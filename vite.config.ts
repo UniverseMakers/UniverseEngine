@@ -1,0 +1,15 @@
+import { defineConfig } from 'vite';
+
+export default defineConfig({
+  // Base path — '/' for local dev. The GitHub Actions deploy workflow
+  // overrides this to '/engine/' when building for GitHub Pages.
+  base: '/',
+  build: {
+    outDir: 'dist',
+    sourcemap: true,
+  },
+  server: {
+    port: 5173,
+    open: true,
+  },
+});
