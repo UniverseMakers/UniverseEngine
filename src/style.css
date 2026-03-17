@@ -1,0 +1,1061 @@
+/* ============================================================
+   UniverseEngine — Base Styles & Layout
+   ============================================================
+   
+   LAYOUT MODEL:
+   The viewport covers the entire screen as a background.
+   All UI widgets (sidebar, menu, timeline, theme toggle) are
+   positioned absolutely on top with translucent backgrounds.
+   The sidebar auto-sizes to its content and can be minimized.
+   ============================================================ */
+
+/* --- Reset --- */
+*,
+*::before,
+*::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html,
+body {
+  height: 100%;
+  overflow: hidden;
+  font-family: var(--font-family);
+  background: #000;
+  color: var(--text-primary);
+}
+
+/* ============================================================
+   Theme: Glass
+   ============================================================ */
+[data-theme='glass'] {
+  --font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display',
+    'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+
+  /* Backgrounds */
+  --bg-base: #0d1117;
+  --bg-panel: rgba(20, 20, 30, 0.55);
+  --bg-panel-hover: rgba(40, 40, 60, 0.6);
+  --bg-panel-active: rgba(60, 60, 80, 0.6);
+  --bg-input: rgba(255, 255, 255, 0.06);
+  --bg-input-focus: rgba(255, 255, 255, 0.1);
+
+  /* Glass effect */
+  --glass-blur: 24px;
+  --glass-border: 1px solid rgba(255, 255, 255, 0.12);
+  --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+  --glass-radius: 16px;
+  --glass-radius-sm: 10px;
+
+  /* Text */
+  --text-primary: rgba(255, 255, 255, 0.92);
+  --text-secondary: rgba(255, 255, 255, 0.55);
+  --text-accent: #58a6ff;
+
+  /* Accent / interactive */
+  --accent: #58a6ff;
+  --accent-hover: #79b8ff;
+  --accent-glow: rgba(88, 166, 255, 0.3);
+  --btn-bg: rgba(88, 166, 255, 0.2);
+  --btn-bg-hover: rgba(88, 166, 255, 0.35);
+  --btn-text: #58a6ff;
+
+  /* Slider */
+  --slider-track: rgba(255, 255, 255, 0.12);
+  --slider-fill: #58a6ff;
+  --slider-thumb: #fff;
+  --slider-thumb-shadow: 0 0 6px rgba(88, 166, 255, 0.5);
+
+  /* Timeline */
+  --timeline-bg: rgba(255, 255, 255, 0.06);
+  --timeline-fill: #58a6ff;
+  --timeline-thumb: #fff;
+
+  /* Icon buttons */
+  --icon-btn-size: 42px;
+  --icon-btn-font: 20px;
+  --icon-btn-bg: rgba(255, 255, 255, 0.06);
+  --icon-btn-bg-active: rgba(88, 166, 255, 0.2);
+  --icon-btn-border: 1px solid rgba(255, 255, 255, 0.1);
+  --icon-btn-border-active: 1px solid rgba(88, 166, 255, 0.4);
+
+  /* Scrollbar */
+  --scrollbar-thumb: rgba(255, 255, 255, 0.15);
+  --scrollbar-track: transparent;
+
+  /* Scanlines (glass doesn't use them) */
+  --scanline-opacity: 0;
+}
+
+/* ============================================================
+   Theme: 90s Matrix
+   ============================================================ */
+[data-theme='matrix'] {
+  --font-family: 'Courier New', 'Lucida Console', 'Consolas', monospace;
+
+  /* Backgrounds */
+  --bg-base: #000;
+  --bg-panel: rgba(0, 10, 2, 0.6);
+  --bg-panel-hover: rgba(0, 255, 65, 0.08);
+  --bg-panel-active: rgba(0, 255, 65, 0.12);
+  --bg-input: rgba(0, 255, 65, 0.05);
+  --bg-input-focus: rgba(0, 255, 65, 0.1);
+
+  /* Glass effect (more harsh / CRT-like) */
+  --glass-blur: 12px;
+  --glass-border: 1px solid rgba(0, 255, 65, 0.25);
+  --glass-shadow: 0 0 20px rgba(0, 255, 65, 0.15),
+    inset 0 0 20px rgba(0, 255, 65, 0.03);
+  --glass-radius: 2px;
+  --glass-radius-sm: 2px;
+
+  /* Text */
+  --text-primary: #00ff41;
+  --text-secondary: rgba(0, 255, 65, 0.5);
+  --text-accent: #00ff41;
+
+  /* Accent / interactive */
+  --accent: #00ff41;
+  --accent-hover: #33ff66;
+  --accent-glow: rgba(0, 255, 65, 0.4);
+  --btn-bg: rgba(0, 255, 65, 0.12);
+  --btn-bg-hover: rgba(0, 255, 65, 0.25);
+  --btn-text: #00ff41;
+
+  /* Slider */
+  --slider-track: rgba(0, 255, 65, 0.15);
+  --slider-fill: #00ff41;
+  --slider-thumb: #00ff41;
+  --slider-thumb-shadow: 0 0 8px rgba(0, 255, 65, 0.7);
+
+  /* Timeline */
+  --timeline-bg: rgba(0, 255, 65, 0.08);
+  --timeline-fill: #00ff41;
+  --timeline-thumb: #00ff41;
+
+  /* Icon buttons */
+  --icon-btn-size: 42px;
+  --icon-btn-font: 20px;
+  --icon-btn-bg: rgba(0, 255, 65, 0.05);
+  --icon-btn-bg-active: rgba(0, 255, 65, 0.15);
+  --icon-btn-border: 1px solid rgba(0, 255, 65, 0.2);
+  --icon-btn-border-active: 1px solid rgba(0, 255, 65, 0.5);
+
+  /* Scrollbar */
+  --scrollbar-thumb: rgba(0, 255, 65, 0.2);
+  --scrollbar-track: transparent;
+
+  /* Scanlines */
+  --scanline-opacity: 1;
+}
+
+/* ============================================================
+   Theme: HAL 9000
+   ============================================================
+   Deep black, clinical white text, iconic red (#FF0000) accents.
+   Calm, sterile, quietly menacing. "I'm sorry, Dave."
+   ============================================================ */
+[data-theme='hal'] {
+  --font-family: 'Futura', 'Century Gothic', -apple-system, BlinkMacSystemFont,
+    'Segoe UI', Helvetica, Arial, sans-serif;
+
+  /* Backgrounds */
+  --bg-base: #000;
+  --bg-panel: rgba(15, 0, 0, 0.6);
+  --bg-panel-hover: rgba(40, 0, 0, 0.65);
+  --bg-panel-active: rgba(60, 0, 0, 0.65);
+  --bg-input: rgba(255, 0, 0, 0.04);
+  --bg-input-focus: rgba(255, 0, 0, 0.08);
+
+  /* Glass effect */
+  --glass-blur: 16px;
+  --glass-border: 1px solid rgba(255, 0, 0, 0.2);
+  --glass-shadow: 0 0 24px rgba(255, 0, 0, 0.1),
+    inset 0 0 12px rgba(255, 0, 0, 0.02);
+  --glass-radius: 8px;
+  --glass-radius-sm: 4px;
+
+  /* Text */
+  --text-primary: rgba(255, 255, 255, 0.9);
+  --text-secondary: rgba(255, 255, 255, 0.4);
+  --text-accent: #ff0000;
+
+  /* Accent / interactive */
+  --accent: #ff0000;
+  --accent-hover: #ff3333;
+  --accent-glow: rgba(255, 0, 0, 0.35);
+  --btn-bg: rgba(255, 0, 0, 0.12);
+  --btn-bg-hover: rgba(255, 0, 0, 0.25);
+  --btn-text: #ff0000;
+
+  /* Slider */
+  --slider-track: rgba(255, 255, 255, 0.08);
+  --slider-fill: #ff0000;
+  --slider-thumb: #ff0000;
+  --slider-thumb-shadow: 0 0 10px rgba(255, 0, 0, 0.6);
+
+  /* Timeline */
+  --timeline-bg: rgba(255, 0, 0, 0.05);
+  --timeline-fill: #ff0000;
+  --timeline-thumb: #ff0000;
+
+  /* Icon buttons */
+  --icon-btn-size: 42px;
+  --icon-btn-font: 20px;
+  --icon-btn-bg: rgba(255, 0, 0, 0.04);
+  --icon-btn-bg-active: rgba(255, 0, 0, 0.15);
+  --icon-btn-border: 1px solid rgba(255, 0, 0, 0.15);
+  --icon-btn-border-active: 1px solid rgba(255, 0, 0, 0.5);
+
+  /* Scrollbar */
+  --scrollbar-thumb: rgba(255, 0, 0, 0.15);
+  --scrollbar-track: transparent;
+
+  /* Scanlines — subtle */
+  --scanline-opacity: 0;
+}
+
+/* ============================================================
+   Theme: Nostromo
+   ============================================================
+   Amber/orange phosphor on dark, chunky monospace type,
+   retro-futurist computer readout. The original Alien (1979).
+   ============================================================ */
+[data-theme='nostromo'] {
+  --font-family: 'Courier New', 'Lucida Console', 'Consolas', monospace;
+
+  /* Backgrounds */
+  --bg-base: #0a0800;
+  --bg-panel: rgba(20, 14, 0, 0.65);
+  --bg-panel-hover: rgba(255, 176, 0, 0.08);
+  --bg-panel-active: rgba(255, 176, 0, 0.12);
+  --bg-input: rgba(255, 176, 0, 0.05);
+  --bg-input-focus: rgba(255, 176, 0, 0.1);
+
+  /* Glass effect */
+  --glass-blur: 8px;
+  --glass-border: 1px solid rgba(255, 176, 0, 0.25);
+  --glass-shadow: 0 0 16px rgba(255, 176, 0, 0.1),
+    inset 0 0 16px rgba(255, 176, 0, 0.02);
+  --glass-radius: 2px;
+  --glass-radius-sm: 2px;
+
+  /* Text */
+  --text-primary: #ffb000;
+  --text-secondary: rgba(255, 176, 0, 0.5);
+  --text-accent: #ffb000;
+
+  /* Accent / interactive */
+  --accent: #ffb000;
+  --accent-hover: #ffc933;
+  --accent-glow: rgba(255, 176, 0, 0.35);
+  --btn-bg: rgba(255, 176, 0, 0.12);
+  --btn-bg-hover: rgba(255, 176, 0, 0.25);
+  --btn-text: #ffb000;
+
+  /* Slider */
+  --slider-track: rgba(255, 176, 0, 0.15);
+  --slider-fill: #ffb000;
+  --slider-thumb: #ffb000;
+  --slider-thumb-shadow: 0 0 8px rgba(255, 176, 0, 0.6);
+
+  /* Timeline */
+  --timeline-bg: rgba(255, 176, 0, 0.06);
+  --timeline-fill: #ffb000;
+  --timeline-thumb: #ffb000;
+
+  /* Icon buttons */
+  --icon-btn-size: 42px;
+  --icon-btn-font: 20px;
+  --icon-btn-bg: rgba(255, 176, 0, 0.05);
+  --icon-btn-bg-active: rgba(255, 176, 0, 0.15);
+  --icon-btn-border: 1px solid rgba(255, 176, 0, 0.2);
+  --icon-btn-border-active: 1px solid rgba(255, 176, 0, 0.5);
+
+  /* Scrollbar */
+  --scrollbar-thumb: rgba(255, 176, 0, 0.2);
+  --scrollbar-track: transparent;
+
+  /* Scanlines — heavy, like an old CRT */
+  --scanline-opacity: 1;
+}
+
+/* ============================================================
+   Theme: Tron
+   ============================================================
+   Cyan/blue neon wireframe glow on pure black.
+   The digital frontier. Clean geometric edges.
+   ============================================================ */
+[data-theme='tron'] {
+  --font-family: 'Orbitron', 'Eurostile', 'Century Gothic', -apple-system,
+    sans-serif;
+
+  /* Backgrounds */
+  --bg-base: #000508;
+  --bg-panel: rgba(0, 20, 30, 0.6);
+  --bg-panel-hover: rgba(0, 255, 255, 0.06);
+  --bg-panel-active: rgba(0, 255, 255, 0.1);
+  --bg-input: rgba(0, 255, 255, 0.04);
+  --bg-input-focus: rgba(0, 255, 255, 0.08);
+
+  /* Glass effect — sharp geometric */
+  --glass-blur: 12px;
+  --glass-border: 1px solid rgba(0, 255, 255, 0.3);
+  --glass-shadow: 0 0 20px rgba(0, 255, 255, 0.12),
+    inset 0 0 12px rgba(0, 255, 255, 0.02);
+  --glass-radius: 2px;
+  --glass-radius-sm: 2px;
+
+  /* Text */
+  --text-primary: #e0ffff;
+  --text-secondary: rgba(0, 255, 255, 0.45);
+  --text-accent: #00ffff;
+
+  /* Accent / interactive */
+  --accent: #00ffff;
+  --accent-hover: #33ffff;
+  --accent-glow: rgba(0, 255, 255, 0.35);
+  --btn-bg: rgba(0, 255, 255, 0.1);
+  --btn-bg-hover: rgba(0, 255, 255, 0.22);
+  --btn-text: #00ffff;
+
+  /* Slider */
+  --slider-track: rgba(0, 255, 255, 0.12);
+  --slider-fill: #00ffff;
+  --slider-thumb: #00ffff;
+  --slider-thumb-shadow: 0 0 10px rgba(0, 255, 255, 0.7);
+
+  /* Timeline */
+  --timeline-bg: rgba(0, 255, 255, 0.06);
+  --timeline-fill: #00ffff;
+  --timeline-thumb: #00ffff;
+
+  /* Icon buttons */
+  --icon-btn-size: 42px;
+  --icon-btn-font: 20px;
+  --icon-btn-bg: rgba(0, 255, 255, 0.04);
+  --icon-btn-bg-active: rgba(0, 255, 255, 0.15);
+  --icon-btn-border: 1px solid rgba(0, 255, 255, 0.2);
+  --icon-btn-border-active: 1px solid rgba(0, 255, 255, 0.5);
+
+  /* Scrollbar */
+  --scrollbar-thumb: rgba(0, 255, 255, 0.2);
+  --scrollbar-track: transparent;
+
+  /* Scanlines — none, clean digital */
+  --scanline-opacity: 0;
+}
+
+/* ============================================================
+   App Container — stacking context for layers
+   ============================================================ */
+#app {
+  position: relative;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  background: #000;
+}
+
+/* ============================================================
+   Viewport — FULL SCREEN background layer
+   ============================================================ */
+.viewport {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #000;
+  overflow: hidden;
+}
+
+.viewport__image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: opacity 0.4s ease;
+}
+
+.viewport__image.fade-out {
+  opacity: 0;
+}
+
+/* ============================================================
+   Floating UI — all overlaid on top of the viewport
+   ============================================================ */
+
+/* --- Top Bar (theme toggle) — top center --- */
+.top-bar {
+  position: absolute;
+  top: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* --- Theme Toggle --- */
+.theme-toggle {
+  position: relative;
+}
+
+.theme-toggle__btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 18px;
+  background: var(--bg-panel);
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+  border: var(--glass-border);
+  border-radius: var(--glass-radius-sm);
+  box-shadow: var(--glass-shadow);
+  color: var(--text-primary);
+  font-family: var(--font-family);
+  font-size: 13px;
+  cursor: pointer;
+  transition: background 0.2s, border-color 0.2s;
+}
+
+.theme-toggle__btn:hover {
+  background: var(--bg-panel-hover);
+}
+
+.theme-toggle__btn .caret {
+  font-size: 10px;
+  opacity: 0.6;
+  transition: transform 0.2s;
+}
+
+.theme-toggle.open .caret {
+  transform: rotate(180deg);
+}
+
+.theme-toggle__dropdown {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 50%;
+  transform: translateX(-50%);
+  min-width: 160px;
+  background: var(--bg-panel);
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+  border: var(--glass-border);
+  border-radius: var(--glass-radius-sm);
+  box-shadow: var(--glass-shadow);
+  overflow: hidden;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateX(-50%) translateY(-4px);
+  transition: opacity 0.2s, transform 0.2s;
+  z-index: 100;
+}
+
+.theme-toggle.open .theme-toggle__dropdown {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateX(-50%) translateY(0);
+}
+
+.theme-toggle__option {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 10px 16px;
+  background: none;
+  border: none;
+  color: var(--text-primary);
+  font-family: var(--font-family);
+  font-size: 13px;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.theme-toggle__option:hover {
+  background: var(--bg-panel-hover);
+}
+
+.theme-toggle__option.active {
+  color: var(--accent);
+}
+
+.theme-toggle__option .check {
+  width: 16px;
+  text-align: center;
+}
+
+/* ============================================================
+   Simulation Class Menu — top-right, floating
+   ============================================================ */
+.menu-container {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  z-index: 20;
+}
+
+.sim-menu {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 8px;
+  background: var(--bg-panel);
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+  border: var(--glass-border);
+  border-radius: var(--glass-radius);
+  box-shadow: var(--glass-shadow);
+}
+
+.sim-menu__btn {
+  width: var(--icon-btn-size);
+  height: var(--icon-btn-size);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--icon-btn-font);
+  background: var(--icon-btn-bg);
+  border: var(--icon-btn-border);
+  border-radius: var(--glass-radius-sm);
+  cursor: pointer;
+  transition: background 0.2s, border-color 0.2s, box-shadow 0.2s,
+    transform 0.15s;
+  position: relative;
+}
+
+.sim-menu__btn:hover {
+  background: var(--bg-panel-hover);
+  transform: scale(1.05);
+}
+
+.sim-menu__btn.active {
+  background: var(--icon-btn-bg-active);
+  border: var(--icon-btn-border-active);
+  box-shadow: 0 0 12px var(--accent-glow);
+}
+
+/* Tooltip on hover — appears to the left */
+.sim-menu__btn::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  right: calc(100% + 10px);
+  top: 50%;
+  transform: translateY(-50%);
+  padding: 4px 10px;
+  background: var(--bg-panel);
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+  border: var(--glass-border);
+  border-radius: var(--glass-radius-sm);
+  box-shadow: var(--glass-shadow);
+  color: var(--text-primary);
+  font-family: var(--font-family);
+  font-size: 11px;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s;
+}
+
+.sim-menu__btn:hover::after {
+  opacity: 1;
+}
+
+/* ============================================================
+   Sidebar — left edge, floating, auto-sized, collapsible
+   ============================================================ */
+.sidebar-container {
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  z-index: 20;
+  width: 280px;
+  transition: width 0.3s ease, opacity 0.3s ease;
+}
+
+/* Expanded state: show sidebar, hide mini bar */
+.sidebar-container .sidebar {
+  display: flex;
+  transition: opacity 0.25s ease, transform 0.25s ease;
+}
+
+.sidebar-container .sidebar__mini-bar {
+  display: none;
+}
+
+/* Minimized state: hide sidebar, show mini bar */
+.sidebar-container.minimized {
+  width: auto;
+}
+
+.sidebar-container.minimized .sidebar {
+  display: none;
+}
+
+.sidebar-container.minimized .sidebar__mini-bar {
+  display: flex;
+}
+
+/* --- Sidebar panel --- */
+.sidebar {
+  flex-direction: column;
+  background: var(--bg-panel);
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+  border: var(--glass-border);
+  border-radius: var(--glass-radius);
+  box-shadow: var(--glass-shadow);
+  overflow: hidden;
+}
+
+/* --- Header row with title + minimize button --- */
+.sidebar__header {
+  padding: 16px 16px 10px;
+  border-bottom: var(--glass-border);
+}
+
+.sidebar__header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.sidebar__title {
+  font-size: 13px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1.2px;
+  color: var(--text-secondary);
+}
+
+.sidebar__minimize-btn {
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  font-size: 16px;
+  font-weight: 700;
+  background: var(--icon-btn-bg);
+  border: var(--icon-btn-border);
+  border-radius: var(--glass-radius-sm);
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+}
+
+.sidebar__minimize-btn:hover {
+  background: var(--bg-panel-hover);
+  color: var(--text-primary);
+}
+
+/* --- Mini bar (collapsed state) --- */
+.sidebar__mini-bar {
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-panel);
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+  border: var(--glass-border);
+  border-radius: var(--glass-radius);
+  box-shadow: var(--glass-shadow);
+  padding: 6px;
+}
+
+.sidebar__expand-btn {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  font-weight: 700;
+  background: var(--icon-btn-bg);
+  border: var(--icon-btn-border);
+  border-radius: var(--glass-radius-sm);
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s, transform 0.15s;
+}
+
+.sidebar__expand-btn:hover {
+  background: var(--bg-panel-hover);
+  color: var(--text-primary);
+  transform: scale(1.05);
+}
+
+/* --- Parameters --- */
+.sidebar__params {
+  overflow-y: auto;
+  padding: 14px 16px;
+  scrollbar-width: thin;
+  scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
+}
+
+.sidebar__params::-webkit-scrollbar {
+  width: 5px;
+}
+
+.sidebar__params::-webkit-scrollbar-thumb {
+  background: var(--scrollbar-thumb);
+  border-radius: 3px;
+}
+
+/* --- Parameter Control --- */
+.param {
+  margin-bottom: 16px;
+}
+
+.param:last-child {
+  margin-bottom: 0;
+}
+
+.param__label {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 6px;
+}
+
+.param__name {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+.param__unit {
+  font-size: 11px;
+  color: var(--text-secondary);
+}
+
+.param__controls {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.param__slider {
+  flex: 1;
+  -webkit-appearance: none;
+  appearance: none;
+  height: 4px;
+  background: var(--slider-track);
+  border-radius: 2px;
+  outline: none;
+  cursor: pointer;
+}
+
+.param__slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--slider-thumb);
+  box-shadow: var(--slider-thumb-shadow);
+  cursor: pointer;
+  transition: transform 0.15s;
+}
+
+.param__slider::-webkit-slider-thumb:hover {
+  transform: scale(1.2);
+}
+
+.param__slider::-moz-range-thumb {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--slider-thumb);
+  box-shadow: var(--slider-thumb-shadow);
+  border: none;
+  cursor: pointer;
+}
+
+.param__input {
+  width: 64px;
+  padding: 4px 8px;
+  background: var(--bg-input);
+  border: var(--glass-border);
+  border-radius: var(--glass-radius-sm);
+  color: var(--text-primary);
+  font-family: var(--font-family);
+  font-size: 12px;
+  text-align: right;
+  outline: none;
+  transition: background 0.2s, border-color 0.2s;
+}
+
+.param__input:focus {
+  background: var(--bg-input-focus);
+  border-color: var(--accent);
+}
+
+/* --- Run Button --- */
+.sidebar__footer {
+  padding: 12px 16px;
+  border-top: var(--glass-border);
+}
+
+.run-btn {
+  width: 100%;
+  padding: 10px;
+  background: var(--btn-bg);
+  border: 1px solid var(--accent);
+  border-radius: var(--glass-radius-sm);
+  color: var(--btn-text);
+  font-family: var(--font-family);
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  cursor: pointer;
+  transition: background 0.2s, box-shadow 0.2s, transform 0.1s;
+}
+
+.run-btn:hover {
+  background: var(--btn-bg-hover);
+  box-shadow: 0 0 16px var(--accent-glow);
+}
+
+.run-btn:active {
+  transform: scale(0.97);
+}
+
+/* ============================================================
+   Timeline — bottom edge, floating bar
+   ============================================================ */
+.timeline-container {
+  position: absolute;
+  bottom: 16px;
+  left: 16px;
+  right: 16px;
+  z-index: 20;
+}
+
+.timeline {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 14px 24px;
+  background: var(--bg-panel);
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+  border: var(--glass-border);
+  border-radius: var(--glass-radius);
+  box-shadow: var(--glass-shadow);
+}
+
+.timeline__label {
+  font-size: 11px;
+  color: var(--text-primary);
+  min-width: 48px;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+
+.timeline__slider {
+  flex: 1;
+  -webkit-appearance: none;
+  appearance: none;
+  height: 4px;
+  background: var(--timeline-bg);
+  border-radius: 2px;
+  outline: none;
+  cursor: pointer;
+}
+
+.timeline__slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--timeline-thumb);
+  box-shadow: 0 0 8px var(--accent-glow);
+  cursor: pointer;
+  transition: transform 0.15s;
+}
+
+.timeline__slider::-webkit-slider-thumb:hover {
+  transform: scale(1.25);
+}
+
+.timeline__slider::-moz-range-thumb {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--timeline-thumb);
+  box-shadow: 0 0 8px var(--accent-glow);
+  border: none;
+  cursor: pointer;
+}
+
+/* ============================================================
+   Scanline overlay (Matrix theme only)
+   ============================================================ */
+.scanlines {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 9999;
+  opacity: var(--scanline-opacity);
+  background: repeating-linear-gradient(
+    0deg,
+    rgba(0, 0, 0, 0.15) 0px,
+    rgba(0, 0, 0, 0.15) 1px,
+    transparent 1px,
+    transparent 3px
+  );
+}
+
+/* CRT flicker for Matrix theme */
+[data-theme='matrix'] .scanlines {
+  animation: flicker 0.05s infinite alternate;
+}
+
+@keyframes flicker {
+  0% {
+    opacity: var(--scanline-opacity);
+  }
+  100% {
+    opacity: calc(var(--scanline-opacity) * 0.85);
+  }
+}
+
+/* CRT vignette for Matrix theme */
+[data-theme='matrix'] #app::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 9998;
+  background: radial-gradient(
+    ellipse at center,
+    transparent 60%,
+    rgba(0, 0, 0, 0.5) 100%
+  );
+}
+
+/* Matrix glow on text */
+[data-theme='matrix'] .sidebar__title,
+[data-theme='matrix'] .param__name,
+[data-theme='matrix'] .run-btn,
+[data-theme='matrix'] .timeline__label {
+  text-shadow: 0 0 6px rgba(0, 255, 65, 0.5);
+}
+
+/* ============================================================
+   HAL 9000 — theme-specific effects
+   ============================================================ */
+
+/* Red eye vignette */
+[data-theme='hal'] #app::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 9998;
+  background: radial-gradient(
+    ellipse at center,
+    rgba(255, 0, 0, 0.03) 0%,
+    transparent 40%,
+    rgba(0, 0, 0, 0.6) 100%
+  );
+}
+
+/* Subtle red glow on panels */
+[data-theme='hal'] .sidebar,
+[data-theme='hal'] .sim-menu,
+[data-theme='hal'] .timeline {
+  box-shadow: 0 0 24px rgba(255, 0, 0, 0.08),
+    inset 0 0 12px rgba(255, 0, 0, 0.02);
+}
+
+/* HAL text — clean, no glow, just the accent color on key elements */
+[data-theme='hal'] .run-btn {
+  text-shadow: 0 0 8px rgba(255, 0, 0, 0.4);
+}
+
+/* ============================================================
+   Nostromo — theme-specific effects
+   ============================================================ */
+
+/* Amber CRT vignette */
+[data-theme='nostromo'] #app::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 9998;
+  background: radial-gradient(
+    ellipse at center,
+    transparent 55%,
+    rgba(0, 0, 0, 0.55) 100%
+  );
+}
+
+/* Nostromo scanlines (reuses the .scanlines element) */
+[data-theme='nostromo'] .scanlines {
+  animation: flicker-amber 0.08s infinite alternate;
+}
+
+@keyframes flicker-amber {
+  0% {
+    opacity: var(--scanline-opacity);
+  }
+  100% {
+    opacity: calc(var(--scanline-opacity) * 0.8);
+  }
+}
+
+/* Amber phosphor glow on text */
+[data-theme='nostromo'] .sidebar__title,
+[data-theme='nostromo'] .param__name,
+[data-theme='nostromo'] .run-btn,
+[data-theme='nostromo'] .timeline__label {
+  text-shadow: 0 0 6px rgba(255, 176, 0, 0.5);
+}
+
+/* ============================================================
+   Tron — theme-specific effects
+   ============================================================ */
+
+/* Dark digital vignette */
+[data-theme='tron'] #app::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 9998;
+  background: radial-gradient(
+    ellipse at center,
+    transparent 50%,
+    rgba(0, 5, 8, 0.5) 100%
+  );
+}
+
+/* Neon glow on text */
+[data-theme='tron'] .sidebar__title,
+[data-theme='tron'] .param__name,
+[data-theme='tron'] .run-btn,
+[data-theme='tron'] .timeline__label {
+  text-shadow: 0 0 6px rgba(0, 255, 255, 0.5);
+}
+
+/* Stronger border glow on panels */
+[data-theme='tron'] .sidebar,
+[data-theme='tron'] .sim-menu,
+[data-theme='tron'] .timeline,
+[data-theme='tron'] .theme-toggle__btn {
+  box-shadow: 0 0 16px rgba(0, 255, 255, 0.1),
+    inset 0 0 8px rgba(0, 255, 255, 0.02);
+}
