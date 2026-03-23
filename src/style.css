@@ -733,6 +733,45 @@ button {
   flex-direction: column;
 }
 
+/* Summary overlay reveal: fade in cleanly at end-of-run. */
+.overlay--summary {
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 800ms cubic-bezier(0.2, 0.9, 0.2, 1);
+}
+
+.overlay--summary.is-visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.overlay--summary .summary-overlay {
+  opacity: 0;
+  transform: translateY(22px) scale(0.985);
+  transition:
+    transform 900ms cubic-bezier(0.2, 0.9, 0.2, 1),
+    opacity 700ms ease;
+  transition-delay: 80ms;
+  will-change: transform, opacity;
+}
+
+.overlay--summary.is-visible .summary-overlay {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .overlay--summary {
+    transition: none;
+  }
+
+  .overlay--summary .summary-overlay {
+    transition: none;
+    transform: none;
+    opacity: 1;
+  }
+}
+
 .summary-overlay__eyebrow,
 .summary-overlay__metric-label,
 .summary-overlay__button {

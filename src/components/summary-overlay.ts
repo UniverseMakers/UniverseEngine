@@ -12,6 +12,7 @@ import type {
   SummaryStatId,
 } from '../data/simulations.ts';
 import { buildSummaryMetricMap } from '../domain/simulations/summary-metrics.ts';
+import { SUMMARY_OVERLAY } from '../shared/constants.ts';
 import { withUnit } from '../shared/format.ts';
 
 export interface SummaryOverlayController {
@@ -48,6 +49,10 @@ export function createSummaryOverlay(
   overlay.className = 'overlay overlay--summary';
   overlay.hidden = true;
   overlay.classList.add('is-hidden');
+
+  // Hide/show uses a short fade transition, so we track the last scheduled hide
+  // timer to avoid racing `hide()` and `show()` calls.
+  let hideTimer: number | undefined;
 
   const panel = document.createElement('div');
   panel.className = 'summary-overlay';
@@ -92,12 +97,30 @@ export function createSummaryOverlay(
 
   return {
     show() {
+      if (hideTimer) {
+        window.clearTimeout(hideTimer);
+        hideTimer = undefined;
+      }
+
       overlay.hidden = false;
       overlay.classList.remove('is-hidden');
+
+      // Trigger the CSS transition by toggling `is-visible` on the next frame.
+      overlay.classList.remove('is-visible');
+      requestAnimationFrame(() => {
+        overlay.classList.add('is-visible');
+      });
     },
     hide() {
-      overlay.hidden = true;
-      overlay.classList.add('is-hidden');
+      // Start the fade-out immediately.
+      overlay.classList.remove('is-visible');
+
+      // After the transition, fully remove from layout and interactions.
+      hideTimer = window.setTimeout(() => {
+        overlay.hidden = true;
+        overlay.classList.add('is-hidden');
+        hideTimer = undefined;
+      }, SUMMARY_OVERLAY.HIDE_AFTER_MS);
     },
     update(
       simClass: SimulationClass,

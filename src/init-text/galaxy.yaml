@@ -9,27 +9,18 @@
 #     - `duration` (optional): dwell time in seconds before the next line
 
 - options:
-    - text: 'INIT_PHYSICAL_LAWS :: fixing the speed of light'
-    - text: 'INIT_PHYSICAL_LAWS :: making gravity just weak enough to be inconvenient'
-    - text: 'INIT_PHYSICAL_LAWS :: setting angular momentum to annoy future observers'
-    - text: 'INIT_PHYSICAL_LAWS :: persuading thermodynamics to tolerate galaxies for a while'
-- options:
     - text: 'INIT_STELLAR_POP :: spiralling arms into existence'
     - text: 'INIT_STELLAR_POP :: merging via hierarchical assembly'
-    - text: 'INIT_STELLAR_POP :: sprinkling stars into a disk and hoping they behave collectively'
     - text: 'INIT_STELLAR_POP :: assembling a galaxy one mildly unstable stellar population at a time'
-    - text: 'INIT_STELLAR_POP :: giving spiral structure a suspicious amount of confidence'
+    - text: 'INIT_STELLAR_POP :: ending runaway star formation for good with supernovae'
+    - text: 'INIT_STELLAR_POP :: blowing gas back out before the stars get any ideas'
+    - text: 'INIT_STELLAR_POP :: weaponising stellar evolution against future stellar evolution'
 - options:
     - text: 'INIT_BLACK_HOLE :: regulating self-regulation mechanisms'
     - text: 'INIT_BLACK_HOLE :: placing one supermassive liability at the galactic center'
-    - text: 'INIT_BLACK_HOLE :: teaching accretion disks to glow with expensive enthusiasm'
+    - text: 'INIT_BLACK_HOLE :: ramping up x-rays from the accretion disk'
     - text: 'INIT_BLACK_HOLE :: allowing the core to consume matter with professional focus'
-- options:
-    - text: 'INIT_FEEDBACK :: ending runaway star formation by killing stars in supernovae'
-    - text: 'INIT_FEEDBACK :: giving supermassive black holes galaxy killing powers'
-    - text: 'INIT_FEEDBACK :: blowing gas back out before the stars get any ideas'
-    - text: 'INIT_FEEDBACK :: weaponising stellar evolution against future stellar evolution'
-    - text: 'INIT_FEEDBACK :: calibrating winds, jets, and explosive disapproval'
+    - text: 'INIT_BLACK_HOLE :: giving supermassive black holes galaxy killing powers'
 - options:
     - text: 'INIT_GAS :: threading cold flows through a halo with dubious boundaries'
     - text: 'INIT_GAS :: reminding baryons they are not actually collisionless'
@@ -38,10 +29,6 @@
     - text: 'INIT_HALO :: wrapping the visible galaxy in a dark matter support group'
     - text: 'INIT_HALO :: shaping the invisible mass budget into something rotationally persuasive'
     - text: 'INIT_HALO :: hiding most of the mass where telescopes will complain about it'
-- options:
-    - text: 'INIT_CHEMISTRY :: turning old stars into heavy-element subscription services'
-    - text: "INIT_CHEMISTRY :: enriching gas clouds with yesterday's exploded ambitions"
-    - text: 'INIT_CHEMISTRY :: making metals out of stars and then pretending the naming is fine'
 - options:
     - text: 'PREPARE_COMP :: filling RAM to the brim'
     - text: 'PREPARE_COMP :: funding a bigger supercomputer'

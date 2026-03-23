@@ -84,5 +84,5 @@ function randomInteger(min: number, max: number): number {
  * @returns Duration in seconds.
  */
 function randomDurationSeconds(): number {
-  return 0.5 + Math.random() * 0.5;
+  return 0.25 + Math.random() * 0.25;
 }
