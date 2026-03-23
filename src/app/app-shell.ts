@@ -28,6 +28,11 @@ import {
   getLocalPlaceholderVideo,
 } from '../domain/simulations/placeholder-assets.ts';
 import {
+  getVideoMetadataUrl,
+  loadVideoRunMetadata,
+  type VideoRunMetadata,
+} from '../domain/simulations/video-run-metadata.ts';
+import {
   loadLiveStatsCsv,
   sampleLiveStats,
   type LiveStatsFrame,
@@ -56,6 +61,12 @@ export function createAppShell(app: HTMLElement): void {
 
   // Track whether the currently loaded video has reached the end.
   let hasCompletedPlayback = false;
+
+  // Sidecar run metadata for the currently loaded video.
+  let activeRunMetadata: VideoRunMetadata | null = null;
+
+  // Last-known playback time in seconds; used to refresh HUD after async loads.
+  let lastPlaybackSeconds = 0;
 
   // Hold the currently loaded live-stat frames for the active simulation/video.
   let activeLiveStatsFrames: LiveStatsFrame[] = [];
@@ -141,7 +152,8 @@ export function createAppShell(app: HTMLElement): void {
   // Keep the timeline synchronized to the real media playback position.
   viewport.onTimeUpdate((position) => {
     timeline.setPosition(position);
-    refreshDisplayData(position * viewport.getDurationSeconds());
+    lastPlaybackSeconds = position * viewport.getDurationSeconds();
+    refreshDisplayData(lastPlaybackSeconds);
   });
 
   // Mount the shared overlay layer used by the app's mode transitions.
@@ -163,6 +175,7 @@ export function createAppShell(app: HTMLElement): void {
       activeClass,
       getActiveValues(),
       viewport.getDurationSeconds(),
+      activeRunMetadata,
     );
     summaryOverlay.show();
   });
@@ -329,6 +342,7 @@ export function createAppShell(app: HTMLElement): void {
         activeClass,
         getActiveValues(),
         viewport.getDurationSeconds(),
+        activeRunMetadata,
       );
       summaryOverlay.show();
     }
@@ -352,6 +366,7 @@ export function createAppShell(app: HTMLElement): void {
     viewport.setSource(match.url);
     viewport.pause();
     void loadActiveLiveStats();
+    void loadActiveRunMetadata(match.url);
     viewport.setMuted(false);
     setMode('initializing');
 
@@ -407,6 +422,7 @@ export function createAppShell(app: HTMLElement): void {
         activeClass,
         getActiveValues(),
         viewport.getDurationSeconds(),
+        activeRunMetadata,
       );
       summaryOverlay.show();
     }
@@ -432,8 +448,17 @@ export function createAppShell(app: HTMLElement): void {
    * @returns void
    */
   function refreshDisplayData(timeSeconds = 0): void {
-    const liveValues = sampleLiveStats(activeLiveStatsFrames, timeSeconds);
-    dataPanel.update(activeClass, getActiveValues(), liveValues);
+    const sampledValues = sampleLiveStats(activeLiveStatsFrames, timeSeconds);
+    const videoScaledValues = buildVideoScaledStats(
+      activeClass,
+      activeRunMetadata,
+      timeSeconds,
+      viewport.getDurationSeconds(),
+    );
+    dataPanel.update(activeClass, getActiveValues(), {
+      ...sampledValues,
+      ...videoScaledValues,
+    });
   }
 
   /**
@@ -455,6 +480,8 @@ export function createAppShell(app: HTMLElement): void {
     activeLiveStatsFrames = [];
     hasCompletedPlayback = false;
     isDisplayTerminalOpen = false;
+    activeRunMetadata = null;
+    lastPlaybackSeconds = 0;
     summaryOverlay.hide();
     displayTerminal.hide();
     viewport.pause();
@@ -497,6 +524,57 @@ export function createAppShell(app: HTMLElement): void {
       activeLiveStatsFrames = [];
     }
     refreshDisplayData();
+  }
+
+  /**
+   * Load the sidecar run metadata for the active video.
+   *
+   * @param videoUrl - URL of the currently selected video.
+   * @returns Promise that resolves once loading completes.
+   */
+  async function loadActiveRunMetadata(videoUrl: string): Promise<void> {
+    activeRunMetadata = await loadVideoRunMetadata(getVideoMetadataUrl(videoUrl));
+    refreshDisplayData(lastPlaybackSeconds);
+  }
+
+  /**
+   * Build derived "live" stats that scale a final value linearly with time.
+   *
+   * @param simClass - Active simulation family.
+   * @param runMetadata - Parsed run metadata from the active video.
+   * @param timeSeconds - Current playback time.
+   * @param durationSeconds - Full video duration.
+   * @returns Live-value map keyed by stat id.
+   */
+  function buildVideoScaledStats(
+    simClass: SimulationClass,
+    runMetadata: VideoRunMetadata | null,
+    timeSeconds: number,
+    durationSeconds: number,
+  ): Record<string, string> {
+    if (!runMetadata || !Number.isFinite(durationSeconds) || durationSeconds <= 0) {
+      return {};
+    }
+
+    const fraction = Math.max(0, Math.min(1, timeSeconds / durationSeconds));
+    const output: Record<string, string> = {};
+
+    for (const stat of simClass.metadata.liveStats) {
+      if (!stat.live || !stat.fromVideo || !stat.scaleWithTime) {
+        continue;
+      }
+
+      const key = stat.videoKey ?? stat.id;
+      const rawValue = (runMetadata as unknown as Record<string, unknown>)[key];
+      if (typeof rawValue !== 'number' || !Number.isFinite(rawValue)) {
+        continue;
+      }
+
+      const scaled = rawValue * fraction;
+      output[stat.id] = stat.integer ? String(Math.floor(scaled)) : String(scaled);
+    }
+
+    return output;
   }
 
   /**

@@ -11,6 +11,11 @@
 #   - `unit` is appended by the app
 #   - `live: true` means a CSV stream should provide updates
 #   - `live_key` can override which CSV column should be used
+#   - `from_video: true` means the final value should be pulled from the active
+#     video's sidecar metadata YAML
+#   - `video_key` can override which metadata key should be used
+#   - `scale_with_time: true` (when `live`) scales the final metadata value
+#     linearly by normalized playback time
 #
 # `parameters`
 #   Config-overlay controls and parameter-space metadata.
@@ -27,18 +32,28 @@ planetary:
       impactor_angle: 43
     summaryStats:
       - id: runtime
-        value: 0:00
+        value: '0.00'
+        unit: hours
+        from_video: true
+        video_key: wallclockSeconds
       - id: similarityScore
         value: 100/100
       - id: carbonBurnt
         value: '0.00'
         unit: kgCO2e
+        from_video: true
       - id: computeUsed
         value: '0.0'
         unit: smartphones
+        from_video: true
       - id: memoryUsed
         value: '0.0'
         unit: GB
+        from_video: true
+      - id: particlesUpdated
+        value: '0'
+        label: Particle updates
+        from_video: true
     liveStats:
       - id: impactor_mass
         value: '0.10'
@@ -64,6 +79,13 @@ planetary:
         value: 1.0
         unit: M⊕
         live: true
+      - id: particlesUpdated
+        value: '0'
+        label: Particle updates
+        live: true
+        from_video: true
+        scale_with_time: true
+        integer: true
   parameters:
     impactor_mass:
       label: Impactor Mass
@@ -100,18 +122,28 @@ galaxy:
       stellar_mass: 5.1
     summaryStats:
       - id: runtime
-        value: 0:00
+        value: '0.00'
+        unit: hours
+        from_video: true
+        video_key: wallclockSeconds
       - id: similarityScore
         value: 100/100
       - id: carbonBurnt
         value: '0.00'
         unit: kgCO2e
+        from_video: true
       - id: computeUsed
         value: '0.0'
         unit: smartphones
+        from_video: true
       - id: memoryUsed
         value: '0.0'
         unit: GB
+        from_video: true
+      - id: particlesUpdated
+        value: '0'
+        label: Particle updates
+        from_video: true
     liveStats:
       - id: star_formation_rate
         value: '3.0'
@@ -133,6 +165,13 @@ galaxy:
         value: 0.0
         unit: Gyr
         live: true
+      - id: particlesUpdated
+        value: '0'
+        label: Particle updates
+        live: true
+        from_video: true
+        scale_with_time: true
+        integer: true
   parameters:
     star_formation_rate:
       label: Star Formation Rate
@@ -176,18 +215,28 @@ cosmos:
       clustering: 0.81
     summaryStats:
       - id: runtime
-        value: 0:00
+        value: '0.00'
+        unit: hours
+        from_video: true
+        video_key: wallclockSeconds
       - id: similarityScore
         value: 100/100
       - id: carbonBurnt
         value: '0.00'
         unit: kgCO2e
+        from_video: true
       - id: computeUsed
         value: '0.0'
         unit: smartphones
+        from_video: true
       - id: memoryUsed
         value: '0.0'
         unit: GB
+        from_video: true
+      - id: particlesUpdated
+        value: '0'
+        label: Particle updates
+        from_video: true
     liveStats:
       - id: dark_matter_density
         value: '0.27'
@@ -209,6 +258,13 @@ cosmos:
         value: 0.0
         unit: ''
         live: true
+      - id: particlesUpdated
+        value: '0'
+        label: Particle updates
+        live: true
+        from_video: true
+        scale_with_time: true
+        integer: true
   parameters:
     dark_matter_density:
       label: Dark Matter Density

@@ -111,10 +111,20 @@ function buildAvailableMetrics(
     ...Object.fromEntries(
       Object.entries(liveValues).map(([key, value]) => [
         key,
-        { label: key, value: formatMaybeNumber(value) },
+        { label: humanizeKey(key), value: formatMaybeNumber(value) },
       ]),
     ),
   };
+}
+
+/**
+ * Convert a camelCase/snake_case-ish key into spaced words.
+ *
+ * @param key - Raw metric id.
+ * @returns Human-friendly label string.
+ */
+function humanizeKey(key: string): string {
+  return key.replace(/_/g, ' ').replace(/([a-z0-9])([A-Z])/g, '$1 $2');
 }
 
 /**

@@ -49,6 +49,14 @@ export interface StatDisplayConfig {
   live?: boolean;
   /** Optional CSV column key to use instead of `id`. */
   liveKey?: string;
+  /** When true, pull the final value from the active video's sidecar metadata. */
+  fromVideo?: boolean;
+  /** Optional metadata key to use instead of `id` when pulling from video. */
+  videoKey?: string;
+  /** When true and `live`, scale metadata values linearly by video time. */
+  scaleWithTime?: boolean;
+  /** When true, force numeric values to render as whole numbers. */
+  integer?: boolean;
 }
 
 export type SummaryStatId =
@@ -61,6 +69,7 @@ export type SummaryStatId =
   | 'carbonBurnt'
   | 'computeUsed'
   | 'memoryUsed'
+  | 'particlesUpdated'
   | 'audioTrack'
   | 'terminalLines';
 
@@ -108,6 +117,10 @@ interface RawStatDisplayConfig {
   unit?: string;
   live?: boolean;
   live_key?: string;
+  from_video?: boolean;
+  video_key?: string;
+  scale_with_time?: boolean;
+  integer?: boolean;
 }
 
 // Parse the YAML catalog into a raw object keyed by simulation family id.
@@ -151,5 +164,9 @@ function normalizeStatConfig(config: RawStatDisplayConfig): StatDisplayConfig {
     unit: config.unit,
     live: config.live ?? false,
     liveKey: config.live_key,
+    fromVideo: config.from_video ?? false,
+    videoKey: config.video_key,
+    scaleWithTime: config.scale_with_time ?? false,
+    integer: config.integer ?? false,
   };
 }

@@ -1,0 +1,10 @@
+# Sidecar run metadata for `planet_test.mp4`.
+#
+# These values are placeholders until real simulation metadata is streamed
+# alongside each video.
+
+wallclockSeconds: 120118.5
+computeUsed: 31.2
+memoryUsed: 22.4
+carbonBurnt: 1.73
+particlesUpdated: 1250000000

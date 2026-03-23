@@ -8,6 +8,7 @@
  */
 
 import type { SimulationClass, SummaryStatId } from '../../data/simulations.ts';
+import type { VideoRunMetadata } from './video-run-metadata.ts';
 
 export interface SummaryMetricValue {
   label: string;
@@ -23,6 +24,7 @@ export function buildSummaryMetricMap(
   simClass: SimulationClass,
   values: Record<string, number>,
   videoDurationSeconds: number,
+  runMetadata?: VideoRunMetadata | null,
 ): Record<SummaryStatId, SummaryMetricValue> {
   // Measure how far the selected parameters are from the configured "correct"
   // values. This powers the current lightweight scoring mechanic.
@@ -45,16 +47,20 @@ export function buildSummaryMetricMap(
   const score = Math.max(0, Math.round((1 - meanDistance) * 100));
 
   // Derive placeholder resource stats from the same distance measure for now.
-  const carbonKg = (0.8 + meanDistance * 4.2).toFixed(2);
-  const smartphoneUnits = (18 + meanDistance * 46).toFixed(1);
-  const memoryGb = (12 + meanDistance * 84).toFixed(1);
+  const carbonKg = (runMetadata?.carbonBurnt ?? 0.8 + meanDistance * 4.2).toFixed(2);
+  const smartphoneUnits = (runMetadata?.computeUsed ?? 18 + meanDistance * 46).toFixed(
+    1,
+  );
+  const memoryGb = (runMetadata?.memoryUsed ?? 12 + meanDistance * 84).toFixed(1);
 
   // Derive a few additional summary fields for the end overlay.
   const parameterCount = String(simClass.parameters.length);
   const bestFitDelta = `${(meanDistance * 100).toFixed(1)}%`;
   const terminalLines = String(simClass.parameters.length + 6);
   const audioTrack = 'Present';
-  const runtime = formatRuntime(videoDurationSeconds);
+  const runtimeHours = formatHoursFromSeconds(
+    runMetadata?.wallclockSeconds ?? videoDurationSeconds,
+  );
 
   return {
     scale: { label: 'Scale', value: simClass.label },
@@ -63,26 +69,42 @@ export function buildSummaryMetricMap(
       value: String(simClass.metadata.distinctSimulations),
     },
     parameters: { label: 'Parameters', value: parameterCount },
-    runtime: { label: 'Total Runtime', value: runtime },
+    runtime: { label: 'Total Runtime', value: runtimeHours },
     similarityScore: { label: 'Similarity Score', value: `${score}/100` },
     bestFitDelta: { label: 'Best-Fit Delta', value: bestFitDelta },
     carbonBurnt: { label: 'Carbon Burnt', value: carbonKg },
     computeUsed: { label: 'Compute Used', value: smartphoneUnits },
     memoryUsed: { label: 'Memory Used', value: memoryGb },
+    particlesUpdated: {
+      label: 'Particle updates',
+      value: runMetadata ? formatCount(runMetadata.particlesUpdated) : '--',
+    },
     audioTrack: { label: 'Audio Track', value: audioTrack },
     terminalLines: { label: 'Terminal Lines', value: terminalLines },
   };
 }
 
 /**
- * Format a duration as `m:ss` for compact HUD-style presentation.
+ * Format a potentially large count without decimals.
+ *
+ * @param value - Count value.
+ * @returns Human-friendly integer-ish string.
+ */
+function formatCount(value: number): string {
+  const rounded = Math.max(0, Math.round(value));
+  return rounded.toLocaleString(undefined);
+}
+
+/**
+ * Format a duration as hours with <= 2 decimals.
  *
  * @param totalSeconds - Duration in seconds.
- * @returns Duration string.
+ * @returns Hours string.
  */
-function formatRuntime(totalSeconds: number): string {
-  const seconds = Math.max(0, Math.round(totalSeconds));
-  const minutes = Math.floor(seconds / 60);
-  const remainder = seconds % 60;
-  return `${minutes}:${String(remainder).padStart(2, '0')}`;
+function formatHoursFromSeconds(totalSeconds: number): string {
+  const hours = Math.max(0, totalSeconds) / 3600;
+  return hours
+    .toFixed(2)
+    .replace(/\.0+$|(?<=\..*?)0+$/g, '')
+    .replace(/\.$/, '');
 }

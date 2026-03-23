@@ -12,6 +12,7 @@ import type {
   SummaryStatId,
 } from '../data/simulations.ts';
 import { buildSummaryMetricMap } from '../domain/simulations/summary-metrics.ts';
+import type { VideoRunMetadata } from '../domain/simulations/video-run-metadata.ts';
 import { SUMMARY_OVERLAY } from '../shared/constants.ts';
 import { withUnit } from '../shared/format.ts';
 
@@ -25,6 +26,7 @@ export interface SummaryOverlayController {
     simClass: SimulationClass,
     values: Record<string, number>,
     videoDurationSeconds: number,
+    runMetadata?: VideoRunMetadata | null,
   ) => void;
 }
 
@@ -105,8 +107,15 @@ export function createSummaryOverlay(
       overlay.hidden = false;
       overlay.classList.remove('is-hidden');
 
-      // Trigger the CSS transition by toggling `is-visible` on the next frame.
       overlay.classList.remove('is-visible');
+
+      // Ensure the browser commits the initial (hidden) styles before we toggle
+      // `is-visible`. Without this, the first-ever reveal can skip the
+      // transition because the element goes from `display:none` -> visible
+      // and `opacity:1` in the same style calculation.
+      void overlay.offsetWidth;
+
+      // Trigger the CSS transition by toggling `is-visible` on the next frame.
       requestAnimationFrame(() => {
         overlay.classList.add('is-visible');
       });
@@ -126,6 +135,7 @@ export function createSummaryOverlay(
       simClass: SimulationClass,
       values: Record<string, number>,
       videoDurationSeconds: number,
+      runMetadata?: VideoRunMetadata | null,
     ) {
       metrics.innerHTML = '';
 
@@ -133,6 +143,7 @@ export function createSummaryOverlay(
         simClass,
         values,
         videoDurationSeconds,
+        runMetadata,
       )) {
         const row = document.createElement('div');
         row.className = 'summary-overlay__metric';
@@ -158,9 +169,10 @@ function buildSummaryMetrics(
   simClass: SimulationClass,
   values: Record<string, number>,
   videoDurationSeconds: number,
+  runMetadata?: VideoRunMetadata | null,
 ): Array<{ label: string; value: string }> {
   const availableMetrics: Record<SummaryStatId, { label: string; value: string }> =
-    buildSummaryMetricMap(simClass, values, videoDurationSeconds);
+    buildSummaryMetricMap(simClass, values, videoDurationSeconds, runMetadata);
 
   return simClass.metadata.summaryStats.map((stat) =>
     selectMetric(stat, availableMetrics),
