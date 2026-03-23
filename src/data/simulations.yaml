@@ -26,7 +26,6 @@ planetary:
       impactor_velocity: 14
       impactor_angle: 43
     summaryStats:
-      - id: parameters
       - id: runtime
         value: 0:00
       - id: similarityScore
@@ -100,7 +99,6 @@ galaxy:
       diskiness: 0.78
       stellar_mass: 5.1
     summaryStats:
-      - id: parameters
       - id: runtime
         value: 0:00
       - id: similarityScore
@@ -177,7 +175,6 @@ cosmos:
       feedback_strength: 1.1
       clustering: 0.81
     summaryStats:
-      - id: parameters
       - id: runtime
         value: 0:00
       - id: similarityScore
