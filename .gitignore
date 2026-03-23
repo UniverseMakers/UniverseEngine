@@ -30,3 +30,7 @@ __pycache__/
 
 # Local tracking
 PROGRESS.md
+
+# Local test artifacts
+test*.mp4
+test_*.csv
