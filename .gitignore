@@ -21,6 +21,10 @@ dist/
 *.log
 npm-debug.log*
 
+# Python
+__pycache__/
+*.pyc
+
 # TypeScript cache
 *.tsbuildinfo
 
