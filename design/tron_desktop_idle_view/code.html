@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>TRON_OS | SIMULATION_RUNNING</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&amp;family=Inter:wght@300;400;500;600;700&amp;family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@300;400;500&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "surface-bright": "#39393c",
+                        "inverse-surface": "#e4e1e6",
+                        "on-tertiary-fixed": "#001e2c",
+                        "surface-tint": "#b4c5ff",
+                        "surface-container": "#1f1f22",
+                        "secondary-fixed": "#e2e2e2",
+                        "on-tertiary": "#00354a",
+                        "on-primary-fixed-variant": "#003ea8",
+                        "tertiary-fixed-dim": "#7bd0ff",
+                        "on-primary": "#002a78",
+                        "surface-container-high": "#2a2a2d",
+                        "on-primary-container": "#eeefff",
+                        "on-secondary-container": "#b4b5b5",
+                        "on-secondary": "#2f3131",
+                        "surface-dim": "#131316",
+                        "on-tertiary-container": "#e1f2ff",
+                        "tertiary-fixed": "#c4e7ff",
+                        "primary-fixed": "#dbe1ff",
+                        "error-container": "#93000a",
+                        "tertiary": "#7bd0ff",
+                        "on-error-container": "#ffdad6",
+                        "secondary-container": "#454747",
+                        "outline": "#8d90a0",
+                        "error": "#ffb4ab",
+                        "tertiary-container": "#00759f",
+                        "primary-container": "#2563eb",
+                        "on-secondary-fixed": "#1a1c1c",
+                        "secondary": "#c6c6c7",
+                        "surface": "#131316",
+                        "on-error": "#690005",
+                        "inverse-on-surface": "#303033",
+                        "on-surface-variant": "#c3c6d7",
+                        "on-primary-fixed": "#00174b",
+                        "surface-container-low": "#1b1b1e",
+                        "outline-variant": "#434655",
+                        "secondary-fixed-dim": "#c6c6c7",
+                        "primary": "#b4c5ff",
+                        "surface-container-highest": "#353438",
+                        "on-tertiary-fixed-variant": "#004c69",
+                        "on-secondary-fixed-variant": "#454747",
+                        "primary-fixed-dim": "#b4c5ff",
+                        "on-surface": "#e4e1e6",
+                        "inverse-primary": "#0053db",
+                        "surface-variant": "#353438",
+                        "surface-container-lowest": "#0e0e11",
+                        "on-background": "#e4e1e6",
+                        "background": "#131316",
+                        "cyan": {
+                            "400": "#22d3ee",
+                            "500": "#06b6d4",
+                            "900": "#164e63"
+                        }
+                    },
+                    fontFamily: {
+                        "headline": ["Space Grotesk"],
+                        "body": ["Inter"],
+                        "label": ["Space Grotesk"],
+                        "mono": ["Fira Code", "monospace"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .glow-text {
+            text-shadow: 0 0 8px rgba(34, 211, 238, 0.8);
+        }
+        .glow-border {
+            box-shadow: inset 0 0 10px rgba(6, 182, 212, 0.2), 0 0 5px rgba(6, 182, 212, 0.1);
+        }
+        body {
+            background-color: #0e0e11;
+            cursor: crosshair;
+        }
+        .simulation-canvas {
+            background: radial-gradient(circle at center, #1b1b1e 0%, #0e0e11 100%);
+        }
+    </style>
+</head>
+<body class="font-mono text-cyan-400 overflow-hidden">
+<!-- Top Navigation Shell (TopAppBar Implementation) -->
+<header class="fixed top-0 w-full z-50 flex justify-between items-center px-6 py-4 bg-transparent">
+<!-- Left: Burger Menu -->
+<button class="flex items-center justify-center p-2 rounded-lg hover:bg-cyan-900/20 transition-all duration-300 group border border-cyan-500/20">
+<span class="material-symbols-outlined text-cyan-400 group-hover:text-cyan-200">menu</span>
+</button>
+<!-- Product Name Anchor -->
+<div class="absolute left-1/2 -translate-x-1/2">
+<h1 class="text-xl font-bold text-cyan-400 drop-shadow-[0_0_8px_rgba(34,211,238,0.8)] tracking-widest uppercase">TRON_OS</h1>
+</div>
+<!-- Right: Trailing Actions -->
+<div class="flex items-center space-x-4">
+<span class="material-symbols-outlined text-cyan-400 text-sm">monitoring</span>
+</div>
+</header>
+<!-- Side Navigation (Suppressed for Minimalism per State 1 Request) -->
+<!-- Main Content Canvas (The Simulation) -->
+<main class="relative w-screen h-screen simulation-canvas flex items-center justify-center">
+<!-- Background Immersive Asset -->
+<div class="absolute inset-0 z-0">
+<img alt="Cosmological deep space simulation with dark matter filaments" class="w-full h-full object-cover opacity-60 mix-blend-screen" data-alt="Deep space cosmic web and dark matter simulation" src="https://lh3.googleusercontent.com/aida-public/AB6AXuASOpFwYRU6p42pebbzFBFhcj8GyQvZRXCFO5OAtOGSwbdjBFrvi0lrHz1_-IcNXiWna02JFjbNHqOAW1JBHL7eNcEIYcGiAQ9yOo100PfIzzRqZpLOfXx-eTBufcdpmt1WHtZyXBUzaHXUFUz70Kr9XCgHS5yR6-4XULRSCNcHHX4wwbkzA7s5nH2S8Aq6jKiiQkBjoRrB8ZfJVf9NUasGiHeeqxD0VnDsdPpXlxiubCQz1rGVfoJg3_Dg5JkpGL9IAfNxrPXrgZg"/>
+<div class="absolute inset-0 bg-gradient-to-t from-black via-transparent to-black opacity-80"></div>
+</div>
+<!-- Floating UI: Data Pane (Top Right) -->
+<div class="fixed top-20 right-6 z-40 bg-black/40 backdrop-blur-xl p-4 border border-cyan-500/30 rounded-lg glow-border min-w-[240px]">
+<div class="flex flex-col space-y-3">
+<div class="flex justify-between items-baseline border-b border-cyan-900/50 pb-2">
+<span class="text-[10px] text-cyan-700 tracking-tighter uppercase">Time</span>
+<span class="text-sm font-bold glow-text">13.82 GYR</span>
+</div>
+<div class="flex justify-between items-baseline border-b border-cyan-900/50 pb-2">
+<span class="text-[10px] text-cyan-700 tracking-tighter uppercase">Expansion</span>
+<span class="text-sm font-bold glow-text">67.4 KM/S/MPC</span>
+</div>
+<div class="flex justify-between items-baseline border-b border-cyan-900/50 pb-2">
+<span class="text-[10px] text-cyan-700 tracking-tighter uppercase">Density</span>
+<span class="text-sm font-bold glow-text">0.742</span>
+</div>
+<div class="flex justify-between items-baseline">
+<span class="text-[10px] text-cyan-700 tracking-tighter uppercase">Void</span>
+<span class="text-sm font-bold glow-text">54.21%</span>
+</div>
+</div>
+<!-- Pulse indicator -->
+<div class="mt-4 flex items-center space-x-2">
+<div class="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse shadow-[0_0_8px_#22d3ee]"></div>
+<span class="text-[9px] text-cyan-500 tracking-[0.3em]">LIVE_FEED_SYNCED</span>
+</div>
+</div>
+<!-- Center Overlay (Optional Wireframe Visuals) -->
+<div class="z-10 pointer-events-none opacity-20">
+<svg class="w-96 h-96" viewbox="0 0 100 100">
+<circle cx="50" cy="50" fill="none" r="48" stroke="currentColor" stroke-dasharray="1 2" stroke-width="0.1"></circle>
+<circle cx="50" cy="50" fill="none" r="30" stroke="currentColor" stroke-width="0.05"></circle>
+<line stroke="currentColor" stroke-width="0.05" x1="0" x2="100" y1="50" y2="50"></line>
+<line stroke="currentColor" stroke-width="0.05" x1="50" x2="50" y1="0" y2="100"></line>
+</svg>
+</div>
+</main>
+<!-- Bottom Timeline Scrubber (Footer Implementation) -->
+<footer class="fixed bottom-0 w-full z-50 flex flex-col items-center px-8 pb-8">
+<!-- Clean Timeline Bar -->
+<div class="w-full max-w-4xl group">
+<div class="relative h-1 w-full bg-cyan-900/30 rounded-full overflow-hidden mb-2">
+<!-- Progress Fill -->
+<div class="absolute top-0 left-0 h-full w-[68%] bg-cyan-400 shadow-[0_0_10px_#22d3ee]"></div>
+</div>
+<!-- Interaction Area -->
+<div class="w-full flex justify-between items-start opacity-0 group-hover:opacity-100 transition-opacity duration-500">
+<span class="text-[8px] text-cyan-800 tracking-widest">T=0.00</span>
+<span class="text-[8px] text-cyan-800 tracking-widest">T=MAX_EXP</span>
+</div>
+</div>
+<!-- System Branding/Status Line -->
+<div class="w-full flex justify-between items-center mt-4">
+<div class="flex items-center space-x-4">
+<span class="text-[10px] font-bold text-cyan-500 tracking-[0.2em]">ENCOM OS V.2.0.4</span>
+<div class="h-px w-8 bg-cyan-500/30"></div>
+<span class="text-[10px] text-cyan-800 tracking-[0.2em] uppercase">Status: IDLE_OBSERVATION</span>
+</div>
+<div class="flex space-x-6">
+<span class="text-[10px] text-cyan-800 hover:text-cyan-400 transition-colors cursor-pointer tracking-widest uppercase">SYSTEM_LOGS</span>
+<span class="text-[10px] text-cyan-800 hover:text-cyan-400 transition-colors cursor-pointer tracking-widest uppercase">NETWORK_STATUS</span>
+</div>
+</div>
+</footer>
+<!-- Side HUD Elements (Aesthetic Wireframes) -->
+<div class="fixed left-6 top-1/2 -translate-y-1/2 space-y-2 opacity-40 hidden md:block">
+<div class="w-1 h-8 bg-cyan-500/40"></div>
+<div class="w-1 h-12 bg-cyan-400 shadow-[0_0_5px_#22d3ee]"></div>
+<div class="w-1 h-8 bg-cyan-500/40"></div>
+<div class="w-1 h-4 bg-cyan-500/20"></div>
+</div>
+</body></html>

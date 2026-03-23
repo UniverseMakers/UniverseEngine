@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>TRON_OS_V2 - Simulation Initializing</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&amp;family=Inter:wght@300;400;500;600;700&amp;family=JetBrains+Mono:wght@400;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "surface-bright": "#39393c",
+                        "inverse-surface": "#e4e1e6",
+                        "on-tertiary-fixed": "#001e2c",
+                        "surface-tint": "#b4c5ff",
+                        "surface-container": "#1f1f22",
+                        "secondary-fixed": "#e2e2e2",
+                        "on-tertiary": "#00354a",
+                        "on-primary-fixed-variant": "#003ea8",
+                        "tertiary-fixed-dim": "#7bd0ff",
+                        "on-primary": "#002a78",
+                        "surface-container-high": "#2a2a2d",
+                        "on-primary-container": "#eeefff",
+                        "on-secondary-container": "#b4b5b5",
+                        "on-secondary": "#2f3131",
+                        "surface-dim": "#131316",
+                        "on-tertiary-container": "#e1f2ff",
+                        "tertiary-fixed": "#c4e7ff",
+                        "primary-fixed": "#dbe1ff",
+                        "error-container": "#93000a",
+                        "tertiary": "#7bd0ff",
+                        "on-error-container": "#ffdad6",
+                        "secondary-container": "#454747",
+                        "outline": "#8d90a0",
+                        "error": "#ffb4ab",
+                        "tertiary-container": "#00759f",
+                        "primary-container": "#2563eb",
+                        "on-secondary-fixed": "#1a1c1c",
+                        "secondary": "#c6c6c7",
+                        "surface": "#131316",
+                        "on-error": "#690005",
+                        "inverse-on-surface": "#303033",
+                        "on-surface-variant": "#c3c6d7",
+                        "on-primary-fixed": "#00174b",
+                        "surface-container-low": "#1b1b1e",
+                        "outline-variant": "#434655",
+                        "secondary-fixed-dim": "#c6c6c7",
+                        "primary": "#b4c5ff",
+                        "surface-container-highest": "#353438",
+                        "on-tertiary-fixed-variant": "#004c69",
+                        "on-secondary-fixed-variant": "#454747",
+                        "primary-fixed-dim": "#b4c5ff",
+                        "on-surface": "#e4e1e6",
+                        "inverse-primary": "#0053db",
+                        "surface-variant": "#353438",
+                        "surface-container-lowest": "#0e0e11",
+                        "on-background": "#e4e1e6",
+                        "background": "#131316"
+                    },
+                    fontFamily: {
+                        "headline": ["Space Grotesk"],
+                        "body": ["Inter"],
+                        "label": ["Space Grotesk"],
+                        "mono": ["JetBrains Mono", "monospace"]
+                    },
+                    borderRadius: {"DEFAULT": "0.125rem", "lg": "0.25rem", "xl": "0.5rem", "full": "0.75rem"},
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .inner-glow-pulse {
+            box-shadow: inset 0 0 15px rgba(123, 208, 255, 0.4);
+        }
+        .tron-gradient-bg {
+            background: radial-gradient(circle at 50% 50%, #1a1a1e 0%, #0e0e11 100%);
+        }
+        .terminal-scroll {
+            scrollbar-width: none;
+        }
+        .terminal-scroll::-webkit-scrollbar {
+            display: none;
+        }
+        .scanline {
+            background: linear-gradient(to bottom, rgba(123,208,255,0.03) 50%, rgba(0,0,0,0) 50%);
+            background-size: 100% 4px;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-surface-container-lowest text-on-surface font-body selection:bg-tertiary/30 m-0 p-0 overflow-hidden">
+<!-- TopAppBar -->
+<header class="fixed top-0 w-full bg-black/80 backdrop-blur-lg text-[#7bd0ff] font-mono uppercase tracking-[0.2em] text-sm z-50 flex justify-between items-center px-6 h-16 border-b border-[#7bd0ff]/40 shadow-[0_0_15px_rgba(123,208,255,0.3)]">
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined cursor-pointer hover:bg-[#7bd0ff]/10 p-2 rounded transition-all">menu</span>
+<span class="text-[#7bd0ff] font-bold tracking-tighter">TRON_OS_V2</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined cursor-pointer hover:bg-[#7bd0ff]/10 p-2 rounded transition-all">monitoring</span>
+</div>
+</header>
+<!-- Main Canvas (Background Simulation) -->
+<main class="relative w-full h-screen pt-16 pb-20 overflow-hidden tron-gradient-bg">
+<!-- Abstract Cosmic Visual Behind Overlay -->
+<div class="absolute inset-0 opacity-20 pointer-events-none">
+<div class="absolute top-1/4 left-1/4 w-64 h-64 bg-tertiary-container rounded-full blur-[120px]"></div>
+<div class="absolute bottom-1/4 right-1/4 w-96 h-96 bg-primary-container rounded-full blur-[150px]"></div>
+</div>
+<!-- Terminal Overlay (State 3: Initializing) -->
+<div class="absolute inset-0 z-40 bg-black/90 backdrop-blur-md flex flex-col p-6 scanline">
+<!-- Header Status -->
+<div class="flex justify-between items-center mb-8 border-b border-[#7bd0ff]/20 pb-4">
+<div class="flex flex-col">
+<span class="font-mono text-[10px] text-[#7bd0ff]/60 tracking-[0.3em]">SYSTEM_PROCESS_ID: 0x882A</span>
+<h2 class="font-mono text-xl text-[#7bd0ff] font-bold tracking-tight">INITIALIZING...</h2>
+</div>
+<div class="flex items-center gap-2">
+<div class="w-2 h-2 bg-[#7bd0ff] rounded-full animate-pulse shadow-[0_0_8px_rgba(123,208,255,1)]"></div>
+<span class="font-mono text-xs text-[#7bd0ff]">LIVE_CORE</span>
+</div>
+</div>
+<!-- Terminal Logs -->
+<div class="flex-grow font-mono text-sm space-y-3 overflow-y-auto terminal-scroll text-[#7bd0ff]/80">
+<p class="flex gap-3"><span class="text-[#7bd0ff]/40">[00.01]</span> <span class="text-white">SYS_BOOT:</span> KERNEL_LOADED_SUCCESSFULLY</p>
+<p class="flex gap-3"><span class="text-[#7bd0ff]/40">[00.42]</span> <span class="text-white">MEM_CHK:</span> 128TB_VRAM_ALLOCATED</p>
+<p class="flex gap-3"><span class="text-[#7bd0ff]/40">[01.12]</span> <span class="text-white">NET_SYN:</span> CONNECTING_TO_GRID_NODE_7</p>
+<p class="flex gap-3"><span class="text-[#7bd0ff]/40">[01.55]</span> <span class="text-white">NET_SYN:</span> CONNECTION_ESTABLISHED</p>
+<p class="flex gap-3"><span class="text-[#7bd0ff]/40">[02.04]</span> <span class="text-[#7bd0ff] font-bold">SEC_VAL:</span> ENCRYPTION_KEY_ACCEPTED</p>
+<p class="flex gap-3"><span class="text-[#7bd0ff]/40">[02.30]</span> <span class="text-white">SIM_PRE:</span> CALCULATING_INITIAL_TRAJECTORIES</p>
+<p class="flex gap-3"><span class="text-[#7bd0ff]/40">[03.10]</span> <span class="text-white">SIM_PRE:</span> VOXEL_DENSITY_SET_TO_MAX</p>
+<p class="flex gap-3"><span class="text-[#7bd0ff]/40">[03.45]</span> <span class="text-[#7bd0ff] font-bold">PRC_LCH:</span> INJECTING_GRAVITY_CONSTANTS</p>
+<p class="flex gap-3"><span class="text-[#7bd0ff]/40">[04.01]</span> <span class="text-white">PRC_LCH:</span> WARMING_PARTICLE_RENDERER</p>
+<p class="flex gap-3 items-center"><span class="text-[#7bd0ff]/40">[--.--]</span> <span class="bg-[#7bd0ff] text-black px-1 font-bold">RUNNING_HEURISTICS</span> <span class="animate-pulse">_</span></p>
+<p class="flex gap-3 pt-4"><span class="text-[#7bd0ff]/40">[--.--]</span> <span class="text-[#7bd0ff]">PROCEEDING_TO_CORE_VISUALIZATION...</span></p>
+</div>
+<!-- Progress Bar -->
+<div class="mt-8 space-y-2">
+<div class="flex justify-between font-mono text-[10px] text-[#7bd0ff]/60 uppercase tracking-widest">
+<span>Sequence_integrity</span>
+<span>88%</span>
+</div>
+<div class="h-1.5 w-full bg-[#7bd0ff]/10 rounded-full overflow-hidden border border-[#7bd0ff]/20">
+<div class="h-full bg-[#7bd0ff] w-[88%] shadow-[0_0_10px_rgba(123,208,255,0.8)]"></div>
+</div>
+</div>
+<!-- Action Area -->
+<div class="mt-10 grid grid-cols-2 gap-4">
+<button class="bg-black border border-[#7bd0ff]/40 py-3 text-[#7bd0ff] font-mono text-xs tracking-widest hover:bg-[#7bd0ff]/10 transition-all uppercase">
+                    Abort
+                </button>
+<button class="bg-[#7bd0ff]/20 border border-[#7bd0ff] py-3 text-white font-mono text-xs tracking-widest hover:bg-[#7bd0ff]/30 transition-all uppercase shadow-[inset_0_0_10px_rgba(123,208,255,0.4)]">
+                    Override
+                </button>
+</div>
+</div>
+</main>
+<!-- NavigationDrawer (Mobile - Hidden by default but structure present) -->
+<aside class="fixed inset-y-0 left-0 z-[60] flex flex-col p-8 h-screen w-80 bg-black/95 backdrop-blur-2xl text-[#7bd0ff] font-mono text-lg tracking-normal border-r-2 border-[#7bd0ff] shadow-[20px_0_60px_rgba(0,0,0,0.9)] transform -translate-x-full transition-transform duration-300">
+<div class="text-[#7bd0ff] font-black border-b border-[#7bd0ff] mb-4 pb-2">CORE_COMMAND</div>
+<nav class="flex flex-col gap-2">
+<div class="flex items-center gap-4 p-4 text-[#7bd0ff]/60 hover:text-[#7bd0ff] hover:bg-[#7bd0ff]/10 transition-colors cursor-pointer">
+<span class="material-symbols-outlined">tune</span>
+<span>PARAMETERS</span>
+</div>
+<div class="flex items-center gap-4 p-4 text-white bg-[#7bd0ff]/30 font-bold border-l-4 border-[#7bd0ff] cursor-pointer">
+<span class="material-symbols-outlined">straighten</span>
+<span>SCALE_SELECT</span>
+</div>
+<div class="flex items-center gap-4 p-4 text-[#7bd0ff]/60 hover:text-[#7bd0ff] hover:bg-[#7bd0ff]/10 transition-colors cursor-pointer">
+<span class="material-symbols-outlined">terminal</span>
+<span>SYSTEM_LOGS</span>
+</div>
+<div class="flex items-center gap-4 p-4 text-[#7bd0ff]/60 hover:text-[#7bd0ff] hover:bg-[#7bd0ff]/10 transition-colors cursor-pointer">
+<span class="material-symbols-outlined">database</span>
+<span>DATA_EXPORT</span>
+</div>
+<div class="flex items-center gap-4 p-4 text-[#7bd0ff]/60 hover:text-[#7bd0ff] hover:bg-[#7bd0ff]/10 transition-colors cursor-pointer">
+<span class="material-symbols-outlined">rocket_launch</span>
+<span>RUN_SIMULATION</span>
+</div>
+</nav>
+</aside>
+<!-- BottomNavBar -->
+<nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-4 pb-4 bg-black/60 backdrop-blur-xl border-t-2 border-[#7bd0ff]/80 h-20 rounded-t-xl shadow-[0_-4px_20px_rgba(123,208,255,0.2)]">
+<div class="flex flex-col items-center justify-center text-[#7bd0ff]/40 p-3 hover:text-white hover:shadow-[0_0_10px_rgba(123,208,255,0.4)] transition-all cursor-pointer">
+<span class="material-symbols-outlined">play_arrow</span>
+</div>
+<div class="flex flex-col items-center justify-center text-[#7bd0ff]/40 p-3 hover:text-white hover:shadow-[0_0_10px_rgba(123,208,255,0.4)] transition-all cursor-pointer">
+<span class="material-symbols-outlined">settings_input_component</span>
+</div>
+<div class="flex flex-col items-center justify-center bg-[#7bd0ff]/20 text-[#7bd0ff] rounded-lg p-3 border border-[#7bd0ff] shadow-[inset_0_0_10px_rgba(123,208,255,0.5)] drop-shadow-[0_0_8px_rgba(123,208,255,0.8)] cursor-pointer">
+<span class="material-symbols-outlined">layers</span>
+</div>
+<div class="flex flex-col items-center justify-center text-[#7bd0ff]/40 p-3 hover:text-white hover:shadow-[0_0_10px_rgba(123,208,255,0.4)] transition-all cursor-pointer">
+<span class="material-symbols-outlined">timeline</span>
+</div>
+</nav>
+<!-- Ambient Grid Overlay -->
+<div class="fixed inset-0 pointer-events-none opacity-[0.03] z-[1]" style="background-image: radial-gradient(#7bd0ff 1px, transparent 0); background-size: 40px 40px;"></div>
+</body></html>
