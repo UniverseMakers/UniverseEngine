@@ -615,7 +615,7 @@ button {
 .entry-overlay {
   position: relative;
   z-index: 1;
-  width: min(42rem, calc(100vw - 2rem));
+  width: min(46.2rem, calc(100vw - 2rem));
   padding: 2rem;
   border: 1px solid var(--line-strong);
   border-radius: 0;
@@ -676,7 +676,7 @@ button {
 }
 
 .entry-overlay__copy {
-  max-width: 34rem;
+  max-width: 100%;
   margin: 1rem 0 1.8rem;
   color: var(--text-secondary);
   font-size: 0.78rem;

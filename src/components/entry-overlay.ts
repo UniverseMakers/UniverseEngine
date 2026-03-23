@@ -56,9 +56,9 @@ export function createEntryOverlay(
     const button = document.createElement('button');
     button.className = 'entry-overlay__button';
     button.type = 'button';
+
     button.innerHTML = `
       <span class="entry-overlay__button-label">${simClass.label}</span>
-      <span class="entry-overlay__button-meta">${simClass.id.toUpperCase()}</span>
     `;
     // Delegate back to the shell so it can update global state and switch modes.
     button.addEventListener('click', () => onSelect(simClass));
