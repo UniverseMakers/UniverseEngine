@@ -821,15 +821,15 @@ button {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  opacity: 0.6;
-  filter: brightness(0.65) saturate(0.7);
+  opacity: 0.66;
+  filter: brightness(0.72) saturate(0.75);
 }
 
 .config-overlay__media::after {
   content: '';
   position: absolute;
   inset: 0;
-  background: rgba(0, 0, 0, 0.42);
+  background: rgba(0, 0, 0, 0.36);
 }
 
 .config-overlay__media-copy {
