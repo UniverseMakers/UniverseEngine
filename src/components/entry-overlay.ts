@@ -27,6 +27,9 @@ export function createEntryOverlay(
   container: HTMLElement,
   onSelect: (simClass: SimulationClass) => void,
 ): EntryOverlayController {
+  // Static banner asset shown at the top of the first-load overlay.
+  const bannerSrc = '/assets/banner.jpg';
+
   // Full-screen overlay wrapper.
   const overlay = document.createElement('section');
   overlay.className = 'overlay overlay--entry';
@@ -37,9 +40,11 @@ export function createEntryOverlay(
   const panel = document.createElement('div');
   panel.className = 'entry-overlay';
   panel.innerHTML = `
+    <div class="entry-overlay__banner-frame" aria-hidden="true">
+      <img class="entry-overlay__banner" src="${bannerSrc}" alt="" loading="eager" decoding="async" />
+    </div>
     <p class="entry-overlay__eyebrow">Universe Engine</p>
-    <h1 class="entry-overlay__title">Choose a simulation scale</h1>
-    <p class="entry-overlay__copy">Start by picking the simulation family you want to explore. You can still switch scales from the burger menu later.</p>
+    <h1 class="entry-overlay__title">Choose a cosmic scale</h1>
   `;
 
   // Button stack for each available simulation family.
