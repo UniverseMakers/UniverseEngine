@@ -58,7 +58,7 @@ export function createTimeline(
     // Convert the integer slider value back into a normalized position for callers.
     const position = parseInt(slider.value, 10) / 1000;
     slider.style.setProperty('--fill', `${position * 100}%`);
-    current.textContent = `STATUS: IDLE_OBSERVATION [T=${position.toFixed(3)}]`;
+    current.textContent = `STATUS: IDLE_OBSERVATION [T=${position.toFixed(2)}]`;
     onChange?.(position);
   });
 
@@ -74,7 +74,7 @@ export function createTimeline(
       const clamped = Math.max(0, Math.min(1, t));
       slider.value = String(Math.round(clamped * 1000));
       slider.style.setProperty('--fill', `${clamped * 100}%`);
-      current.textContent = `STATUS: IDLE_OBSERVATION [T=${clamped.toFixed(3)}]`;
+      current.textContent = `STATUS: IDLE_OBSERVATION [T=${clamped.toFixed(2)}]`;
     },
   };
 }

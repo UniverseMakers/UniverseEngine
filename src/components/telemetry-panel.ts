@@ -109,9 +109,38 @@ function buildAvailableMetrics(
     ...parameterMetrics,
     ...namedMetrics,
     ...Object.fromEntries(
-      Object.entries(liveValues).map(([key, value]) => [key, { label: key, value }]),
+      Object.entries(liveValues).map(([key, value]) => [
+        key,
+        { label: key, value: formatMaybeNumber(value) },
+      ]),
     ),
   };
+}
+
+/**
+ * Format a CSV-provided value for display.
+ *
+ * Most live stat values are numeric strings. For layout stability we cap the
+ * visible precision to two decimal places and strip trailing zeros.
+ *
+ * @param raw - Raw CSV cell value.
+ * @returns Display-ready value.
+ */
+function formatMaybeNumber(raw: string): string {
+  const trimmed = raw.trim();
+  if (trimmed.length === 0) {
+    return raw;
+  }
+
+  const numeric = Number(trimmed);
+  if (!Number.isFinite(numeric)) {
+    return raw;
+  }
+
+  return numeric
+    .toFixed(2)
+    .replace(/\.0+$|(?<=\..*?)0+$/g, '')
+    .replace(/\.$/, '');
 }
 
 /**

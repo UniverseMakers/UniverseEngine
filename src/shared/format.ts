@@ -19,7 +19,9 @@
  * @returns Formatted string.
  */
 export function formatValueByStep(value: number, step: number): string {
-  const decimals = countDecimals(step);
+  // Never show more than two decimal places in the UI. This keeps panels stable
+  // as values update (especially for live stats) while still conveying precision.
+  const decimals = Math.min(countDecimals(step), 2);
   return value.toFixed(decimals);
 }
 

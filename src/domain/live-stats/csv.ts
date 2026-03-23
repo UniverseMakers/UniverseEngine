@@ -173,7 +173,7 @@ function interpolateFrameValues(
  */
 function formatNumber(value: number): string {
   return value
-    .toFixed(6)
+    .toFixed(2)
     .replace(/\.0+$|(?<=\..*?)0+$/g, '')
     .replace(/\.$/, '');
 }
