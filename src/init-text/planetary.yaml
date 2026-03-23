@@ -1,0 +1,57 @@
+# Initialization terminal script for the Planetary simulation family.
+#
+# Schema:
+# - each list item is one "entry" shown in order
+# - each entry has an `options` list
+# - one option is chosen randomly at runtime
+# - each option supports:
+#     - `text` (required): terminal line text
+#     - `duration` (optional): dwell time in seconds before the next line
+
+- options:
+    - text: 'INIT_EARTH :: loading continental crusts with maximal volcanic activity'
+    - text: 'INIT_EARTH :: breaking up Pangea, just to be annoying for future intercontinental travel'
+    - text: 'INIT_EARTH :: giving Earth oceans, tectonics, and just enough existential risk'
+    - text: 'INIT_EARTH :: assembling a respectable planet to immediately hit with something'
+    - text: 'INIT_EARTH :: checking that the mantle is molten enough to be dramatic'
+- options:
+    - text: 'INIT_IMPACTOR :: finding a suitably apocalyptic impactor to slam into Earth'
+    - text: 'INIT_IMPACTOR :: selecting one large rock with terrible intentions'
+    - text: 'INIT_IMPACTOR :: solving for a collision nobody involved will enjoy'
+    - text: 'INIT_IMPACTOR :: aiming a proto-planet with all the grace of orbital pinball'
+- options:
+    - text: 'INIT_MATERIAL :: solving problems in multi-material simulations just to slam planets together'
+    - text: 'INIT_MATERIAL :: reminding iron, silicates, and vapor how to misbehave under pressure'
+    - text: 'INIT_MATERIAL :: teaching equations of state to survive an obviously bad day'
+    - text: 'INIT_MATERIAL :: calibrating rock strength until it becomes a philosophical question'
+- options:
+    - text: 'INIT_ORBIT :: aligning the crosshairs with Earth'
+    - text: 'INIT_ORBIT :: turning orbital mechanics into a countdown to regret'
+    - text: 'INIT_ORBIT :: fine-tuning impact angle for maximum moon-making potential'
+    - text: 'INIT_ORBIT :: checking that all trajectories intersect in the least peaceful way possible'
+- options:
+    - text: 'INIT_SHOCKS :: preparing the crust for an unusually persuasive compression wave'
+    - text: 'INIT_SHOCKS :: warming up shock physics until continents start filing complaints'
+    - text: 'INIT_SHOCKS :: making sure the pressure pulse arrives before common sense does'
+- options:
+    - text: "INIT_EJECTA :: arranging for molten debris to become tomorrow's orbital problem"
+    - text: 'INIT_EJECTA :: sorting vapor, rock, and metal into scientifically exciting chaos'
+    - text: 'INIT_EJECTA :: asking debris to leave the planet in an orderly plume'
+- options:
+    - text: 'INIT_MOONSHOT :: seeing whether this collision can accidentally invent a moon'
+    - text: 'INIT_MOONSHOT :: checking if catastrophic failure counts as satellite formation'
+    - text: 'INIT_MOONSHOT :: budgeting angular momentum for one extremely expensive natural satellite'
+- options:
+    - text: 'PREPARE_COMP :: filling RAM to the brim'
+    - text: 'PREPARE_COMP :: funding a bigger supercomputer'
+    - text: 'PREPARE_COMP :: making computer go brrr'
+    - text: 'PREPARE_COMP :: solving the three-body problem (ish)'
+    - text: 'PREPARE_COMP :: optimising for oddly specific hardware configurations that may or may not exist in 2 years'
+    - text: 'PREPARE_COMP :: asking the AI overlords to stop using our hardware for cryptocurrency mining'
+    - text: 'PREPARE_COMP :: spending bitcoin before the bubble bursts'
+- options:
+    - text: "VISUAL_PIPELINE :: taking artistic license with Earth's surface"
+    - text: 'VISUAL_PIPELINE :: making sure the impact looks suitably apocalyptic'
+    - text: 'VISUAL_PIPELINE :: colour-grading the magma to something tastefully catastrophic'
+    - text: 'VISUAL_PIPELINE :: rendering one heroic plume of molten bad decisions'
+    - text: 'VISUAL_PIPELINE :: making planetary destruction look oddly publication-ready'

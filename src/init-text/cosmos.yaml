@@ -1,0 +1,44 @@
+# Initialization terminal script for the Cosmos simulation family.
+#
+# Schema:
+# - each list item is one "entry" shown in order
+# - each entry has an `options` list
+# - one option is chosen randomly at runtime
+# - each option supports:
+#     - `text` (required): terminal line text
+#     - `duration` (optional): dwell time in seconds before the next line
+
+- options:
+    - text: 'INIT_PHYSICAL_LAWS :: fixing the speed of light'
+    - text: 'INIT_PHYSICAL_LAWS :: finding the planck scale and trying not to look directly at it'
+    - text: 'INIT_PHYSICAL_LAWS :: removing sanity from quantum mechanics'
+    - text: 'INIT_PHYSICAL_LAWS :: bending spacetime to eventually drop apples'
+    - text: 'INIT_PHYSICAL_LAWS :: making the cosmological constant small but nonzero, just to mess with everyone'
+- options:
+    - text: 'INIT_COSMOS :: finding the edge of the observable universe, give or take a few billion light-years'
+    - text: "INIT_COSMOS :: hiding dark matter's origin"
+    - text: 'INIT_COSMOS :: leaving inflation as an exercise for the reader'
+- options:
+    - text: 'INIT_MATTER :: taking away photon masses'
+    - text: 'INIT_MATTER :: charging protons to their full potential'
+    - text: 'INIT_MATTER :: holding nuclei together with neutrons and a prayer (i.e. the strong force)'
+    - text: 'INIT_MATTER :: making neutrino masses confusing'
+    - text: 'INIT_MATTER :: coupling to the Higgs field to fund the LHC'
+- options:
+    - text: 'INIT_DENSITY_FIELD :: ironing out spacetime variations'
+    - text: 'INIT_DENSITY_FIELD :: forming primordial black holes (or are we?)'
+    - text: 'INIT_DENSITY_FIELD :: generalising most elements as metals'
+    - text: 'INIT_DENSITY_FIELD :: adding astrophysicists with a few good questions about inflation'
+- options:
+    - text: 'PREPARE_COMP :: filling RAM to the brim'
+    - text: 'PREPARE_COMP :: funding a bigger supercomputer'
+    - text: 'PREPARE_COMP :: making computer go brrr'
+    - text: 'PREPARE_COMP :: solving the three-body problem (ish)'
+    - text: 'PREPARE_COMP :: optimising for oddly specific hardware configurations that may or may not exist in 2 years'
+    - text: 'PREPARE_COMP :: asking the AI overlords to stop using our hardware for cryptocurrency mining'
+    - text: 'PREPARE_COMP :: spending bitcoin before the bubble bursts'
+- options:
+    - text: 'VISUAL_PIPELINE :: colouring dark matter purple'
+    - text: 'VISUAL_PIPELINE :: counting pixels one-by-one'
+    - text: 'VISUAL_PIPELINE :: making sure the universe looks like a screensaver from 2002'
+    - text: 'VISUAL_PIPELINE :: tracing rays from the big bang to your screen'
