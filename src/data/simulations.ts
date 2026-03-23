@@ -1,157 +1,155 @@
 /**
- * Simulation class definitions.
+ * Simulation class definitions loaded from YAML.
  *
- * Each simulation class has:
- *  - id / label / icon (Unicode placeholder, will become SVGs)
- *  - A list of parameters with name, unit, min, max, step, and default value
- *  - A placeholder image path (served from /assets/)
+ * The YAML source keeps parameter ranges and simulation metadata in one editable
+ * place so future data drops can adjust the UI and scoring without touching code.
  */
 
+import { parse } from 'yaml';
+import simConfigRaw from './simulations.yaml?raw';
+
 export interface SimParameter {
-  /** Internal key */
+  /** Stable id used as a key in value maps and YAML. */
   id: string;
-  /** Human-readable label */
+  /** Human-readable label shown in UI. */
   label: string;
-  /** Physical unit string shown next to the value */
+  /** Display unit suffix (may be empty). */
   unit: string;
+  /** Minimum selectable value. */
   min: number;
+  /** Maximum selectable value. */
   max: number;
+  /** Step size used for slider precision and formatting. */
   step: number;
+  /** Default value used to seed the editor and fill missing values. */
   defaultValue: number;
 }
 
+export interface SimulationMetadata {
+  /** Approximate count of distinct simulations in the backing dataset. */
+  distinctSimulations: number;
+  /** Per-parameter "correct" values used by placeholder scoring. */
+  correctValues: Record<string, number>;
+  /** Summary overlay rows (ordered). */
+  summaryStats: StatDisplayConfig[];
+  /** Telemetry panel rows (ordered). */
+  liveStats: StatDisplayConfig[];
+}
+
+export interface StatDisplayConfig {
+  /** Id for the metric. Parameter ids are valid ids too. */
+  id: StatDisplayId;
+  /** Optional label override for display. */
+  label?: string;
+  /** Optional placeholder value. */
+  value?: string;
+  /** Optional unit suffix appended during rendering. */
+  unit?: string;
+  /** Whether this stat is expected to receive live updates. */
+  live?: boolean;
+  /** Optional CSV column key to use instead of `id`. */
+  liveKey?: string;
+}
+
+export type SummaryStatId =
+  | 'scale'
+  | 'distinctSimulations'
+  | 'parameters'
+  | 'runtime'
+  | 'similarityScore'
+  | 'bestFitDelta'
+  | 'carbonBurnt'
+  | 'computeUsed'
+  | 'memoryUsed'
+  | 'audioTrack'
+  | 'terminalLines';
+
+export type StatDisplayId = SummaryStatId | string;
+
 export interface SimulationClass {
+  /** Stable id used in URLs, keys, and asset lookup. */
   id: string;
+  /** Human label for UI. */
   label: string;
-  /** Unicode icon placeholder — will be replaced with SVGs later */
+  /** Emoji/icon placeholder (future: SVG). */
   icon: string;
-  /** Path to the placeholder image in /assets/ */
+  /** Placeholder preview image shown in config/entry overlays. */
   placeholderImage: string;
+  /** Additional metadata used by HUD and scoring. */
+  metadata: SimulationMetadata;
+  /** Parameter schemas shown in the parameter editor. */
   parameters: SimParameter[];
 }
 
-export const SIMULATION_CLASSES: SimulationClass[] = [
-  {
-    id: 'planetary',
-    label: 'Planetary',
-    icon: '🌍',
-    placeholderImage: '/assets/planet_example.png',
-    parameters: [
-      {
-        id: 'impactor_mass',
-        label: 'Impactor Mass',
-        unit: 'M⊕',
-        min: 0.01,
-        max: 10,
-        step: 0.01,
-        defaultValue: 0.1,
-      },
-      {
-        id: 'impactor_velocity',
-        label: 'Impactor Velocity',
-        unit: 'km/s',
-        min: 1,
-        max: 50,
-        step: 0.5,
-        defaultValue: 12,
-      },
-      {
-        id: 'impactor_angle',
-        label: 'Impactor Angle',
-        unit: '°',
-        min: 0,
-        max: 90,
-        step: 1,
-        defaultValue: 45,
-      },
-    ],
-  },
-  {
-    id: 'galaxy',
-    label: 'Galaxy',
-    icon: '🌀',
-    placeholderImage: '/assets/galaxy_example.png',
-    parameters: [
-      {
-        id: 'star_formation_rate',
-        label: 'Star Formation Rate',
-        unit: 'M☉/yr',
-        min: 0.1,
-        max: 100,
-        step: 0.1,
-        defaultValue: 3,
-      },
-      {
-        id: 'black_hole_mass',
-        label: 'Black Hole Mass',
-        unit: '×10⁶ M☉',
-        min: 0.1,
-        max: 1000,
-        step: 0.1,
-        defaultValue: 4,
-      },
-      {
-        id: 'diskiness',
-        label: 'Diskiness',
-        unit: '',
-        min: 0,
-        max: 1,
-        step: 0.01,
-        defaultValue: 0.7,
-      },
-      {
-        id: 'stellar_mass',
-        label: 'Stellar Mass',
-        unit: '×10¹⁰ M☉',
-        min: 0.01,
-        max: 50,
-        step: 0.01,
-        defaultValue: 5,
-      },
-    ],
-  },
-  {
-    id: 'cosmos',
-    label: 'Cosmos',
-    icon: '✨',
-    placeholderImage: '/assets/cosmos_example.png',
-    parameters: [
-      {
-        id: 'dark_matter_density',
-        label: 'Dark Matter Density',
-        unit: 'Ωdm',
-        min: 0.05,
-        max: 0.8,
-        step: 0.01,
-        defaultValue: 0.27,
-      },
-      {
-        id: 'baryon_density',
-        label: 'Baryon Density',
-        unit: 'Ωb',
-        min: 0.01,
-        max: 0.15,
-        step: 0.001,
-        defaultValue: 0.049,
-      },
-      {
-        id: 'feedback_strength',
-        label: 'Feedback Strength',
-        unit: '',
-        min: 0,
-        max: 5,
-        step: 0.1,
-        defaultValue: 1,
-      },
-      {
-        id: 'clustering',
-        label: 'Clustering',
-        unit: 'σ₈',
-        min: 0.4,
-        max: 1.2,
-        step: 0.01,
-        defaultValue: 0.81,
-      },
-    ],
-  },
-];
+interface RawParameterConfig {
+  label: string;
+  unit?: string;
+  min: number;
+  max: number;
+  step: number;
+  default: number;
+}
+
+interface RawSimulationConfig {
+  label: string;
+  icon: string;
+  placeholderImage: string;
+  metadata: Omit<SimulationMetadata, 'summaryStats' | 'liveStats'> & {
+    summaryStats: RawStatDisplayConfig[];
+    liveStats: RawStatDisplayConfig[];
+  };
+  parameters: Record<string, RawParameterConfig>;
+}
+
+interface RawStatDisplayConfig {
+  id: StatDisplayId;
+  label?: string;
+  value?: string;
+  unit?: string;
+  live?: boolean;
+  live_key?: string;
+}
+
+// Parse the YAML catalog into a raw object keyed by simulation family id.
+const rawConfig = parse(simConfigRaw) as Record<string, RawSimulationConfig>;
+
+export const SIMULATION_CLASSES: SimulationClass[] = Object.entries(rawConfig).map(
+  ([id, config]) => ({
+    id,
+    label: config.label,
+    icon: config.icon,
+    placeholderImage: config.placeholderImage,
+    metadata: {
+      distinctSimulations: config.metadata.distinctSimulations,
+      correctValues: config.metadata.correctValues,
+      summaryStats: config.metadata.summaryStats.map(normalizeStatConfig),
+      liveStats: config.metadata.liveStats.map(normalizeStatConfig),
+    },
+    parameters: Object.entries(config.parameters).map(([parameterId, parameter]) => ({
+      id: parameterId,
+      label: parameter.label,
+      unit: parameter.unit ?? '',
+      min: parameter.min,
+      max: parameter.max,
+      step: parameter.step,
+      defaultValue: parameter.default,
+    })),
+  }),
+);
+
+/**
+ * Normalize one stat-display entry from YAML into camelCase JS shape.
+ *
+ * @param config - Raw YAML stat config.
+ * @returns Normalized stat config.
+ */
+function normalizeStatConfig(config: RawStatDisplayConfig): StatDisplayConfig {
+  return {
+    id: config.id,
+    label: config.label,
+    value: config.value,
+    unit: config.unit,
+    live: config.live ?? false,
+    liveKey: config.live_key,
+  };
+}
