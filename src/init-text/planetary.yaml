@@ -15,19 +15,17 @@
     - text: 'INIT_EARTH :: assembling a respectable planet to immediately hit with something'
     - text: 'INIT_EARTH :: checking that the mantle is molten enough to be dramatic'
 - options:
-    - text: 'INIT_IMPACTOR :: finding a suitably apocalyptic impactor to slam into Earth'
     - text: 'INIT_IMPACTOR :: selecting one large rock with terrible intentions'
     - text: 'INIT_IMPACTOR :: solving for a collision nobody involved will enjoy'
-    - text: 'INIT_IMPACTOR :: aiming a proto-planet with all the grace of orbital pinball'
-    - text: 'INIT_IMPACTOR :: seeing whether this collision can yield a moon'
+    - text: 'INIT_IMPACTOR :: setting up proto-planet pinball'
     - text: 'INIT_IMPACTOR :: checking if catastrophic failure counts as satellite formation'
 - options:
-    - text: 'INIT_MATERIAL :: solving problems in multi-material simulations just to slam planets together'
-    - text: 'INIT_MATERIAL :: reminding iron, silicates, and vapor how to misbehave under pressure'
-    - text: 'INIT_MATERIAL :: teaching equations of state to survive an obviously bad day'
-    - text: 'INIT_MATERIAL :: calibrating rock strength until it becomes a philosophical question'
+    - text: 'INIT_MATERIAL :: solving problems in multi-material simulations just to slam things together'
+    - text: 'INIT_MATERIAL :: does it matter what its made of if it’s about to be a molten mess?'
+    - text: 'INIT_MATERIAL :: training equations of state to survive a bad day'
 - options:
     - text: 'INIT_ORBIT :: aligning the crosshairs with Earth'
+    - text: "INIT_ORBIT :: emulating Moonfall, Hollywood's finest achievement"
     - text: 'INIT_ORBIT :: turning orbital mechanics into a countdown to regret'
     - text: 'INIT_ORBIT :: fine-tuning impact angle for maximum moon-making potential'
     - text: 'INIT_ORBIT :: checking that all trajectories intersect in the least peaceful way possible'
