@@ -138,8 +138,6 @@ export function createConfigOverlay(
   creditsSection.className = 'config-overlay__section config-overlay__section--grow';
   creditsSection.dataset.section = 'credits';
   creditsSection.innerHTML = `
-    <p class="config-overlay__eyebrow">Credits</p>
-    <p class="config-overlay__settings-copy">Attribution and acknowledgements.</p>
     <div class="config-overlay__console" data-credits></div>
   `;
 
