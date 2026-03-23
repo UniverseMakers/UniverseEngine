@@ -8,6 +8,7 @@
  */
 
 import type { SimulationClass } from '../data/simulations.ts';
+import { getCredits } from '../data/credits.ts';
 import { createParameterEditor } from './parameter-editor.ts';
 import {
   createThemePicker,
@@ -28,7 +29,7 @@ export interface ConfigOverlayController {
   setView: (view: ConfigOverlayView) => void;
 }
 
-export type ConfigOverlayView = 'parameters' | 'settings' | 'terminal';
+export type ConfigOverlayView = 'parameters' | 'settings' | 'credits' | 'terminal';
 
 interface ConfigOverlayOptions {
   simClass: SimulationClass;
@@ -133,6 +134,38 @@ export function createConfigOverlay(
   const themePickerHost = document.createElement('div');
   settingsSection.appendChild(themePickerHost);
 
+  const creditsSection = document.createElement('section');
+  creditsSection.className = 'config-overlay__section config-overlay__section--grow';
+  creditsSection.dataset.section = 'credits';
+  creditsSection.innerHTML = `
+    <p class="config-overlay__eyebrow">Credits</p>
+    <p class="config-overlay__settings-copy">Attribution and acknowledgements.</p>
+    <div class="config-overlay__console" data-credits></div>
+  `;
+
+  const creditsConsole = creditsSection.querySelector(
+    '[data-credits]',
+  ) as HTMLDivElement;
+
+  // Credits are repo-controlled YAML today (not user input), but we still render
+  // them via DOM APIs (not `innerHTML`) to keep the data flow safe and obvious.
+  const credits = getCredits();
+  creditsConsole.innerHTML = '';
+
+  if (credits.length === 0) {
+    const row = document.createElement('div');
+    row.className = 'config-overlay__console-line';
+    row.textContent = 'To be credited...';
+    creditsConsole.appendChild(row);
+  } else {
+    for (const credit of credits) {
+      const row = document.createElement('div');
+      row.className = 'config-overlay__console-line';
+      row.textContent = credit.text;
+      creditsConsole.appendChild(row);
+    }
+  }
+
   const terminalSection = document.createElement('section');
   terminalSection.className = 'config-overlay__section config-overlay__section--grow';
   terminalSection.dataset.section = 'terminal';
@@ -167,6 +200,7 @@ export function createConfigOverlay(
   controls.appendChild(header);
   controls.appendChild(parameterSection);
   controls.appendChild(settingsSection);
+  controls.appendChild(creditsSection);
   controls.appendChild(terminalSection);
   controls.appendChild(footer);
 
@@ -208,11 +242,13 @@ export function createConfigOverlay(
         ? 'Parameters'
         : view === 'settings'
           ? 'Settings'
-          : 'Terminal';
+          : view === 'credits'
+            ? 'Credits'
+            : 'Terminal';
 
     if (view === 'settings') {
       runButton.textContent = 'Apply';
-    } else if (view === 'terminal') {
+    } else if (view === 'terminal' || view === 'credits') {
       runButton.textContent = 'Close';
     } else {
       runButton.textContent = 'Run';
@@ -229,6 +265,11 @@ export function createConfigOverlay(
     }
 
     if (activeView === 'terminal') {
+      options.onClose();
+      return;
+    }
+
+    if (activeView === 'credits') {
       options.onClose();
       return;
     }

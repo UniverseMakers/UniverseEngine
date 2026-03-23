@@ -111,6 +111,11 @@ export function createAppShell(app: HTMLElement): void {
         return;
       }
 
+      if (view === 'credits') {
+        openConfigView('credits');
+        return;
+      }
+
       openConfigView(view);
     },
   });

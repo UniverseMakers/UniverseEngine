@@ -1007,11 +1007,18 @@ button {
 }
 
 .config-overlay__controls[data-view='parameters'] [data-section='settings'],
+.config-overlay__controls[data-view='parameters'] [data-section='credits'],
 .config-overlay__controls[data-view='parameters'] [data-section='terminal'],
 .config-overlay__controls[data-view='settings'] [data-section='parameters'],
+.config-overlay__controls[data-view='settings'] [data-section='credits'],
 .config-overlay__controls[data-view='settings'] [data-section='terminal'],
+/* Credits view hides everything except the credits section itself. */
+.config-overlay__controls[data-view='credits'] [data-section='parameters'],
+.config-overlay__controls[data-view='credits'] [data-section='settings'],
+.config-overlay__controls[data-view='credits'] [data-section='terminal'],
 .config-overlay__controls[data-view='terminal'] [data-section='parameters'],
-.config-overlay__controls[data-view='terminal'] [data-section='settings'] {
+.config-overlay__controls[data-view='terminal'] [data-section='settings'],
+.config-overlay__controls[data-view='terminal'] [data-section='credits'] {
   display: none;
 }
 

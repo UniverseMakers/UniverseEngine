@@ -17,7 +17,7 @@ interface DisplayMenuOptions {
   /** Called after the user picks a new simulation family from the menu. */
   onSimulationSelected: (simClass: SimulationClass) => void;
   /** Called after the user picks a non-simulation view entry. */
-  onViewSelected: (view: 'settings' | 'terminal') => void;
+  onViewSelected: (view: 'settings' | 'credits' | 'terminal') => void;
 }
 
 /**
@@ -71,6 +71,13 @@ export function createDisplayMenu(
     createMenuButton('Terminal', () => {
       close();
       options.onViewSelected('terminal');
+    }),
+  );
+
+  menu.appendChild(
+    createMenuButton('Credits', () => {
+      close();
+      options.onViewSelected('credits');
     }),
   );
 
