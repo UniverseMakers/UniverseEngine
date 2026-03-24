@@ -8,6 +8,7 @@
  */
 
 import type { SimParameter } from '../../data/simulations.ts';
+import { withBaseUrl } from '../../shared/urls.ts';
 
 export interface VideoMatch {
   /** URL to the matched placeholder video. */
@@ -25,13 +26,13 @@ export interface VideoMatch {
 export function getLocalPlaceholderVideo(simClassId: string): string {
   switch (simClassId) {
     case 'planetary':
-      return '/assets/planet_test.mp4';
+      return withBaseUrl('assets/planet_test.mp4');
     case 'galaxy':
-      return '/assets/galaxy_test.mp4';
+      return withBaseUrl('assets/galaxy_test.mp4');
     case 'cosmos':
-      return '/assets/cosmo_test.mp4';
+      return withBaseUrl('assets/cosmo_test.mp4');
     default:
-      return '/assets/galaxy_test.mp4';
+      return withBaseUrl('assets/galaxy_test.mp4');
   }
 }
 
@@ -44,13 +45,13 @@ export function getLocalPlaceholderVideo(simClassId: string): string {
 export function getLocalPlaceholderStats(simClassId: string): string {
   switch (simClassId) {
     case 'planetary':
-      return '/assets/planet_test_planetary_stats.csv';
+      return withBaseUrl('assets/planet_test_planetary_stats.csv');
     case 'galaxy':
-      return '/assets/galaxy_test_galaxy_stats.csv';
+      return withBaseUrl('assets/galaxy_test_galaxy_stats.csv');
     case 'cosmos':
-      return '/assets/cosmo_test_cosmos_stats.csv';
+      return withBaseUrl('assets/cosmo_test_cosmos_stats.csv');
     default:
-      return '/assets/galaxy_test_galaxy_stats.csv';
+      return withBaseUrl('assets/galaxy_test_galaxy_stats.csv');
   }
 }
 
