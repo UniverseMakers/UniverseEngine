@@ -1,0 +1,10 @@
+# Credits source-of-truth.
+#
+# Schema:
+# - top-level is a YAML list
+# - each list item is one credit entry
+# - each entry must contain:
+#     - `text` (required): the exact text that must appear in the credits
+
+- text: To be credited...
+- text: Data products derived from simulated datasets (placeholder)

@@ -1,3 +1,11 @@
+/**
+ * Vite build/dev configuration.
+ *
+ * Notes:
+ * - `base` is `/` for local development.
+ * - CI/deploy tooling may override `base` for GitHub Pages-style deployments.
+ */
+
 import { defineConfig } from 'vite';
 
 export default defineConfig({

@@ -1,0 +1,296 @@
+# Simulation catalog source-of-truth.
+#
+# Each top-level key is one simulation family shown in the UI.
+#
+# `metadata.summaryStats`
+#   End-of-run summary cards.
+#
+# `metadata.liveStats`
+#   Top-right live telemetry rows.
+#   - `value` is the initial/fallback display value
+#   - `unit` is appended by the app
+#   - `live: true` means a CSV stream should provide updates
+#   - `live_key` can override which CSV column should be used
+#   - `from_video: true` means the final value should be pulled from the active
+#     video's sidecar metadata YAML
+#   - `video_key` can override which metadata key should be used
+#   - `scale_with_time: true` (when `live`) scales the final metadata value
+#     linearly by normalized playback time
+#
+# `parameters`
+#   Config-overlay controls and parameter-space metadata.
+
+planetary:
+  label: Planetary
+  icon: '🌍'
+  placeholderImage: /assets/planet_example.webp
+  metadata:
+    distinctSimulations: 384
+    correctValues:
+      impactor_mass: 0.12
+      impactor_velocity: 14
+      impactor_angle: 43
+    summaryStats:
+      - id: runtime
+        value: '0.00'
+        unit: hours
+        from_video: true
+        video_key: wallclockSeconds
+      - id: similarityScore
+        value: 100/100
+      - id: carbonBurnt
+        value: '0.00'
+        unit: kgCO2e
+        from_video: true
+      - id: computeUsed
+        value: '0.0'
+        unit: smartphones
+        from_video: true
+      - id: memoryUsed
+        value: '0.0'
+        unit: GB
+        from_video: true
+      - id: particlesUpdated
+        value: '0'
+        label: Particle updates
+        from_video: true
+    liveStats:
+      - id: impactor_mass
+        value: '0.10'
+        unit: M⊕
+        live: false
+      - id: impactor_velocity
+        value: '12.0'
+        unit: km/s
+        live: false
+      - id: impactor_angle
+        value: '45'
+        unit: °
+        live: false
+      - id: time
+        value: 0.0
+        unit: hours
+        live: true
+      - id: temperature
+        value: 0.0
+        unit: K
+        live: true
+      - id: Earth mass
+        value: 1.0
+        unit: M⊕
+        live: true
+      - id: particlesUpdated
+        value: '0'
+        label: Particle updates
+        live: true
+        from_video: true
+        scale_with_time: true
+        integer: true
+  parameters:
+    impactor_mass:
+      label: Impactor Mass
+      unit: M⊕
+      min: 0.01
+      max: 10
+      step: 0.01
+      default: 0.1
+    impactor_velocity:
+      label: Impactor Velocity
+      unit: km/s
+      min: 1
+      max: 50
+      step: 0.5
+      default: 12
+    impactor_angle:
+      label: Impactor Angle
+      unit: °
+      min: 0
+      max: 90
+      step: 1
+      default: 45
+
+galaxy:
+  label: Galaxy
+  icon: '🌀'
+  placeholderImage: /assets/galaxy_example.webp
+  metadata:
+    distinctSimulations: 2048
+    correctValues:
+      star_formation_rate: 2.4
+      black_hole_mass: 4.3
+      diskiness: 0.78
+      stellar_mass: 5.1
+    summaryStats:
+      - id: runtime
+        value: '0.00'
+        unit: hours
+        from_video: true
+        video_key: wallclockSeconds
+      - id: similarityScore
+        value: 100/100
+      - id: carbonBurnt
+        value: '0.00'
+        unit: kgCO2e
+        from_video: true
+      - id: computeUsed
+        value: '0.0'
+        unit: smartphones
+        from_video: true
+      - id: memoryUsed
+        value: '0.0'
+        unit: GB
+        from_video: true
+      - id: particlesUpdated
+        value: '0'
+        label: Particle updates
+        from_video: true
+    liveStats:
+      - id: star_formation_rate
+        value: '3.0'
+        unit: M☉/yr
+        live: true
+      - id: black_hole_mass
+        value: '4.0'
+        unit: ×10⁶ M☉
+        live: true
+      - id: stellar_mass
+        value: '5.0'
+        unit: ×10¹⁰ M☉
+        live: true
+      - id: size
+        value: 0.0
+        unit: kpc
+        live: true
+      - id: age
+        value: 0.0
+        unit: Gyr
+        live: true
+      - id: particlesUpdated
+        value: '0'
+        label: Particle updates
+        live: true
+        from_video: true
+        scale_with_time: true
+        integer: true
+  parameters:
+    star_formation_rate:
+      label: Star Formation Rate
+      unit: M☉/yr
+      min: 0.1
+      max: 100
+      step: 0.1
+      default: 3
+    black_hole_mass:
+      label: Black Hole Mass
+      unit: '×10⁶ M☉'
+      min: 0.1
+      max: 1000
+      step: 0.1
+      default: 4
+    diskiness:
+      label: Diskiness
+      unit: ''
+      min: 0
+      max: 1
+      step: 0.01
+      default: 0.7
+    stellar_mass:
+      label: Stellar Mass
+      unit: '×10¹⁰ M☉'
+      min: 0.01
+      max: 50
+      step: 0.01
+      default: 5
+
+cosmos:
+  label: Cosmos
+  icon: '✨'
+  placeholderImage: /assets/cosmos_example.webp
+  metadata:
+    distinctSimulations: 8192
+    correctValues:
+      dark_matter_density: 0.27
+      baryon_density: 0.049
+      feedback_strength: 1.1
+      clustering: 0.81
+    summaryStats:
+      - id: runtime
+        value: '0.00'
+        unit: hours
+        from_video: true
+        video_key: wallclockSeconds
+      - id: similarityScore
+        value: 100/100
+      - id: carbonBurnt
+        value: '0.00'
+        unit: kgCO2e
+        from_video: true
+      - id: computeUsed
+        value: '0.0'
+        unit: smartphones
+        from_video: true
+      - id: memoryUsed
+        value: '0.0'
+        unit: GB
+        from_video: true
+      - id: particlesUpdated
+        value: '0'
+        label: Particle updates
+        from_video: true
+    liveStats:
+      - id: dark_matter_density
+        value: '0.27'
+        unit: Ωdm
+        live: false
+      - id: baryon_density
+        value: '0.049'
+        unit: Ωb
+        live: false
+      - id: clustering
+        value: '0.81'
+        unit: σ₈
+        live: false
+      - id: age
+        value: 0.0
+        unit: Gyr
+        live: true
+      - id: redshift
+        value: 0.0
+        unit: ''
+        live: true
+      - id: particlesUpdated
+        value: '0'
+        label: Particle updates
+        live: true
+        from_video: true
+        scale_with_time: true
+        integer: true
+  parameters:
+    dark_matter_density:
+      label: Dark Matter Density
+      unit: Ωdm
+      min: 0.05
+      max: 0.8
+      step: 0.01
+      default: 0.27
+    baryon_density:
+      label: Baryon Density
+      unit: Ωb
+      min: 0.01
+      max: 0.15
+      step: 0.001
+      default: 0.049
+    feedback_strength:
+      label: Feedback Strength
+      unit: ''
+      min: 0
+      max: 5
+      step: 0.1
+      default: 1
+    clustering:
+      label: Clustering
+      unit: σ₈
+      min: 0.4
+      max: 1.2
+      step: 0.01
+      default: 0.81

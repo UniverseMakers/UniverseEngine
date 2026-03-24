@@ -1,0 +1,45 @@
+# Initialization terminal script for the Galaxy simulation family.
+#
+# Schema:
+# - each list item is one "entry" shown in order
+# - each entry has an `options` list
+# - one option is chosen randomly at runtime
+# - each option supports:
+#     - `text` (required): terminal line text
+#     - `duration` (optional): dwell time in seconds before the next line
+
+- options:
+    - text: 'INIT_STELLAR_POP :: spiralling arms into existence'
+    - text: 'INIT_STELLAR_POP :: merging via hierarchical assembly'
+    - text: 'INIT_STELLAR_POP :: assembling a galaxy one mildly unstable stellar population at a time'
+    - text: 'INIT_STELLAR_POP :: ending runaway star formation for good with supernovae'
+    - text: 'INIT_STELLAR_POP :: blowing gas back out before the stars get any ideas'
+    - text: 'INIT_STELLAR_POP :: weaponising stellar evolution against future stellar evolution'
+- options:
+    - text: 'INIT_BLACK_HOLE :: regulating self-regulation mechanisms'
+    - text: 'INIT_BLACK_HOLE :: placing one supermassive liability at the galactic center'
+    - text: 'INIT_BLACK_HOLE :: ramping up x-rays from the accretion disk'
+    - text: 'INIT_BLACK_HOLE :: allowing the core to consume matter with professional focus'
+    - text: 'INIT_BLACK_HOLE :: giving supermassive black holes galaxy killing powers'
+- options:
+    - text: 'INIT_GAS :: threading cold flows through a halo with dubious boundaries'
+    - text: 'INIT_GAS :: reminding baryons they are not actually collisionless'
+    - text: "INIT_GAS :: letting the interstellar medium become everybody's problem"
+- options:
+    - text: 'INIT_HALO :: wrapping the visible galaxy in a dark matter support group'
+    - text: 'INIT_HALO :: shaping the invisible mass budget into something rotationally persuasive'
+    - text: 'INIT_HALO :: hiding most of the mass where telescopes will complain about it'
+- options:
+    - text: 'PREPARE_COMP :: filling RAM to the brim'
+    - text: 'PREPARE_COMP :: funding a bigger supercomputer'
+    - text: 'PREPARE_COMP :: making computer go brrr'
+    - text: 'PREPARE_COMP :: solving the three-body problem (ish)'
+    - text: 'PREPARE_COMP :: optimising for oddly specific hardware configurations that may or may not exist in 2 years'
+    - text: 'PREPARE_COMP :: asking the AI overlords to stop using our hardware for cryptocurrency mining'
+    - text: 'PREPARE_COMP :: spending bitcoin before the bubble bursts'
+- options:
+    - text: 'VISUAL_PIPELINE :: rendering dust lanes to look like Andromeda'
+    - text: 'VISUAL_PIPELINE :: asking Micheal Bay for advice on rendering explosions'
+    - text: 'VISUAL_PIPELINE :: making the spiral arms look just unstable enough to be believable'
+    - text: 'VISUAL_PIPELINE :: painting nebulae with suspiciously cinematic restraint'
+    - text: 'VISUAL_PIPELINE :: counting photons until the galaxy agrees to be beautiful'
