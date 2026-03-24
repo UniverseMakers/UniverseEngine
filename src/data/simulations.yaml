@@ -23,7 +23,7 @@
 planetary:
   label: Planetary
   icon: '🌍'
-  placeholderImage: /assets/planet_example.webp
+  placeholderImage: assets/planet_example.webp
   metadata:
     distinctSimulations: 384
     correctValues:
@@ -112,7 +112,7 @@ planetary:
 galaxy:
   label: Galaxy
   icon: '🌀'
-  placeholderImage: /assets/galaxy_example.webp
+  placeholderImage: assets/galaxy_example.webp
   metadata:
     distinctSimulations: 2048
     correctValues:
@@ -205,7 +205,7 @@ galaxy:
 cosmos:
   label: Cosmos
   icon: '✨'
-  placeholderImage: /assets/cosmos_example.webp
+  placeholderImage: assets/cosmos_example.webp
   metadata:
     distinctSimulations: 8192
     correctValues:

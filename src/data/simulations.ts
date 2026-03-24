@@ -7,6 +7,7 @@
 
 import { parse } from 'yaml';
 import simConfigRaw from './simulations.yaml?raw';
+import { withBaseUrl } from '../shared/urls.ts';
 
 export interface SimParameter {
   /** Stable id used as a key in value maps and YAML. */
@@ -131,7 +132,7 @@ export const SIMULATION_CLASSES: SimulationClass[] = Object.entries(rawConfig).m
     id,
     label: config.label,
     icon: config.icon,
-    placeholderImage: config.placeholderImage,
+    placeholderImage: withBaseUrl(config.placeholderImage),
     metadata: {
       distinctSimulations: config.metadata.distinctSimulations,
       correctValues: config.metadata.correctValues,

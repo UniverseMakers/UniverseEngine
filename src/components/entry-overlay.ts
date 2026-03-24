@@ -8,6 +8,7 @@
  */
 
 import { SIMULATION_CLASSES, type SimulationClass } from '../data/simulations.ts';
+import { withBaseUrl } from '../shared/urls.ts';
 
 export interface EntryOverlayController {
   /** Reveal the overlay. */
@@ -28,7 +29,7 @@ export function createEntryOverlay(
   onSelect: (simClass: SimulationClass) => void,
 ): EntryOverlayController {
   // Static banner asset shown at the top of the first-load overlay.
-  const bannerSrc = '/assets/banner.jpg';
+  const bannerSrc = withBaseUrl('assets/banner.jpg');
 
   // Full-screen overlay wrapper.
   const overlay = document.createElement('section');
