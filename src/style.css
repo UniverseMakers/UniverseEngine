@@ -1686,12 +1686,25 @@ button {
     width: 100vw;
     min-height: 100vh;
     min-height: 100dvh;
+    height: 100vh;
+    height: 100dvh;
     border-radius: 0;
     border-left: 0;
     border-right: 0;
     padding: calc(2.5rem + env(safe-area-inset-top)) 1rem
       calc(2rem + env(safe-area-inset-bottom));
     background: #080b10;
+    overflow: hidden;
+  }
+
+  /* Keep action buttons reachable: scroll the metric grid when content is tall. */
+  .summary-overlay__metrics {
+    flex: 1;
+    min-height: 0;
+    overflow: auto;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+    padding-right: 0.25rem;
   }
 
   .summary-overlay__title {
