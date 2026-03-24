@@ -11,7 +11,9 @@ html,
 body {
   margin: 0;
   min-height: 100%;
-  overflow: hidden;
+  /* Allow panning when zoomed and support scrollable panels on mobile. */
+  overflow-x: hidden;
+  overflow-y: auto;
   background: #05080d;
   color: var(--text-primary);
   font-family: var(--font-body);
@@ -146,7 +148,80 @@ button {
   position: relative;
   width: 100vw;
   height: 100vh;
+  height: 100dvh;
   background: var(--bg-base);
+}
+
+.orientation-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 20;
+  display: none;
+  place-items: center;
+  padding: 1.25rem;
+  background: rgba(0, 0, 0, 0.78);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  pointer-events: auto;
+}
+
+.orientation-overlay__card {
+  width: min(26rem, calc(100vw - 2rem));
+  padding: 1.4rem 1.35rem;
+  border: 1px solid var(--line-strong);
+  background: rgba(10, 12, 16, 0.92);
+  box-shadow: var(--shadow-ambient);
+  text-align: center;
+}
+
+.orientation-overlay__icon {
+  position: relative;
+  width: 5.2rem;
+  height: 3.2rem;
+  margin: 0 auto 1rem;
+}
+
+.orientation-overlay__icon::before {
+  content: '';
+  position: absolute;
+  inset: 0.3rem 0.85rem;
+  border: 1px solid var(--line-strong);
+  border-radius: 0.55rem;
+  transform: rotate(90deg);
+  opacity: 0.85;
+}
+
+.orientation-overlay__icon::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 2.8rem;
+  height: 2.8rem;
+  border: 2px solid transparent;
+  border-top-color: var(--accent);
+  border-right-color: var(--accent);
+  border-radius: 999px;
+  transform: translate(-50%, -50%) rotate(25deg);
+  opacity: 0.85;
+}
+
+.orientation-overlay__title {
+  margin: 0;
+  color: var(--text-primary);
+  font-family: var(--font-mono);
+  font-size: 0.9rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.orientation-overlay__copy {
+  margin: 0.75rem 0 0;
+  color: var(--text-secondary);
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
 }
 
 .viewport {
@@ -331,6 +406,11 @@ button {
   display: none;
 }
 
+/* Burger menu is redundant while the config overlay is open. */
+#app[data-mode='config'] .display-chrome__top-left {
+  display: none;
+}
+
 .display-chrome__top-center {
   top: 1.55rem;
   left: 50%;
@@ -363,6 +443,12 @@ button {
 .display-chrome__center-status {
   display: none;
   z-index: 1;
+}
+
+/* The center "DISPLAY_STATE" card is decorative; keep it off the viewport in
+   display mode to avoid covering the video on small screens. */
+#app[data-mode='display'] .display-chrome__center-status {
+  display: none !important;
 }
 
 .display-chrome__bottom {
@@ -793,6 +879,8 @@ button {
   font-size: clamp(1.8rem, 3vw, 2.6rem);
   letter-spacing: 0.08em;
   text-transform: uppercase;
+  line-height: 1.05;
+  padding-top: 0.1em;
 }
 
 .summary-overlay__metrics {
@@ -855,7 +943,10 @@ button {
   position: relative;
   z-index: 1;
   width: min(68.5rem, calc(100vw - 2rem));
+  height: min(52rem, calc(100vh - 2.5rem));
+  height: min(52rem, calc(100dvh - 2.5rem));
   max-height: calc(100vh - 2.5rem);
+  max-height: calc(100dvh - 2.5rem);
   overflow: hidden;
   border: 1px solid var(--line-strong);
   border-radius: 0;
@@ -868,6 +959,7 @@ button {
 .config-overlay__shell {
   display: grid;
   grid-template-columns: minmax(18rem, 22rem) 1fr;
+  height: 100%;
   min-height: min(52rem, calc(100vh - 2.5rem));
 }
 
@@ -935,6 +1027,7 @@ button {
   flex-direction: column;
   gap: 2.1rem;
   padding: 2.6rem 2.8rem 2.2rem;
+  height: 100%;
   min-height: 0;
 }
 
@@ -1003,7 +1096,10 @@ button {
 .config-overlay__section--grow {
   flex: 1;
   min-height: 0;
-  overflow: hidden;
+  /* Keep footer reachable on small screens by scrolling the main section. */
+  overflow: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
 }
 
 .config-overlay__controls[data-view='parameters'] [data-section='settings'],
@@ -1555,6 +1651,12 @@ button {
 }
 
 @media (max-width: 720px) {
+  /* Prevent the page scroll indicator from bleeding through the full-screen summary. */
+  html:has(.overlay--summary.is-visible),
+  body:has(.overlay--summary.is-visible) {
+    overflow: hidden;
+  }
+
   .overlay {
     padding: 0;
   }
@@ -1562,6 +1664,7 @@ button {
   .entry-overlay {
     width: 100vw;
     min-height: 100vh;
+    min-height: 100dvh;
     border-radius: 0;
     border-left: 0;
     border-right: 0;
@@ -1573,13 +1676,43 @@ button {
     height: 8.5rem;
   }
 
+  /* Avoid subpixel clipping by stretching the full-screen summary layout. */
+  .overlay--summary {
+    place-items: stretch;
+    background: rgba(0, 0, 0, 0.88);
+  }
+
   .summary-overlay {
     width: 100vw;
     min-height: 100vh;
+    min-height: 100dvh;
     border-radius: 0;
     border-left: 0;
     border-right: 0;
-    padding: 2rem 1rem;
+    padding: calc(2.5rem + env(safe-area-inset-top)) 1rem
+      calc(2rem + env(safe-area-inset-bottom));
+    background: #080b10;
+  }
+
+  .summary-overlay__title {
+    font-size: clamp(1.55rem, 7vw, 2.1rem);
+    line-height: 1.12;
+    padding-top: 0.22em;
+  }
+
+  .summary-overlay__eyebrow {
+    margin-top: 0;
+    font-size: 0.68rem;
+    letter-spacing: 0.22em;
+    opacity: 0.92;
+  }
+
+  /* iOS can clip transformed text; keep the summary reveal as a pure fade. */
+  .overlay--summary .summary-overlay {
+    transform: none;
+    transition: opacity 700ms ease;
+    transition-delay: 0ms;
+    will-change: opacity;
   }
 
   .summary-overlay__metrics {
@@ -1594,10 +1727,17 @@ button {
   .terminal {
     width: 100vw;
     height: 100vh;
+    height: 100dvh;
     max-height: 100vh;
+    max-height: 100dvh;
     border-radius: 0;
     border-left: 0;
     border-right: 0;
+  }
+
+  /* Let the control column size correctly so the section can scroll. */
+  .config-overlay__shell {
+    height: 100%;
   }
 
   .config-overlay__controls,
@@ -1606,7 +1746,6 @@ button {
     padding-right: 1rem;
   }
 
-  .config-overlay__header,
   .config-overlay__footer,
   .param__label,
   .param__controls,
@@ -1626,16 +1765,32 @@ button {
     color: var(--accent);
   }
 
+  /* Mobile header: keep the close button in the top-right. */
   .config-overlay__header {
+    display: grid;
+    grid-template-columns: 1fr 2.25rem;
     align-items: center;
-    justify-content: space-between;
+    column-gap: 0.85rem;
     padding-bottom: 1rem;
     border-bottom: 1px solid var(--line-strong);
+  }
+
+  .config-overlay__close {
+    grid-column: 2;
+    grid-row: 1;
+    justify-self: end;
+    align-self: start;
+  }
+
+  .config-overlay__section-indicator {
+    grid-column: 1;
+    grid-row: 1;
   }
 
   .config-overlay__controls {
     gap: 1.75rem;
     padding-top: 2.2rem;
+    padding-bottom: calc(2.2rem + env(safe-area-inset-bottom));
   }
 
   .config-overlay__media {
@@ -1696,8 +1851,28 @@ button {
     left: 0.75rem;
   }
 
+  /* Hide the burger menu while the summary overlay is visible. */
+  #app:has(.overlay--summary.is-visible) .display-chrome__top-left {
+    display: none;
+  }
+
+  /* While the full-screen summary is up, hide other HUD widgets to avoid
+     scrollbar bleed-through and layout collisions. */
+  #app:has(.overlay--summary.is-visible) .display-chrome__top-right,
+  #app:has(.overlay--summary.is-visible) .display-chrome__bottom {
+    display: none;
+  }
+
   .display-menu {
-    min-width: 12.5rem;
+    position: fixed;
+    top: 3.4rem;
+    left: 0.75rem;
+    right: 0.75rem;
+    min-width: 0;
+    width: auto;
+    max-width: calc(100vw - 1.5rem);
+    max-height: calc(100dvh - 6rem);
+    overflow: auto;
   }
 
   .display-chrome__top-center {
@@ -1729,9 +1904,14 @@ button {
     padding: 0.9rem 1rem;
   }
 
-  .data-panel__metric:nth-child(3),
-  .data-panel__metric:nth-child(4) {
-    display: none;
+  /* Keep the HUD compact: show a few rows and allow vertical scroll for more. */
+  .data-panel__metrics {
+    max-height: 8.8rem;
+    overflow: auto;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+    touch-action: pan-y;
+    padding-right: 0.25rem;
   }
 
   .display-terminal__log {
@@ -1749,34 +1929,13 @@ button {
 
   .display-chrome__bottom {
     right: 0.75rem;
-    bottom: 0.35rem;
+    bottom: calc(0.35rem + env(safe-area-inset-bottom));
     left: 0.75rem;
   }
 
+  /* Keep the decorative center status card off phone layouts. */
   .display-chrome__center-status {
-    display: grid;
-    place-items: center;
-    top: 52%;
-    left: 50%;
-    width: calc(100vw - 5rem);
-    max-width: 28rem;
-    aspect-ratio: 1 / 1.1;
-    transform: translate(-50%, -50%);
-    border: 1px solid rgba(123, 208, 255, 0.28);
-    border-radius: 0;
-  }
-
-  .display-chrome__center-status::before,
-  .display-chrome__center-status::after {
-    content: '';
-    position: absolute;
-    inset: 1.4rem;
-    border: 1px dashed rgba(123, 208, 255, 0.18);
-    border-radius: 0;
-  }
-
-  .display-chrome__center-title {
-    font-size: clamp(2.6rem, 9vw, 3.8rem);
+    display: none;
   }
 
   .timeline__left-cluster {
@@ -1837,5 +1996,11 @@ button {
 
   .terminal__cursor {
     padding: 0 1rem 1rem;
+  }
+}
+
+@media (max-width: 920px) and (orientation: landscape) {
+  .orientation-overlay {
+    display: grid;
   }
 }
