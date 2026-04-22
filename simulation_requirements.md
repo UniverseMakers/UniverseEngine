@@ -55,12 +55,12 @@ On event the sonifications will only work if we can get headphones (think single
 
 ### Parameter Space
 
-- Omega_b:
-  - Limits: 0.040-0.060
-- Jet velocity:
-  - Limits: 100-10,000 km/s
-- Star formation efficiency (?):
-  - Limits: ???
+- Baryon fraction:
+  - Limits: 0.1 - 0.7
+- AGN dT:
+  - Limits: 10^7 - 10^12 K
+- Gravitational constant:
+  - Limits: 1e-10 - 1e-6 m^3 kg^-1 s^-2
 
 ### Videos
 
