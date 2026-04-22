@@ -21,6 +21,8 @@ I suggest that when selecting the parameter values for videos, they cluster arou
 
 The in app sliders will have "infinite adjustability" and once the user selects their parameters the app will find the closet video by a nearest grid point look up.
 
+NOTE: there is no need for every value along an axis to have a video at every other axis point.
+
 ## The videos
 
 Each set of parameters should have a set of videos visualising different properties (3-5 is optimal) with runtimes of 20-30 seconds (to keep the app experience responsive and to push the user towards tinkering). The app will include the ability to flick between the visualised component.
@@ -54,19 +56,16 @@ On event the sonifications will only work if we can get headphones (think single
 ### Parameter Space
 
 - Omega_b:
-  - Limits:
-  - N_samples:
+  - Limits: 0.040-0.060
 - Jet velocity:
-  - Limits:
-  - N_samples:
+  - Limits: 100-10,000 km/s
 - Star formation efficiency (?):
-  - Limits:
-  - N_samples:
+  - Limits: ???
 
 ### Videos
 
 - Video location (on cosma):
-- Number of videos:
+- Number of videos: ~100
 - Visualised components:
   - Dark matter mass
   - Gas mass
