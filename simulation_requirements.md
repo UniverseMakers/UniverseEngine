@@ -108,8 +108,6 @@ On event the sonifications will only work if we can get headphones (think single
 
 - ???:
   - Limits:
-  - N_samples:
-    ...
 
 ### Videos
 
@@ -140,7 +138,6 @@ This one might be trickier since there won't be time evolution. Maybe this can j
 
 - ???:
   - Limits:
-  - N_samples:
 
 ### Videos
 
