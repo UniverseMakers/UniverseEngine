@@ -59,8 +59,8 @@ On event the sonifications will only work if we can get headphones (think single
   - Limits: 0.1 - 0.7
 - AGN dT:
   - Limits: 10^7 - 10^12 K
-- Gravitational constant:
-  - Limits: 1e-10 - 1e-6 m^3 kg^-1 s^-2
+- Gravity:
+  - Limits: 0.1 G - 10 G
 
 ### Videos
 
