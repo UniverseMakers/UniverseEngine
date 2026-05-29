@@ -8,6 +8,7 @@
     "dev": "vite",
     "build": "tsc && vite build",
     "preview": "vite preview",
+    "generate:run-manifest": "python3 scripts/generate_run_manifest.py",
     "format": "prettier --write \"src/**/*.{ts,css,yaml,yml}\" \"*.{md,json}\"",
     "format:check": "prettier --check \"src/**/*.{ts,css,yaml,yml}\" \"*.{md,json}\""
   },
