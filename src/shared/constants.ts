@@ -8,11 +8,9 @@
 /** Initialization/boot-sequence tuning. */
 export const INITIALIZATION = {
   /** Constant terminal typing speed (milliseconds per character). */
-  TYPING_MS_PER_CHAR: 18,
-  /** Final throbber time to give visitors a moment to read. */
-  FINAL_THROBBER_MS: 500,
-  /** Default spinner cadence (milliseconds per frame). */
-  THROBBER_STEP_MS: 120,
+  TYPING_MS_PER_CHAR: 15,
+  /** Final pause after the last line has finished typing. */
+  FINAL_PAUSE_MS: 1000,
 } as const;
 
 /** End-of-run summary overlay transition tuning. */

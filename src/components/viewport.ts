@@ -8,7 +8,7 @@
 
 export interface ViewportController {
   /** Change the displayed media with a soft transition. */
-  setSource: (src: string) => void;
+  setSource: (src: string, options?: ViewportSourceOptions) => void;
   /** Enable or disable audio on the video element. */
   setMuted: (muted: boolean) => void;
   /** Attempt playback, usually after a user gesture. */
@@ -29,8 +29,19 @@ export interface ViewportController {
   onEnded: (callback: () => void) => void;
   /** Read the current video duration. */
   getDurationSeconds: () => number;
+  /** Read the current playback progress as a normalized fraction. */
+  getPlaybackFraction: () => number;
+  /** Whether the video is currently paused. */
+  isPaused: () => boolean;
   /** Get the viewport element. */
   getElement: () => HTMLElement;
+}
+
+export interface ViewportSourceOptions {
+  /** Optional normalized seek target to apply after load. */
+  seekFraction?: number;
+  /** Resume playback after load when true. */
+  autoplay?: boolean;
 }
 
 /**
@@ -91,7 +102,7 @@ export function createViewport(
    * @param src - URL for the new media.
    * @returns void
    */
-  function setSource(src: string): void {
+  function setSource(src: string, options: ViewportSourceOptions = {}): void {
     video.classList.add('fade-out');
 
     window.setTimeout(() => {
@@ -103,14 +114,30 @@ export function createViewport(
 
       // Preserve mute state, then load the new source from the beginning.
       const resumeMuted = video.muted;
+      const seekFraction = options.seekFraction;
       video.src = src;
       video.load();
       video.onloadeddata = () => {
         video.muted = resumeMuted;
-        video.currentTime = 0;
+        if (
+          seekFraction !== undefined &&
+          Number.isFinite(video.duration) &&
+          video.duration > 0
+        ) {
+          const clamped = Math.max(0, Math.min(0.999, seekFraction));
+          video.currentTime = clamped * video.duration;
+        } else {
+          video.currentTime = 0;
+        }
         video.classList.remove('fade-out');
+
+        if (options.autoplay) {
+          void video.play().catch(() => {
+            // Leave the media paused if the browser rejects playback.
+          });
+        }
       };
-    }, 220);
+    }, 120);
   }
 
   /**
@@ -226,6 +253,13 @@ export function createViewport(
     onTimeUpdate,
     onEnded,
     getDurationSeconds: () => (Number.isFinite(video.duration) ? video.duration : 0),
+    getPlaybackFraction: () => {
+      if (!Number.isFinite(video.duration) || video.duration <= 0) {
+        return 0;
+      }
+      return video.currentTime / video.duration;
+    },
+    isPaused: () => video.paused,
     getElement: () => viewport,
   };
 }

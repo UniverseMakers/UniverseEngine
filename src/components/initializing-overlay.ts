@@ -27,7 +27,7 @@ export function createInitializingOverlay(
   container: HTMLElement,
 ): InitializingOverlayController {
   // Read time/tuning constants from a central module.
-  const { TYPING_MS_PER_CHAR, FINAL_THROBBER_MS, THROBBER_STEP_MS } = INITIALIZATION;
+  const { TYPING_MS_PER_CHAR, FINAL_PAUSE_MS } = INITIALIZATION;
 
   // Full-screen wrapper for the terminal stage.
   const overlay = document.createElement('section');
@@ -114,68 +114,13 @@ export function createInitializingOverlay(
   }
 
   /**
-   * Render a short spinner line for `durationSeconds`.
-   *
-   * @param token - Token captured at sequence start; used for cancellation.
-   * @param durationSeconds - How long to spin for.
-   * @returns Promise that resolves once the throbber completes.
-   */
-  async function showThrobber(token: number, durationSeconds: number, stepMs: number) {
-    // The throbber sits on its own line between boot messages so the terminal
-    // still feels active while waiting for the next output line.
-    if (durationSeconds <= 0) {
-      return;
-    }
-
-    const row = document.createElement('div');
-    row.className = 'terminal__throbber';
-
-    const spinner = document.createElement('span');
-    spinner.className = 'terminal__spinner';
-
-    const spacer = document.createElement('span');
-    spacer.textContent = ' ';
-
-    const cursor = createCursor();
-
-    row.appendChild(spinner);
-    row.appendChild(spacer);
-    row.appendChild(cursor);
-    log.appendChild(row);
-
-    const frames = ['-', '\\', '|', '/'];
-    let frameIndex = 0;
-    const endAt = performance.now() + durationSeconds * 1000;
-
-    while (performance.now() < endAt) {
-      if (token !== sequenceToken) {
-        row.remove();
-        return;
-      }
-
-      spinner.textContent = frames[frameIndex % frames.length];
-      frameIndex += 1;
-      log.scrollTop = log.scrollHeight;
-      await wait(stepMs, token);
-    }
-
-    row.remove();
-  }
-
-  /**
-   * Type one line character-by-character, then show the throbber.
+   * Type one line character-by-character.
    *
    * @param line - Full line to type.
    * @param token - Token captured at sequence start; used for cancellation.
-   * @param durationSeconds - Dwell time after typing before continuing.
-   * @returns Promise that resolves once typing + dwell completes.
+   * @returns Promise that resolves once typing completes.
    */
-  async function typeLine(
-    line: string,
-    token: number,
-    durationSeconds: number,
-    throbberStepMs: number,
-  ): Promise<void> {
+  async function typeLine(line: string, token: number): Promise<void> {
     // Each terminal line gets its own row and characters are appended one by one
     // so the result feels like live terminal output rather than instant text insertion.
     const row = document.createElement('div');
@@ -200,7 +145,6 @@ export function createInitializingOverlay(
     }
 
     cursor.remove();
-    await showThrobber(token, durationSeconds, throbberStepMs);
   }
 
   /**
@@ -226,9 +170,6 @@ export function createInitializingOverlay(
       overlay.classList.remove('is-hidden');
       setLoad(0);
 
-      // Spinner cadence stays constant; per-line dwell times come from init text.
-      const throbberStepMs = THROBBER_STEP_MS;
-
       // Print the boot sequence sequentially, one line at a time.
       for (const [index, line] of lines.entries()) {
         if (token !== sequenceToken) {
@@ -237,12 +178,7 @@ export function createInitializingOverlay(
 
         const stampedLine = `${formatTimestamp(index)} ${line.text}`;
 
-        await typeLine(
-          stampedLine,
-          token,
-          Math.max(0, line.durationSeconds),
-          throbberStepMs,
-        );
+        await typeLine(stampedLine, token);
 
         // Progress is based on the number of lines printed rather than seconds.
         // This stays stable even when the global scale changes.
@@ -251,8 +187,7 @@ export function createInitializingOverlay(
 
       setLoad(1);
       if (token === sequenceToken) {
-        // Final pause: spin for a fixed moment to make the last line readable.
-        await showThrobber(token, FINAL_THROBBER_MS / 1000, throbberStepMs);
+        await wait(FINAL_PAUSE_MS, token);
         onComplete();
       }
     },
