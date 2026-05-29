@@ -11,13 +11,23 @@ export interface LiveStatsFrame {
   values: Record<string, string>;
 }
 
+export interface LiveStatsDataset {
+  mode: 'time' | 'row';
+  frames: LiveStatsFrame[];
+}
+
+export const EMPTY_LIVE_STATS_DATASET: LiveStatsDataset = {
+  mode: 'time',
+  frames: [],
+};
+
 /**
  * Fetch and parse a live-stat CSV file.
  *
  * @param url - URL to fetch.
  * @returns Parsed frame list.
  */
-export async function loadLiveStatsCsv(url: string): Promise<LiveStatsFrame[]> {
+export async function loadLiveStatsCsv(url: string): Promise<LiveStatsDataset> {
   const response = await fetch(url);
   if (!response.ok) {
     throw new Error(`Failed to load live stats CSV: ${url}`);
@@ -35,9 +45,15 @@ export async function loadLiveStatsCsv(url: string): Promise<LiveStatsFrame[]> {
  * @returns Key/value map suitable for UI display.
  */
 export function sampleLiveStats(
-  frames: LiveStatsFrame[],
+  dataset: LiveStatsDataset,
   timeSeconds: number,
+  durationSeconds = 0,
 ): Record<string, string> {
+  if (dataset.mode === 'row') {
+    return sampleRowBasedStats(dataset.frames, timeSeconds, durationSeconds);
+  }
+
+  const frames = dataset.frames;
   if (frames.length === 0) {
     return {};
   }
@@ -72,31 +88,79 @@ export function sampleLiveStats(
  * @param text - Raw CSV payload.
  * @returns Parsed frame list.
  */
-function parseCsv(text: string): LiveStatsFrame[] {
+function parseCsv(text: string): LiveStatsDataset {
   const lines = text
     .split(/\r?\n/)
     .map((line) => line.trim())
     .filter(Boolean);
 
   if (lines.length < 2) {
-    return [];
+    return EMPTY_LIVE_STATS_DATASET;
   }
 
   const headers = splitCsvLine(lines[0]);
 
-  return lines.slice(1).map((line) => {
-    const cells = splitCsvLine(line);
-    const values: Record<string, string> = {};
-
-    for (let index = 1; index < headers.length; index += 1) {
-      values[headers[index]] = cells[index] ?? '';
-    }
-
+  if (headers[0] === 't') {
     return {
-      t: parseFloat(cells[0] ?? '0') || 0,
-      values,
+      mode: 'time',
+      frames: lines.slice(1).map((line) => {
+        const cells = splitCsvLine(line);
+        const values: Record<string, string> = {};
+
+        for (let index = 1; index < headers.length; index += 1) {
+          values[headers[index]] = cells[index] ?? '';
+        }
+
+        return {
+          t: parseFloat(cells[0] ?? '0') || 0,
+          values,
+        };
+      }),
     };
-  });
+  }
+
+  return {
+    mode: 'row',
+    frames: lines.slice(1).map((line, rowIndex) => {
+      const cells = splitCsvLine(line);
+      const values: Record<string, string> = {};
+
+      for (let index = 0; index < headers.length; index += 1) {
+        values[headers[index]] = cells[index] ?? '';
+      }
+
+      return {
+        t: rowIndex,
+        values,
+      };
+    }),
+  };
+}
+
+/**
+ * Sample a row-per-frame dataset by normalized playback position.
+ *
+ * @param frames - Parsed frame rows.
+ * @param timeSeconds - Playback timestamp in seconds.
+ * @param durationSeconds - Full video duration.
+ * @returns Key/value map from the nearest row.
+ */
+function sampleRowBasedStats(
+  frames: LiveStatsFrame[],
+  timeSeconds: number,
+  durationSeconds: number,
+): Record<string, string> {
+  if (frames.length === 0) {
+    return {};
+  }
+
+  if (!Number.isFinite(durationSeconds) || durationSeconds <= 0) {
+    return { ...frames[0].values };
+  }
+
+  const fraction = Math.max(0, Math.min(1, timeSeconds / durationSeconds));
+  const index = Math.round(fraction * (frames.length - 1));
+  return { ...frames[index].values };
 }
 
 /**
@@ -165,12 +229,6 @@ function interpolateFrameValues(
   return output;
 }
 
-/**
- * Format a sampled numeric value compactly for UI display.
- *
- * @param value - Numeric value.
- * @returns Compact string representation.
- */
 function formatNumber(value: number): string {
   return value
     .toFixed(2)

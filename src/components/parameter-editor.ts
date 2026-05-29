@@ -6,7 +6,7 @@
  */
 
 import type { SimulationClass, SimParameter } from '../data/simulations.ts';
-import { formatValueByStep, withUnit } from '../shared/format.ts';
+import { formatParameterValue, withUnit } from '../shared/format.ts';
 
 export interface ParameterEditorController {
   /** Re-render the editor for a new simulation class. */
@@ -88,11 +88,12 @@ export function createParameterEditor(
 
     const labelRow = document.createElement('div');
     labelRow.className = 'param__label';
+    const displayUnit = param.displayUnit ?? param.unit;
 
     const name = document.createElement('div');
     name.innerHTML = `
       <span class="param__name">${param.label}</span>
-      <span class="param__range">${formatValueByStep(param.min, param.step)} - ${formatValueByStep(param.max, param.step)} ${param.unit}</span>
+      <span class="param__range">${withUnit(formatParameterValue(param.min, param.step, { scale: param.valueScale, format: param.displayFormat, significantFigures: param.displaySignificantFigures }), displayUnit)} - ${withUnit(formatParameterValue(param.max, param.step, { scale: param.valueScale, format: param.displayFormat, significantFigures: param.displaySignificantFigures }), displayUnit)}</span>
     `;
 
     const readout = document.createElement('div');
@@ -123,7 +124,14 @@ export function createParameterEditor(
         '--fill',
         `${calculateFill(value, param.min, param.max)}%`,
       );
-      readout.textContent = withUnit(formatValueByStep(value, param.step), param.unit);
+      readout.textContent = withUnit(
+        formatParameterValue(value, param.step, {
+          scale: param.valueScale,
+          format: param.displayFormat,
+          significantFigures: param.displaySignificantFigures,
+        }),
+        displayUnit,
+      );
       emitChange();
     }
 
@@ -136,8 +144,12 @@ export function createParameterEditor(
       `${calculateFill(values[param.id] ?? param.defaultValue, param.min, param.max)}%`,
     );
     readout.textContent = withUnit(
-      formatValueByStep(values[param.id] ?? param.defaultValue, param.step),
-      param.unit,
+      formatParameterValue(values[param.id] ?? param.defaultValue, param.step, {
+        scale: param.valueScale,
+        format: param.displayFormat,
+        significantFigures: param.displaySignificantFigures,
+      }),
+      displayUnit,
     );
 
     labelRow.appendChild(name);

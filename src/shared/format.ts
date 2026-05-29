@@ -40,6 +40,117 @@ export function withUnit(value: string, unit?: string): string {
 }
 
 /**
+ * Format a live numeric string compactly for UI display.
+ *
+ * @param raw - Raw value string.
+ * @param options - Optional numeric transforms.
+ * @returns Display-ready string.
+ */
+export function formatMaybeNumber(
+  raw: string,
+  options: { scale?: number; integer?: boolean } = {},
+): string {
+  const trimmed = raw.trim();
+  if (trimmed.length === 0) {
+    return raw;
+  }
+
+  const numeric = Number(trimmed);
+  if (!Number.isFinite(numeric)) {
+    return raw;
+  }
+
+  const scaled = numeric * (options.scale ?? 1);
+  if (options.integer) {
+    return Math.max(0, Math.round(scaled)).toLocaleString(undefined);
+  }
+
+  return scaled
+    .toFixed(2)
+    .replace(/\.0+$|(?<=\..*?)0+$/g, '')
+    .replace(/\.$/, '');
+}
+
+/**
+ * Format a numeric-looking string according to an explicit display mode.
+ *
+ * @param raw - Raw value string.
+ * @param options - Formatting controls.
+ * @returns Display-ready string.
+ */
+export function formatNumericString(
+  raw: string,
+  options: {
+    scale?: number;
+    mode?: 'integer' | 'float' | 'scientific' | 'percentage';
+    precision?: number;
+  } = {},
+): string {
+  const trimmed = raw.trim();
+  if (trimmed.length === 0) {
+    return raw;
+  }
+
+  const numeric = Number(trimmed);
+  if (!Number.isFinite(numeric)) {
+    return raw;
+  }
+
+  const mode = options.mode ?? 'float';
+  const scaled = numeric * (options.scale ?? 1) * (mode === 'percentage' ? 100 : 1);
+
+  if (mode === 'integer') {
+    return Math.round(scaled).toLocaleString(undefined);
+  }
+
+  if (mode === 'scientific') {
+    const significantFigures = Math.max(1, options.precision ?? 3);
+    return scaled
+      .toExponential(significantFigures - 1)
+      .replace('e+', 'e')
+      .replace(/\.0+e/, 'e');
+  }
+
+  const decimals = Math.max(0, options.precision ?? 2);
+  return scaled
+    .toFixed(decimals)
+    .replace(/\.0+$|(?<=\..*?)0+$/g, '')
+    .replace(/\.$/, '');
+}
+
+/**
+ * Format a parameter value for display without changing the stored value.
+ *
+ * @param value - Raw parameter value.
+ * @param step - Raw parameter step.
+ * @param options - Optional display-only transforms.
+ * @returns Formatted string.
+ */
+export function formatParameterValue(
+  value: number,
+  step: number,
+  options: {
+    scale?: number;
+    format?: 'fixed' | 'scientific';
+    significantFigures?: number;
+  } = {},
+): string {
+  const scale = options.scale ?? 1;
+  const scaledValue = value * scale;
+  const scaledStep = step * scale;
+
+  if (options.format === 'scientific') {
+    const significantFigures = Math.max(1, options.significantFigures ?? 3);
+    return scaledValue
+      .toExponential(significantFigures - 1)
+      .replace('e+', 'e')
+      .replace(/\.0+e/, 'e');
+  }
+
+  return formatValueByStep(scaledValue, scaledStep);
+}
+
+/**
  * Count how many decimal places appear in a numeric step value.
  *
  * The result is used to keep displayed values aligned with the configured

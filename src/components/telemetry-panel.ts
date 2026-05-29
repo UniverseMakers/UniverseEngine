@@ -12,7 +12,11 @@ import type {
   StatDisplayConfig,
   SummaryStatId,
 } from '../data/simulations.ts';
-import { formatValueByStep, withUnit } from '../shared/format.ts';
+import {
+  formatMaybeNumber,
+  formatParameterValue,
+  withUnit,
+} from '../shared/format.ts';
 
 export interface TelemetryPanelController {
   /** Render metric rows for the active simulation and its current values. */
@@ -86,9 +90,14 @@ function buildAvailableMetrics(
       parameter.id,
       {
         label: parameter.label,
-        value: formatValueByStep(
+        value: formatParameterValue(
           values[parameter.id] ?? parameter.defaultValue,
           parameter.step,
+          {
+            scale: parameter.valueScale,
+            format: parameter.displayFormat,
+            significantFigures: parameter.displaySignificantFigures,
+          },
         ),
       },
     ]),
@@ -111,7 +120,7 @@ function buildAvailableMetrics(
     ...Object.fromEntries(
       Object.entries(liveValues).map(([key, value]) => [
         key,
-        { label: humanizeKey(key), value: formatMaybeNumber(value) },
+        { label: humanizeKey(key), value },
       ]),
     ),
   };
@@ -136,30 +145,6 @@ function humanizeKey(key: string): string {
  * @param raw - Raw CSV cell value.
  * @returns Display-ready value.
  */
-function formatMaybeNumber(raw: string): string {
-  const trimmed = raw.trim();
-  if (trimmed.length === 0) {
-    return raw;
-  }
-
-  const numeric = Number(trimmed);
-  if (!Number.isFinite(numeric)) {
-    return raw;
-  }
-
-  return numeric
-    .toFixed(2)
-    .replace(/\.0+$|(?<=\..*?)0+$/g, '')
-    .replace(/\.$/, '');
-}
-
-/**
- * Resolve one display row from YAML config + available metric map.
- *
- * @param stat - YAML-driven display config.
- * @param availableMetrics - Candidate metrics keyed by id.
- * @returns Resolved label/value row.
- */
 function selectMetric(
   stat: StatDisplayConfig,
   availableMetrics: Record<string, { label: string; value: string }>,
@@ -172,9 +157,44 @@ function selectMetric(
   const liveMetric = availableMetrics[liveKey];
 
   // Prefer sampled live values when present, then fall back to static/placeholder values.
-  const resolvedValue = liveMetric?.value ?? metric.value ?? stat.value ?? '--';
+  const resolvedValue = formatMetricValue(
+    liveMetric?.value ?? metric.value ?? stat.value ?? '--',
+    stat,
+    Boolean(liveMetric),
+  );
   return {
     label: stat.label ?? liveMetric?.label ?? metric.label,
     value: withUnit(resolvedValue, stat.unit),
   };
+}
+
+/**
+ * Apply optional numeric scaling/rounding to a resolved stat value.
+ *
+ * @param value - Raw value string.
+ * @param stat - Display config for the row.
+ * @param shouldFormat - Whether numeric live formatting should be applied.
+ * @returns Display-ready value.
+ */
+function formatMetricValue(
+  value: string,
+  stat: StatDisplayConfig,
+  shouldFormat: boolean,
+): string {
+  if (value === '--') {
+    return value;
+  }
+
+  if (stat.valueScale !== undefined) {
+    return formatMaybeNumber(value, {
+      scale: stat.valueScale,
+      integer: stat.integer,
+    });
+  }
+
+  if (shouldFormat || stat.integer) {
+    return formatMaybeNumber(value, { integer: stat.integer });
+  }
+
+  return value;
 }

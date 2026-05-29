@@ -4,6 +4,11 @@
 #
 # `metadata.summaryStats`
 #   End-of-run summary cards.
+#   - ids can refer to built-in app metrics such as `runtime`
+#   - ids can also refer to keys under the selected run's `run_summary.yaml`
+#     `summaryMetrics` map
+#   - `display_format` can be `integer`, `float`, `scientific`, or `percentage`
+#   - `precision` controls decimal places or scientific significant figures
 #
 # `metadata.liveStats`
 #   Top-right live telemetry rows.
@@ -16,9 +21,16 @@
 #   - `video_key` can override which metadata key should be used
 #   - `scale_with_time: true` (when `live`) scales the final metadata value
 #     linearly by normalized playback time
+#   - `value_scale` multiplies a live numeric value before formatting
 #
 # `parameters`
 #   Config-overlay controls and parameter-space metadata.
+#
+# `views`
+#   Optional display-mode video tabs.
+#   - `id` must match a view key in the generated run manifest
+#   - `label` renders text in the switcher
+#   - `icon` can be used instead of text when a theme wants glyph-first tabs
 
 planetary:
   label: Planetary
@@ -206,13 +218,25 @@ cosmos:
   label: Cosmos
   icon: '✨'
   placeholderImage: assets/cosmos_example.webp
+  views:
+    - id: gas_density
+      label: Gas Density
+      icon: gas-density
+    - id: gas_temperature
+      label: Gas Temperature
+      icon: gas-temperature
+    - id: dark_matter_density
+      label: Dark Matter
+      icon: dark-matter
+    - id: gas_metallicity_stellar_density
+      label: Metals + Stars
+      icon: metals-stars
   metadata:
     distinctSimulations: 8192
     correctValues:
-      dark_matter_density: 0.27
-      baryon_density: 0.049
-      feedback_strength: 1.1
-      clustering: 0.81
+      baryon_fraction: 1.0
+      black_hole_strength: 1.0
+      gravity_strength: 1.0
     summaryStats:
       - id: runtime
         value: '0.00'
@@ -225,72 +249,97 @@ cosmos:
         value: '0.00'
         unit: kgCO2e
         from_video: true
+        display_format: float
+        precision: 2
       - id: computeUsed
         value: '0.0'
         unit: smartphones
         from_video: true
+        display_format: float
+        precision: 1
       - id: memoryUsed
         value: '0.0'
         unit: GB
         from_video: true
+        display_format: float
+        precision: 1
       - id: particlesUpdated
         value: '0'
         label: Particle updates
         from_video: true
+        display_format: integer
+      - id: stellar_mass_msun
+        label: Number of Suns
+        display_format: scientific
+        precision: 3
+      - id: gas_mass_msun
+        display_format: scientific
+        precision: 3
+      - id: dark_matter_mass_msun
+        display_format: scientific
+        precision: 3
+      - id: black_hole_mass_msun
+        display_format: scientific
+        precision: 3
+      - id: sn_events_age_30myr
+        display_format: integer
     liveStats:
-      - id: dark_matter_density
-        value: '0.27'
-        unit: Ωdm
-        live: false
-      - id: baryon_density
-        value: '0.049'
-        unit: Ωb
-        live: false
-      - id: clustering
-        value: '0.81'
-        unit: σ₈
-        live: false
       - id: age
         value: 0.0
         unit: Gyr
         live: true
+        live_key: age_years
+        value_scale: 1.0e-9
       - id: redshift
         value: 0.0
         unit: ''
         live: true
-      - id: particlesUpdated
+      - id: stellar_mass
+        value: '0'
+        label: Stellar Mass
+        unit: Msun
+        live: true
+      - id: bh_mass
+        value: '0'
+        label: Black Hole Mass
+        unit: Msun
+        live: true
+      - id: sfr
+        value: '0'
+        label: SFR
+        unit: Msun/yr
+        live: true
+      - id: g_updates_total
         value: '0'
         label: Particle updates
         live: true
-        from_video: true
-        scale_with_time: true
         integer: true
   parameters:
-    dark_matter_density:
-      label: Dark Matter Density
-      unit: Ωdm
-      min: 0.05
-      max: 0.8
-      step: 0.01
-      default: 0.27
-    baryon_density:
-      label: Baryon Density
-      unit: Ωb
-      min: 0.01
-      max: 0.15
-      step: 0.001
-      default: 0.049
-    feedback_strength:
-      label: Feedback Strength
+    baryon_fraction:
+      label: Baryon Fraction
       unit: ''
-      min: 0
-      max: 5
-      step: 0.1
-      default: 1
-    clustering:
-      label: Clustering
-      unit: σ₈
-      min: 0.4
-      max: 1.2
+      min: 0.10
+      max: 4
       step: 0.01
-      default: 0.81
+      default: 1
+      value_scale: 0.1536
+    black_hole_strength:
+      label: Black Hole Strength
+      unit: ''
+      min: 0.01
+      max: 6.67
+      step: 0.01
+      default: 1
+      value_scale: 1.0e8
+      display_format: scientific
+      display_significant_figures: 3
+    gravity_strength:
+      label: Gravity
+      unit: ''
+      min: 0.01
+      max: 10
+      step: 0.01
+      default: 1
+      value_scale: 6.6743e-11
+      display_format: scientific
+      display_significant_figures: 3

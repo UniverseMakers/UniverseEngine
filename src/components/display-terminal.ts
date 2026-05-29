@@ -7,7 +7,7 @@
  */
 
 import type { SimulationClass } from '../data/simulations.ts';
-import { formatValueByStep, withUnit } from '../shared/format.ts';
+import { formatParameterValue, withUnit } from '../shared/format.ts';
 
 export interface DisplayTerminalController {
   /** Show the panel without rebuilding it. */
@@ -156,7 +156,7 @@ function createLogLines(
   const formattedParams = simClass.parameters.map((parameter, index) => {
     const value = values[parameter.id] ?? parameter.defaultValue;
     const timestamp = `[00:${String(index).padStart(2, '0')}:0${index}]`;
-    return `${timestamp} PARAM_${parameter.id.toUpperCase()} :: ${withUnit(formatValueByStep(value, parameter.step), parameter.unit)}`;
+    return `${timestamp} PARAM_${parameter.id.toUpperCase()} :: ${withUnit(formatParameterValue(value, parameter.step, { scale: parameter.valueScale, format: parameter.displayFormat, significantFigures: parameter.displaySignificantFigures }), parameter.displayUnit ?? parameter.unit)}`;
   });
 
   // Build the final placeholder stream shown to the user.

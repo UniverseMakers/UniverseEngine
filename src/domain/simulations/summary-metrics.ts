@@ -7,7 +7,7 @@
  * rules a single home.
  */
 
-import type { SimulationClass, SummaryStatId } from '../../data/simulations.ts';
+import type { SimulationClass } from '../../data/simulations.ts';
 import type { VideoRunMetadata } from './video-run-metadata.ts';
 
 export interface SummaryMetricValue {
@@ -25,7 +25,7 @@ export function buildSummaryMetricMap(
   values: Record<string, number>,
   videoDurationSeconds: number,
   runMetadata?: VideoRunMetadata | null,
-): Record<SummaryStatId, SummaryMetricValue> {
+): Record<string, SummaryMetricValue> {
   // Measure how far the selected parameters are from the configured "correct"
   // values. This powers the current lightweight scoring mechanic.
   const normalizedDistances = simClass.parameters.map((parameter) => {
@@ -81,6 +81,15 @@ export function buildSummaryMetricMap(
     },
     audioTrack: { label: 'Audio Track', value: audioTrack },
     terminalLines: { label: 'Terminal Lines', value: terminalLines },
+    ...Object.fromEntries(
+      Object.entries(runMetadata?.summaryMetrics ?? {}).map(([key, metric]) => [
+        key,
+        {
+          label: metric.label,
+          value: metric.value,
+        },
+      ]),
+    ),
   };
 }
 

@@ -20,6 +20,13 @@ export interface VideoRunMetadata {
   carbonBurnt: number;
   /** Total number of particles updated over the run. */
   particlesUpdated: number;
+  /** Arbitrary summary rows sourced from the run-level YAML. */
+  summaryMetrics: Record<string, VideoRunSummaryMetric>;
+}
+
+export interface VideoRunSummaryMetric {
+  label: string;
+  value: string;
 }
 
 /**
@@ -55,6 +62,7 @@ export async function loadVideoRunMetadata(
     const memoryUsed = toNumber(raw.memoryUsed);
     const carbonBurnt = toNumber(raw.carbonBurnt);
     const particlesUpdated = toNumber(raw.particlesUpdated);
+    const summaryMetrics = toSummaryMetrics(raw.summaryMetrics);
 
     if (
       wallclockSeconds === null ||
@@ -72,6 +80,7 @@ export async function loadVideoRunMetadata(
       memoryUsed,
       carbonBurnt,
       particlesUpdated,
+      summaryMetrics,
     };
   } catch {
     return null;
@@ -87,4 +96,39 @@ export async function loadVideoRunMetadata(
 function toNumber(value: unknown): number | null {
   const numeric = typeof value === 'number' ? value : Number(value);
   return Number.isFinite(numeric) ? numeric : null;
+}
+
+/**
+ * Normalize arbitrary YAML summary rows into a typed dictionary.
+ *
+ * @param value - Raw `summaryMetrics` payload.
+ * @returns Parsed metric map.
+ */
+function toSummaryMetrics(value: unknown): Record<string, VideoRunSummaryMetric> {
+  if (!value || typeof value !== 'object') {
+    return {};
+  }
+
+  const rawMetrics = value as Record<string, unknown>;
+  const output: Record<string, VideoRunSummaryMetric> = {};
+
+  for (const [key, rawMetric] of Object.entries(rawMetrics)) {
+    if (!rawMetric || typeof rawMetric !== 'object') {
+      continue;
+    }
+
+    const metric = rawMetric as Record<string, unknown>;
+    const label = typeof metric.label === 'string' ? metric.label : key;
+    const rawValue = metric.value;
+    if (rawValue === undefined || rawValue === null) {
+      continue;
+    }
+
+    output[key] = {
+      label,
+      value: String(rawValue),
+    };
+  }
+
+  return output;
 }

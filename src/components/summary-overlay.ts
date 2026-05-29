@@ -9,12 +9,11 @@
 import type {
   SimulationClass,
   StatDisplayConfig,
-  SummaryStatId,
 } from '../data/simulations.ts';
 import { buildSummaryMetricMap } from '../domain/simulations/summary-metrics.ts';
 import type { VideoRunMetadata } from '../domain/simulations/video-run-metadata.ts';
 import { SUMMARY_OVERLAY } from '../shared/constants.ts';
-import { withUnit } from '../shared/format.ts';
+import { formatNumericString, withUnit } from '../shared/format.ts';
 
 export interface SummaryOverlayController {
   /** Reveal the overlay. */
@@ -171,8 +170,12 @@ function buildSummaryMetrics(
   videoDurationSeconds: number,
   runMetadata?: VideoRunMetadata | null,
 ): Array<{ label: string; value: string }> {
-  const availableMetrics: Record<SummaryStatId, { label: string; value: string }> =
-    buildSummaryMetricMap(simClass, values, videoDurationSeconds, runMetadata);
+  const availableMetrics = buildSummaryMetricMap(
+    simClass,
+    values,
+    videoDurationSeconds,
+    runMetadata,
+  );
 
   return simClass.metadata.summaryStats.map((stat) =>
     selectMetric(stat, availableMetrics),
@@ -192,9 +195,33 @@ function selectMetric(
 ): { label: string; value: string } {
   const metric = availableMetrics[stat.id] ?? { label: stat.id, value: '--' };
   const resolvedValue = metric.value !== '--' ? metric.value : (stat.value ?? '--');
+  const formattedValue = formatSummaryValue(resolvedValue, stat);
 
   return {
     label: stat.label ?? metric.label,
-    value: withUnit(resolvedValue, stat.unit),
+    value: withUnit(formattedValue, stat.unit),
   };
+}
+
+/**
+ * Apply YAML-configured summary formatting to one resolved value.
+ *
+ * @param value - Raw resolved value.
+ * @param stat - Summary display config.
+ * @returns Display-ready value.
+ */
+function formatSummaryValue(value: string, stat: StatDisplayConfig): string {
+  if (value === '--') {
+    return value;
+  }
+
+  if (!stat.displayFormat && stat.valueScale === undefined && !stat.integer) {
+    return value;
+  }
+
+  return formatNumericString(value, {
+    scale: stat.valueScale,
+    mode: stat.displayFormat ?? (stat.integer ? 'integer' : 'float'),
+    precision: stat.precision,
+  });
 }

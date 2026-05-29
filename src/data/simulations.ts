@@ -24,6 +24,14 @@ export interface SimParameter {
   step: number;
   /** Default value used to seed the editor and fill missing values. */
   defaultValue: number;
+  /** Optional numeric multiplier applied only for UI display. */
+  valueScale?: number;
+  /** Optional display unit override for UI-only formatting. */
+  displayUnit?: string;
+  /** Optional UI-only formatting mode. */
+  displayFormat?: 'fixed' | 'scientific';
+  /** Optional significant figures for scientific display. */
+  displaySignificantFigures?: number;
 }
 
 export interface SimulationMetadata {
@@ -35,6 +43,15 @@ export interface SimulationMetadata {
   summaryStats: StatDisplayConfig[];
   /** Telemetry panel rows (ordered). */
   liveStats: StatDisplayConfig[];
+}
+
+export interface SimulationViewOption {
+  /** Stable id that should match a manifest view key. */
+  id: string;
+  /** Text label shown in the switcher. */
+  label?: string;
+  /** Optional icon or glyph shown instead of text. */
+  icon?: string;
 }
 
 export interface StatDisplayConfig {
@@ -58,6 +75,12 @@ export interface StatDisplayConfig {
   scaleWithTime?: boolean;
   /** When true, force numeric values to render as whole numbers. */
   integer?: boolean;
+  /** Optional numeric multiplier applied before display. */
+  valueScale?: number;
+  /** Optional display formatting mode. */
+  displayFormat?: 'integer' | 'float' | 'scientific' | 'percentage';
+  /** Optional decimal places or significant figures. */
+  precision?: number;
 }
 
 export type SummaryStatId =
@@ -89,6 +112,8 @@ export interface SimulationClass {
   metadata: SimulationMetadata;
   /** Parameter schemas shown in the parameter editor. */
   parameters: SimParameter[];
+  /** Optional displayable views for switching between run videos. */
+  views: SimulationViewOption[];
 }
 
 interface RawParameterConfig {
@@ -98,6 +123,10 @@ interface RawParameterConfig {
   max: number;
   step: number;
   default: number;
+  value_scale?: number;
+  display_unit?: string;
+  display_format?: 'fixed' | 'scientific';
+  display_significant_figures?: number;
 }
 
 interface RawSimulationConfig {
@@ -109,6 +138,13 @@ interface RawSimulationConfig {
     liveStats: RawStatDisplayConfig[];
   };
   parameters: Record<string, RawParameterConfig>;
+  views?: RawSimulationViewOption[];
+}
+
+interface RawSimulationViewOption {
+  id: string;
+  label?: string;
+  icon?: string;
 }
 
 interface RawStatDisplayConfig {
@@ -122,6 +158,9 @@ interface RawStatDisplayConfig {
   video_key?: string;
   scale_with_time?: boolean;
   integer?: boolean;
+  value_scale?: number;
+  display_format?: 'integer' | 'float' | 'scientific' | 'percentage';
+  precision?: number;
 }
 
 // Parse the YAML catalog into a raw object keyed by simulation family id.
@@ -147,6 +186,15 @@ export const SIMULATION_CLASSES: SimulationClass[] = Object.entries(rawConfig).m
       max: parameter.max,
       step: parameter.step,
       defaultValue: parameter.default,
+      valueScale: parameter.value_scale,
+      displayUnit: parameter.display_unit,
+      displayFormat: parameter.display_format,
+      displaySignificantFigures: parameter.display_significant_figures,
+    })),
+    views: (config.views ?? []).map((view) => ({
+      id: view.id,
+      label: view.label,
+      icon: view.icon,
     })),
   }),
 );
@@ -169,5 +217,8 @@ function normalizeStatConfig(config: RawStatDisplayConfig): StatDisplayConfig {
     videoKey: config.video_key,
     scaleWithTime: config.scale_with_time ?? false,
     integer: config.integer ?? false,
+    valueScale: config.value_scale,
+    displayFormat: config.display_format,
+    precision: config.precision,
   };
 }
