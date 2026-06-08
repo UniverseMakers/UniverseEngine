@@ -1,15 +1,11 @@
 /**
  * Display-mode timeline scrubber.
  *
- * This component is a thin wrapper around a range input that:
- * - displays the current normalized playback position (0..1)
- * - allows the user to scrub (seek) by dragging
- *
- * Callers provide the seek callback; the component stays UI-only.
+ * Thin wrapper around a range input (0-1000) that converts to/from normalized
+ * 0..1 fractions at the boundary for smooth slider behavior.
  */
 
 export interface TimelineController {
-  /** Move the scrubber thumb programmatically. */
   setPosition: (t: number) => void;
 }
 
@@ -17,10 +13,6 @@ export type TimelineChangeCallback = (position: number) => void;
 
 /**
  * Create and mount the timeline scrubber.
- *
- * The timeline uses an integer range input (0-1000) internally and converts
- * to/from normalized 0..1 fractions at the boundary. This gives us smooth
- * slider behavior without floating-point step issues.
  *
  * @param container - Host element to mount into.
  * @param onChange - Optional callback invoked when the user scrubs (receives 0..1).
@@ -30,8 +22,6 @@ export function createTimeline(
   container: HTMLElement,
   onChange?: TimelineChangeCallback,
 ): TimelineController {
-  // Outer footer structure closely mirrors the reference HUD: a slim timeline
-  // plus a lower status row carrying the current state readout.
   const timeline = document.createElement('div');
   timeline.className = 'timeline';
 
@@ -59,7 +49,6 @@ export function createTimeline(
   current.textContent = 'STATUS: IDLE_OBSERVATION';
 
   slider.addEventListener('input', () => {
-    // Convert the integer slider value back into a normalized position for callers.
     const position = parseInt(slider.value, 10) / 1000;
     slider.style.setProperty('--fill', `${position * 100}%`);
     current.textContent = `STATUS: IDLE_OBSERVATION [T=${position.toFixed(2)}]`;
@@ -74,7 +63,6 @@ export function createTimeline(
 
   return {
     setPosition(t: number) {
-      // Clamp to the valid range before updating the control.
       const clamped = Math.max(0, Math.min(1, t));
       slider.value = String(Math.round(clamped * 1000));
       slider.style.setProperty('--fill', `${clamped * 100}%`);

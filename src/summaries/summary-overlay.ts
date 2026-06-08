@@ -2,16 +2,16 @@
  * End-of-run summary overlay.
  *
  * This module renders the centered summary overlay shown after playback ends.
- * The actual metric derivation now lives in the simulation domain so this file
- * can stay focused on presentation and button wiring.
+ * The actual metric derivation now lives alongside it in this directory so the
+ * UI can stay focused on presentation and button wiring.
  */
 
 import type {
   SimulationClass,
   StatDisplayConfig,
-} from '../data/simulations.ts';
-import { buildSummaryMetricMap } from '../domain/simulations/summary-metrics.ts';
-import type { VideoRunMetadata } from '../domain/simulations/video-run-metadata.ts';
+} from '../selection/data.ts';
+import { buildSummaryMetricMap } from './summary-metrics.ts';
+import type { VideoRunMetadata } from '../selection/video-run-metadata.ts';
 import { SUMMARY_OVERLAY } from '../shared/constants.ts';
 import { formatNumericString, withUnit } from '../shared/format.ts';
 

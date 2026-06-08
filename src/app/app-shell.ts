@@ -7,37 +7,37 @@
  * orchestration, and domain logic are separated more clearly.
  */
 
-import { SIMULATION_CLASSES, type SimulationClass } from '../data/simulations.ts';
-import { applyTheme, getInitialTheme, type ThemeId } from '../components/theme.ts';
-import { createViewport } from '../components/viewport.ts';
-import { createTimeline } from '../components/timeline.ts';
-import { createTelemetryPanel } from '../components/telemetry-panel.ts';
-import { createDisplayTerminal } from '../components/display-terminal.ts';
-import { createViewSwitcher } from '../components/view-switcher.ts';
-import { createEntryOverlay } from '../components/entry-overlay.ts';
-import { createSummaryOverlay } from '../components/summary-overlay.ts';
+import { SIMULATION_CLASSES, type SimulationClass } from '../selection/data.ts';
+import { applyTheme, getInitialTheme, type ThemeId } from '../selection/theme.ts';
+import { createViewport } from '../video_player/viewport.ts';
+import { createTimeline } from '../video_player/timeline.ts';
+import { createTelemetryPanel } from '../live-data/hud.ts';
+import { createDisplayTerminal } from '../overlays/display-terminal.ts';
+import { createViewSwitcher } from '../video_player/view-switcher.ts';
+import { createEntryOverlay } from '../entry/entry-overlay.ts';
+import { createSummaryOverlay } from '../summaries/summary-overlay.ts';
 import {
-  createConfigOverlay,
-  type ConfigOverlayView,
-} from '../components/config-overlay.ts';
-import { createInitializingOverlay } from '../components/initializing-overlay.ts';
+  createSelectionOverlay,
+  type SelectionOverlayView,
+} from '../selection/overlay.ts';
+import { createLoadingOverlay } from '../loading/overlay.ts';
 import { createDisplayMenu } from './display-menu.ts';
-import { getInitializationLines } from '../init-text/index.ts';
+import { getInitializationLines } from '../loading/init-text.ts';
 import {
   findNearestVideo,
   getLocalPlaceholderVideo,
   type VideoMatch,
-} from '../domain/simulations/placeholder-assets.ts';
+} from '../selection/placeholder-assets.ts';
 import {
   loadVideoRunMetadata,
   type VideoRunMetadata,
-} from '../domain/simulations/video-run-metadata.ts';
+} from '../selection/video-run-metadata.ts';
 import {
   EMPTY_LIVE_STATS_DATASET,
   loadLiveStatsCsv,
   sampleLiveStats,
   type LiveStatsDataset,
-} from '../domain/live-stats/csv.ts';
+} from '../live-data/csv.ts';
 import { countDecimals } from '../shared/format.ts';
 
 type AppMode = 'entry' | 'config' | 'initializing' | 'display';
@@ -143,7 +143,7 @@ export function createAppShell(app: HTMLElement): void {
   createDisplayMenu(topLeft, SIMULATION_CLASSES, {
     onSimulationSelected(simClass) {
       handleClassChange(simClass);
-      openConfigView('parameters');
+      openSelectionView('parameters');
     },
     onViewSelected(view) {
       if (view === 'terminal') {
@@ -152,11 +152,11 @@ export function createAppShell(app: HTMLElement): void {
       }
 
       if (view === 'credits') {
-        openConfigView('credits');
+        openSelectionView('credits');
         return;
       }
 
-      openConfigView(view);
+      openSelectionView(view);
     },
   });
 
@@ -226,7 +226,7 @@ export function createAppShell(app: HTMLElement): void {
   // Mount the end-of-run summary overlay that appears when a video finishes.
   const summaryOverlay = createSummaryOverlay(overlayLayer, {
     onReplay: handleReplay,
-    onNew: () => openConfigView('parameters'),
+    onNew: () => openSelectionView('parameters'),
     onTerminal: handleOpenTerminalFromSummary,
   });
 
@@ -245,11 +245,11 @@ export function createAppShell(app: HTMLElement): void {
   // Mount the first-load entry overlay — the very first thing the user sees.
   const entryOverlay = createEntryOverlay(overlayLayer, (simClass) => {
     handleClassChange(simClass);
-    openConfigView('parameters');
+    openSelectionView('parameters');
   });
 
-  // Mount the main configuration overlay — parameters, settings, credits, etc.
-  const configOverlay = createConfigOverlay(overlayLayer, {
+  // Mount the main selection overlay — parameters, settings, credits, etc.
+  const selectionOverlay = createSelectionOverlay(overlayLayer, {
     simClass: activeClass,
     values: getActiveValues(),
     theme: activeTheme,
@@ -264,7 +264,7 @@ export function createAppShell(app: HTMLElement): void {
   });
 
   // Mount the initializing terminal overlay — the faux-boot sequence.
-  const initializingOverlay = createInitializingOverlay(overlayLayer);
+  const loadingOverlay = createLoadingOverlay(overlayLayer);
 
   // ── Initial State ────────────────────────────────────────────────────────
   // Prime everything to a clean, empty baseline before the first mode switch.
@@ -292,7 +292,7 @@ export function createAppShell(app: HTMLElement): void {
     activeClass = newClass;
     resetSimulationState();
     // Rebuild the config overlay so the parameters match the new family.
-    configOverlay.setSimulation(activeClass, getActiveValues());
+    selectionOverlay.setSimulation(activeClass, getActiveValues());
     timeline.setPosition(0);
     refreshDisplayData();
     refreshDisplayTerminal();
@@ -322,7 +322,7 @@ export function createAppShell(app: HTMLElement): void {
   function handleThemeChange(theme: ThemeId): void {
     activeTheme = theme;
     applyTheme(theme);
-    configOverlay.setTheme(theme);
+    selectionOverlay.setTheme(theme);
   }
 
   /**
@@ -331,11 +331,11 @@ export function createAppShell(app: HTMLElement): void {
    * @param view - Which config subview to display.
    * @returns void
    */
-  function openConfigView(view: ConfigOverlayView): void {
+  function openSelectionView(view: SelectionOverlayView): void {
     // Close the display terminal first — it's a separate concern from config.
     isDisplayTerminalOpen = false;
     displayTerminal.hide();
-    configOverlay.setView(view);
+    selectionOverlay.setView(view);
     setMode('config');
   }
 
@@ -353,7 +353,7 @@ export function createAppShell(app: HTMLElement): void {
     }
 
     // Otherwise keep showing the parameter view so the user can start a run.
-    configOverlay.setView('parameters');
+    selectionOverlay.setView('parameters');
   }
 
   /**
@@ -459,7 +459,7 @@ export function createAppShell(app: HTMLElement): void {
 
     // Kick off the terminal boot sequence. When it finishes, reveal the video
     // and try to play it. If autoplay is blocked, fall back to muted.
-    initializingOverlay.show(getInitializationLines(activeClass), () => {
+    loadingOverlay.show(getInitializationLines(activeClass), () => {
       hasCompletedInitialization = true;
       viewport.showMedia();
       void viewport.play().catch(() => {
@@ -500,11 +500,11 @@ export function createAppShell(app: HTMLElement): void {
 
     // Config overlay: only shown when we're explicitly in config mode.
     if (nextMode === 'config') {
-      initializingOverlay.hide();
-      configOverlay.setSimulation(activeClass, getActiveValues());
-      configOverlay.show();
+      loadingOverlay.hide();
+      selectionOverlay.setSimulation(activeClass, getActiveValues());
+      selectionOverlay.show();
     } else {
-      configOverlay.hide();
+      selectionOverlay.hide();
     }
 
     // Display terminal: hidden outside display mode, but restored if the user
@@ -541,7 +541,7 @@ export function createAppShell(app: HTMLElement): void {
 
     // Initializing overlay: only shown during the boot sequence.
     if (nextMode !== 'initializing') {
-      initializingOverlay.hide();
+      loadingOverlay.hide();
     }
   }
 

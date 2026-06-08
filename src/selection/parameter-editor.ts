@@ -1,19 +1,15 @@
 /**
- * Parameter editor used inside the config overlay.
+ * Parameter editor — slider-based controls for the selection overlay.
  *
- * This module renders the slider-based parameter controls for the active
- * simulation family and reports value updates back to the app shell.
+ * Renders one range input per parameter and reports value updates back up.
  */
 
-import type { SimulationClass, SimParameter } from '../data/simulations.ts';
+import type { SimulationClass, SimParameter } from './data.ts';
 import { formatParameterValue, withUnit } from '../shared/format.ts';
 
 export interface ParameterEditorController {
-  /** Re-render the editor for a new simulation class. */
   setSimClass: (simClass: SimulationClass, nextValues?: Record<string, number>) => void;
-  /** Replace the current value map while staying on the same class. */
   setValues: (nextValues: Record<string, number>) => void;
-  /** Return a copy of the current edited values. */
   getValues: () => Record<string, number>;
 }
 
@@ -39,16 +35,6 @@ export function createParameterEditor(
   let currentClass = initialSimClass;
   let values = { ...initialValues };
 
-  /**
-   * Render the full editor for a given simulation family.
-   *
-   * This function intentionally rebuilds the control list; the UI is small and
-   * rebuilding keeps the logic straightforward.
-   *
-   * @param simClass - Simulation family whose parameters are being edited.
-   * @param nextValues - Optional pre-existing values to seed the controls.
-   * @returns void
-   */
   function render(
     simClass: SimulationClass,
     nextValues?: Record<string, number>,
@@ -76,12 +62,6 @@ export function createParameterEditor(
     emitChange();
   }
 
-  /**
-   * Build one parameter slider row.
-   *
-   * @param param - Parameter schema.
-   * @returns Wrapper element for the parameter control.
-   */
   function createParamControl(param: SimParameter): HTMLElement {
     const wrapper = document.createElement('section');
     wrapper.className = 'param';
@@ -111,19 +91,9 @@ export function createParameterEditor(
     slider.value = String(values[param.id] ?? param.defaultValue);
     slider.setAttribute('aria-label', param.label);
 
-    /**
-     * Sync UI + internal value map for this parameter.
-     *
-     * Updates three things in step: the stored value, the slider position (with
-     * its fill track), and the numeric readout next to the slider.
-     *
-     * @param value - Next numeric value.
-     * @returns void
-     */
     function sync(value: number): void {
       values[param.id] = value;
       slider.value = String(value);
-      // The --fill custom property drives the slider track's filled portion via CSS.
       slider.style.setProperty(
         '--fill',
         `${calculateFill(value, param.min, param.max)}%`,
@@ -164,11 +134,6 @@ export function createParameterEditor(
     return wrapper;
   }
 
-  /**
-   * Notify the parent with a defensive copy of the current values.
-   *
-   * @returns void
-   */
   function emitChange(): void {
     onChange({ ...values });
   }
@@ -188,26 +153,12 @@ export function createParameterEditor(
   };
 }
 
-/**
- * Build the default parameter value map for a simulation family.
- *
- * @param simClass - Simulation family schema.
- * @returns Values keyed by parameter id.
- */
 function createDefaultValues(simClass: SimulationClass): Record<string, number> {
   return Object.fromEntries(
     simClass.parameters.map((parameter) => [parameter.id, parameter.defaultValue]),
   );
 }
 
-/**
- * Compute a 0..100 fill percentage for styling a range input.
- *
- * @param value - Current value.
- * @param min - Minimum allowed value.
- * @param max - Maximum allowed value.
- * @returns Fill percentage in the range 0..100.
- */
 function calculateFill(value: number, min: number, max: number): number {
   if (max === min) {
     return 0;

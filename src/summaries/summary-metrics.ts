@@ -2,13 +2,12 @@
  * Summary metric derivation.
  *
  * This module converts a simulation configuration plus the current parameter
- * values into a dictionary of summary metrics. Keeping this logic outside the UI
- * component makes the display layer easier to understand and gives the domain
- * rules a single home.
+ * values into a dictionary of summary metrics. Keeping this logic in the same
+ * directory as the summary overlay makes the feature boundary explicit.
  */
 
-import type { SimulationClass } from '../../data/simulations.ts';
-import type { VideoRunMetadata } from './video-run-metadata.ts';
+import type { SimulationClass } from '../selection/data.ts';
+import type { VideoRunMetadata } from '../selection/video-run-metadata.ts';
 
 export interface SummaryMetricValue {
   label: string;
@@ -143,5 +142,3 @@ function formatHoursFromSeconds(totalSeconds: number): string {
     .replace(/\.0+$|(?<=\..*?)0+$/g, '')
     .replace(/\.$/, '');
 }
-
-

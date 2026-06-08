@@ -1,15 +1,9 @@
 /**
  * Theme model, persistence, and picker UI.
  *
- * Responsibilities:
- * - Define the set of supported themes (ids + human labels + tiny ASCII icons).
- * - Persist the active theme to `localStorage`.
- * - Apply the active theme to the document root via `data-theme`.
- * - Render the settings-panel theme picker and keep it in sync.
- *
- * Non-goals:
- * - This module does not define CSS tokens; those live in `src/style.css`.
- * - This module does not own app-level state; callers decide when to apply.
+ * Defines supported themes, persists the active choice to localStorage, and
+ * applies it to the document root via `data-theme`. CSS tokens live in
+ * `src/style.css`.
  */
 
 const STORAGE_KEY = 'universe-engine-theme';
@@ -31,7 +25,6 @@ export const THEMES: ThemeOption[] = [
 ];
 
 export interface ThemePickerController {
-  /** Visually mark a theme as active without rebuilding the picker. */
   setActive: (id: ThemeId) => void;
 }
 
@@ -48,10 +41,6 @@ export function getInitialTheme(): ThemeId {
 /**
  * Apply a theme to the document and persist the choice.
  *
- * Setting `data-theme` on the `<html>` element triggers CSS custom property
- * overrides (defined in `src/style.css`) that swap the entire color palette
- * and visual language. We also save the selection so it survives page reloads.
- *
  * @param id - Theme id to activate.
  * @returns void
  */
@@ -63,9 +52,6 @@ export function applyTheme(id: ThemeId): void {
 /**
  * Render the theme picker UI.
  *
- * The picker is a simple list of buttons. It is intentionally state-light:
- * callers own the current theme id and re-apply it to the document.
- *
  * @param container - Host element to mount into.
  * @param initialTheme - Theme id to show as initially active.
  * @param onChange - Callback invoked after a user picks a theme.
@@ -76,15 +62,12 @@ export function createThemePicker(
   initialTheme: ThemeId,
   onChange: (theme: ThemeId) => void,
 ): ThemePickerController {
-  // Root wrapper so the parent overlay can position the picker as one block.
   const root = document.createElement('div');
   root.className = 'theme-picker';
 
-  // Keep direct references to each button so we can cheaply toggle active styling later.
   const buttons = new Map<ThemeId, HTMLButtonElement>();
 
   for (const theme of THEMES) {
-    // Each button represents one complete theme preset.
     const button = document.createElement('button');
     button.className = 'theme-picker__option';
     button.type = 'button';
@@ -93,28 +76,17 @@ export function createThemePicker(
       <span class="theme-picker__label">${theme.label}</span>
     `;
     button.addEventListener('click', () => {
-      // Update the local button state immediately for responsiveness.
       setActive(theme.id);
-
-      // Then notify the parent so it can apply the real theme to the document.
       onChange(theme.id);
     });
     root.appendChild(button);
     buttons.set(theme.id, button);
   }
 
-  // Render the picker first, then apply the initial active style.
   container.appendChild(root);
   setActive(initialTheme);
 
-  /**
-   * Update active styling for all theme buttons.
-   *
-   * @param id - Theme id to mark as active.
-   * @returns void
-   */
   function setActive(id: ThemeId) {
-    // Walk every button and mark exactly one as active.
     for (const [themeId, button] of buttons.entries()) {
       const isActive = themeId === id;
       button.classList.toggle('active', isActive);
@@ -125,12 +97,6 @@ export function createThemePicker(
   return { setActive };
 }
 
-/**
- * Narrow an unknown persisted value to a valid `ThemeId`.
- *
- * @param value - Raw value read from `localStorage`.
- * @returns True when `value` is a known theme id.
- */
 function isThemeId(value: string | null): value is ThemeId {
   return THEMES.some((theme) => theme.id === value);
 }

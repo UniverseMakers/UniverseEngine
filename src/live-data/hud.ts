@@ -1,5 +1,5 @@
 /**
- * Telemetry panel (display-mode HUD).
+ * Telemetry HUD (display-mode live stats panel).
  *
  * The telemetry panel shows a small list of metrics in the top-right corner of
  * display mode. Metrics can come from three sources:
@@ -11,7 +11,7 @@ import type {
   SimulationClass,
   StatDisplayConfig,
   SummaryStatId,
-} from '../data/simulations.ts';
+} from '../selection/data.ts';
 import {
   formatMaybeNumber,
   formatParameterValue,
@@ -28,7 +28,7 @@ export interface TelemetryPanelController {
 }
 
 /**
- * Create and mount the telemetry panel.
+ * Create and mount the telemetry HUD panel.
  *
  * @param container - Host element to mount into.
  * @returns Controller for updating visible metrics.

@@ -40,8 +40,9 @@ export async function loadLiveStatsCsv(url: string): Promise<LiveStatsDataset> {
 /**
  * Sample the loaded frames at the requested playback time.
  *
- * @param frames - Parsed live-stat frames.
+ * @param dataset - Parsed live-stat dataset.
  * @param timeSeconds - Playback timestamp in seconds.
+ * @param durationSeconds - Full video duration (for row-based datasets).
  * @returns Key/value map suitable for UI display.
  */
 export function sampleLiveStats(
@@ -107,6 +108,8 @@ function parseCsv(text: string): LiveStatsDataset {
 
   const headers = splitCsvLine(lines[0]);
 
+  // If the first column is "t", this is a time-keyed dataset where each row
+  // has a timestamp and we interpolate between rows during playback.
   if (headers[0] === 't') {
     return {
       mode: 'time',
@@ -126,6 +129,8 @@ function parseCsv(text: string): LiveStatsDataset {
     };
   }
 
+  // Otherwise this is a row-based dataset (no timestamp column). We treat each
+  // row as one discrete frame indexed by its position in the file.
   return {
     mode: 'row',
     frames: lines.slice(1).map((line, rowIndex) => {

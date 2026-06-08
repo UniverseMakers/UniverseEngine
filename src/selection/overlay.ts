@@ -1,13 +1,14 @@
 /**
- * Config overlay.
+ * Selection overlay (parameter configuration + settings).
  *
- * This is the primary control surface for the application. It combines:
- * - parameter editing
+ * This is the primary control surface for choosing simulation parameters.
+ * It combines:
+ * - parameter editing sliders
  * - theme settings
- * - the run trigger that moves the app into initializing mode
+ * - the run trigger that moves the app into loading/display mode
  */
 
-import type { SimulationClass } from '../data/simulations.ts';
+import type { SimulationClass } from './data.ts';
 import { getCredits } from '../data/credits.ts';
 import { createParameterEditor } from './parameter-editor.ts';
 import {
@@ -16,22 +17,17 @@ import {
   type ThemePickerController,
 } from './theme.ts';
 
-export interface ConfigOverlayController {
-  /** Reveal the configuration overlay. */
+export interface SelectionOverlayController {
   show: () => void;
-  /** Hide the overlay without destroying its DOM. */
   hide: () => void;
-  /** Rebind the form to a different simulation class and value set. */
   setSimulation: (simClass: SimulationClass, values: Record<string, number>) => void;
-  /** Keep the embedded theme picker selection synchronized. */
   setTheme: (theme: ThemeId) => void;
-  /** Switch which internal section is visible. */
-  setView: (view: ConfigOverlayView) => void;
+  setView: (view: SelectionOverlayView) => void;
 }
 
-export type ConfigOverlayView = 'parameters' | 'settings' | 'credits' | 'terminal';
+export type SelectionOverlayView = 'parameters' | 'settings' | 'credits' | 'terminal';
 
-interface ConfigOverlayOptions {
+interface SelectionOverlayOptions {
   simClass: SimulationClass;
   values: Record<string, number>;
   theme: ThemeId;
@@ -40,38 +36,31 @@ interface ConfigOverlayOptions {
   onRun: () => void;
   onApplySettings: () => void;
   onClose: () => void;
-  initialView?: ConfigOverlayView;
+  initialView?: SelectionOverlayView;
 }
 
 /**
- * Create and mount the main configuration overlay.
- *
- * The overlay is created once and then updated/reused when simulation family,
- * parameter values, or theme selection changes.
+ * Create and mount the selection/configuration overlay.
  *
  * @param container - Overlay layer host element.
  * @param options - Initial state and callback hooks.
  * @returns Controller for showing/hiding and syncing state.
  */
-export function createConfigOverlay(
+export function createSelectionOverlay(
   container: HTMLElement,
-  options: ConfigOverlayOptions,
-): ConfigOverlayController {
-  // Full-screen overlay wrapper. This provides the dimmed glass backdrop.
+  options: SelectionOverlayOptions,
+): SelectionOverlayController {
   const overlay = document.createElement('section');
   overlay.className = 'overlay overlay--config';
   overlay.hidden = true;
   overlay.classList.add('is-hidden');
 
-  // Central panel that holds the full overlay content.
   const panel = document.createElement('div');
   panel.className = 'config-overlay';
 
-  // Shell splits the overlay into the left visual panel and the right controls panel.
   const shell = document.createElement('div');
   shell.className = 'config-overlay__shell';
 
-  // Left side: atmospheric copy and preview styling.
   const media = document.createElement('div');
   media.className = 'config-overlay__media';
   const mediaImage = document.createElement('img');
@@ -85,16 +74,13 @@ export function createConfigOverlay(
   `;
   media.prepend(mediaImage);
 
-  // Right side: the interactive controls the user actually edits.
   const controls = document.createElement('div');
   controls.className = 'config-overlay__controls';
   controls.dataset.view = options.initialView ?? 'parameters';
 
-  // Header contains settings access and a lightweight close action.
   const header = document.createElement('div');
   header.className = 'config-overlay__header';
 
-  // Center title block gives the overlay a strong identity.
   const titleBlock = document.createElement('div');
   titleBlock.className = 'config-overlay__title-block';
   titleBlock.innerHTML = `
@@ -102,7 +88,6 @@ export function createConfigOverlay(
     <h2 class="config-overlay__title">Simulation matrix</h2>
   `;
 
-  // Right-edge close action lets the user leave config without running.
   const closeButton = document.createElement('button');
   closeButton.className = 'config-overlay__close';
   closeButton.type = 'button';
@@ -117,7 +102,6 @@ export function createConfigOverlay(
   header.appendChild(titleBlock);
   header.appendChild(closeButton);
 
-  // Main editable section: parameter controls. This is allowed to grow and scroll.
   const parameterSection = document.createElement('section');
   parameterSection.className = 'config-overlay__section config-overlay__section--grow';
   parameterSection.dataset.section = 'parameters';
@@ -145,8 +129,6 @@ export function createConfigOverlay(
     '[data-credits]',
   ) as HTMLDivElement;
 
-  // Credits are repo-controlled YAML today (not user input), but we still render
-  // them via DOM APIs (not `innerHTML`) to keep the data flow safe and obvious.
   const credits = getCredits();
   creditsConsole.innerHTML = '';
 
@@ -183,7 +165,6 @@ export function createConfigOverlay(
     .querySelector('.config-overlay__console')
     ?.prepend(terminalProfileLine);
 
-  // Footer anchors the run call-to-action and explains what happens next.
   const footer = document.createElement('div');
   footer.className = 'config-overlay__footer';
 
@@ -194,7 +175,6 @@ export function createConfigOverlay(
 
   footer.appendChild(runButton);
 
-  // Physically assemble the right-hand controls column.
   controls.appendChild(header);
   controls.appendChild(parameterSection);
   controls.appendChild(settingsSection);
@@ -202,14 +182,12 @@ export function createConfigOverlay(
   controls.appendChild(terminalSection);
   controls.appendChild(footer);
 
-  // Physically assemble the whole overlay shell and mount it.
   shell.appendChild(media);
   shell.appendChild(controls);
   panel.appendChild(shell);
   overlay.appendChild(panel);
   container.appendChild(overlay);
 
-  // Create the three reusable child controllers that live inside this overlay.
   const parameterEditor = createParameterEditor(
     parametersHost,
     options.simClass,
@@ -222,24 +200,11 @@ export function createConfigOverlay(
     options.onThemeChange,
   );
 
-  // Close just hides the overlay; it does not clear any stored state.
   closeButton.addEventListener('click', options.onClose);
 
   applyView(options.initialView ?? 'parameters');
 
-  /**
-   * Apply the active internal view and keep header/footer labels consistent.
-   *
-   * The action button changes label based on the active section:
-   * - Parameters → "Run" (starts the simulation)
-   * - Settings   → "Apply" (applies theme changes without launching)
-   * - Credits/Terminal → "Close" (dismisses the overlay)
-   *
-   * @param view - View to activate.
-   * @returns void
-   */
-  function applyView(view: ConfigOverlayView): void {
-    // Update a data attribute so CSS can highlight the active section.
+  function applyView(view: SelectionOverlayView): void {
     controls.dataset.view = view;
     sectionLabel.textContent =
       view === 'parameters'
@@ -250,7 +215,6 @@ export function createConfigOverlay(
             ? 'Credits'
             : 'Terminal';
 
-    // The run button's label changes to match the active section's purpose.
     if (view === 'settings') {
       runButton.textContent = 'Apply';
     } else if (view === 'terminal' || view === 'credits') {
@@ -260,9 +224,8 @@ export function createConfigOverlay(
     }
   }
 
-  // The primary footer action changes by active overlay section.
   runButton.addEventListener('click', () => {
-    const activeView = controls.dataset.view as ConfigOverlayView;
+    const activeView = controls.dataset.view as SelectionOverlayView;
 
     if (activeView === 'settings') {
       options.onApplySettings();
@@ -284,28 +247,23 @@ export function createConfigOverlay(
 
   return {
     show() {
-      // Keep the DOM mounted and simply reveal it.
       overlay.hidden = false;
       overlay.classList.remove('is-hidden');
     },
     hide() {
-      // Hide the overlay and also collapse the settings card so it does not
-      // unexpectedly remain open next time config is shown.
       overlay.hidden = true;
       overlay.classList.add('is-hidden');
     },
     setSimulation(simClass: SimulationClass, values: Record<string, number>) {
-      // Sync the parameter editor and the preview copy to the latest external state.
       parameterEditor.setSimClass(simClass, values);
       mediaImage.src = simClass.placeholderImage;
       mediaImage.alt = `${simClass.label} preview`;
       terminalProfileLine.textContent = `> CURRENT_PROFILE :: ${simClass.label.toUpperCase()}`;
     },
     setTheme(theme: ThemeId) {
-      // Only the picker UI needs to update here; `main.ts` applies the real theme tokens.
       themePicker.setActive(theme);
     },
-    setView(view: ConfigOverlayView) {
+    setView(view: SelectionOverlayView) {
       applyView(view);
     },
   };

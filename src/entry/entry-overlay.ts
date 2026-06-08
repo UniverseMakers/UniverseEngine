@@ -7,7 +7,7 @@
  * Once a family is chosen, the app shell transitions into config mode.
  */
 
-import { SIMULATION_CLASSES, type SimulationClass } from '../data/simulations.ts';
+import { SIMULATION_CLASSES, type SimulationClass } from '../selection/data.ts';
 import { withBaseUrl } from '../shared/urls.ts';
 
 export interface EntryOverlayController {
@@ -53,7 +53,6 @@ export function createEntryOverlay(
   actions.className = 'entry-overlay__actions';
 
   for (const simClass of SIMULATION_CLASSES) {
-    // Each button is a single "choose this family" call-to-action.
     const button = document.createElement('button');
     button.className = 'entry-overlay__button';
     button.type = 'button';
@@ -61,7 +60,6 @@ export function createEntryOverlay(
     button.innerHTML = `
       <span class="entry-overlay__button-label">${simClass.label}</span>
     `;
-    // Delegate back to the shell so it can update global state and switch modes.
     button.addEventListener('click', () => onSelect(simClass));
     actions.appendChild(button);
   }
@@ -72,12 +70,10 @@ export function createEntryOverlay(
 
   return {
     show() {
-      // Reveal without rebuilding.
       overlay.hidden = false;
       overlay.classList.remove('is-hidden');
     },
     hide() {
-      // Hide without destroying DOM.
       overlay.hidden = true;
       overlay.classList.add('is-hidden');
     },

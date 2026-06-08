@@ -3,11 +3,11 @@
  *
  * Each simulation class owns a YAML file containing N entries, where each entry
  * offers multiple candidate lines. At runtime we pick one random line from each
- * entry.
+ * entry to keep the boot sequence varied.
  */
 
 import { parse } from 'yaml';
-import type { SimulationClass } from '../data/simulations.ts';
+import type { SimulationClass } from '../selection/data.ts';
 
 import planetaryRaw from './planetary.yaml?raw';
 import galaxyRaw from './galaxy.yaml?raw';
@@ -44,7 +44,6 @@ const RAW_BY_CLASS: Record<SimulationClass['id'], string> = {
 export function getInitializationLines(
   simClass: SimulationClass,
 ): InitializationLine[] {
-  // Parse the YAML for this simulation family. Each entry yields exactly one line.
   const parsed = parse(RAW_BY_CLASS[simClass.id]) as InitializationOptionFileEntry[];
 
   return parsed.flatMap((entry, index) => {

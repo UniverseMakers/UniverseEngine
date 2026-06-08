@@ -6,7 +6,7 @@
  * lines derived from the active simulation and selected parameters.
  */
 
-import type { SimulationClass } from '../data/simulations.ts';
+import type { SimulationClass } from '../selection/data.ts';
 import { formatParameterValue, withUnit } from '../shared/format.ts';
 
 export interface DisplayTerminalController {
