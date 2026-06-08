@@ -35,6 +35,7 @@ export interface ThemePickerController {
  */
 export function getInitialTheme(): ThemeId {
   const saved = localStorage.getItem(STORAGE_KEY);
+
   return isThemeId(saved) ? saved : 'tron';
 }
 
@@ -63,12 +64,14 @@ export function createThemePicker(
   onChange: (theme: ThemeId) => void,
 ): ThemePickerController {
   const root = document.createElement('div');
+
   root.className = 'theme-picker';
 
   const buttons = new Map<ThemeId, HTMLButtonElement>();
 
   for (const theme of THEMES) {
     const button = document.createElement('button');
+
     button.className = 'theme-picker__option';
     button.type = 'button';
     button.innerHTML = `
@@ -89,6 +92,7 @@ export function createThemePicker(
   function setActive(id: ThemeId) {
     for (const [themeId, button] of buttons.entries()) {
       const isActive = themeId === id;
+
       button.classList.toggle('active', isActive);
       button.setAttribute('aria-pressed', String(isActive));
     }

@@ -33,6 +33,7 @@ export function getCredits(): CreditEntry[] {
   }
 
   const credits: CreditEntry[] = [];
+
   for (const entry of parsed) {
     // Skip anything that isn't an object (scalars, nulls, arrays).
     if (!entry || typeof entry !== 'object') {
@@ -41,6 +42,7 @@ export function getCredits(): CreditEntry[] {
 
     // Extract and validate the `text` field — it must be a non-empty string.
     const text = (entry as { text?: unknown }).text;
+
     if (typeof text !== 'string' || text.trim().length === 0) {
       continue;
     }

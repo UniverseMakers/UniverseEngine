@@ -29,6 +29,7 @@ export function createParameterEditor(
   onChange: (values: Record<string, number>) => void,
 ): ParameterEditorController {
   const root = document.createElement('div');
+
   root.className = 'parameter-editor';
   container.appendChild(root);
 
@@ -44,6 +45,7 @@ export function createParameterEditor(
     root.innerHTML = '';
 
     const heading = document.createElement('div');
+
     heading.className = 'parameter-editor__heading';
     heading.innerHTML = `
       <p class="parameter-editor__eyebrow">Parameter matrix</p>
@@ -52,6 +54,7 @@ export function createParameterEditor(
     root.appendChild(heading);
 
     const list = document.createElement('div');
+
     list.className = 'parameter-editor__list';
 
     for (const parameter of simClass.parameters) {
@@ -64,25 +67,31 @@ export function createParameterEditor(
 
   function createParamControl(param: SimParameter): HTMLElement {
     const wrapper = document.createElement('section');
+
     wrapper.className = 'param';
 
     const labelRow = document.createElement('div');
+
     labelRow.className = 'param__label';
     const displayUnit = param.displayUnit ?? param.unit;
 
     const name = document.createElement('div');
+
     name.innerHTML = `
       <span class="param__name">${param.label}</span>
       <span class="param__range">${withUnit(formatParameterValue(param.min, param.step, { scale: param.valueScale, format: param.displayFormat, significantFigures: param.displaySignificantFigures }), displayUnit)} - ${withUnit(formatParameterValue(param.max, param.step, { scale: param.valueScale, format: param.displayFormat, significantFigures: param.displaySignificantFigures }), displayUnit)}</span>
     `;
 
     const readout = document.createElement('div');
+
     readout.className = 'param__readout';
 
     const controls = document.createElement('div');
+
     controls.className = 'param__controls';
 
     const slider = document.createElement('input');
+
     slider.className = 'param__slider';
     slider.type = 'range';
     slider.min = String(param.min);
@@ -131,6 +140,7 @@ export function createParameterEditor(
     controls.appendChild(slider);
     wrapper.appendChild(labelRow);
     wrapper.appendChild(controls);
+
     return wrapper;
   }
 

@@ -23,12 +23,15 @@ export function createTimeline(
   onChange?: TimelineChangeCallback,
 ): TimelineController {
   const timeline = document.createElement('div');
+
   timeline.className = 'timeline';
 
   const barRow = document.createElement('div');
+
   barRow.className = 'timeline__bar-row';
 
   const slider = document.createElement('input');
+
   slider.className = 'timeline__slider';
   slider.type = 'range';
   slider.min = '0';
@@ -39,17 +42,21 @@ export function createTimeline(
   slider.setAttribute('aria-label', 'Simulation time');
 
   const bottomRow = document.createElement('div');
+
   bottomRow.className = 'timeline__bottom-row';
 
   const leftCluster = document.createElement('div');
+
   leftCluster.className = 'timeline__left-cluster';
 
   const current = document.createElement('span');
+
   current.className = 'timeline__current';
   current.textContent = 'STATUS: IDLE_OBSERVATION';
 
   slider.addEventListener('input', () => {
     const position = parseInt(slider.value, 10) / 1000;
+
     slider.style.setProperty('--fill', `${position * 100}%`);
     current.textContent = `STATUS: IDLE_OBSERVATION [T=${position.toFixed(2)}]`;
     onChange?.(position);
@@ -64,6 +71,7 @@ export function createTimeline(
   return {
     setPosition(t: number) {
       const clamped = Math.max(0, Math.min(1, t));
+
       slider.value = String(Math.round(clamped * 1000));
       slider.style.setProperty('--fill', `${clamped * 100}%`);
       current.textContent = `STATUS: IDLE_OBSERVATION [T=${clamped.toFixed(2)}]`;

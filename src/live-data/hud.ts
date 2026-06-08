@@ -32,10 +32,12 @@ export interface TelemetryPanelController {
 export function createTelemetryPanel(container: HTMLElement): TelemetryPanelController {
   // Outer card element shown in the top-right of display mode.
   const panel = document.createElement('aside');
+
   panel.className = 'data-panel';
 
   // Metric rows are rebuilt whenever the active class or values change.
   const metricList = document.createElement('div');
+
   metricList.className = 'data-panel__metrics';
 
   panel.appendChild(metricList);
@@ -57,6 +59,7 @@ export function createTelemetryPanel(container: HTMLElement): TelemetryPanelCont
       for (const stat of simClass.metadata.liveStats) {
         const metric = selectMetric(stat, availableMetrics);
         const row = document.createElement('div');
+
         row.className = 'data-panel__metric';
         row.innerHTML = `
           <span class="data-panel__metric-label">${metric.label}</span>
@@ -181,6 +184,7 @@ function selectMetric(
     stat,
     Boolean(liveMetric),
   );
+
   return {
     label: stat.label ?? liveMetric?.label ?? metric.label,
     value: withUnit(resolvedValue, stat.unit),

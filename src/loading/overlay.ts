@@ -27,14 +27,17 @@ export function createLoadingOverlay(container: HTMLElement): LoadingOverlayCont
   const { TYPING_MS_PER_CHAR, FINAL_PAUSE_MS } = INITIALIZATION;
 
   const overlay = document.createElement('section');
+
   overlay.className = 'overlay overlay--initializing';
   overlay.hidden = true;
   overlay.classList.add('is-hidden');
 
   const terminal = document.createElement('div');
+
   terminal.className = 'terminal';
 
   const header = document.createElement('div');
+
   header.className = 'terminal__header';
   header.innerHTML = `
     <div class="terminal__header-left">
@@ -48,6 +51,7 @@ export function createLoadingOverlay(container: HTMLElement): LoadingOverlayCont
 
   const loadReadout = header.querySelector('.terminal__load') as HTMLSpanElement;
   const log = document.createElement('div');
+
   log.className = 'terminal__log';
 
   terminal.appendChild(header);
@@ -62,6 +66,7 @@ export function createLoadingOverlay(container: HTMLElement): LoadingOverlayCont
     for (const timer of timers) {
       window.clearTimeout(timer);
     }
+
     timers = [];
   }
 
@@ -75,20 +80,24 @@ export function createLoadingOverlay(container: HTMLElement): LoadingOverlayCont
         },
         Math.max(0, ms),
       );
+
       timers.push(timer);
     });
   }
 
   function setLoad(progress: number) {
     const percent = Math.round(Math.max(0, Math.min(1, progress)) * 100);
+
     loadReadout.textContent = `LOAD: ${percent}%`;
   }
 
   async function typeLine(line: string, token: number): Promise<void> {
     const row = document.createElement('div');
+
     row.className = 'terminal__line';
 
     const cursor = createCursor();
+
     row.appendChild(cursor);
     log.appendChild(row);
 
@@ -98,6 +107,7 @@ export function createLoadingOverlay(container: HTMLElement): LoadingOverlayCont
       }
 
       const character = line[index];
+
       row.insertBefore(document.createTextNode(character), cursor);
       log.scrollTop = log.scrollHeight;
       await wait(TYPING_MS_PER_CHAR, token);
@@ -108,8 +118,10 @@ export function createLoadingOverlay(container: HTMLElement): LoadingOverlayCont
 
   function createCursor(): HTMLSpanElement {
     const cursor = document.createElement('span');
+
     cursor.className = 'terminal__cursor';
     cursor.textContent = '█';
+
     return cursor;
   }
 
@@ -118,6 +130,7 @@ export function createLoadingOverlay(container: HTMLElement): LoadingOverlayCont
       clearTimers();
       sequenceToken += 1;
       const token = sequenceToken;
+
       log.innerHTML = '';
       overlay.hidden = false;
       overlay.classList.remove('is-hidden');
@@ -129,6 +142,7 @@ export function createLoadingOverlay(container: HTMLElement): LoadingOverlayCont
         }
 
         const stampedLine = `${formatTimestamp(index)} ${line.text}`;
+
         await typeLine(stampedLine, token);
         setLoad((index + 1) / Math.max(1, lines.length));
       }
@@ -155,6 +169,7 @@ function formatTimestamp(totalSeconds: number): string {
   const hours = Math.floor(wholeSeconds / 3600);
   const minutes = Math.floor((wholeSeconds % 3600) / 60);
   const seconds = wholeSeconds % 60;
+
   return `[${pad(hours)}:${pad(minutes)}:${pad(seconds)}]`;
 }
 

@@ -91,11 +91,13 @@ export async function findNearestVideo(
   values: Record<string, number>,
 ): Promise<VideoMatch> {
   const manifestMatch = await findManifestBackedRun(simClassId, params, values);
+
   if (manifestMatch) {
     return manifestMatch;
   }
 
   const fallbackUrl = getLocalPlaceholderVideo(simClassId);
+
   return {
     url: fallbackUrl,
     liveDataUrl: getLocalPlaceholderStats(simClassId),
@@ -111,6 +113,7 @@ async function loadRunManifest(): Promise<RunManifest> {
         if (!response.ok) {
           throw new Error('Failed to load run manifest');
         }
+
         return (await response.json()) as RunManifest;
       })
       .catch(() => ({ version: 1, runs: [] }));
@@ -134,6 +137,7 @@ async function findManifestBackedRun(
 ): Promise<VideoMatch | null> {
   const manifest = await loadRunManifest();
   const runs = manifest.runs.filter((entry) => entry.simulationId === simClassId);
+
   if (runs.length === 0) {
     return null;
   }
@@ -143,6 +147,7 @@ async function findManifestBackedRun(
 
   for (const entry of runs.slice(1)) {
     const distance = getEntryDistance(entry, params, values);
+
     if (distance < bestDistance) {
       bestEntry = entry;
       bestDistance = distance;
@@ -196,6 +201,7 @@ function getEntryDistance(
       entry.parameterDefaults?.[parameter.id] ??
       parameter.defaultValue;
     const range = Math.max(parameter.max - parameter.min, 1e-9);
+
     return sum + Math.abs(selected - candidate) / range;
   }, 0);
 

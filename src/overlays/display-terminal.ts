@@ -37,24 +37,29 @@ export function createDisplayTerminal(
 ): DisplayTerminalController {
   // Build the outer panel container that will later be shown/hidden.
   const panel = document.createElement('aside');
+
   panel.className = 'display-terminal is-hidden';
   panel.hidden = true;
 
   // Build the terminal header so the viewer has a clear title and close action.
   const header = document.createElement('div');
+
   header.className = 'display-terminal__header';
 
   // Group the title and subtitle so they align as a single text block.
   const titleWrap = document.createElement('div');
+
   titleWrap.className = 'display-terminal__title-wrap';
 
   // Main title names the currently displayed log panel.
   const title = document.createElement('div');
+
   title.className = 'display-terminal__title';
   title.textContent = 'Simulation Logs';
 
   // Subtitle explains that this is still placeholder/demo content.
   const subtitle = document.createElement('div');
+
   subtitle.className = 'display-terminal__subtitle';
   subtitle.textContent = 'Operator-side stream preview';
 
@@ -63,6 +68,7 @@ export function createDisplayTerminal(
 
   // The close button allows the shell to hide the viewer without leaving display mode.
   const closeButton = document.createElement('button');
+
   closeButton.className = 'display-terminal__close';
   closeButton.type = 'button';
   closeButton.setAttribute('aria-label', 'Close terminal viewer');
@@ -70,11 +76,13 @@ export function createDisplayTerminal(
 
   // Meta text is a compact status line under the title bar.
   const meta = document.createElement('div');
+
   meta.className = 'display-terminal__meta';
   meta.textContent = 'STREAM_MODE :: PLACEHOLDER';
 
   // The log area itself is rebuilt every time the simulation changes.
   const log = document.createElement('div');
+
   log.className = 'display-terminal__log';
 
   header.appendChild(titleWrap);
@@ -97,11 +105,13 @@ export function createDisplayTerminal(
       // Toggle by checking the actual hidden state of the root panel.
       // Returns the *new* visibility: true if now visible, false if now hidden.
       const nextVisible = panel.hidden;
+
       if (nextVisible) {
         show();
       } else {
         hide();
       }
+
       return nextVisible;
     },
     update(simClass: SimulationClass, values: Record<string, number>) {
@@ -115,6 +125,7 @@ export function createDisplayTerminal(
 
       for (const line of createLogLines(simClass, values)) {
         const row = document.createElement('div');
+
         row.className = 'display-terminal__line';
         row.textContent = line;
         log.appendChild(row);
@@ -158,6 +169,7 @@ function createLogLines(
   const formattedParams = simClass.parameters.map((parameter, index) => {
     const value = values[parameter.id] ?? parameter.defaultValue;
     const timestamp = `[00:${String(index).padStart(2, '0')}:0${index}]`;
+
     return `${timestamp} PARAM_${parameter.id.toUpperCase()} :: ${withUnit(formatParameterValue(value, parameter.step, { scale: parameter.valueScale, format: parameter.displayFormat, significantFigures: parameter.displaySignificantFigures }), parameter.displayUnit ?? parameter.unit)}`;
   });
 

@@ -38,6 +38,7 @@ export function createDisplayMenu(
 ): DisplayMenuController {
   // Three stacked spans → the classic hamburger icon. CSS handles the styling.
   const trigger = document.createElement('button');
+
   trigger.className = 'display-button';
   trigger.type = 'button';
   trigger.innerHTML = '<span></span><span></span><span></span>';
@@ -45,9 +46,11 @@ export function createDisplayMenu(
   host.appendChild(trigger);
 
   const menu = document.createElement('div');
+
   menu.className = 'display-menu';
 
   const header = document.createElement('div');
+
   header.className = 'display-menu__header';
   header.textContent = 'Core Menu';
   menu.appendChild(header);
@@ -107,6 +110,7 @@ export function createDisplayMenu(
    */
   function createMenuButton(label: string, onClick: () => void): HTMLButtonElement {
     const button = document.createElement('button');
+
     button.className = 'display-menu__item';
     button.type = 'button';
     button.innerHTML = `
@@ -114,6 +118,7 @@ export function createDisplayMenu(
       <span class="display-menu__item-label">${label}</span>
     `;
     button.addEventListener('click', onClick);
+
     return button;
   }
 

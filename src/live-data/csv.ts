@@ -29,11 +29,13 @@ export const EMPTY_LIVE_STATS_DATASET: LiveStatsDataset = {
  */
 export async function loadLiveStatsCsv(url: string): Promise<LiveStatsDataset> {
   const response = await fetch(url);
+
   if (!response.ok) {
     throw new Error(`Failed to load live stats CSV: ${url}`);
   }
 
   const text = await response.text();
+
   return parseCsv(text);
 }
 
@@ -57,6 +59,7 @@ export function sampleLiveStats(
 
   // Time-based datasets: find the two neighboring keyframes and interpolate.
   const frames = dataset.frames;
+
   if (frames.length === 0) {
     return {};
   }
@@ -68,6 +71,7 @@ export function sampleLiveStats(
 
   // After or at the last frame? Return the last frame's values.
   const lastFrame = frames[frames.length - 1];
+
   if (timeSeconds >= lastFrame.t) {
     return { ...lastFrame.values };
   }
@@ -83,6 +87,7 @@ export function sampleLiveStats(
 
     // Compute the interpolation fraction and lerp between the two frames.
     const fraction = (timeSeconds - start.t) / Math.max(end.t - start.t, 1e-9);
+
     return interpolateFrameValues(start.values, end.values, fraction);
   }
 
@@ -172,6 +177,7 @@ function sampleRowBasedStats(
 
   const fraction = Math.max(0, Math.min(1, timeSeconds / durationSeconds));
   const index = Math.round(fraction * (frames.length - 1));
+
   return { ...frames[index].values };
 }
 
@@ -204,6 +210,7 @@ function splitCsvLine(line: string): string[] {
   }
 
   cells.push(current);
+
   return cells;
 }
 
@@ -237,6 +244,7 @@ function interpolateFrameValues(
     if (Number.isFinite(startNumber) && Number.isFinite(endNumber)) {
       // Numeric interpolation: lerp between the two values.
       const value = startNumber + (endNumber - startNumber) * fraction;
+
       output[key] = formatNumber(value);
       continue;
     }

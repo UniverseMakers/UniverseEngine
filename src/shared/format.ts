@@ -22,6 +22,7 @@ export function formatValueByStep(value: number, step: number): string {
   // Never show more than two decimal places in the UI. This keeps panels stable
   // as values update (especially for live stats) while still conveying precision.
   const decimals = Math.min(countDecimals(step), 2);
+
   return value.toFixed(decimals);
 }
 
@@ -51,16 +52,19 @@ export function formatMaybeNumber(
   options: { scale?: number; integer?: boolean } = {},
 ): string {
   const trimmed = raw.trim();
+
   if (trimmed.length === 0) {
     return raw;
   }
 
   const numeric = Number(trimmed);
+
   if (!Number.isFinite(numeric)) {
     return raw;
   }
 
   const scaled = numeric * (options.scale ?? 1);
+
   if (options.integer) {
     return Math.max(0, Math.round(scaled)).toLocaleString(undefined);
   }
@@ -90,11 +94,13 @@ export function formatNumericString(
   } = {},
 ): string {
   const trimmed = raw.trim();
+
   if (trimmed.length === 0) {
     return raw;
   }
 
   const numeric = Number(trimmed);
+
   if (!Number.isFinite(numeric)) {
     return raw;
   }
@@ -109,6 +115,7 @@ export function formatNumericString(
 
   if (mode === 'scientific') {
     const significantFigures = Math.max(1, options.precision ?? 3);
+
     return (
       scaled
         .toExponential(significantFigures - 1)
@@ -120,6 +127,7 @@ export function formatNumericString(
   }
 
   const decimals = Math.max(0, options.precision ?? 2);
+
   return scaled
     .toFixed(decimals)
     .replace(/\.0+$|(?<=\..*?)0+$/g, '')
@@ -149,6 +157,7 @@ export function formatParameterValue(
 
   if (options.format === 'scientific') {
     const significantFigures = Math.max(1, options.significantFigures ?? 3);
+
     return scaledValue
       .toExponential(significantFigures - 1)
       .replace('e+', 'e')
@@ -169,5 +178,6 @@ export function formatParameterValue(
 export function countDecimals(step: number): number {
   const asString = String(step);
   const dotIndex = asString.indexOf('.');
+
   return dotIndex === -1 ? 0 : asString.length - dotIndex - 1;
 }

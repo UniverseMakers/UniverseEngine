@@ -28,6 +28,7 @@ export function createViewSwitcher(
   options: ViewSwitcherOptions,
 ): ViewSwitcherController {
   const root = document.createElement('div');
+
   root.className = 'view-switcher is-hidden';
   container.appendChild(root);
 
@@ -37,6 +38,7 @@ export function createViewSwitcher(
 
       if (viewOptions.length <= 1) {
         root.classList.add('is-hidden');
+
         return;
       }
 
@@ -44,6 +46,7 @@ export function createViewSwitcher(
 
       for (const view of viewOptions) {
         const button = document.createElement('button');
+
         button.className = 'view-switcher__button';
         button.type = 'button';
         button.dataset.viewId = view.id;
@@ -52,8 +55,10 @@ export function createViewSwitcher(
         button.setAttribute('aria-label', view.label ?? view.id);
 
         const icon = createViewIcon(view.icon);
+
         if (icon) {
           const iconWrap = document.createElement('span');
+
           iconWrap.className = 'view-switcher__icon';
           iconWrap.setAttribute('aria-hidden', 'true');
           iconWrap.appendChild(icon);
@@ -61,6 +66,7 @@ export function createViewSwitcher(
         }
 
         const label = document.createElement('span');
+
         label.className = 'view-switcher__label';
         label.textContent = view.label ?? view.id;
         button.appendChild(label);
@@ -111,6 +117,7 @@ function createViewIcon(iconId?: string): SVGSVGElement | null {
 
 function createSvg(content: string): SVGSVGElement {
   const template = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+
   template.setAttribute('viewBox', '0 0 24 24');
   template.setAttribute('fill', 'none');
   template.setAttribute('stroke', 'currentColor');
@@ -118,5 +125,6 @@ function createSvg(content: string): SVGSVGElement {
   template.setAttribute('stroke-linecap', 'round');
   template.setAttribute('stroke-linejoin', 'round');
   template.innerHTML = content;
+
   return template;
 }

@@ -39,9 +39,11 @@ export function createViewport(
   initialSrc: string,
 ): ViewportController {
   const viewport = document.createElement('div');
+
   viewport.className = 'viewport';
 
   const video = document.createElement('video');
+
   video.className = 'viewport__media is-empty';
   video.src = initialSrc;
   video.loop = false;
@@ -78,6 +80,7 @@ export function createViewport(
     window.setTimeout(() => {
       if (video.src.endsWith(src)) {
         video.classList.remove('fade-out');
+
         return;
       }
 
@@ -96,6 +99,7 @@ export function createViewport(
           video.duration > 0
         ) {
           const clamped = Math.max(0, Math.min(0.999, seekFraction));
+
           video.currentTime = clamped * video.duration;
         } else {
           video.currentTime = 0;
@@ -136,6 +140,7 @@ export function createViewport(
     }
 
     const clamped = Math.max(0, Math.min(1, fraction));
+
     video.currentTime = clamped * video.duration;
   }
 
@@ -168,6 +173,7 @@ export function createViewport(
       if (!Number.isFinite(video.duration) || video.duration <= 0) {
         return 0;
       }
+
       return video.currentTime / video.duration;
     },
     isPaused: () => video.paused,

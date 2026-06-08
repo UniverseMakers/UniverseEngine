@@ -116,6 +116,7 @@ export function createAppShell(app: HTMLElement): void {
 
   // Build the display HUD container that appears in config/display contexts.
   const displayChrome = document.createElement('div');
+
   displayChrome.className = 'display-chrome';
   displayChrome.classList.add('is-hidden');
   app.appendChild(displayChrome);
@@ -123,6 +124,7 @@ export function createAppShell(app: HTMLElement): void {
   // Mobile-only helper overlay shown when the device is in landscape.
   // We mount it unconditionally; CSS media queries control visibility.
   const orientationOverlay = document.createElement('div');
+
   orientationOverlay.className = 'orientation-overlay';
   orientationOverlay.innerHTML = `
     <div class="orientation-overlay__card" role="status" aria-live="polite">
@@ -135,6 +137,7 @@ export function createAppShell(app: HTMLElement): void {
 
   // Build the burger-menu host in the upper-left corner of the chrome.
   const topLeft = document.createElement('div');
+
   topLeft.className = 'display-chrome__top-left';
   displayChrome.appendChild(topLeft);
 
@@ -148,11 +151,13 @@ export function createAppShell(app: HTMLElement): void {
     onViewSelected(view) {
       if (view === 'terminal') {
         toggleDisplayTerminal();
+
         return;
       }
 
       if (view === 'credits') {
         openSelectionView('credits');
+
         return;
       }
 
@@ -163,6 +168,7 @@ export function createAppShell(app: HTMLElement): void {
   // Left-center slot: the view-switcher that appears when a run has multiple
   // video views available (e.g. dark matter + gas density for cosmos).
   const leftCenter = document.createElement('div');
+
   leftCenter.className = 'display-chrome__left-center';
   displayChrome.appendChild(leftCenter);
   const viewSwitcher = createViewSwitcher(leftCenter, {
@@ -173,6 +179,7 @@ export function createAppShell(app: HTMLElement): void {
 
   // Mount the compact top-right telemetry panel (the HUD with live stats).
   const dataPanelHost = document.createElement('div');
+
   dataPanelHost.className = 'display-chrome__top-right';
   displayChrome.appendChild(dataPanelHost);
   const dataPanel = createTelemetryPanel(dataPanelHost);
@@ -180,6 +187,7 @@ export function createAppShell(app: HTMLElement): void {
   // Mount the centered display terminal overlay host. This shows placeholder
   // log lines while the simulation is running.
   const displayTerminalHost = document.createElement('div');
+
   displayTerminalHost.className = 'display-chrome__terminal';
   displayChrome.appendChild(displayTerminalHost);
   const displayTerminal = createDisplayTerminal(displayTerminalHost, {
@@ -190,6 +198,7 @@ export function createAppShell(app: HTMLElement): void {
   // This is purely cosmetic — it gives the display mode a bit of visual weight
   // when there's no sidebar to fill the screen.
   const centerStatus = document.createElement('div');
+
   centerStatus.className = 'display-chrome__center-status';
   centerStatus.innerHTML = `
     <div class="display-chrome__center-status-inner">
@@ -202,6 +211,7 @@ export function createAppShell(app: HTMLElement): void {
 
   // Mount the timeline scrubber footer.
   const timelineHost = document.createElement('div');
+
   timelineHost.className = 'display-chrome__bottom';
   displayChrome.appendChild(timelineHost);
   const timeline = createTimeline(timelineHost, (position) => {
@@ -220,6 +230,7 @@ export function createAppShell(app: HTMLElement): void {
   // Mount the shared overlay layer used by the app's mode transitions.
   // Overlays sit above the chrome and block interaction with the viewport.
   const overlayLayer = document.createElement('div');
+
   overlayLayer.className = 'overlay-layer';
   app.appendChild(overlayLayer);
 
@@ -349,6 +360,7 @@ export function createAppShell(app: HTMLElement): void {
     if (hasCompletedInitialization) {
       summaryOverlay.hide();
       setMode('display');
+
       return;
     }
 
@@ -448,6 +460,7 @@ export function createAppShell(app: HTMLElement): void {
     // Resolve which view (dark matter, gas density, etc.) to show first.
     const selectedViewId = resolveSelectedViewId(activeClass, match);
     const selectedViewUrl = getViewUrl(match, selectedViewId) ?? match.url;
+
     viewport.setSource(selectedViewUrl);
     viewport.pause();
     // Fire-and-forget the async data loads — they'll update the HUD when done.
@@ -489,6 +502,7 @@ export function createAppShell(app: HTMLElement): void {
 
     // Display chrome is shared between display and config modes.
     const showDisplay = nextMode === 'display' || nextMode === 'config';
+
     setElementVisibility(displayChrome, showDisplay);
 
     // Entry overlay: shown only in entry mode, hidden everywhere else.
@@ -563,6 +577,7 @@ export function createAppShell(app: HTMLElement): void {
       timeSeconds,
       viewport.getDurationSeconds(),
     );
+
     dataPanel.update(activeClass, getActiveValues(), {
       ...sampledValues,
       ...videoScaledValues,
@@ -591,6 +606,7 @@ export function createAppShell(app: HTMLElement): void {
 
     if (configuredViews.length <= 1) {
       viewSwitcher.hide();
+
       return;
     }
 
@@ -642,6 +658,7 @@ export function createAppShell(app: HTMLElement): void {
     }
 
     const nextUrl = activeRunMatch.views[viewId];
+
     if (!nextUrl) {
       return;
     }
@@ -712,6 +729,7 @@ export function createAppShell(app: HTMLElement): void {
     const value = parameter.min + stepIndex * parameter.step;
     // Round to the parameter's step precision to avoid floating-point artifacts.
     const decimals = countDecimals(parameter.step);
+
     return Number(value.toFixed(decimals));
   }
 
@@ -726,6 +744,7 @@ export function createAppShell(app: HTMLElement): void {
     } catch {
       activeLiveStatsFrames = EMPTY_LIVE_STATS_DATASET;
     }
+
     refreshDisplayData();
   }
 
@@ -782,12 +801,14 @@ export function createAppShell(app: HTMLElement): void {
       // Look up the final value from the metadata using the configured key.
       const key = stat.videoKey ?? stat.id;
       const rawValue = (runMetadata as unknown as Record<string, unknown>)[key];
+
       if (typeof rawValue !== 'number' || !Number.isFinite(rawValue)) {
         continue;
       }
 
       // Linearly interpolate: fraction × total = current.
       const scaled = rawValue * fraction;
+
       output[stat.id] = stat.integer ? String(Math.floor(scaled)) : String(scaled);
     }
 
@@ -828,6 +849,7 @@ export function createAppShell(app: HTMLElement): void {
 
     // Check for a user preference saved from a previous selection.
     const preferred = preferredViewByClass[simClass.id];
+
     if (preferred && match.views[preferred]) {
       return preferred;
     }

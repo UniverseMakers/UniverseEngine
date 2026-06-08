@@ -33,12 +33,14 @@ export function createEntryOverlay(
 
   // Full-screen overlay wrapper.
   const overlay = document.createElement('section');
+
   overlay.className = 'overlay overlay--entry';
   overlay.hidden = true;
   overlay.classList.add('is-hidden');
 
   // Center panel with copy + action list.
   const panel = document.createElement('div');
+
   panel.className = 'entry-overlay';
   panel.innerHTML = `
     <div class="entry-overlay__banner-frame" aria-hidden="true">
@@ -50,10 +52,12 @@ export function createEntryOverlay(
 
   // Button stack for each available simulation family.
   const actions = document.createElement('div');
+
   actions.className = 'entry-overlay__actions';
 
   for (const simClass of SIMULATION_CLASSES) {
     const button = document.createElement('button');
+
     button.className = 'entry-overlay__button';
     button.type = 'button';
 

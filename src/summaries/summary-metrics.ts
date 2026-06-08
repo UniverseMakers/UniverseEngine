@@ -124,6 +124,7 @@ export function buildSummaryMetricMap(
  */
 function formatCount(value: number): string {
   const rounded = Math.max(0, Math.round(value));
+
   return rounded.toLocaleString(undefined);
 }
 
@@ -137,6 +138,7 @@ function formatCount(value: number): string {
  */
 function formatHoursFromSeconds(totalSeconds: number): string {
   const hours = Math.max(0, totalSeconds) / 3600;
+
   return hours
     .toFixed(2)
     .replace(/\.0+$|(?<=\..*?)0+$/g, '')

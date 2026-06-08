@@ -62,6 +62,7 @@ export async function loadVideoRunMetadata(
     // Fetch the sidecar YAML.  A 404 is not an error — many placeholders won't
     // have one yet — so we return null and let the caller degrade gracefully.
     const response = await fetch(url);
+
     if (!response.ok) {
       return null;
     }
@@ -118,6 +119,7 @@ export async function loadVideoRunMetadata(
  */
 function toNumber(value: unknown): number | null {
   const numeric = typeof value === 'number' ? value : Number(value);
+
   return Number.isFinite(numeric) ? numeric : null;
 }
 
@@ -151,6 +153,7 @@ function toSummaryMetrics(value: unknown): Record<string, VideoRunSummaryMetric>
     // "undefined" in the summary UI.
     const label = typeof metric.label === 'string' ? metric.label : key;
     const rawValue = metric.value;
+
     if (rawValue === undefined || rawValue === null) {
       continue;
     }

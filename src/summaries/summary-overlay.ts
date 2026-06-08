@@ -15,8 +15,10 @@ import { formatNumericString, withUnit } from '../shared/format.ts';
 export interface SummaryOverlayController {
   /** Reveal the overlay. */
   show: () => void;
+
   /** Hide the overlay. */
   hide: () => void;
+
   /** Replace the visible metric payload for the completed run. */
   update: (
     simClass: SimulationClass,
@@ -37,13 +39,16 @@ interface SummaryOverlayOptions {
  *
  * @param container - Overlay layer host element.
  * @param options - Button callback hooks.
+ *
  * @returns Controller for show/hide/update.
  */
 export function createSummaryOverlay(
   container: HTMLElement,
   options: SummaryOverlayOptions,
 ): SummaryOverlayController {
+  // Full-screen shell that fades in above the video once playback ends.
   const overlay = document.createElement('section');
+
   overlay.className = 'overlay overlay--summary';
   overlay.hidden = true;
   overlay.classList.add('is-hidden');
@@ -52,41 +57,48 @@ export function createSummaryOverlay(
   // timer to avoid racing `hide()` and `show()` calls.
   let hideTimer: number | undefined;
 
+  // The centered card only owns static chrome. The metric rows are rebuilt on
+  // every completed run because the values depend on the selected parameters
+  // and whichever metadata file was available for that run.
   const panel = document.createElement('div');
+
   panel.className = 'summary-overlay';
   panel.innerHTML = `
     <p class="summary-overlay__eyebrow">Simulation Complete</p>
     <h2 class="summary-overlay__title">Run summary</h2>
   `;
 
+  // Metric rows are injected here by `update()` in the exact order declared by
+  // the active simulation family's YAML config.
   const metrics = document.createElement('div');
+
   metrics.className = 'summary-overlay__metrics';
 
+  // Action row stays fixed for every run: replay or start over
   const actions = document.createElement('div');
+
   actions.className = 'summary-overlay__actions';
 
+  // Add button to replay the current video
   const replayButton = document.createElement('button');
   replayButton.className = 'summary-overlay__button summary-overlay__button--primary';
   replayButton.type = 'button';
   replayButton.textContent = 'Replay';
 
+  // Add button to select new parameters and start a new run
   const newButton = document.createElement('button');
   newButton.className = 'summary-overlay__button';
   newButton.type = 'button';
   newButton.textContent = 'New';
 
-  const terminalButton = document.createElement('button');
-  terminalButton.className = 'summary-overlay__button';
-  terminalButton.type = 'button';
-  terminalButton.textContent = 'Terminal';
-
+  // The overlay never owns application state. It only forwards user intent back
+  // to the app shell which decides what replay/new/terminal actually do.
   replayButton.addEventListener('click', options.onReplay);
   newButton.addEventListener('click', options.onNew);
   terminalButton.addEventListener('click', options.onTerminal);
 
   actions.appendChild(replayButton);
   actions.appendChild(newButton);
-  actions.appendChild(terminalButton);
 
   panel.appendChild(metrics);
   panel.appendChild(actions);
@@ -95,14 +107,17 @@ export function createSummaryOverlay(
 
   return {
     show() {
+      // If a hide transition was still pending, cancel it so the overlay can't
+      // disappear halfway through a fresh reveal.
       if (hideTimer) {
         window.clearTimeout(hideTimer);
         hideTimer = undefined;
       }
 
+      // The over is visible now... but fully transparent and non-interactive
+      // until we toggle `is-visible`
       overlay.hidden = false;
       overlay.classList.remove('is-hidden');
-
       overlay.classList.remove('is-visible');
 
       // Ensure the browser commits the initial (hidden) styles before we toggle
@@ -116,6 +131,7 @@ export function createSummaryOverlay(
         overlay.classList.add('is-visible');
       });
     },
+
     hide() {
       // Start the fade-out immediately.
       overlay.classList.remove('is-visible');
@@ -127,21 +143,30 @@ export function createSummaryOverlay(
         hideTimer = undefined;
       }, SUMMARY_OVERLAY.HIDE_AFTER_MS);
     },
+
     update(
       simClass: SimulationClass,
       values: Record<string, number>,
       videoDurationSeconds: number,
       runMetadata?: VideoRunMetadata | null,
     ) {
+      // We rebuild the metric list from scratch each time rather than diffing.
+      // The list is tiny, and this keeps the rendering path obvious.
       metrics.innerHTML = '';
 
-      for (const metric of buildSummaryMetrics(
+      // Get the summary metrics from the shared builder function, which
+      // encapsulates all the scoring and resource calculations
+      const rows = buildSummaryMetrics(
         simClass,
         values,
         videoDurationSeconds,
         runMetadata,
-      )) {
+      );
+
+      // Construct metrics
+      for (const metric of rows) {
         const row = document.createElement('div');
+
         row.className = 'summary-overlay__metric';
         row.innerHTML = `
           <span class="summary-overlay__metric-label">${metric.label}</span>
@@ -167,6 +192,9 @@ function buildSummaryMetrics(
   videoDurationSeconds: number,
   runMetadata?: VideoRunMetadata | null,
 ): Array<{ label: string; value: string }> {
+  // First compute the full dictionary of possible summary metrics. This gives
+  // us one place for scoring/resource derivation before the UI applies display
+  // ordering and labels from the YAML config.
   const availableMetrics = buildSummaryMetricMap(
     simClass,
     values,
@@ -174,6 +202,8 @@ function buildSummaryMetrics(
     runMetadata,
   );
 
+  // Then walk the configured summary rows in order so the overlay matches the
+  // product-facing YAML rather than the internal dictionary order.
   return simClass.metadata.summaryStats.map((stat) =>
     selectMetric(stat, availableMetrics),
   );
@@ -190,7 +220,12 @@ function selectMetric(
   stat: StatDisplayConfig,
   availableMetrics: Record<string, { label: string; value: string }>,
 ): { label: string; value: string } {
+  // Prefer the computed metric when available. If the YAML references a metric
+  // we don't know about yet, fall back to a placeholder instead of crashing.
   const metric = availableMetrics[stat.id] ?? { label: stat.id, value: '--' };
+
+  // Some YAML rows provide a literal fallback `value`. That gives content for
+  // fixed informational rows even when no computed metric exists.
   const resolvedValue = metric.value !== '--' ? metric.value : (stat.value ?? '--');
   const formattedValue = formatSummaryValue(resolvedValue, stat);
 
@@ -212,10 +247,15 @@ function formatSummaryValue(value: string, stat: StatDisplayConfig): string {
     return value;
   }
 
+  // If YAML didn't request any numeric transformation, preserve the original
+  // string exactly. This matters for values that are already presentation-ready
+  // like `97/100` or custom run-metadata strings.
   if (!stat.displayFormat && stat.valueScale === undefined && !stat.integer) {
     return value;
   }
 
+  // Otherwise hand off to the shared formatter so summary rows and live HUD
+  // values obey the same precision/scale rules.
   return formatNumericString(value, {
     scale: stat.valueScale,
     mode: stat.displayFormat ?? (stat.integer ? 'integer' : 'float'),
