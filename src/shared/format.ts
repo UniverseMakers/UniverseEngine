@@ -109,12 +109,14 @@ export function formatNumericString(
 
   if (mode === 'scientific') {
     const significantFigures = Math.max(1, options.precision ?? 3);
-    return scaled
-      .toExponential(significantFigures - 1)
-      // Clean up the default exponential notation: "1.00e+3" → "1.00e3".
-      .replace('e+', 'e')
-      // And "1.0e+3" → "1e3" when the mantissa has no meaningful fraction.
-      .replace(/\.0+e/, 'e');
+    return (
+      scaled
+        .toExponential(significantFigures - 1)
+        // Clean up the default exponential notation: "1.00e+3" → "1.00e3".
+        .replace('e+', 'e')
+        // And "1.0e+3" → "1e3" when the mantissa has no meaningful fraction.
+        .replace(/\.0+e/, 'e')
+    );
   }
 
   const decimals = Math.max(0, options.precision ?? 2);

@@ -12,11 +12,7 @@ import type {
   StatDisplayConfig,
   SummaryStatId,
 } from '../selection/data.ts';
-import {
-  formatMaybeNumber,
-  formatParameterValue,
-  withUnit,
-} from '../shared/format.ts';
+import { formatMaybeNumber, formatParameterValue, withUnit } from '../shared/format.ts';
 
 export interface TelemetryPanelController {
   /** Render metric rows for the active simulation and its current values. */

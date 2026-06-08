@@ -259,10 +259,12 @@ function interpolateFrameValues(
  * @returns Display-friendly string.
  */
 function formatNumber(value: number): string {
-  return value
-    .toFixed(2)
-    // Strip trailing zeros after the decimal: "12.50" → "12.5", "7.00" → "7"
-    .replace(/\.0+$|(?<=\..*?)0+$/g, '')
-    // Strip a trailing decimal point if all decimals were zeros: "7." → "7"
-    .replace(/\.$/, '');
+  return (
+    value
+      .toFixed(2)
+      // Strip trailing zeros after the decimal: "12.50" → "12.5", "7.00" → "7"
+      .replace(/\.0+$|(?<=\..*?)0+$/g, '')
+      // Strip a trailing decimal point if all decimals were zeros: "7." → "7"
+      .replace(/\.$/, '')
+  );
 }

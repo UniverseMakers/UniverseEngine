@@ -23,9 +23,7 @@ export interface LoadingOverlayController {
  * @param container - Overlay layer host element.
  * @returns Controller for showing/hiding the boot sequence.
  */
-export function createLoadingOverlay(
-  container: HTMLElement,
-): LoadingOverlayController {
+export function createLoadingOverlay(container: HTMLElement): LoadingOverlayController {
   const { TYPING_MS_PER_CHAR, FINAL_PAUSE_MS } = INITIALIZATION;
 
   const overlay = document.createElement('section');

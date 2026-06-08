@@ -6,10 +6,7 @@
  * UI can stay focused on presentation and button wiring.
  */
 
-import type {
-  SimulationClass,
-  StatDisplayConfig,
-} from '../selection/data.ts';
+import type { SimulationClass, StatDisplayConfig } from '../selection/data.ts';
 import { buildSummaryMetricMap } from './summary-metrics.ts';
 import type { VideoRunMetadata } from '../selection/video-run-metadata.ts';
 import { SUMMARY_OVERLAY } from '../shared/constants.ts';

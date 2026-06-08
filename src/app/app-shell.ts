@@ -681,7 +681,10 @@ export function createAppShell(app: HTMLElement): void {
    */
   function createDefaultValues(simClass: SimulationClass): Record<string, number> {
     return Object.fromEntries(
-      simClass.parameters.map((parameter) => [parameter.id, randomizeParameterValue(parameter)]),
+      simClass.parameters.map((parameter) => [
+        parameter.id,
+        randomizeParameterValue(parameter),
+      ]),
     );
   }
 
@@ -695,9 +698,14 @@ export function createAppShell(app: HTMLElement): void {
    * @param parameter - Parameter schema.
    * @returns Randomized initial value.
    */
-  function randomizeParameterValue(parameter: SimulationClass['parameters'][number]): number {
+  function randomizeParameterValue(
+    parameter: SimulationClass['parameters'][number],
+  ): number {
     // Figure out how many discrete steps the slider has.
-    const steps = Math.max(0, Math.round((parameter.max - parameter.min) / parameter.step));
+    const steps = Math.max(
+      0,
+      Math.round((parameter.max - parameter.min) / parameter.step),
+    );
     // Pick a random step index — uniform across the full range.
     const stepIndex = Math.floor(Math.random() * (steps + 1));
     // Convert back to an actual numeric value.
