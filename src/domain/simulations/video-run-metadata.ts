@@ -42,6 +42,14 @@ export function getVideoMetadataUrl(videoUrl: string): string {
 /**
  * Load and parse a video sidecar metadata file.
  *
+ * Sidecar YAML files sit next to their video assets (same basename, .yaml
+ * extension). They contain final run totals — wallclock time, compute used,
+ * carbon footprint, etc. — that we display in the summary overlay and scale
+ * into live HUD values during playback.
+ *
+ * If the file is missing, malformed, or missing required numeric fields, we
+ * return null and the app gracefully degrades to placeholder-derived values.
+ *
  * @param url - Metadata URL (usually from `getVideoMetadataUrl`).
  * @returns Parsed metadata, or `null` when missing/invalid.
  */
@@ -57,6 +65,7 @@ export async function loadVideoRunMetadata(
     const text = await response.text();
     const raw = parse(text) as Partial<Record<keyof VideoRunMetadata, unknown>>;
 
+    // Extract and validate the five required numeric fields.
     const wallclockSeconds = toNumber(raw.wallclockSeconds);
     const computeUsed = toNumber(raw.computeUsed);
     const memoryUsed = toNumber(raw.memoryUsed);
@@ -64,6 +73,7 @@ export async function loadVideoRunMetadata(
     const particlesUpdated = toNumber(raw.particlesUpdated);
     const summaryMetrics = toSummaryMetrics(raw.summaryMetrics);
 
+    // If any required field is missing or non-numeric, reject the whole file.
     if (
       wallclockSeconds === null ||
       computeUsed === null ||
@@ -83,6 +93,7 @@ export async function loadVideoRunMetadata(
       summaryMetrics,
     };
   } catch {
+    // Network error, parse failure, or any other exception — degrade gracefully.
     return null;
   }
 }

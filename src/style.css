@@ -294,7 +294,6 @@ button {
 /* -------------------------------------------------------------------------- */
 
 .display-chrome__top-left,
-.display-chrome__top-center,
 .display-chrome__left-center,
 .display-chrome__top-right,
 .display-chrome__center-status,
@@ -399,7 +398,6 @@ button {
   background: var(--accent);
 }
 
-#app[data-mode='config'] .display-chrome__top-center,
 #app[data-mode='config'] .display-chrome__left-center,
 #app[data-mode='config'] .display-chrome__top-right,
 #app[data-mode='config'] .display-chrome__center-status,
@@ -411,21 +409,6 @@ button {
 /* Burger menu is redundant while the config overlay is open. */
 #app[data-mode='config'] .display-chrome__top-left {
   display: none;
-}
-
-.display-chrome__top-center {
-  top: 1.55rem;
-  left: 50%;
-  transform: translateX(-50%);
-  color: var(--accent);
-  font-family: var(--font-display);
-  font-size: 1rem;
-  font-weight: 700;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  text-shadow: none;
-  z-index: 4;
-  pointer-events: auto;
 }
 
 .display-chrome__left-center {
@@ -1524,8 +1507,7 @@ button {
 }
 
 [data-theme='hal'] .summary-overlay__title,
-[data-theme='hal'] .config-overlay__headline,
-[data-theme='hal'] .display-chrome__top-center {
+[data-theme='hal'] .config-overlay__headline {
   color: #ffe9d9;
 }
 
@@ -1565,8 +1547,7 @@ button {
 [data-theme='nostromo'] .data-panel__metric-value,
 [data-theme='nostromo'] .summary-overlay__metric-value,
 [data-theme='nostromo'] .config-overlay__headline,
-[data-theme='nostromo'] .display-terminal__title,
-[data-theme='nostromo'] .display-chrome__top-center {
+[data-theme='nostromo'] .display-terminal__title {
   color: #dca94a;
 }
 
@@ -1600,11 +1581,10 @@ button {
     left: 1rem;
   }
 
-  .display-chrome__top-center {
-    top: 1.15rem;
-    left: 6.75rem;
+  .display-chrome__left-center {
+    top: 5.25rem;
+    left: 1rem;
     transform: none;
-    font-size: 0.95rem;
   }
 
   .display-chrome__top-right {
@@ -1966,11 +1946,10 @@ button {
     overflow: auto;
   }
 
-  .display-chrome__top-center {
-    top: 1rem;
-    left: 4.5rem;
+  .display-chrome__left-center {
+    top: 4.25rem;
+    left: 0.75rem;
     transform: none;
-    font-size: 0.9rem;
   }
 
   .display-chrome__center-status {

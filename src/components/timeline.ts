@@ -18,8 +18,12 @@ export type TimelineChangeCallback = (position: number) => void;
 /**
  * Create and mount the timeline scrubber.
  *
+ * The timeline uses an integer range input (0-1000) internally and converts
+ * to/from normalized 0..1 fractions at the boundary. This gives us smooth
+ * slider behavior without floating-point step issues.
+ *
  * @param container - Host element to mount into.
- * @param onChange - Optional callback invoked when the user scrubs.
+ * @param onChange - Optional callback invoked when the user scrubs (receives 0..1).
  * @returns Controller for updating the thumb from playback.
  */
 export function createTimeline(

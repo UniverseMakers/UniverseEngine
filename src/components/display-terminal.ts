@@ -95,6 +95,7 @@ export function createDisplayTerminal(
     hide,
     toggle() {
       // Toggle by checking the actual hidden state of the root panel.
+      // Returns the *new* visibility: true if now visible, false if now hidden.
       const nextVisible = panel.hidden;
       if (nextVisible) {
         show();
@@ -108,7 +109,8 @@ export function createDisplayTerminal(
       title.textContent = `${simClass.label.toUpperCase()} Logs`;
       meta.textContent = `STREAM_MODE :: ${simClass.id.toUpperCase()}_PLACEHOLDER`;
 
-      // Rebuild the visible lines from scratch because the data volume is tiny.
+      // Rebuild the visible lines from scratch because the data volume is tiny
+      // (typically fewer than 20 placeholder lines).
       log.innerHTML = '';
 
       for (const line of createLogLines(simClass, values)) {

@@ -52,11 +52,12 @@ export function createTelemetryPanel(container: HTMLElement): TelemetryPanelCont
       liveValues: Record<string, string> = {},
     ) {
       // Rebuild the list from scratch. This is simple and perfectly fine for the
-      // very small amount of data shown in this panel.
+      // very small amount of data shown in this panel (typically < 15 rows).
       metricList.innerHTML = '';
 
       const availableMetrics = buildAvailableMetrics(simClass, values, liveValues);
 
+      // Walk the YAML-configured liveStats list in order and render each row.
       for (const stat of simClass.metadata.liveStats) {
         const metric = selectMetric(stat, availableMetrics);
         const row = document.createElement('div');
@@ -74,6 +75,14 @@ export function createTelemetryPanel(container: HTMLElement): TelemetryPanelCont
 /**
  * Build a dictionary of candidate metrics keyed by id.
  *
+ * Metrics come from three sources:
+ * 1. Static parameter values (current slider positions)
+ * 2. Derived "named" metrics (app-defined fields like scale or parameter count)
+ * 3. Live-streamed CSV values (sampled at the current playback position)
+ *
+ * The three sources are merged with live values taking priority, so a CSV
+ * column named "scale" would override the static scale metric.
+ *
  * @param simClass - Active simulation family.
  * @param values - Active parameter values.
  * @param liveValues - Sampled live values keyed by CSV column.
@@ -84,7 +93,8 @@ function buildAvailableMetrics(
   values: Record<string, number>,
   liveValues: Record<string, string>,
 ): Record<string, { label: string; value: string }> {
-  // Parameter metrics are always available because they are part of the class definition.
+  // Source 1: Parameter metrics — always available because they're part of the
+  // class definition and the user has slider values for them.
   const parameterMetrics = Object.fromEntries(
     simClass.parameters.map((parameter) => [
       parameter.id,
@@ -103,7 +113,8 @@ function buildAvailableMetrics(
     ]),
   ) as Record<string, { label: string; value: string }>;
 
-  // "Named" metrics are app-defined summary fields that are not parameters.
+  // Source 2: "Named" metrics are app-defined summary fields that are not
+  // parameters — things like "Scale" and "Parameters".
   const namedMetrics: Partial<Record<SummaryStatId, { label: string; value: string }>> =
     {
       scale: { label: 'Scale', value: simClass.label },
@@ -114,6 +125,8 @@ function buildAvailableMetrics(
       parameters: { label: 'Parameters', value: String(simClass.parameters.length) },
     };
 
+  // Source 3: Live CSV values — these override anything from sources 1 and 2
+  // because they're the most current data available.
   return {
     ...parameterMetrics,
     ...namedMetrics,
@@ -129,30 +142,40 @@ function buildAvailableMetrics(
 /**
  * Convert a camelCase/snake_case-ish key into spaced words.
  *
- * @param key - Raw metric id.
+ * CSV column names like "particlesUpdated" become "particles Updated" and
+ * "dark_matter_density" becomes "dark matter density". This is good enough
+ * for auto-generated labels without maintaining a label map in YAML.
+ *
+ * @param key - Raw metric id (camelCase or snake_case).
  * @returns Human-friendly label string.
  */
 function humanizeKey(key: string): string {
+  // Replace underscores with spaces, then insert spaces before uppercase letters.
   return key.replace(/_/g, ' ').replace(/([a-z0-9])([A-Z])/g, '$1 $2');
 }
 
 /**
- * Format a CSV-provided value for display.
+ * Resolve one metric value and label from the available sources.
  *
- * Most live stat values are numeric strings. For layout stability we cap the
- * visible precision to two decimal places and strip trailing zeros.
+ * Selection priority:
+ * 1. A sampled live value keyed by `stat.liveKey` (or `stat.id`)
+ * 2. The static parameter/named metric from `availableMetrics`
+ * 3. The YAML-configured placeholder value (`stat.value`)
+ * 4. A fallback "--" placeholder
  *
- * @param raw - Raw CSV cell value.
- * @returns Display-ready value.
+ * @param stat - Display configuration for this metric row.
+ * @param availableMetrics - All known metrics keyed by id.
+ * @returns Resolved label/value pair for rendering.
  */
 function selectMetric(
   stat: StatDisplayConfig,
   availableMetrics: Record<string, { label: string; value: string }>,
 ): { label: string; value: string } {
-  // Start from the static config id.
+  // Start with the metric matching this stat's id, or create a placeholder.
   const metric = availableMetrics[stat.id] ?? { label: stat.id, value: '--' };
 
-  // Optionally point at a different live-stream key.
+  // Optionally point at a different live-stream key rather than the stat id.
+  // This lets a stat labeled "Compute" pull from a CSV column called "compute_used".
   const liveKey = stat.liveKey ?? stat.id;
   const liveMetric = availableMetrics[liveKey];
 
@@ -171,9 +194,14 @@ function selectMetric(
 /**
  * Apply optional numeric scaling/rounding to a resolved stat value.
  *
+ * If the stat has a `valueScale`, we always run it through `formatMaybeNumber`
+ * to apply the multiplier. Otherwise, we only format if the value came from a
+ * live source or needs integer rounding — static placeholder strings like
+ * "Present" or "N/A" should pass through untouched.
+ *
  * @param value - Raw value string.
  * @param stat - Display config for the row.
- * @param shouldFormat - Whether numeric live formatting should be applied.
+ * @param shouldFormat - Whether the value came from a live source and should be formatted.
  * @returns Display-ready value.
  */
 function formatMetricValue(
@@ -185,6 +213,7 @@ function formatMetricValue(
     return value;
   }
 
+  // If a scale is configured, always apply it (e.g. converting seconds to hours).
   if (stat.valueScale !== undefined) {
     return formatMaybeNumber(value, {
       scale: stat.valueScale,
@@ -192,6 +221,7 @@ function formatMetricValue(
     });
   }
 
+  // Format live values or integer-configured stats; pass static strings through.
   if (shouldFormat || stat.integer) {
     return formatMaybeNumber(value, { integer: stat.integer });
   }

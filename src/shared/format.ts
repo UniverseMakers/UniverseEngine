@@ -65,6 +65,9 @@ export function formatMaybeNumber(
     return Math.max(0, Math.round(scaled)).toLocaleString(undefined);
   }
 
+  // Format to 2 decimal places, then strip trailing zeros (e.g. "12.50" → "12.5")
+  // and any trailing decimal point (e.g. "12." → "12"). This keeps the display
+  // clean without misleading precision.
   return scaled
     .toFixed(2)
     .replace(/\.0+$|(?<=\..*?)0+$/g, '')
@@ -97,6 +100,7 @@ export function formatNumericString(
   }
 
   const mode = options.mode ?? 'float';
+  // For percentage mode, multiply by 100 since the value is already 0..1.
   const scaled = numeric * (options.scale ?? 1) * (mode === 'percentage' ? 100 : 1);
 
   if (mode === 'integer') {
@@ -107,7 +111,9 @@ export function formatNumericString(
     const significantFigures = Math.max(1, options.precision ?? 3);
     return scaled
       .toExponential(significantFigures - 1)
+      // Clean up the default exponential notation: "1.00e+3" → "1.00e3".
       .replace('e+', 'e')
+      // And "1.0e+3" → "1e3" when the mantissa has no meaningful fraction.
       .replace(/\.0+e/, 'e');
   }
 

@@ -36,6 +36,7 @@ export function createDisplayMenu(
   simulationClasses: SimulationClass[],
   options: DisplayMenuOptions,
 ): DisplayMenuController {
+  // Three stacked spans → the classic hamburger icon. CSS handles the styling.
   const trigger = document.createElement('button');
   trigger.className = 'display-button';
   trigger.type = 'button';

@@ -52,48 +52,66 @@ type AppMode = 'entry' | 'config' | 'initializing' | 'display';
  * @returns void
  */
 export function createAppShell(app: HTMLElement): void {
+  // ── State ────────────────────────────────────────────────────────────────
+  // Everything the shell needs to track lives here so it's easy to see what's
+  // being managed at a glance. We keep these as closure variables rather than
+  // a formal state object because the data is all independently scoped.
+
   // Start on the first simulation class defined in the catalog.
   let activeClass: SimulationClass = SIMULATION_CLASSES[0];
 
-  // Load the user's persisted theme immediately.
+  // Load the user's persisted theme immediately so the UI renders in the right
+  // color scheme from the very first frame.
   let activeTheme: ThemeId = getInitialTheme();
 
-  // Track whether the display-side terminal viewer is open.
+  // Track whether the display-side terminal viewer is open so we can restore it
+  // when the user comes back to display mode.
   let isDisplayTerminalOpen = false;
 
-  // Track whether the currently loaded video has reached the end.
+  // Track whether the currently loaded video has reached the end — we need this
+  // to know if we should re-show the summary overlay after closing the terminal.
   let hasCompletedPlayback = false;
 
-  // Sidecar run metadata for the currently loaded video.
+  // Sidecar run metadata for the currently loaded video (wallclock, compute, etc).
   let activeRunMetadata: VideoRunMetadata | null = null;
 
   // Manifest-backed run selection for the currently loaded simulation.
   let activeRunMatch: VideoMatch | null = null;
 
-  // Persist the user's preferred view per simulation family.
+  // Persist the user's preferred view per simulation family so switching
+  // families and coming back remembers which view they last chose.
   const preferredViewByClass: Record<string, string | undefined> = {};
 
-  // Last-known playback time in seconds; used to refresh HUD after async loads.
+  // Last-known playback time in seconds; used to refresh HUD after async loads
+  // complete (e.g. CSV parsing or YAML fetch).
   let lastPlaybackSeconds = 0;
 
   // Hold the currently loaded live-stat frames for the active simulation/video.
   let activeLiveStatsFrames: LiveStatsDataset = EMPTY_LIVE_STATS_DATASET;
 
   // Keep the viewport hidden until a simulation has successfully initialized.
+  // This way the video element doesn't flash before the boot sequence finishes.
   let hasCompletedInitialization = false;
 
-  // Persist parameter values per simulation family so users can switch around.
+  // Persist parameter values per simulation family so users can switch between
+  // families without losing their slider positions.
   const valuesByClass = Object.fromEntries(
     SIMULATION_CLASSES.map((simClass) => [simClass.id, createDefaultValues(simClass)]),
   ) as Record<string, Record<string, number>>;
 
-  // Apply the theme before assembling UI so token-based styling is ready.
+  // ── UI Assembly ──────────────────────────────────────────────────────────
+  // Build the full DOM tree top-down. Layers stack: viewport at the bottom,
+  // chrome overlays in the middle, modal overlays on top.
+
+  // Apply the theme before assembling UI so token-based styling is ready before
+  // any element references a CSS custom property.
   applyTheme(activeTheme);
 
   // Use the active family to choose the initial local placeholder video.
   const initialPlaceholderVideo = getLocalPlaceholderVideo(activeClass.id);
 
   // Mount the persistent viewport layer first so every overlay can sit above it.
+  // The viewport stays mounted forever — only its source video changes.
   const viewport = createViewport(app, initialPlaceholderVideo);
 
   // Build the display HUD container that appears in config/display contexts.
@@ -103,6 +121,7 @@ export function createAppShell(app: HTMLElement): void {
   app.appendChild(displayChrome);
 
   // Mobile-only helper overlay shown when the device is in landscape.
+  // We mount it unconditionally; CSS media queries control visibility.
   const orientationOverlay = document.createElement('div');
   orientationOverlay.className = 'orientation-overlay';
   orientationOverlay.innerHTML = `
@@ -114,12 +133,13 @@ export function createAppShell(app: HTMLElement): void {
   `;
   app.appendChild(orientationOverlay);
 
-  // Build the burger-menu host in the upper-left corner.
+  // Build the burger-menu host in the upper-left corner of the chrome.
   const topLeft = document.createElement('div');
   topLeft.className = 'display-chrome__top-left';
   displayChrome.appendChild(topLeft);
 
   // Mount the display menu and delegate actions back into the shell state.
+  // The menu doesn't know about modes or state — it just fires callbacks.
   createDisplayMenu(topLeft, SIMULATION_CLASSES, {
     onSimulationSelected(simClass) {
       handleClassChange(simClass);
@@ -140,6 +160,8 @@ export function createAppShell(app: HTMLElement): void {
     },
   });
 
+  // Left-center slot: the view-switcher that appears when a run has multiple
+  // video views available (e.g. dark matter + gas density for cosmos).
   const leftCenter = document.createElement('div');
   leftCenter.className = 'display-chrome__left-center';
   displayChrome.appendChild(leftCenter);
@@ -149,13 +171,14 @@ export function createAppShell(app: HTMLElement): void {
     },
   });
 
-  // Mount the compact top-right telemetry panel.
+  // Mount the compact top-right telemetry panel (the HUD with live stats).
   const dataPanelHost = document.createElement('div');
   dataPanelHost.className = 'display-chrome__top-right';
   displayChrome.appendChild(dataPanelHost);
   const dataPanel = createTelemetryPanel(dataPanelHost);
 
-  // Mount the centered display terminal overlay host.
+  // Mount the centered display terminal overlay host. This shows placeholder
+  // log lines while the simulation is running.
   const displayTerminalHost = document.createElement('div');
   displayTerminalHost.className = 'display-chrome__terminal';
   displayChrome.appendChild(displayTerminalHost);
@@ -164,6 +187,8 @@ export function createAppShell(app: HTMLElement): void {
   });
 
   // Mount the decorative center status frame used by tablet/mobile layouts.
+  // This is purely cosmetic — it gives the display mode a bit of visual weight
+  // when there's no sidebar to fill the screen.
   const centerStatus = document.createElement('div');
   centerStatus.className = 'display-chrome__center-status';
   centerStatus.innerHTML = `
@@ -175,7 +200,7 @@ export function createAppShell(app: HTMLElement): void {
   `;
   displayChrome.appendChild(centerStatus);
 
-  // Mount the timeline footer.
+  // Mount the timeline scrubber footer.
   const timelineHost = document.createElement('div');
   timelineHost.className = 'display-chrome__bottom';
   displayChrome.appendChild(timelineHost);
@@ -184,6 +209,8 @@ export function createAppShell(app: HTMLElement): void {
   });
 
   // Keep the timeline synchronized to the real media playback position.
+  // Every time the video's currentTime advances, we update both the visual
+  // scrubber on the timeline and the derived telemetry data.
   viewport.onTimeUpdate((position) => {
     timeline.setPosition(position);
     lastPlaybackSeconds = position * viewport.getDurationSeconds();
@@ -191,11 +218,12 @@ export function createAppShell(app: HTMLElement): void {
   });
 
   // Mount the shared overlay layer used by the app's mode transitions.
+  // Overlays sit above the chrome and block interaction with the viewport.
   const overlayLayer = document.createElement('div');
   overlayLayer.className = 'overlay-layer';
   app.appendChild(overlayLayer);
 
-  // Mount the end-of-run summary overlay.
+  // Mount the end-of-run summary overlay that appears when a video finishes.
   const summaryOverlay = createSummaryOverlay(overlayLayer, {
     onReplay: handleReplay,
     onNew: () => openConfigView('parameters'),
@@ -214,13 +242,13 @@ export function createAppShell(app: HTMLElement): void {
     summaryOverlay.show();
   });
 
-  // Mount the first-load entry overlay.
+  // Mount the first-load entry overlay — the very first thing the user sees.
   const entryOverlay = createEntryOverlay(overlayLayer, (simClass) => {
     handleClassChange(simClass);
     openConfigView('parameters');
   });
 
-  // Mount the main configuration overlay.
+  // Mount the main configuration overlay — parameters, settings, credits, etc.
   const configOverlay = createConfigOverlay(overlayLayer, {
     simClass: activeClass,
     values: getActiveValues(),
@@ -235,16 +263,18 @@ export function createAppShell(app: HTMLElement): void {
     initialView: 'parameters',
   });
 
-  // Mount the initializing terminal overlay.
+  // Mount the initializing terminal overlay — the faux-boot sequence.
   const initializingOverlay = createInitializingOverlay(overlayLayer);
 
-  // Prime display-side UI to a known empty state before the first run.
+  // ── Initial State ────────────────────────────────────────────────────────
+  // Prime everything to a clean, empty baseline before the first mode switch.
+
   timeline.setPosition(0);
   refreshDisplayData();
   refreshDisplayTerminal();
   summaryOverlay.hide();
 
-  // Start in entry mode with the media hidden.
+  // Start in entry mode with the media hidden and paused.
   viewport.hideMedia();
   viewport.pause();
   setMode('entry');
@@ -256,10 +286,12 @@ export function createAppShell(app: HTMLElement): void {
    * @returns void
    */
   function handleClassChange(newClass: SimulationClass): void {
+    // If the user picks the family they're already on, skip the reset entirely.
     if (newClass.id === activeClass.id) return;
 
     activeClass = newClass;
     resetSimulationState();
+    // Rebuild the config overlay so the parameters match the new family.
     configOverlay.setSimulation(activeClass, getActiveValues());
     timeline.setPosition(0);
     refreshDisplayData();
@@ -274,7 +306,9 @@ export function createAppShell(app: HTMLElement): void {
    * @returns void
    */
   function handleValuesChange(values: Record<string, number>): void {
+    // Take a defensive copy so the caller can't mutate our internal state.
     valuesByClass[activeClass.id] = { ...values };
+    // The HUD and terminal show parameter values, so refresh them immediately.
     refreshDisplayData();
     refreshDisplayTerminal();
   }
@@ -298,6 +332,7 @@ export function createAppShell(app: HTMLElement): void {
    * @returns void
    */
   function openConfigView(view: ConfigOverlayView): void {
+    // Close the display terminal first — it's a separate concern from config.
     isDisplayTerminalOpen = false;
     displayTerminal.hide();
     configOverlay.setView(view);
@@ -310,12 +345,14 @@ export function createAppShell(app: HTMLElement): void {
    * @returns void
    */
   function handleApplySettings(): void {
+    // If we've already initialized a run, just go back to display mode.
     if (hasCompletedInitialization) {
       summaryOverlay.hide();
       setMode('display');
       return;
     }
 
+    // Otherwise keep showing the parameter view so the user can start a run.
     configOverlay.setView('parameters');
   }
 
@@ -326,6 +363,8 @@ export function createAppShell(app: HTMLElement): void {
    */
   function handleCloseConfig(): void {
     summaryOverlay.hide();
+    // If we've been through init at least once, going back to display makes
+    // sense. Otherwise the video hasn't loaded yet — send them to entry.
     setMode(hasCompletedInitialization ? 'display' : 'entry');
   }
 
@@ -348,6 +387,8 @@ export function createAppShell(app: HTMLElement): void {
     hasCompletedPlayback = false;
     summaryOverlay.hide();
     viewport.resetPlayback();
+    // Browsers often require a user gesture to play audio. If the initial play
+    // fails, fall back to muted playback so the video still works.
     void viewport.play().catch(() => {
       viewport.setMuted(true);
       void viewport.play();
@@ -367,7 +408,7 @@ export function createAppShell(app: HTMLElement): void {
 
   /**
    * When the display terminal closes, restore the summary overlay if playback
-   * had already ended.
+   * had already ended — we don't want the terminal to swallow the summary.
    *
    * @returns void
    */
@@ -388,29 +429,36 @@ export function createAppShell(app: HTMLElement): void {
   /**
    * Start a new run for the active simulation class.
    *
+   * The flow: find the nearest matching video in the manifest → load its live
+   * stats and metadata → show the boot sequence → reveal the viewport → play.
+   *
    * @returns void
    */
   async function handleRun(): Promise<void> {
     const values = getActiveValues();
+    // Query the manifest for the best-matching precomputed video asset.
     const match = await findNearestVideo(
       activeClass.id,
       activeClass.parameters,
       values,
-      activeClass.placeholderImage,
     );
 
     resetSimulationState();
     activeRunMatch = match;
+    // Resolve which view (dark matter, gas density, etc.) to show first.
     const selectedViewId = resolveSelectedViewId(activeClass, match);
     const selectedViewUrl = getViewUrl(match, selectedViewId) ?? match.url;
     viewport.setSource(selectedViewUrl);
     viewport.pause();
+    // Fire-and-forget the async data loads — they'll update the HUD when done.
     void loadActiveLiveStats(match.liveDataUrl);
     void loadActiveRunMetadata(match.summaryUrl);
     viewport.setMuted(false);
     refreshViewSwitcher(selectedViewId);
     setMode('initializing');
 
+    // Kick off the terminal boot sequence. When it finishes, reveal the video
+    // and try to play it. If autoplay is blocked, fall back to muted.
     initializingOverlay.show(getInitializationLines(activeClass), () => {
       hasCompletedInitialization = true;
       viewport.showMedia();
@@ -418,6 +466,7 @@ export function createAppShell(app: HTMLElement): void {
         viewport.setMuted(true);
         void viewport.play().catch(() => {
           // Leave the media paused if the browser still rejects playback.
+          // This is expected on some mobile browsers without a user gesture.
         });
       });
       setMode('display');
@@ -427,21 +476,29 @@ export function createAppShell(app: HTMLElement): void {
   /**
    * Switch the shell into one of its four high-level UI modes.
    *
+   * Each mode shows/hides the right combination of overlays, chrome chrome, and
+   * viewport. The important invariant is that exactly the right set of elements
+   * is visible at the end — no more, no less.
+   *
    * @param nextMode - Mode to apply.
    * @returns void
    */
   function setMode(nextMode: AppMode): void {
+    // Set a data attribute on the app root so CSS can react to mode changes.
     app.dataset.mode = nextMode;
 
+    // Display chrome is shared between display and config modes.
     const showDisplay = nextMode === 'display' || nextMode === 'config';
     setElementVisibility(displayChrome, showDisplay);
 
+    // Entry overlay: shown only in entry mode, hidden everywhere else.
     if (nextMode === 'entry') {
       entryOverlay.show();
     } else {
       entryOverlay.hide();
     }
 
+    // Config overlay: only shown when we're explicitly in config mode.
     if (nextMode === 'config') {
       initializingOverlay.hide();
       configOverlay.setSimulation(activeClass, getActiveValues());
@@ -450,12 +507,16 @@ export function createAppShell(app: HTMLElement): void {
       configOverlay.hide();
     }
 
+    // Display terminal: hidden outside display mode, but restored if the user
+    // had it open before leaving display mode.
     if (nextMode !== 'display') {
       displayTerminal.hide();
     } else if (isDisplayTerminalOpen) {
       displayTerminal.show();
     }
 
+    // Summary overlay: hidden outside display mode, but re-shown if playback
+    // had already completed when the user left and came back.
     if (nextMode !== 'display') {
       summaryOverlay.hide();
     } else if (hasCompletedPlayback) {
@@ -468,6 +529,7 @@ export function createAppShell(app: HTMLElement): void {
       summaryOverlay.show();
     }
 
+    // Viewport visibility: hidden before init and during the boot sequence.
     if (!hasCompletedInitialization || nextMode === 'initializing') {
       viewport.hideMedia();
       if (nextMode === 'initializing') {
@@ -477,6 +539,7 @@ export function createAppShell(app: HTMLElement): void {
       viewport.showMedia();
     }
 
+    // Initializing overlay: only shown during the boot sequence.
     if (nextMode !== 'initializing') {
       initializingOverlay.hide();
     }
@@ -561,10 +624,15 @@ export function createAppShell(app: HTMLElement): void {
   /**
    * Switch to a different view for the active run while preserving playback progress.
    *
+   * Views are alternate video renderings of the same simulation run (e.g. dark
+   * matter vs. gas density). Switching views should feel seamless — we preserve
+   * the current seek position and autoplay state.
+   *
    * @param viewId - Manifest/YAML view id.
    * @returns void
    */
   function handleViewSelection(viewId: string): void {
+    // Guard: no views configured, or already on this view.
     if (!activeRunMatch?.views) {
       return;
     }
@@ -578,9 +646,13 @@ export function createAppShell(app: HTMLElement): void {
       return;
     }
 
+    // Remember the user's preference for this simulation family.
     preferredViewByClass[activeClass.id] = viewId;
     activeRunMatch.viewId = viewId;
+
+    // Determine whether the video was playing before the switch.
     const shouldAutoplay = !viewport.isPaused() && !hasCompletedPlayback;
+    // Seek to the same fraction unless playback already finished.
     const seekFraction = hasCompletedPlayback ? 0 : viewport.getPlaybackFraction();
 
     hasCompletedPlayback = false;
@@ -616,13 +688,21 @@ export function createAppShell(app: HTMLElement): void {
   /**
    * Pick a random slider value aligned to the configured parameter step.
    *
+   * Rather than always defaulting to min or midpoint, we randomize the initial
+   * parameter position so the entry experience feels different each time and
+   * users explore more of the parameter space.
+   *
    * @param parameter - Parameter schema.
    * @returns Randomized initial value.
    */
   function randomizeParameterValue(parameter: SimulationClass['parameters'][number]): number {
+    // Figure out how many discrete steps the slider has.
     const steps = Math.max(0, Math.round((parameter.max - parameter.min) / parameter.step));
+    // Pick a random step index — uniform across the full range.
     const stepIndex = Math.floor(Math.random() * (steps + 1));
+    // Convert back to an actual numeric value.
     const value = parameter.min + stepIndex * parameter.step;
+    // Round to the parameter's step precision to avoid floating-point artifacts.
     const decimals = countDecimals(parameter.step);
     return Number(value.toFixed(decimals));
   }
@@ -655,6 +735,14 @@ export function createAppShell(app: HTMLElement): void {
   /**
    * Build derived "live" stats that scale a final value linearly with time.
    *
+   * For stats flagged with `fromVideo` and `scaleWithTime`, we take the total
+   * value from the run's sidecar metadata and linearly interpolate it based on
+   * current playback progress. This gives the illusion of a live counter that
+   * steadily climbs toward the final total.
+   *
+   * Example: if a run used 1200 compute units total and we're 50% through,
+   * we'd show ~600 units.
+   *
    * @param simClass - Active simulation family.
    * @param runMetadata - Parsed run metadata from the active video.
    * @param timeSeconds - Current playback time.
@@ -667,24 +755,30 @@ export function createAppShell(app: HTMLElement): void {
     timeSeconds: number,
     durationSeconds: number,
   ): Record<string, string> {
+    // Without metadata or a known duration, there's nothing to scale.
     if (!runMetadata || !Number.isFinite(durationSeconds) || durationSeconds <= 0) {
       return {};
     }
 
+    // Clamp the playback fraction — we don't want >100% values on overshoot.
     const fraction = Math.max(0, Math.min(1, timeSeconds / durationSeconds));
     const output: Record<string, string> = {};
 
+    // Walk the configured live stats and scale any that are marked for it.
     for (const stat of simClass.metadata.liveStats) {
+      // Only scale stats that are explicitly tagged for this behavior.
       if (!stat.live || !stat.fromVideo || !stat.scaleWithTime) {
         continue;
       }
 
+      // Look up the final value from the metadata using the configured key.
       const key = stat.videoKey ?? stat.id;
       const rawValue = (runMetadata as unknown as Record<string, unknown>)[key];
       if (typeof rawValue !== 'number' || !Number.isFinite(rawValue)) {
         continue;
       }
 
+      // Linearly interpolate: fraction × total = current.
       const scaled = rawValue * fraction;
       output[stat.id] = stat.integer ? String(Math.floor(scaled)) : String(scaled);
     }
@@ -707,6 +801,10 @@ export function createAppShell(app: HTMLElement): void {
   /**
    * Resolve the preferred or default view id for the active simulation.
    *
+   * Priority order: user's saved preference → manifest's default view → the
+   * first view in the manifest's views object. This ensures the switcher always
+   * has a valid starting selection.
+   *
    * @param simClass - Simulation family.
    * @param match - Active manifest-backed run.
    * @returns View id when available.
@@ -715,15 +813,18 @@ export function createAppShell(app: HTMLElement): void {
     simClass: SimulationClass,
     match: VideoMatch | null,
   ): string | undefined {
+    // No views configured? Just return whatever the match has.
     if (!match?.views) {
       return match?.viewId;
     }
 
+    // Check for a user preference saved from a previous selection.
     const preferred = preferredViewByClass[simClass.id];
     if (preferred && match.views[preferred]) {
       return preferred;
     }
 
+    // Fall back to the manifest's default, or the first view alphabetically.
     return match.viewId ?? Object.keys(match.views)[0];
   }
 

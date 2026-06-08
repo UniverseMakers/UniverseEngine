@@ -114,12 +114,16 @@ export function createParameterEditor(
     /**
      * Sync UI + internal value map for this parameter.
      *
+     * Updates three things in step: the stored value, the slider position (with
+     * its fill track), and the numeric readout next to the slider.
+     *
      * @param value - Next numeric value.
      * @returns void
      */
     function sync(value: number): void {
       values[param.id] = value;
       slider.value = String(value);
+      // The --fill custom property drives the slider track's filled portion via CSS.
       slider.style.setProperty(
         '--fill',
         `${calculateFill(value, param.min, param.max)}%`,

@@ -80,12 +80,17 @@ export function createViewSwitcher(
 /**
  * Build a switcher icon for one configured view.
  *
- * @param iconId - Configured icon id.
- * @returns SVG element when supported.
+ * These are simple inline SVG icons that represent the simulation data channel
+ * each view provides. They're defined here rather than in CSS so they can be
+ * easily extended per-simulation-family in the YAML config.
+ *
+ * @param iconId - Configured icon id (matches the YAML view icon key).
+ * @returns SVG element when supported, or null to skip the icon slot.
  */
 function createViewIcon(iconId?: string): SVGSVGElement | null {
   switch (iconId) {
     case 'dark-matter':
+      // A ringed sphere suggesting a dark-matter halo projection.
       return createSvg(`
         <circle cx="12" cy="12" r="6.5"></circle>
         <ellipse cx="12" cy="12" rx="10" ry="4.2"></ellipse>
@@ -94,18 +99,21 @@ function createViewIcon(iconId?: string): SVGSVGElement | null {
         <circle cx="12" cy="7.2" r="1.1" fill="currentColor" stroke="none"></circle>
       `);
     case 'gas-density':
+      // A cloud-like shape suggesting gas density contours.
       return createSvg(`
         <path d="M6 14c0-3.6 2.7-6.2 6-6.2 2.1 0 4 .9 5.1 2.5 2.5.2 4.4 2.1 4.4 4.6 0 2.7-2.1 4.7-4.9 4.7H10.2C7.7 19.6 6 17.4 6 14Z"></path>
         <path d="M9.2 13.6h5.6"></path>
         <path d="M8.5 16.2h7.8"></path>
       `);
     case 'gas-temperature':
+      // A thermometer-like shape representing temperature data.
       return createSvg(`
         <path d="M12 5.2a2.2 2.2 0 0 1 2.2 2.2v7.2a4 4 0 1 1-4.4 0V7.4A2.2 2.2 0 0 1 12 5.2Z"></path>
         <path d="M12 10v6.6"></path>
         <circle cx="12" cy="18" r="1.6" fill="currentColor" stroke="none"></circle>
       `);
     case 'metals-stars':
+      // A star shape inside a box suggesting a stellar metallicity map.
       return createSvg(`
         <rect x="4.8" y="4.8" width="14.4" height="14.4"></rect>
         <path d="m12 8.2 1.25 2.55 2.82.41-2.04 1.98.48 2.8L12 14.63 9.49 15.94l.48-2.8-2.04-1.98 2.82-.41L12 8.2Z"></path>

@@ -48,6 +48,10 @@ export function getInitialTheme(): ThemeId {
 /**
  * Apply a theme to the document and persist the choice.
  *
+ * Setting `data-theme` on the `<html>` element triggers CSS custom property
+ * overrides (defined in `src/style.css`) that swap the entire color palette
+ * and visual language. We also save the selection so it survives page reloads.
+ *
  * @param id - Theme id to activate.
  * @returns void
  */

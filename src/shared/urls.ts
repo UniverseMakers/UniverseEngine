@@ -13,6 +13,8 @@
  * @returns A URL safe to use under any Vite base path.
  */
 export function withBaseUrl(path: string): string {
+  // If the path is already an absolute URL (http://, data:, blob:), pass
+  // it through unchanged — only relative asset paths need the base prefix.
   if (
     /^[a-z]+:\/\//i.test(path) ||
     path.startsWith('data:') ||
@@ -22,6 +24,8 @@ export function withBaseUrl(path: string): string {
   }
 
   const base = import.meta.env.BASE_URL ?? '/';
+  // Ensure the base ends with a trailing slash and the path doesn't start
+  // with one, so concatenation always produces a clean URL.
   const normalizedBase = base.endsWith('/') ? base : `${base}/`;
   const normalizedPath = path.startsWith('/') ? path.slice(1) : path;
 

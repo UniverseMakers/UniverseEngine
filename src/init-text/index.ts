@@ -3,7 +3,7 @@
  *
  * Each simulation class owns a YAML file containing N entries, where each entry
  * offers multiple candidate lines. At runtime we pick one random line from each
- * entry and assign it a dwell time (either YAML-provided or randomized).
+ * entry.
  */
 
 import { parse } from 'yaml';
@@ -15,13 +15,11 @@ import cosmosRaw from './cosmos.yaml?raw';
 
 export interface InitializationLine {
   text: string;
-  durationSeconds: number;
 }
 
 interface InitializationOptionFileEntry {
   options: Array<{
     text: string;
-    duration?: number;
   }>;
 }
 
@@ -34,12 +32,14 @@ const RAW_BY_CLASS: Record<SimulationClass['id'], string> = {
 /**
  * Build the initializing-terminal line sequence for a simulation family.
  *
- * The YAML file is structured as a list of "entries". Each entry contains N
- * candidate line options. This helper picks exactly one option per entry to
- * keep the boot sequence varied while staying within a curated set.
+ * The YAML file is structured as a list of "entries" (think of them as line
+ * slots in the boot sequence). Each entry contains N candidate line options.
+ * This helper picks exactly one option per entry — randomly — so every boot
+ * sequence feels slightly different while staying within a curated set of
+ * scientifically plausible initialization messages.
  *
  * @param simClass - Active simulation family.
- * @returns Array of lines to print in order.
+ * @returns Array of lines to print in order (one per YAML entry).
  */
 export function getInitializationLines(
   simClass: SimulationClass,
@@ -54,14 +54,12 @@ export function getInitializationLines(
       );
     }
 
-    // Pick one candidate option per entry to keep the output varied.
+    // Randomly select one of the candidate lines for this entry slot.
     const option = entry.options[randomInteger(0, entry.options.length - 1)];
 
     return [
       {
         text: option.text,
-        // Respect explicit per-option durations when provided; otherwise randomize.
-        durationSeconds: option.duration ?? randomDurationSeconds(),
       },
     ];
   });
@@ -76,13 +74,4 @@ export function getInitializationLines(
  */
 function randomInteger(min: number, max: number): number {
   return Math.floor(Math.random() * (max - min + 1)) + min;
-}
-
-/**
- * Pick a short randomized dwell time for one initialization line.
- *
- * @returns Duration in seconds.
- */
-function randomDurationSeconds(): number {
-  return 0.14 + Math.random() * 0.12;
 }

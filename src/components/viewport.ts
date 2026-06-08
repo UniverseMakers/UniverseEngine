@@ -63,9 +63,13 @@ export function createViewport(
   const video = document.createElement('video');
   video.className = 'viewport__media is-empty';
   video.src = initialSrc;
+  // No loop — we rely on the ended event to show the summary overlay.
   video.loop = false;
+  // Start muted to comply with browser autoplay policies.
   video.muted = true;
+  // Required for inline playback on iOS Safari.
   video.playsInline = true;
+  // Load metadata first so we can query duration before play.
   video.preload = 'metadata';
   video.setAttribute('aria-label', 'Simulation output');
 
@@ -78,6 +82,8 @@ export function createViewport(
   let endedCallback: (() => void) | undefined;
 
   // Forward time updates whenever the media has a valid duration.
+  // We emit normalized fractions (0..1) rather than raw seconds so callers
+  // don't need to query video.duration separately for every tick.
   video.addEventListener('timeupdate', () => {
     if (
       !timeUpdateCallback ||
@@ -90,53 +96,70 @@ export function createViewport(
     timeUpdateCallback(video.currentTime / video.duration);
   });
 
-  // Forward media-ended events so the app shell can show the summary overlay.
+  // Forward media-ended events so the app shell can show the summary overlay
+  // and let the user decide to replay or configure a new run.
   video.addEventListener('ended', () => {
     endedCallback?.();
   });
-
-  // Swap to a new source with a short fade so placeholder changes are not abrupt.
   /**
-   * Swap to a new source with a short fade.
+   * Swap to a new source with a short fade transition.
+   *
+   * The 120ms delay lets the CSS fade-out animation start before we swap the
+   * video source, preventing an abrupt visual cut. We also handle optional
+   * seek-to-fraction and autoplay for view switching.
    *
    * @param src - URL for the new media.
    * @returns void
    */
   function setSource(src: string, options: ViewportSourceOptions = {}): void {
+    // Start the CSS fade-out so the current frame fades to black.
     video.classList.add('fade-out');
 
     window.setTimeout(() => {
       // If the requested source is already active, just remove the fade and stop.
+      // This avoids unnecessary re-loads when the user clicks the same view.
       if (video.src.endsWith(src)) {
         video.classList.remove('fade-out');
         return;
       }
 
-      // Preserve mute state, then load the new source from the beginning.
+      // Remember the current mute state so setting a new src doesn't reset it.
       const resumeMuted = video.muted;
       const seekFraction = options.seekFraction;
+
+      // Swap the source and trigger a fresh load.
       video.src = src;
       video.load();
+
+      // Once the new video's first frame is ready, apply post-load settings.
       video.onloadeddata = () => {
         video.muted = resumeMuted;
+
+        // Seek to a specific fraction if requested (used during view switches).
         if (
           seekFraction !== undefined &&
           Number.isFinite(video.duration) &&
           video.duration > 0
         ) {
+          // Clamp to 0..0.999 so we never seek exactly to the end.
           const clamped = Math.max(0, Math.min(0.999, seekFraction));
           video.currentTime = clamped * video.duration;
         } else {
           video.currentTime = 0;
         }
+
+        // Fade back in now that the new source is ready.
         video.classList.remove('fade-out');
 
+        // Resume playback if requested (e.g. switching views while playing).
         if (options.autoplay) {
           void video.play().catch(() => {
             // Leave the media paused if the browser rejects playback.
           });
         }
       };
+      // 120ms matches the CSS fade-out transition duration, giving the old
+      // frame time to fade before the source is replaced.
     }, 120);
   }
 

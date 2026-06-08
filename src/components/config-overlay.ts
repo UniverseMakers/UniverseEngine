@@ -230,10 +230,16 @@ export function createConfigOverlay(
   /**
    * Apply the active internal view and keep header/footer labels consistent.
    *
+   * The action button changes label based on the active section:
+   * - Parameters → "Run" (starts the simulation)
+   * - Settings   → "Apply" (applies theme changes without launching)
+   * - Credits/Terminal → "Close" (dismisses the overlay)
+   *
    * @param view - View to activate.
    * @returns void
    */
   function applyView(view: ConfigOverlayView): void {
+    // Update a data attribute so CSS can highlight the active section.
     controls.dataset.view = view;
     sectionLabel.textContent =
       view === 'parameters'
@@ -244,6 +250,7 @@ export function createConfigOverlay(
             ? 'Credits'
             : 'Terminal';
 
+    // The run button's label changes to match the active section's purpose.
     if (view === 'settings') {
       runButton.textContent = 'Apply';
     } else if (view === 'terminal' || view === 'credits') {

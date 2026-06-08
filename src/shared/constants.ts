@@ -2,7 +2,8 @@
  * Shared runtime constants.
  *
  * This module centralizes timing and tuning constants so UX adjustments do not
- * require hunting through individual components.
+ * require hunting through individual components. If you need to tweak the boot
+ * sequence speed or overlay fade timing, change it here — not in ten places.
  */
 
 /** Initialization/boot-sequence tuning. */

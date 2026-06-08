@@ -49,24 +49,29 @@ export function sampleLiveStats(
   timeSeconds: number,
   durationSeconds = 0,
 ): Record<string, string> {
+  // Row-based datasets don't have timestamps — we sample by normalized position instead.
   if (dataset.mode === 'row') {
     return sampleRowBasedStats(dataset.frames, timeSeconds, durationSeconds);
   }
 
+  // Time-based datasets: find the two neighboring keyframes and interpolate.
   const frames = dataset.frames;
   if (frames.length === 0) {
     return {};
   }
 
+  // Before or at the first frame? Return the first frame's values.
   if (timeSeconds <= frames[0].t) {
     return { ...frames[0].values };
   }
 
+  // After or at the last frame? Return the last frame's values.
   const lastFrame = frames[frames.length - 1];
   if (timeSeconds >= lastFrame.t) {
     return { ...lastFrame.values };
   }
 
+  // Walk through frames to find the pair (start, end) that brackets our time.
   for (let index = 0; index < frames.length - 1; index += 1) {
     const start = frames[index];
     const end = frames[index + 1];
@@ -75,10 +80,12 @@ export function sampleLiveStats(
       continue;
     }
 
+    // Compute the interpolation fraction and lerp between the two frames.
     const fraction = (timeSeconds - start.t) / Math.max(end.t - start.t, 1e-9);
     return interpolateFrameValues(start.values, end.values, fraction);
   }
 
+  // Safety net — should not normally be reached.
   return { ...lastFrame.values };
 }
 
@@ -198,16 +205,21 @@ function splitCsvLine(line: string): string[] {
 /**
  * Interpolate one frame of values between two neighboring keyframes.
  *
+ * Numeric values are linearly interpolated (lerp). Non-numeric values snap to
+ * the nearest keyframe — they jump at the halfway point rather than blending
+ * into nonsense strings like "galaxgalaxy".
+ *
  * @param start - Values at the start keyframe.
  * @param end - Values at the end keyframe.
  * @param fraction - Normalized interpolation fraction 0..1.
- * @returns Interpolated value map.
+ * @returns Interpolated value map (union of all keys from both frames).
  */
 function interpolateFrameValues(
   start: Record<string, string>,
   end: Record<string, string>,
   fraction: number,
 ): Record<string, string> {
+  // Collect all unique keys from both frames so nothing gets dropped.
   const keys = new Set([...Object.keys(start), ...Object.keys(end)]);
   const output: Record<string, string> = {};
 
@@ -218,20 +230,34 @@ function interpolateFrameValues(
     const endNumber = parseFloat(endValue);
 
     if (Number.isFinite(startNumber) && Number.isFinite(endNumber)) {
+      // Numeric interpolation: lerp between the two values.
       const value = startNumber + (endNumber - startNumber) * fraction;
       output[key] = formatNumber(value);
       continue;
     }
 
+    // Non-numeric: snap at the midpoint to avoid blended strings.
     output[key] = fraction < 0.5 ? startValue : endValue;
   }
 
   return output;
 }
 
+/**
+ * Format an interpolated number for display.
+ *
+ * We keep two decimal places internally but strip trailing zeros so "42.00"
+ * becomes "42" and "3.50" becomes "3.5". This keeps the HUD compact while
+ * preserving enough precision for gradual live counters.
+ *
+ * @param value - Numeric value to format.
+ * @returns Display-friendly string.
+ */
 function formatNumber(value: number): string {
   return value
     .toFixed(2)
+    // Strip trailing zeros after the decimal: "12.50" → "12.5", "7.00" → "7"
     .replace(/\.0+$|(?<=\..*?)0+$/g, '')
+    // Strip a trailing decimal point if all decimals were zeros: "7." → "7"
     .replace(/\.$/, '');
 }
