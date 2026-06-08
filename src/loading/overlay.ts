@@ -26,12 +26,17 @@ export interface LoadingOverlayController {
 export function createLoadingOverlay(container: HTMLElement): LoadingOverlayController {
   const { TYPING_MS_PER_CHAR, FINAL_PAUSE_MS } = INITIALIZATION;
 
+  // Full-screen shell that blocks interaction while the faux boot sequence is
+  // printing. CSS handles the visual treatment; this module handles sequencing.
   const overlay = document.createElement('section');
 
   overlay.className = 'overlay overlay--initializing';
   overlay.hidden = true;
   overlay.classList.add('is-hidden');
 
+  // Everything inside the loading overlay is framed like a terminal window so
+  // the user gets a clear transition from parameter selection into "simulation
+  // startup" even though we are really just pacing text lines.
   const terminal = document.createElement('div');
 
   terminal.className = 'terminal';
@@ -71,6 +76,8 @@ export function createLoadingOverlay(container: HTMLElement): LoadingOverlayCont
   }
 
   function wait(ms: number, token: number): Promise<void> {
+    // Every wait is token-aware so a new `show()` or `hide()` call can cancel an
+    // in-flight sequence without us needing to thread abort controllers around.
     return new Promise((resolve) => {
       const timer = window.setTimeout(
         () => {
@@ -86,12 +93,15 @@ export function createLoadingOverlay(container: HTMLElement): LoadingOverlayCont
   }
 
   function setLoad(progress: number) {
+    // Clamp to 0..100 so callers can pass defensive values without breaking the UI.
     const percent = Math.round(Math.max(0, Math.min(1, progress)) * 100);
 
     loadReadout.textContent = `LOAD: ${percent}%`;
   }
 
   async function typeLine(line: string, token: number): Promise<void> {
+    // Each line gets its own cursor so the typing effect feels like a real shell
+    // prompt rather than one global cursor teleporting around the log.
     const row = document.createElement('div');
 
     row.className = 'terminal__line';
@@ -108,6 +118,8 @@ export function createLoadingOverlay(container: HTMLElement): LoadingOverlayCont
 
       const character = line[index];
 
+      // Insert before the cursor so the block character always stays at the end
+      // of the visible line while text streams in.
       row.insertBefore(document.createTextNode(character), cursor);
       log.scrollTop = log.scrollHeight;
       await wait(TYPING_MS_PER_CHAR, token);
@@ -127,6 +139,7 @@ export function createLoadingOverlay(container: HTMLElement): LoadingOverlayCont
 
   return {
     async show(lines: InitializationLine[], onComplete: () => void) {
+      // Starting a new show() always invalidates any prior sequence first.
       clearTimers();
       sequenceToken += 1;
       const token = sequenceToken;
@@ -141,6 +154,8 @@ export function createLoadingOverlay(container: HTMLElement): LoadingOverlayCont
           return;
         }
 
+        // Prefix with a synthetic timestamp so even static YAML lines feel like
+        // a coherent boot log rather than unrelated status messages.
         const stampedLine = `${formatTimestamp(index)} ${line.text}`;
 
         await typeLine(stampedLine, token);
@@ -149,6 +164,8 @@ export function createLoadingOverlay(container: HTMLElement): LoadingOverlayCont
 
       setLoad(1);
       if (token === sequenceToken) {
+        // Hold the final 100% state briefly so the user perceives completion
+        // before the app swaps into display mode.
         await wait(FINAL_PAUSE_MS, token);
         onComplete();
       }

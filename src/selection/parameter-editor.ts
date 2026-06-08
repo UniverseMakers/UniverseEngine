@@ -8,8 +8,13 @@ import type { SimulationClass, SimParameter } from './data.ts';
 import { formatParameterValue, withUnit } from '../shared/format.ts';
 
 export interface ParameterEditorController {
+  /** Swap to a different simulation family and optionally seed its values. */
   setSimClass: (simClass: SimulationClass, nextValues?: Record<string, number>) => void;
+
+  /** Replace the current value map for the active simulation family. */
   setValues: (nextValues: Record<string, number>) => void;
+
+  /** Read a defensive copy of the current values. */
   getValues: () => Record<string, number>;
 }
 
@@ -28,6 +33,9 @@ export function createParameterEditor(
   initialValues: Record<string, number>,
   onChange: (values: Record<string, number>) => void,
 ): ParameterEditorController {
+  // Single root node so the whole editor can be rebuilt whenever the active
+  // simulation family changes. The parameter count is small, so full re-render
+  // is simpler than diffing individual slider rows.
   const root = document.createElement('div');
 
   root.className = 'parameter-editor';
@@ -40,10 +48,14 @@ export function createParameterEditor(
     simClass: SimulationClass,
     nextValues?: Record<string, number>,
   ): void {
+    // Swap the active class and either keep caller-provided values or fall back
+    // to that class's defaults when no explicit value map was supplied.
     currentClass = simClass;
     values = nextValues ? { ...nextValues } : createDefaultValues(simClass);
     root.innerHTML = '';
 
+    // The heading gives the slider bank some context whenever the user switches
+    // between planetary / galaxy / cosmos presets.
     const heading = document.createElement('div');
 
     heading.className = 'parameter-editor__heading';
@@ -53,6 +65,7 @@ export function createParameterEditor(
     `;
     root.appendChild(heading);
 
+    // Every parameter becomes one self-contained slider row.
     const list = document.createElement('div');
 
     list.className = 'parameter-editor__list';
@@ -66,6 +79,8 @@ export function createParameterEditor(
   }
 
   function createParamControl(param: SimParameter): HTMLElement {
+    // Each parameter row owns its label, range readout, current value, and the
+    // slider itself so the structure stays easy to scan in the DOM.
     const wrapper = document.createElement('section');
 
     wrapper.className = 'param';
@@ -101,6 +116,8 @@ export function createParameterEditor(
     slider.setAttribute('aria-label', param.label);
 
     function sync(value: number): void {
+      // One helper keeps the slider thumb, CSS fill, readout text, and outward
+      // change notification moving together from the same source of truth.
       values[param.id] = value;
       slider.value = String(value);
       slider.style.setProperty(
@@ -122,6 +139,8 @@ export function createParameterEditor(
       sync(parseFloat(slider.value));
     });
 
+    // Prime the slider fill/readout before the row is attached so there is no
+    // visible snap from default browser state to our styled state.
     slider.style.setProperty(
       '--fill',
       `${calculateFill(values[param.id] ?? param.defaultValue, param.min, param.max)}%`,
@@ -145,6 +164,8 @@ export function createParameterEditor(
   }
 
   function emitChange(): void {
+    // Emit a copy so consumers cannot accidentally mutate the editor's internal
+    // state object behind its back.
     onChange({ ...values });
   }
 
@@ -164,6 +185,8 @@ export function createParameterEditor(
 }
 
 function createDefaultValues(simClass: SimulationClass): Record<string, number> {
+  // Defaults come directly from the simulation schema so adding a new parameter
+  // in YAML automatically gives it a sane starting value in the editor.
   return Object.fromEntries(
     simClass.parameters.map((parameter) => [parameter.id, parameter.defaultValue]),
   );

@@ -18,10 +18,19 @@ import {
 } from './theme.ts';
 
 export interface SelectionOverlayController {
+  /** Reveal the overlay. */
   show: () => void;
+
+  /** Hide the overlay. */
   hide: () => void;
+
+  /** Replace the active simulation family and parameter values. */
   setSimulation: (simClass: SimulationClass, values: Record<string, number>) => void;
+
+  /** Update the selected theme button state. */
   setTheme: (theme: ThemeId) => void;
+
+  /** Switch the visible section within the overlay. */
   setView: (view: SelectionOverlayView) => void;
 }
 
@@ -50,12 +59,17 @@ export function createSelectionOverlay(
   container: HTMLElement,
   options: SelectionOverlayOptions,
 ): SelectionOverlayController {
+  // Full-screen shell that sits above the viewport while the user is choosing
+  // parameters, tweaking theme settings, or reading credits/terminal copy.
   const overlay = document.createElement('section');
 
   overlay.className = 'overlay overlay--config';
   overlay.hidden = true;
   overlay.classList.add('is-hidden');
 
+  // The visual panel is split into two halves: left media/branding, right
+  // controls. The shell element exists so CSS can switch layouts without this
+  // module caring about breakpoints.
   const panel = document.createElement('div');
 
   panel.className = 'config-overlay';
@@ -72,6 +86,9 @@ export function createSelectionOverlay(
   mediaImage.className = 'config-overlay__media-image';
   mediaImage.src = options.simClass.placeholderImage;
   mediaImage.alt = `${options.simClass.label} preview`;
+
+  // The left-hand media block is largely atmospheric. The real interaction
+  // lives on the control side where users set parameters and launch runs.
   media.innerHTML = `
     <div class="config-overlay__media-copy">
       <h1 class="config-overlay__headline">Universe \n Engine</h1>
@@ -112,6 +129,8 @@ export function createSelectionOverlay(
   header.appendChild(titleBlock);
   header.appendChild(closeButton);
 
+  // Parameters are mounted by the dedicated editor helper so this overlay does
+  // not need to own slider rendering details directly.
   const parameterSection = document.createElement('section');
 
   parameterSection.className = 'config-overlay__section config-overlay__section--grow';
@@ -132,6 +151,7 @@ export function createSelectionOverlay(
 
   settingsSection.appendChild(themePickerHost);
 
+  // Credits are static project data, so we render them once up front.
   const creditsSection = document.createElement('section');
 
   creditsSection.className = 'config-overlay__section config-overlay__section--grow';
@@ -164,6 +184,8 @@ export function createSelectionOverlay(
     }
   }
 
+  // The terminal tab is intentionally placeholder content for now. Keeping the
+  // tab in place now gives us a stable home for real logs later.
   const terminalSection = document.createElement('section');
 
   terminalSection.className = 'config-overlay__section config-overlay__section--grow';
@@ -210,6 +232,7 @@ export function createSelectionOverlay(
   overlay.appendChild(panel);
   container.appendChild(overlay);
 
+  // Mount the two sub-controllers after their host nodes exist.
   const parameterEditor = createParameterEditor(
     parametersHost,
     options.simClass,
@@ -227,6 +250,8 @@ export function createSelectionOverlay(
   applyView(options.initialView ?? 'parameters');
 
   function applyView(view: SelectionOverlayView): void {
+    // We store the active view as data so CSS can switch visible sections
+    // declaratively instead of this module toggling many classes by hand.
     controls.dataset.view = view;
     sectionLabel.textContent =
       view === 'parameters'
@@ -237,6 +262,8 @@ export function createSelectionOverlay(
             ? 'Credits'
             : 'Terminal';
 
+    // The footer button changes job based on the active section. Reusing one
+    // button keeps the bottom chrome stable while the body content changes.
     if (view === 'settings') {
       runButton.textContent = 'Apply';
     } else if (view === 'terminal' || view === 'credits') {
@@ -249,12 +276,14 @@ export function createSelectionOverlay(
   runButton.addEventListener('click', () => {
     const activeView = controls.dataset.view as SelectionOverlayView;
 
+    // Settings uses the footer button as an "apply and close" affordance.
     if (activeView === 'settings') {
       options.onApplySettings();
 
       return;
     }
 
+    // Read-only tabs simply close the overlay when the footer button is pressed.
     if (activeView === 'terminal') {
       options.onClose();
 
@@ -267,6 +296,7 @@ export function createSelectionOverlay(
       return;
     }
 
+    // Parameter mode is the only view that actually kicks off a simulation run.
     options.onRun();
   });
 
@@ -280,6 +310,7 @@ export function createSelectionOverlay(
       overlay.classList.add('is-hidden');
     },
     setSimulation(simClass: SimulationClass, values: Record<string, number>) {
+      // Keep all subviews aligned when the active simulation family changes.
       parameterEditor.setSimClass(simClass, values);
       mediaImage.src = simClass.placeholderImage;
       mediaImage.alt = `${simClass.label} preview`;

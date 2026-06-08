@@ -123,6 +123,8 @@ export function createDisplayTerminal(
       // (typically fewer than 20 placeholder lines).
       log.innerHTML = '';
 
+      // The terminal currently shows curated placeholder lines, but the render
+      // path is intentionally the same one a real log stream would use later.
       for (const line of createLogLines(simClass, values)) {
         const row = document.createElement('div');
 
@@ -170,6 +172,8 @@ function createLogLines(
     const value = values[parameter.id] ?? parameter.defaultValue;
     const timestamp = `[00:${String(index).padStart(2, '0')}:0${index}]`;
 
+    // Reuse the same formatting rules as the parameter editor so the terminal
+    // preview never disagrees with the slider readout the user just saw.
     return `${timestamp} PARAM_${parameter.id.toUpperCase()} :: ${withUnit(formatParameterValue(value, parameter.step, { scale: parameter.valueScale, format: parameter.displayFormat, significantFigures: parameter.displaySignificantFigures }), parameter.displayUnit ?? parameter.unit)}`;
   });
 

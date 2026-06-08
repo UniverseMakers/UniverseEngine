@@ -6,6 +6,7 @@
  */
 
 export interface TimelineController {
+  /** Update the visible thumb position from normalized playback progress. */
   setPosition: (t: number) => void;
 }
 
@@ -22,6 +23,8 @@ export function createTimeline(
   container: HTMLElement,
   onChange?: TimelineChangeCallback,
 ): TimelineController {
+  // The timeline is intentionally thin: one range input plus a lightweight
+  // status readout. The app shell owns all real playback state.
   const timeline = document.createElement('div');
 
   timeline.className = 'timeline';
@@ -54,6 +57,8 @@ export function createTimeline(
   current.className = 'timeline__current';
   current.textContent = 'STATUS: IDLE_OBSERVATION';
 
+  // User scrubbing emits a normalized fraction so callers never depend on the
+  // slider's 0..1000 internal range.
   slider.addEventListener('input', () => {
     const position = parseInt(slider.value, 10) / 1000;
 
@@ -70,6 +75,8 @@ export function createTimeline(
 
   return {
     setPosition(t: number) {
+      // Playback-driven updates use the same clamped path as user scrubbing so
+      // the fill bar and status text always stay in sync.
       const clamped = Math.max(0, Math.min(1, t));
 
       slider.value = String(Math.round(clamped * 1000));

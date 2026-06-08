@@ -81,15 +81,24 @@ export function createSummaryOverlay(
 
   // Add button to replay the current video
   const replayButton = document.createElement('button');
+
   replayButton.className = 'summary-overlay__button summary-overlay__button--primary';
   replayButton.type = 'button';
   replayButton.textContent = 'Replay';
 
   // Add button to select new parameters and start a new run
   const newButton = document.createElement('button');
+
   newButton.className = 'summary-overlay__button';
   newButton.type = 'button';
   newButton.textContent = 'New';
+
+  // Add button to open the terminal view after playback completes.
+  const terminalButton = document.createElement('button');
+
+  terminalButton.className = 'summary-overlay__button';
+  terminalButton.type = 'button';
+  terminalButton.textContent = 'Terminal';
 
   // The overlay never owns application state. It only forwards user intent back
   // to the app shell which decides what replay/new/terminal actually do.
@@ -99,6 +108,7 @@ export function createSummaryOverlay(
 
   actions.appendChild(replayButton);
   actions.appendChild(newButton);
+  actions.appendChild(terminalButton);
 
   panel.appendChild(metrics);
   panel.appendChild(actions);

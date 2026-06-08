@@ -25,6 +25,7 @@ export const THEMES: ThemeOption[] = [
 ];
 
 export interface ThemePickerController {
+  /** Update which theme button is visually marked active. */
   setActive: (id: ThemeId) => void;
 }
 
@@ -34,6 +35,8 @@ export interface ThemePickerController {
  * @returns The saved theme id, or a reasonable default when missing/invalid.
  */
 export function getInitialTheme(): ThemeId {
+  // We validate the stored string against the known theme ids so stale or
+  // hand-edited localStorage values do not put the UI into an invalid state.
   const saved = localStorage.getItem(STORAGE_KEY);
 
   return isThemeId(saved) ? saved : 'tron';
@@ -46,6 +49,8 @@ export function getInitialTheme(): ThemeId {
  * @returns void
  */
 export function applyTheme(id: ThemeId): void {
+  // `data-theme` lets CSS own the real visual differences; TypeScript just picks
+  // the active token set and persists the choice for the next visit.
   document.documentElement.setAttribute('data-theme', id);
   localStorage.setItem(STORAGE_KEY, id);
 }
@@ -63,6 +68,7 @@ export function createThemePicker(
   initialTheme: ThemeId,
   onChange: (theme: ThemeId) => void,
 ): ThemePickerController {
+  // The picker is intentionally tiny: one button per known theme.
   const root = document.createElement('div');
 
   root.className = 'theme-picker';
@@ -70,6 +76,8 @@ export function createThemePicker(
   const buttons = new Map<ThemeId, HTMLButtonElement>();
 
   for (const theme of THEMES) {
+    // Keep a direct button map so `setActive()` can update state without
+    // rebuilding the picker every time the shell applies a theme.
     const button = document.createElement('button');
 
     button.className = 'theme-picker__option';
@@ -90,6 +98,8 @@ export function createThemePicker(
   setActive(initialTheme);
 
   function setActive(id: ThemeId) {
+    // One pass flips all active states so there is never ambiguity about which
+    // theme is currently selected.
     for (const [themeId, button] of buttons.entries()) {
       const isActive = themeId === id;
 
@@ -102,5 +112,6 @@ export function createThemePicker(
 }
 
 function isThemeId(value: string | null): value is ThemeId {
+  // Shared runtime guard used by localStorage recovery.
   return THEMES.some((theme) => theme.id === value);
 }

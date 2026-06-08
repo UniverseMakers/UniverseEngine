@@ -8,7 +8,10 @@
 import type { SimulationViewOption } from '../selection/data.ts';
 
 export interface ViewSwitcherController {
+  /** Replace the available view buttons and active selection. */
   update: (options: SimulationViewOption[], selectedId?: string) => void;
+
+  /** Clear and hide the switcher. */
   hide: () => void;
 }
 
@@ -27,6 +30,8 @@ export function createViewSwitcher(
   container: HTMLElement,
   options: ViewSwitcherOptions,
 ): ViewSwitcherController {
+  // The switcher stays mounted permanently, but may render zero buttons when a
+  // run only has one available view.
   const root = document.createElement('div');
 
   root.className = 'view-switcher is-hidden';
@@ -34,6 +39,8 @@ export function createViewSwitcher(
 
   return {
     update(viewOptions, selectedId) {
+      // Rebuild from scratch because the option count is tiny and the full set
+      // can change when the user jumps between simulation families or run ids.
       root.innerHTML = '';
 
       if (viewOptions.length <= 1) {
@@ -42,6 +49,7 @@ export function createViewSwitcher(
         return;
       }
 
+      // More than one view means the switcher becomes relevant and should be shown.
       root.classList.remove('is-hidden');
 
       for (const view of viewOptions) {
@@ -54,6 +62,8 @@ export function createViewSwitcher(
         button.setAttribute('aria-pressed', String(view.id === selectedId));
         button.setAttribute('aria-label', view.label ?? view.id);
 
+        // Optional icons give the astrophysics-heavy views some visual identity
+        // without forcing labels like "dark-matter" to do all the work.
         const icon = createViewIcon(view.icon);
 
         if (icon) {
@@ -75,6 +85,8 @@ export function createViewSwitcher(
       }
     },
     hide() {
+      // Hide also clears buttons so stale run-specific views cannot flash when
+      // the next run loads.
       root.innerHTML = '';
       root.classList.add('is-hidden');
     },
@@ -82,6 +94,8 @@ export function createViewSwitcher(
 }
 
 function createViewIcon(iconId?: string): SVGSVGElement | null {
+  // View ids map to tiny inline SVGs so we keep this feature self-contained and
+  // do not need a separate icon asset pipeline.
   switch (iconId) {
     case 'dark-matter':
       return createSvg(`
@@ -116,6 +130,7 @@ function createViewIcon(iconId?: string): SVGSVGElement | null {
 }
 
 function createSvg(content: string): SVGSVGElement {
+  // Build the SVG wrapper once per icon and inject the specific path markup.
   const template = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
 
   template.setAttribute('viewBox', '0 0 24 24');

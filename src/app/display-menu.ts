@@ -45,6 +45,8 @@ export function createDisplayMenu(
   trigger.setAttribute('aria-label', 'Open configuration overlay');
   host.appendChild(trigger);
 
+  // The dropdown itself is intentionally plain: a static vertical list of
+  // actions with one header row and a shared button renderer.
   const menu = document.createElement('div');
 
   menu.className = 'display-menu';
@@ -55,6 +57,7 @@ export function createDisplayMenu(
   header.textContent = 'Core Menu';
   menu.appendChild(header);
 
+  // First render the simulation-family shortcuts, then append utility views.
   for (const simClass of simulationClasses) {
     menu.appendChild(
       createMenuButton(simClass.label, () => {
@@ -87,10 +90,13 @@ export function createDisplayMenu(
 
   host.appendChild(menu);
 
+  // Toggle the popover from the burger button.
   trigger.addEventListener('click', () => {
     host.classList.toggle('open');
   });
 
+  // Global outside-click dismissal keeps the menu behaving like a popover even
+  // though it is built from plain DOM rather than a dedicated UI library.
   document.addEventListener('click', (event) => {
     if (!host.contains(event.target as Node)) {
       close();

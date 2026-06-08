@@ -28,6 +28,8 @@ export const EMPTY_LIVE_STATS_DATASET: LiveStatsDataset = {
  * @returns Parsed frame list.
  */
 export async function loadLiveStatsCsv(url: string): Promise<LiveStatsDataset> {
+  // Treat a missing CSV as a hard failure here; the shell decides whether to
+  // catch that and substitute an empty dataset for display purposes.
   const response = await fetch(url);
 
   if (!response.ok) {
@@ -102,6 +104,8 @@ export function sampleLiveStats(
  * @returns Parsed frame list.
  */
 function parseCsv(text: string): LiveStatsDataset {
+  // Trim and drop empty lines so small formatting differences in generated CSVs
+  // do not change parsing behavior.
   const lines = text
     .split(/\r?\n/)
     .map((line) => line.trim())
@@ -122,6 +126,8 @@ function parseCsv(text: string): LiveStatsDataset {
         const cells = splitCsvLine(line);
         const values: Record<string, string> = {};
 
+        // Column 0 is the timestamp; every remaining column becomes a named
+        // metric value on this frame.
         for (let index = 1; index < headers.length; index += 1) {
           values[headers[index]] = cells[index] ?? '';
         }
@@ -142,6 +148,8 @@ function parseCsv(text: string): LiveStatsDataset {
       const cells = splitCsvLine(line);
       const values: Record<string, string> = {};
 
+      // Row-based files have no explicit time column, so every header maps
+      // directly to its cell value.
       for (let index = 0; index < headers.length; index += 1) {
         values[headers[index]] = cells[index] ?? '';
       }
@@ -175,6 +183,8 @@ function sampleRowBasedStats(
     return { ...frames[0].values };
   }
 
+  // Convert absolute playback time into a normalized file position, then snap
+  // to the nearest row because row-based datasets are discrete rather than interpolated.
   const fraction = Math.max(0, Math.min(1, timeSeconds / durationSeconds));
   const index = Math.round(fraction * (frames.length - 1));
 
@@ -188,6 +198,8 @@ function sampleRowBasedStats(
  * @returns Array of cells.
  */
 function splitCsvLine(line: string): string[] {
+  // This is intentionally a small CSV splitter, not a full RFC parser. It is
+  // enough for the generated telemetry files used by this app.
   const cells: string[] = [];
   let current = '';
   let inQuotes = false;
