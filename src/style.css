@@ -230,7 +230,6 @@ button {
   background: rgba(0, 0, 0, 0.14);
 }
 
-.viewport__image,
 .viewport__media {
   position: absolute;
   inset: 0;
@@ -250,7 +249,6 @@ button {
   opacity: 0;
 }
 
-.viewport__image.fade-out,
 .viewport__media.fade-out {
   opacity: 0.2;
 }
@@ -663,8 +661,7 @@ button {
   text-overflow: ellipsis;
 }
 
-.data-panel__metric-label,
-.data-panel__status {
+.data-panel__metric-label {
   color: var(--text-muted);
   font-family: var(--font-mono);
   font-size: 0.72rem;
@@ -682,14 +679,6 @@ button {
   text-align: right;
 }
 
-.data-panel__status {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  margin-top: 1rem;
-}
-
-.data-panel__status-dot,
 .terminal__dot {
   width: 0.55rem;
   height: 0.55rem;
@@ -985,8 +974,6 @@ button {
 }
 
 .entry-overlay__eyebrow,
-.entry-overlay__copy,
-.entry-overlay__button-meta,
 .entry-overlay__button-label {
   font-family: var(--font-mono);
   text-transform: uppercase;
@@ -1006,15 +993,6 @@ button {
   font-size: clamp(2rem, 4vw, 3rem);
   letter-spacing: 0.08em;
   text-transform: uppercase;
-}
-
-.entry-overlay__copy {
-  max-width: 100%;
-  margin: 1rem 0 1.8rem;
-  color: var(--text-secondary);
-  font-size: 0.78rem;
-  line-height: 1.8;
-  letter-spacing: 0.05em;
 }
 
 .entry-overlay__actions {
@@ -1042,12 +1020,6 @@ button {
 
 .entry-overlay__button-label {
   font-size: 0.92rem;
-  letter-spacing: 0.18em;
-}
-
-.entry-overlay__button-meta {
-  color: var(--text-muted);
-  font-size: 0.7rem;
   letter-spacing: 0.18em;
 }
 
@@ -1257,8 +1229,6 @@ button {
   letter-spacing: 0.08em;
 }
 
-.config-overlay__body,
-.config-overlay__footer-note,
 .config-overlay__settings-copy {
   margin: 0.8rem 0 0;
   color: var(--text-secondary);
@@ -1315,7 +1285,6 @@ button {
   text-transform: uppercase;
 }
 
-.config-overlay__settings-button,
 .config-overlay__close {
   padding: 0.55rem 0.7rem;
   border: 1px solid var(--line-strong);
@@ -1363,35 +1332,6 @@ button {
 .config-overlay__controls[data-view='terminal'] [data-section='settings'],
 .config-overlay__controls[data-view='terminal'] [data-section='credits'] {
   display: none;
-}
-
-.class-selector {
-  position: relative;
-}
-
-.class-selector__select {
-  width: 100%;
-  border: 1px solid var(--line-strong);
-  border-radius: 0;
-  background: var(--surface-high);
-  color: var(--text-primary);
-  font-family: var(--font-body);
-}
-
-.class-selector__select {
-  appearance: none;
-  padding: 1.12rem 3.25rem 1.12rem 1.25rem;
-  font-size: 1rem;
-}
-
-.class-selector__chevron {
-  position: absolute;
-  top: 50%;
-  right: 1rem;
-  transform: translateY(-50%);
-  color: var(--accent);
-  font-size: 1.2rem;
-  pointer-events: none;
 }
 
 .parameter-editor {
@@ -1610,10 +1550,6 @@ button {
   border-top: 1px solid rgba(123, 208, 255, 0.12);
 }
 
-.config-overlay__footer-note {
-  margin: 0;
-}
-
 /* -------------------------------------------------------------------------- */
 /* Initializing Terminal                                                       */
 /* -------------------------------------------------------------------------- */
@@ -1664,26 +1600,11 @@ button {
 }
 
 .terminal__line,
-.terminal__throbber,
 .terminal__cursor {
   color: var(--accent);
   font-size: 0.95rem;
   line-height: 1.55;
   white-space: pre-wrap;
-}
-
-.terminal__throbber {
-  display: flex;
-  align-items: center;
-  gap: 0.25rem;
-  color: rgba(123, 208, 255, 0.78);
-  letter-spacing: 0.12em;
-}
-
-.terminal__spinner {
-  display: inline-block;
-  width: 1ch;
-  color: var(--accent);
 }
 
 .terminal__cursor {
@@ -1712,9 +1633,7 @@ button {
 [data-theme='hal'] .summary-overlay__button,
 [data-theme='hal'] .entry-overlay__button,
 [data-theme='hal'] .theme-picker__option,
-[data-theme='hal'] .config-overlay__settings-button,
 [data-theme='hal'] .config-overlay__close,
-[data-theme='hal'] .class-selector__select,
 [data-theme='hal'] .param__readout {
   background: #161616;
   border-color: rgba(255, 42, 42, 0.32);
@@ -1725,7 +1644,6 @@ button {
   background: #7f1d1d;
 }
 
-[data-theme='hal'] .data-panel__status-dot,
 [data-theme='hal'] .terminal__dot {
   background: #ff2a2a;
   box-shadow: 0 0 0 2px rgba(255, 42, 42, 0.18);
@@ -1753,9 +1671,7 @@ button {
 [data-theme='nostromo'] .summary-overlay__button,
 [data-theme='nostromo'] .entry-overlay__button,
 [data-theme='nostromo'] .theme-picker__option,
-[data-theme='nostromo'] .config-overlay__settings-button,
 [data-theme='nostromo'] .config-overlay__close,
-[data-theme='nostromo'] .class-selector__select,
 [data-theme='nostromo'] .param__readout,
 [data-theme='nostromo'] .summary-overlay__metric,
 [data-theme='nostromo'] .config-overlay__console {
@@ -2095,14 +2011,6 @@ button {
   .config-overlay__shell {
     display: block;
     min-height: 100vh;
-  }
-
-  .class-selector__select {
-    padding: 1.15rem 3.25rem 1.15rem 1rem;
-    font-family: var(--font-mono);
-    font-size: 0.95rem;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
   }
 
   .param__name {

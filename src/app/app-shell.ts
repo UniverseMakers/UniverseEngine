@@ -677,6 +677,14 @@ export function createAppShell(app: HTMLElement): void {
     // Set a data attribute on the app root so CSS can react to mode changes.
     app.dataset.mode = nextMode;
 
+    // Every screen outside an active simulation scale uses the neutral glass
+    // theme. Scale-specific themes only apply during display mode.
+    if (nextMode === 'entry' || nextMode === 'config') {
+      document.documentElement.setAttribute('data-theme', 'glass');
+    } else if (nextMode === 'display') {
+      applyTheme(activeTheme);
+    }
+
     // Display chrome is shared between display and config modes.
     const showDisplay = nextMode === 'display' || nextMode === 'config';
 

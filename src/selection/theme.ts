@@ -39,7 +39,7 @@ export function getInitialTheme(): ThemeId {
   // hand-edited localStorage values do not put the UI into an invalid state.
   const saved = localStorage.getItem(STORAGE_KEY);
 
-  return isThemeId(saved) ? saved : 'tron';
+  return isThemeId(saved) ? saved : 'glass';
 }
 
 /**
