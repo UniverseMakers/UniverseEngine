@@ -49,9 +49,8 @@ _UPLOAD_SKIP_PATTERNS = (
     "live_data_table_L",  # debug-res HTML/CSV telemetry variants
 )
 
-# Folder-name parsing is intentionally conservative for now. Unknown tokens are
-# preserved in the manifest, and any missing parameters fall back to the
-# simulation defaults in the app's nearest-run lookup.
+# Legacy fallback for run directories that do not yet have a `parameters.yaml`.
+# When the YAML is present it takes precedence over token-based parsing.
 RUN_TOKEN_MAP: dict[str, dict[str, str]] = {
     "cosmos": {
         "Fb": "baryon_fraction",
@@ -195,6 +194,8 @@ def main() -> None:
 
 
 def load_simulation_config() -> dict[str, Any]:
+    if not SIM_CONFIG_PATH.exists():
+        return {}
     with SIM_CONFIG_PATH.open("r", encoding="utf-8") as handle:
         return yaml.safe_load(handle)
 
@@ -226,8 +227,7 @@ def build_manifest_entry(
     return {
         "simulationId": simulation_id,
         "runId": run_dir.name,
-        "parameters": parse_run_parameters(simulation_id, run_dir.name),
-        "parameterTokens": parse_parameter_tokens(run_dir.name),
+        "parameters": parse_run_parameters(simulation_id, run_dir),
         "liveDataPath": to_public_relative_path(live_data_path),
         "summaryPath": to_public_relative_path(run_summary_yaml),
         "defaultView": default_view,
@@ -310,7 +310,20 @@ def build_parameter_defaults(
     }
 
 
-def parse_run_parameters(simulation_id: str, run_id: str) -> dict[str, float]:
+def parse_run_parameters(simulation_id: str, run_dir: Path) -> dict[str, float]:
+    """Read run parameters from `parameters.yaml` if present, otherwise parse the
+    directory name using the token map as a legacy fallback."""
+    params_yaml = run_dir / "parameters.yaml"
+    if params_yaml.exists():
+        with params_yaml.open("r", encoding="utf-8") as handle:
+            raw: dict[str, Any] = yaml.safe_load(handle) or {}
+        return {str(k): float(v) for k, v in raw.items()}
+
+    # Legacy fallback: parse directory name tokens.
+    return _parse_run_parameters_from_tokens(simulation_id, run_dir.name)
+
+
+def _parse_run_parameters_from_tokens(simulation_id: str, run_id: str) -> dict[str, float]:
     token_map = RUN_TOKEN_MAP.get(simulation_id, {})
     parsed: dict[str, float] = {}
 
