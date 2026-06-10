@@ -89,7 +89,7 @@ export function formatNumericString(
   raw: string,
   options: {
     scale?: number;
-    mode?: 'integer' | 'float' | 'scientific' | 'percentage';
+    mode?: 'integer' | 'float' | 'scientific';
     precision?: number;
   } = {},
 ): string {
@@ -106,8 +106,7 @@ export function formatNumericString(
   }
 
   const mode = options.mode ?? 'float';
-  // For percentage mode, multiply by 100 since the value is already 0..1.
-  const scaled = numeric * (options.scale ?? 1) * (mode === 'percentage' ? 100 : 1);
+  const scaled = numeric * (options.scale ?? 1);
 
   if (mode === 'integer') {
     return Math.round(scaled).toLocaleString(undefined);

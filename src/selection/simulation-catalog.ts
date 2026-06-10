@@ -2,7 +2,7 @@
  * Simulation class definitions loaded from YAML.
  *
  * The config is split across three YAML files so concerns stay separate:
- * - `simulation-catalog.yaml`   Family metadata (labels, icons, scoring)
+ * - `simulation-catalog.yaml`   Family metadata (labels, scoring)
  * - `parameter-info.yaml`       Parameter ranges, defaults, and descriptions
  * - `stats-config.yaml`         Display stat configuration (summary + live)
  */
@@ -53,7 +53,7 @@ export interface StatDisplayConfig {
   scaleWithTime?: boolean;
   integer?: boolean;
   valueScale?: number;
-  displayFormat?: 'integer' | 'float' | 'scientific' | 'percentage';
+  displayFormat?: 'integer' | 'float' | 'scientific';
   precision?: number;
 }
 
@@ -76,7 +76,6 @@ export type StatDisplayId = SummaryStatId | string;
 export interface SimulationClass {
   id: string;
   label: string;
-  icon: string;
   placeholderImage: string;
   metadata: SimulationMetadata;
   parameters: SimParameter[];
@@ -87,7 +86,6 @@ export interface SimulationClass {
 
 interface RawCatalogEntry {
   label: string;
-  icon: string;
   placeholderImage: string;
   metadata: {
     distinctSimulations: number;
@@ -133,7 +131,7 @@ interface RawStatDisplayConfig {
   scale_with_time?: boolean;
   integer?: boolean;
   value_scale?: number;
-  display_format?: 'integer' | 'float' | 'scientific' | 'percentage';
+  display_format?: 'integer' | 'float' | 'scientific';
   precision?: number;
 }
 
@@ -153,7 +151,6 @@ export const SIMULATION_CLASSES: SimulationClass[] = Object.entries(catalog).map
     return {
       id,
       label: entry.label,
-      icon: entry.icon,
       placeholderImage: withBaseUrl(entry.placeholderImage),
       metadata: {
         distinctSimulations: entry.metadata.distinctSimulations,

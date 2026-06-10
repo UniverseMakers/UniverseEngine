@@ -53,9 +53,7 @@ button {
   --line: rgba(85, 215, 255, 0.18);
   --line-strong: rgba(85, 215, 255, 0.52);
   --button-primary: #2662d9;
-  --button-primary-2: #2662d9;
   --shadow-ambient: 0 20px 40px rgba(0, 0, 0, 0.42);
-  --scanline-opacity: 0;
 }
 
 [data-theme='glass'] {
@@ -74,7 +72,6 @@ button {
   --line: rgba(255, 255, 255, 0.14);
   --line-strong: rgba(185, 204, 214, 0.32);
   --button-primary: #6b7c8b;
-  --button-primary-2: #6b7c8b;
 }
 
 [data-theme='matrix'] {
@@ -95,8 +92,6 @@ button {
   --line: rgba(0, 255, 65, 0.18);
   --line-strong: rgba(0, 255, 65, 0.5);
   --button-primary: #007a1f;
-  --button-primary-2: #007a1f;
-  --scanline-opacity: 1;
 }
 
 [data-theme='hal'] {
@@ -115,7 +110,6 @@ button {
   --line: rgba(255, 42, 42, 0.18);
   --line-strong: rgba(255, 42, 42, 0.46);
   --button-primary: #a51d1d;
-  --button-primary-2: #a51d1d;
 }
 
 [data-theme='nostromo'] {
@@ -136,8 +130,6 @@ button {
   --line: rgba(220, 169, 74, 0.18);
   --line-strong: rgba(220, 169, 74, 0.4);
   --button-primary: #857042;
-  --button-primary-2: #857042;
-  --scanline-opacity: 1;
 }
 
 /* -------------------------------------------------------------------------- */

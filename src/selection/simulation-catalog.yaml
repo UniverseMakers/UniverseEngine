@@ -16,7 +16,6 @@
 
 planetary:
   label: Planetary
-  icon: '🌍'
   placeholderImage: assets/planet_example.webp
   metadata:
     distinctSimulations: 384
@@ -27,19 +26,16 @@ planetary:
 
 galaxy:
   label: Galaxy
-  icon: '🌀'
   placeholderImage: assets/galaxy_example.webp
   metadata:
-    distinctSimulations: 2048
+    distinctSimulations: 20488
     correctValues:
       star_formation_rate: 2.4
       black_hole_mass: 4.3
-      diskiness: 0.78
       stellar_mass: 5.1
 
 cosmos:
   label: Cosmos
-  icon: '✨'
   placeholderImage: assets/cosmos_example.webp
   views:
     - id: gas_density

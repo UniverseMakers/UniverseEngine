@@ -5,7 +5,7 @@
 #   - ids can refer to built-in app metrics such as `runtime`
 #   - ids can also refer to keys under the selected run's `run_summary.yaml`
 #     `summaryMetrics` map
-#   - `display_format` can be `integer`, `float`, `scientific`, or `percentage`
+#   - `display_format` can be `integer`, `float`, or `scientific`
 #   - `precision` controls decimal places or scientific significant figures
 #
 # `liveStats`
@@ -164,21 +164,6 @@ cosmos:
       value: '0'
       label: Particle updates
       from_video: true
-      display_format: integer
-    - id: stellar_mass_msun
-      label: Number of Suns
-      display_format: scientific
-      precision: 3
-    - id: gas_mass_msun
-      display_format: scientific
-      precision: 3
-    - id: dark_matter_mass_msun
-      display_format: scientific
-      precision: 3
-    - id: black_hole_mass_msun
-      display_format: scientific
-      precision: 3
-    - id: sn_events_age_30myr
       display_format: integer
   liveStats:
     - id: age

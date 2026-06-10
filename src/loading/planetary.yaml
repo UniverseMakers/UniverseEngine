@@ -6,7 +6,6 @@
 # - one option is chosen randomly at runtime
 # - each option supports:
 #     - `text` (required): terminal line text
-#     - `duration` (optional): dwell time in seconds before the next line
 
 - options:
     - text: 'INIT_EARTH :: loading continental crusts with maximal volcanic activity'

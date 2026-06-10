@@ -13,10 +13,8 @@ export interface VideoMatch {
   url: string;
   liveDataUrl: string;
   summaryUrl: string;
-  runId?: string;
   views?: Record<string, string>;
   viewId?: string;
-  distance: number;
 }
 
 interface RunManifest {
@@ -83,7 +81,7 @@ export function getLocalPlaceholderStats(simClassId: string): string {
  * @param simClassId - Simulation family id.
  * @param params - Parameter schemas used for normalized nearest-run lookup.
  * @param values - Current parameter values.
- * @returns Matched video URL + placeholder distance.
+ * @returns Matched video bundle.
  */
 export async function findNearestVideo(
   simClassId: string,
@@ -102,7 +100,6 @@ export async function findNearestVideo(
     url: fallbackUrl,
     liveDataUrl: getLocalPlaceholderStats(simClassId),
     summaryUrl: getVideoMetadataUrl(fallbackUrl),
-    distance: 0,
   };
 }
 
@@ -165,12 +162,10 @@ async function findManifestBackedRun(
     url: withBaseUrl(videoPath),
     liveDataUrl: withBaseUrl(bestEntry.liveDataPath),
     summaryUrl: withBaseUrl(bestEntry.summaryPath),
-    runId: bestEntry.runId,
     viewId,
     views: Object.fromEntries(
       Object.entries(bestEntry.views).map(([key, path]) => [key, withBaseUrl(path)]),
     ),
-    distance: bestDistance,
   };
 }
 
