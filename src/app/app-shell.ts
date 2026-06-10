@@ -42,6 +42,13 @@ import { countDecimals } from '../shared/format.ts';
 
 type AppMode = 'entry' | 'config' | 'initializing' | 'display';
 
+/** Maps each cosmic scale to its default visual theme. */
+const SCALE_TO_THEME: Record<string, ThemeId> = {
+  galaxy: 'tron',
+  planetary: 'matrix',
+  cosmos: 'nostromo',
+};
+
 /**
  * Create and run the full application shell inside the provided mount node.
  *
@@ -302,6 +309,8 @@ export function createAppShell(app: HTMLElement): void {
 
     activeClass = newClass;
     resetSimulationState();
+    // Apply the scale's signature theme.
+    handleThemeChange(SCALE_TO_THEME[newClass.id]);
     // Rebuild the config overlay so the parameters match the new family.
     selectionOverlay.setSimulation(activeClass, getActiveValues());
     timeline.setPosition(0);
