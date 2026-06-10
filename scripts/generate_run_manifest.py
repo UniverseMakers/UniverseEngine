@@ -34,6 +34,21 @@ MANIFEST_PATH = ASSET_ROOT / "run-manifest.json"
 
 SIMULATION_DIRECTORIES = ("planetary", "galaxy", "cosmos")
 
+SKIP_NAMES = frozenset({".DS_Store", "__pycache__", ".ipynb_checkpoints"})
+
+VIDEO_EXTENSIONS = frozenset({".mp4", ".webm", ".mov", ".mkv"})
+
+METADATA_EXTENSIONS = frozenset({".csv", ".yaml", ".yml", ".json", ".txt", ".html"})
+
+STATIC_EXTENSIONS = frozenset({".png", ".jpg", ".jpeg", ".webp", ".svg"})
+
+# Filename patterns that should never be uploaded (debug artifacts, build-time
+# intermediate files, comparison grids not consumed by the frontend).
+_UPLOAD_SKIP_FILENAMES = frozenset({"all_videos_comparison_2x2.mp4", "final_snapshot_summary.csv"})
+_UPLOAD_SKIP_PATTERNS = (
+    "live_data_table_L",  # debug-res HTML/CSV telemetry variants
+)
+
 # Folder-name parsing is intentionally conservative for now. Unknown tokens are
 # preserved in the manifest, and any missing parameters fall back to the
 # simulation defaults in the app's nearest-run lookup.
@@ -44,6 +59,117 @@ RUN_TOKEN_MAP: dict[str, dict[str, str]] = {
         "G": "gravity_strength",
     },
 }
+
+
+def discover_runs(
+    assets_root: Path | None = None,
+    themes: tuple[str, ...] = SIMULATION_DIRECTORIES,
+) -> dict[str, list[Path]]:
+    """Return a mapping of theme name -> sorted list of run directory Paths.
+
+    Only directories that contain at least one actual file (recursively,
+    excluding junk files) are included as runs.
+
+    This function is reused by the R2 upload script to avoid duplicating
+    directory-walking logic.
+    """
+    if assets_root is None:
+        assets_root = ASSET_ROOT
+
+    result: dict[str, list[Path]] = {}
+
+    for theme in themes:
+        theme_dir = assets_root / theme
+        if not theme_dir.is_dir():
+            continue
+        runs: list[Path] = []
+        for entry in sorted(theme_dir.iterdir()):
+            if not entry.is_dir():
+                continue
+            if entry.name in SKIP_NAMES or entry.name.startswith("."):
+                continue
+            # Only include directories containing actual files (not empty shells)
+            if any(
+                p.is_file() and not _should_skip_file(p)
+                for p in entry.rglob("*")
+            ):
+                runs.append(entry)
+        if runs:
+            result[theme] = runs
+
+    return result
+
+
+def discover_files_for_upload(
+    assets_root: Path,
+    themes: tuple[str, ...] = SIMULATION_DIRECTORIES,
+) -> dict[str, dict[str, dict[str, list[Path]]]]:
+    """Walk the assets tree and return a mapping of files ready for upload.
+
+    Returns:
+        {
+            "theme_name": {
+                "run_name": {
+                    "animations": [Path, ...],
+                    "metadata": [Path, ...],
+                }
+            }
+        }
+
+    This is the primary discovery function used by the R2 upload script.
+    Only files that should be uploaded are included; junk files, hidden
+    files, and bare directories are excluded.
+    """
+    result: dict[str, dict[str, dict[str, list[Path]]]] = {}
+
+    discovered = discover_runs(assets_root, themes)
+
+    for theme, run_dirs in discovered.items():
+        theme_entry: dict[str, dict[str, list[Path]]] = {}
+        for run_dir in run_dirs:
+            animations: list[Path] = []
+            metadata: list[Path] = []
+            for file_path in sorted(run_dir.rglob("*")):
+                if not file_path.is_file():
+                    continue
+                if _should_skip_file(file_path):
+                    continue
+                rel = file_path.relative_to(run_dir)
+                if rel.parts[0] == "animations":
+                    animations.append(file_path)
+                else:
+                    metadata.append(file_path)
+            if animations or metadata:
+                theme_entry[run_dir.name] = {
+                    "animations": animations,
+                    "metadata": metadata,
+                }
+        if theme_entry:
+            result[theme] = theme_entry
+
+    return result
+
+
+def _should_skip_file(path: Path) -> bool:
+    """Return True if the file should not be uploaded or published."""
+    name = path.name
+    if name in SKIP_NAMES:
+        return True
+    if name.endswith(".pyc"):
+        return True
+    if name.startswith("."):
+        return True
+    for part in path.parts:
+        if part in SKIP_NAMES or part.startswith("."):
+            return True
+    # Exclude files the frontend never loads.
+    if name in _UPLOAD_SKIP_FILENAMES:
+        return True
+    if any(name.startswith(pat) for pat in _UPLOAD_SKIP_PATTERNS):
+        return True
+    # Only include known file types (skip shell scripts, etc.)
+    ext = path.suffix.lower()
+    return ext not in VIDEO_EXTENSIONS and ext not in METADATA_EXTENSIONS and ext not in STATIC_EXTENSIONS
 
 
 def main() -> None:
