@@ -4,7 +4,7 @@
  * Renders one range input per parameter and reports value updates back up.
  */
 
-import type { SimulationClass, SimParameter } from './data.ts';
+import type { SimulationClass, SimParameter } from './simulation-catalog.ts';
 import { formatParameterValue, withUnit } from '../shared/format.ts';
 
 export interface ParameterEditorController {
@@ -156,6 +156,28 @@ export function createParameterEditor(
 
     labelRow.appendChild(name);
     labelRow.appendChild(readout);
+
+    if (param.description) {
+      name.classList.add('param__name--has-info');
+      name.setAttribute('title', param.description);
+
+      const popover = document.createElement('div');
+
+      popover.className = 'param__popover';
+      popover.textContent = param.description;
+      wrapper.appendChild(popover);
+
+      name.addEventListener('click', () => {
+        wrapper.classList.toggle('param--info-open');
+      });
+
+      document.addEventListener('click', (event) => {
+        if (!wrapper.contains(event.target as Node)) {
+          wrapper.classList.remove('param--info-open');
+        }
+      });
+    }
+
     controls.appendChild(slider);
     wrapper.appendChild(labelRow);
     wrapper.appendChild(controls);
