@@ -285,6 +285,8 @@ button {
 /* Display Mode                                                                */
 /* -------------------------------------------------------------------------- */
 
+/* ── Chrome Layout ────────────────────────────────────────────────────────── */
+
 .display-chrome__top-left,
 .display-chrome__left-center,
 .display-chrome__top-right,
@@ -299,6 +301,60 @@ button {
   left: 1.25rem;
   z-index: 5;
   pointer-events: auto;
+}
+
+.display-chrome__left-center {
+  top: 50%;
+  left: 1.25rem;
+  transform: translateY(-50%);
+  z-index: 4;
+  pointer-events: auto;
+}
+
+.display-chrome__top-right {
+  top: 1.25rem;
+  right: 1.25rem;
+  z-index: 2;
+  pointer-events: auto;
+}
+
+.display-chrome__terminal {
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 1.5rem;
+  z-index: 4;
+  pointer-events: none;
+}
+
+.display-chrome__bottom {
+  right: 2.5rem;
+  bottom: 1.5rem;
+  left: 2.5rem;
+  z-index: 2;
+  pointer-events: auto;
+}
+
+/* ── Burger Menu ──────────────────────────────────────────────────────────── */
+
+.display-button {
+  display: inline-grid;
+  gap: 0.32rem;
+  padding: 0.9rem;
+  border: 1px solid var(--line-strong);
+  border-radius: 0;
+  background: rgba(0, 0, 0, 0.26);
+  color: var(--accent);
+  box-shadow: none;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+.display-button span {
+  display: block;
+  width: 1.15rem;
+  height: 2px;
+  background: currentColor;
 }
 
 .display-menu {
@@ -390,6 +446,93 @@ button {
   background: var(--accent);
 }
 
+/* ── Collapsible Sidebar ──────────────────────────────────────────────────── */
+
+.display-chrome__top-left .display-button,
+.display-chrome__left-center .view-switcher,
+.display-chrome__left-center .view-switcher__button,
+.display-chrome__left-center .view-switcher__label {
+  transition:
+    opacity 0.28s ease,
+    padding 0.28s ease,
+    transform 0.28s ease,
+    max-width 0.28s ease,
+    min-width 0.28s ease,
+    gap 0.28s ease;
+}
+
+.display-chrome__top-left.side-collapsed .display-button {
+  padding: 0.45rem 0.5rem;
+  opacity: 0.38;
+  transform: scale(0.76);
+}
+
+.display-chrome__top-left:not(.side-collapsed) .display-button,
+.display-chrome__top-left.open .display-button {
+  padding: 0.9rem;
+  opacity: 1;
+  transform: scale(1);
+}
+
+.display-chrome__left-center.side-collapsed .view-switcher {
+  opacity: 0.38;
+}
+
+.display-chrome__left-center.side-collapsed .view-switcher__label {
+  max-width: 0;
+  opacity: 0;
+  overflow: hidden;
+}
+
+.display-chrome__left-center.side-collapsed .view-switcher__button {
+  min-width: auto;
+  padding: 0.5rem;
+  justify-content: center;
+  gap: 0;
+}
+
+.display-chrome__left-center:not(.side-collapsed) .view-switcher {
+  opacity: 1;
+}
+
+.display-chrome__left-center:not(.side-collapsed) .view-switcher__label {
+  max-width: 10rem;
+  opacity: 1;
+}
+
+.display-chrome__left-center:not(.side-collapsed) .view-switcher__button {
+  min-width: 8.5rem;
+  padding: 0.6rem 0.9rem;
+  justify-content: flex-start;
+  gap: 0.7rem;
+}
+
+@media (hover: hover) {
+  .display-chrome__top-left.side-collapsed:hover .display-button {
+    padding: 0.9rem;
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  .display-chrome__left-center.side-collapsed:hover .view-switcher {
+    opacity: 1;
+  }
+
+  .display-chrome__left-center.side-collapsed:hover .view-switcher__label {
+    max-width: 10rem;
+    opacity: 1;
+  }
+
+  .display-chrome__left-center.side-collapsed:hover .view-switcher__button {
+    min-width: 8.5rem;
+    padding: 0.6rem 0.9rem;
+    justify-content: flex-start;
+    gap: 0.7rem;
+  }
+}
+
+/* ── Mode Visibility ──────────────────────────────────────────────────────── */
+
 #app[data-mode='config'] .display-chrome__left-center,
 #app[data-mode='config'] .display-chrome__top-right,
 #app[data-mode='config'] .display-chrome__center-status,
@@ -403,13 +546,20 @@ button {
   display: none;
 }
 
-.display-chrome__left-center {
-  top: 50%;
-  left: 1.25rem;
-  transform: translateY(-50%);
-  z-index: 4;
-  pointer-events: auto;
+/* The center "DISPLAY_STATE" card is decorative; keep it off the viewport in
+   display mode to avoid covering the video on small screens. */
+#app[data-mode='display'] .display-chrome__center-status {
+  display: none !important;
 }
+
+/* ── Center Status ────────────────────────────────────────────────────────── */
+
+.display-chrome__center-status {
+  display: none;
+  z-index: 1;
+}
+
+/* ── View Switcher ────────────────────────────────────────────────────────── */
 
 .view-switcher {
   display: inline-flex;
@@ -477,60 +627,7 @@ button {
   transform: translateX(1px);
 }
 
-.display-chrome__top-right {
-  top: 1.25rem;
-  right: 1.25rem;
-  z-index: 2;
-  pointer-events: auto;
-}
-
-.display-chrome__terminal {
-  inset: 0;
-  display: grid;
-  place-items: center;
-  padding: 1.5rem;
-  z-index: 4;
-  pointer-events: none;
-}
-
-.display-chrome__center-status {
-  display: none;
-  z-index: 1;
-}
-
-/* The center "DISPLAY_STATE" card is decorative; keep it off the viewport in
-   display mode to avoid covering the video on small screens. */
-#app[data-mode='display'] .display-chrome__center-status {
-  display: none !important;
-}
-
-.display-chrome__bottom {
-  right: 2.5rem;
-  bottom: 1.5rem;
-  left: 2.5rem;
-  z-index: 2;
-  pointer-events: auto;
-}
-
-.display-button {
-  display: inline-grid;
-  gap: 0.32rem;
-  padding: 0.9rem;
-  border: 1px solid var(--line-strong);
-  border-radius: 0;
-  background: rgba(0, 0, 0, 0.26);
-  color: var(--accent);
-  box-shadow: none;
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-}
-
-.display-button span {
-  display: block;
-  width: 1.15rem;
-  height: 2px;
-  background: currentColor;
-}
+/* ── Data Panel (HUD) ────────────────────────────────────────────────────── */
 
 .data-panel {
   width: fit-content;
@@ -567,8 +664,7 @@ button {
 }
 
 .data-panel__metric-label,
-.data-panel__status,
-.timeline__current {
+.data-panel__status {
   color: var(--text-muted);
   font-family: var(--font-mono);
   font-size: 0.72rem;
@@ -601,6 +697,8 @@ button {
   background: var(--accent);
   opacity: 0.85;
 }
+
+/* ── Display Terminal ─────────────────────────────────────────────────────── */
 
 .display-terminal {
   width: min(58rem, calc(100vw - 3rem));
@@ -677,20 +775,56 @@ button {
   word-break: break-word;
 }
 
+/* ── Timeline ─────────────────────────────────────────────────────────────── */
+
 .timeline {
   display: grid;
-  gap: 1rem;
+  gap: 0.65rem;
   width: min(70rem, 100%);
   margin: 0 auto;
+  padding: 0.5rem 0.8rem;
+  border: 1px solid var(--line-strong);
+  background: rgba(0, 0, 0, 0.34);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
 }
 
 .timeline__bar-row {
   display: flex;
   align-items: center;
+  gap: 0.55rem;
+}
+
+.timeline__play-btn {
+  flex: 0 0 auto;
+  width: 2rem;
+  height: 2rem;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border: 1px solid var(--line-strong);
+  border-radius: 0;
+  background: rgba(255, 255, 255, 0.03);
+  color: var(--accent);
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  line-height: 1;
+  transition:
+    background 0.16s ease,
+    border-color 0.16s ease;
+}
+
+.timeline__play-btn:hover {
+  background: var(--accent-soft);
+  border-color: var(--accent-dim);
+}
+
+.timeline__play-btn.is-paused {
+  color: var(--text-muted);
 }
 
 .timeline__slider {
-  width: 100%;
+  flex: 1;
   appearance: none;
   height: 5px;
   background: rgba(34, 211, 238, 0.18);
@@ -713,20 +847,80 @@ button {
   border: 2px solid var(--accent);
 }
 
-.timeline__bottom-row,
-.timeline__left-cluster {
-  display: flex;
-  align-items: center;
+.timeline__speed {
+  position: relative;
+  flex: 0 0 auto;
 }
 
-.timeline__bottom-row {
-  justify-content: space-between;
-  gap: 2rem;
-  padding: 0 0.15rem;
+.timeline__speed-btn {
+  min-width: 3rem;
+  padding: 0.35rem 0.55rem;
+  border: 1px solid var(--line-strong);
+  border-radius: 0;
+  background: rgba(255, 255, 255, 0.03);
+  color: var(--accent);
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  transition:
+    background 0.16s ease,
+    border-color 0.16s ease;
 }
 
-.timeline__left-cluster {
-  gap: 1.2rem;
+.timeline__speed-btn:hover {
+  background: var(--accent-soft);
+  border-color: var(--accent-dim);
+}
+
+.timeline__speed-menu {
+  position: absolute;
+  right: 0;
+  bottom: calc(100% + 0.35rem);
+  display: grid;
+  min-width: 4rem;
+  border: 1px solid var(--line-strong);
+  background: rgba(6, 9, 12, 0.96);
+  box-shadow: var(--shadow-ambient);
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(0.35rem);
+  transition:
+    opacity 0.16s ease,
+    transform 0.16s ease;
+}
+
+.timeline__speed.open .timeline__speed-menu {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateY(0);
+}
+
+.timeline__speed-option {
+  display: block;
+  width: 100%;
+  padding: 0.5rem 0.75rem;
+  border: 0;
+  border-bottom: 1px solid var(--line);
+  background: transparent;
+  color: var(--text-secondary);
+  font-family: var(--font-mono);
+  font-size: 0.66rem;
+  letter-spacing: 0.08em;
+  text-align: left;
+  transition:
+    background 0.12s ease,
+    color 0.12s ease;
+}
+
+.timeline__speed-option:last-child {
+  border-bottom: 0;
+}
+
+.timeline__speed-option:hover,
+.timeline__speed-option.is-active {
+  background: var(--accent-soft);
+  color: var(--accent);
 }
 
 /* -------------------------------------------------------------------------- */
@@ -1850,8 +2044,7 @@ button {
 
   .config-overlay__footer,
   .param__label,
-  .param__controls,
-  .timeline__bottom-row {
+  .param__controls {
     flex-direction: column;
     align-items: stretch;
   }
@@ -2039,31 +2232,12 @@ button {
     display: none;
   }
 
-  .timeline__left-cluster {
-    flex-wrap: wrap;
-    gap: 0.55rem 0.9rem;
-  }
-
   .timeline {
     gap: 0.65rem;
   }
 
   .timeline__slider {
     height: 6px;
-  }
-
-  .timeline__bottom-row {
-    display: flex;
-    gap: 0.6rem 1rem;
-    align-items: start;
-  }
-
-  .timeline__left-cluster {
-    order: 1;
-  }
-
-  .timeline__current {
-    font-size: 0.62rem;
   }
 
   .terminal {

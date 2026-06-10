@@ -45,6 +45,15 @@ export interface ViewportController {
   /** Whether playback is currently paused. */
   isPaused: () => boolean;
 
+  /** Set video playback rate (0.25, 0.5, 1, etc.). */
+  setPlaybackRate: (rate: number) => void;
+
+  /** Read the current playback rate. */
+  getPlaybackRate: () => number;
+
+  /** Subscribe to play/pause/ended state changes. */
+  onPlayStateChange: (callback: (isPaused: boolean) => void) => void;
+
   /** Access the root viewport element. */
   getElement: () => HTMLElement;
 }
@@ -88,6 +97,11 @@ export function createViewport(
 
   let timeUpdateCallback: ((fraction: number) => void) | undefined;
   let endedCallback: (() => void) | undefined;
+  let playStateCallback: ((isPaused: boolean) => void) | undefined;
+
+  video.addEventListener('play', () => playStateCallback?.(false));
+  video.addEventListener('pause', () => playStateCallback?.(true));
+  video.addEventListener('ended', () => playStateCallback?.(true));
 
   // Convert native video time updates into normalized 0..1 progress so the
   // rest of the app never needs to think about seconds vs duration.
@@ -106,6 +120,10 @@ export function createViewport(
   video.addEventListener('ended', () => {
     endedCallback?.();
   });
+
+  // Persist the desired playback rate across source swaps so the user's
+  // speed preference survives view switches and run restarts.
+  let desiredRate = video.playbackRate;
 
   function setSource(src: string, options: ViewportSourceOptions = {}): void {
     // Fade out first so swapping sources feels deliberate rather than like a
@@ -145,6 +163,7 @@ export function createViewport(
           video.currentTime = 0;
         }
 
+        video.playbackRate = desiredRate;
         video.classList.remove('fade-out');
 
         if (options.autoplay) {
@@ -222,6 +241,14 @@ export function createViewport(
       return video.currentTime / video.duration;
     },
     isPaused: () => video.paused,
+    setPlaybackRate: (rate: number) => {
+      desiredRate = rate;
+      video.playbackRate = rate;
+    },
+    getPlaybackRate: () => desiredRate,
+    onPlayStateChange: (callback: (isPaused: boolean) => void) => {
+      playStateCallback = callback;
+    },
     getElement: () => viewport,
   };
 }

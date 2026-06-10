@@ -216,20 +216,96 @@ export function createAppShell(app: HTMLElement): void {
   `;
   displayChrome.appendChild(centerStatus);
 
+  // ── Playback speed persistence ─────────────────────────────────────────
+  const PLAYBACK_SPEED_KEY = 'universe-engine-playback-speed';
+
+  const loadPlaybackSpeed = (): number => {
+    const raw = localStorage.getItem(PLAYBACK_SPEED_KEY);
+    const parsed = raw ? Number(raw) : NaN;
+
+    // Only accept known rates so hand-edited storage doesn't break the dropdown.
+    return [0.25, 0.5, 1].includes(parsed) ? parsed : 1;
+  };
+
+  const persistPlaybackSpeed = (rate: number) => {
+    localStorage.setItem(PLAYBACK_SPEED_KEY, String(rate));
+  };
+
+  const initialPlaybackSpeed = loadPlaybackSpeed();
+
+  // Prime the video element with the persisted speed before the first frame.
+  viewport.setPlaybackRate(initialPlaybackSpeed);
+
   // Mount the timeline scrubber footer.
   const timelineHost = document.createElement('div');
 
   timelineHost.className = 'display-chrome__bottom';
   displayChrome.appendChild(timelineHost);
-  const timeline = createTimeline(timelineHost, (position) => {
-    viewport.seekToFraction(position);
+  const timeline = createTimeline(timelineHost, {
+    onChange(position) {
+      viewport.seekToFraction(position);
+    },
+    onTogglePlay: handleTogglePlay,
+    onSpeedChange: handleSpeedChange,
+    onScrubStart() {
+      stopScrubberLoop();
+    },
+    onScrubEnd() {
+      if (!viewport.isPaused()) {
+        startScrubberLoop();
+      }
+    },
+    initialSpeed: initialPlaybackSpeed,
   });
 
-  // Keep the timeline synchronized to the real media playback position.
-  // Every time the video's currentTime advances, we update both the visual
-  // scrubber on the timeline and the derived telemetry data.
+  // Prime the play/pause button from the current video state.
+  timeline.setPlaying(!viewport.isPaused());
+
+  // ── Smooth scrubber updates via requestAnimationFrame ──────────────────
+  // The video's native `timeupdate` event fires too infrequently (~4 Hz) to
+  // drive the slider smoothly. Instead, we poll the video's current time on
+  // every animation frame while playback is active, giving a 60-fps visual.
+  let scrubberRafId: number | null = null;
+
+  function startScrubberLoop() {
+    if (scrubberRafId !== null) return;
+
+    function tick() {
+      const fraction = viewport.getPlaybackFraction();
+
+      timeline.setPosition(fraction);
+
+      if (!viewport.isPaused()) {
+        scrubberRafId = requestAnimationFrame(tick);
+      } else {
+        scrubberRafId = null;
+      }
+    }
+
+    scrubberRafId = requestAnimationFrame(tick);
+  }
+
+  function stopScrubberLoop() {
+    if (scrubberRafId !== null) {
+      cancelAnimationFrame(scrubberRafId);
+      scrubberRafId = null;
+    }
+  }
+
+  // Keep the timeline button in sync and start/stop the smooth scrubber loop.
+  viewport.onPlayStateChange((isPaused) => {
+    timeline.setPlaying(!isPaused);
+
+    if (isPaused) {
+      stopScrubberLoop();
+    } else {
+      startScrubberLoop();
+    }
+  });
+
+  // The native `timeupdate` event still drives HUD data refresh — its rate
+  // (~4 Hz) is perfectly adequate for live-stat counters and telemetry.
   viewport.onTimeUpdate((position) => {
-    timeline.setPosition(position);
     lastPlaybackSeconds = position * viewport.getDurationSeconds();
     refreshDisplayData(lastPlaybackSeconds);
   });
@@ -291,6 +367,70 @@ export function createAppShell(app: HTMLElement): void {
   refreshDisplayData();
   refreshDisplayTerminal();
   summaryOverlay.hide();
+
+  // ── Collapsible Left-Side UI ────────────────────────────────────────────
+  // Each left-side panel shrinks independently when idle. Hover (mouse) or
+  // tap (touch) expands only the hovered/tapped element; after 2.5 seconds
+  // of inactivity on that element it collapses back.
+  const sideTimers = new WeakMap<HTMLElement, ReturnType<typeof setTimeout>>();
+
+  const expandOne = (el: HTMLElement) => {
+    const timer = sideTimers.get(el);
+
+    if (timer) {
+      clearTimeout(timer);
+      sideTimers.delete(el);
+    }
+
+    el.classList.remove('side-collapsed');
+  };
+
+  const scheduleCollapseOne = (el: HTMLElement) => {
+    const timer = sideTimers.get(el);
+
+    if (timer) clearTimeout(timer);
+
+    sideTimers.set(
+      el,
+      setTimeout(() => {
+        el.classList.add('side-collapsed');
+        sideTimers.delete(el);
+      }, 2500),
+    );
+  };
+
+  const collapseOneNow = (el: HTMLElement) => {
+    const timer = sideTimers.get(el);
+
+    if (timer) {
+      clearTimeout(timer);
+      sideTimers.delete(el);
+    }
+
+    el.classList.add('side-collapsed');
+  };
+
+  for (const el of [topLeft, leftCenter]) {
+    el.addEventListener('mouseenter', () => expandOne(el));
+    el.addEventListener('mouseleave', () => scheduleCollapseOne(el));
+    el.addEventListener('focusin', () => expandOne(el));
+    el.addEventListener('focusout', (event) => {
+      if (!el.contains(event.relatedTarget as Node)) {
+        scheduleCollapseOne(el);
+      }
+    });
+    el.addEventListener('click', () => {
+      if (el.classList.contains('side-collapsed')) {
+        expandOne(el);
+        scheduleCollapseOne(el);
+      } else {
+        collapseOneNow(el);
+      }
+    });
+
+    // Start collapsed.
+    collapseOneNow(el);
+  }
 
   // Start in entry mode with the media hidden and paused.
   viewport.hideMedia();
@@ -445,6 +585,34 @@ export function createAppShell(app: HTMLElement): void {
       );
       summaryOverlay.show();
     }
+  }
+
+  /**
+   * Toggle play/pause from the timeline control bar.
+   *
+   * @returns void
+   */
+  function handleTogglePlay(): void {
+    if (viewport.isPaused()) {
+      void viewport.play().catch(() => {
+        viewport.setMuted(true);
+        void viewport.play();
+      });
+    } else {
+      viewport.pause();
+    }
+  }
+
+  /**
+   * Change the video playback rate and persist the choice.
+   *
+   * @param rate - New playback rate (0.25, 0.5, or 1).
+   * @returns void
+   */
+  function handleSpeedChange(rate: number): void {
+    viewport.setPlaybackRate(rate);
+    persistPlaybackSpeed(rate);
+    timeline.setSpeed(rate);
   }
 
   /**
