@@ -7,7 +7,7 @@
  */
 
 import { parse } from 'yaml';
-import type { SimulationClass } from '../selection/data.ts';
+import type { SimulationClass } from '../selection/simulation-catalog.ts';
 
 import planetaryRaw from './planetary.yaml?raw';
 import galaxyRaw from './galaxy.yaml?raw';

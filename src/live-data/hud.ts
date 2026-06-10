@@ -11,7 +11,7 @@ import type {
   SimulationClass,
   StatDisplayConfig,
   SummaryStatId,
-} from '../selection/data.ts';
+} from '../selection/simulation-catalog.ts';
 import { formatMaybeNumber, formatParameterValue, withUnit } from '../shared/format.ts';
 
 export interface TelemetryPanelController {

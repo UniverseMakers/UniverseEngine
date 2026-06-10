@@ -6,7 +6,7 @@
  * directory as the summary overlay makes the feature boundary explicit.
  */
 
-import type { SimulationClass } from '../selection/data.ts';
+import type { SimulationClass } from '../selection/simulation-catalog.ts';
 import type { VideoRunMetadata } from '../selection/video-run-metadata.ts';
 
 export interface SummaryMetricValue {

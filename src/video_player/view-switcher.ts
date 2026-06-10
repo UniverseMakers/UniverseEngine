@@ -5,7 +5,7 @@
  * video views for the currently selected run.
  */
 
-import type { SimulationViewOption } from '../selection/data.ts';
+import type { SimulationViewOption } from '../selection/simulation-catalog.ts';
 
 export interface ViewSwitcherController {
   /** Replace the available view buttons and active selection. */

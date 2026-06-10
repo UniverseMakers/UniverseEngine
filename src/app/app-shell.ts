@@ -7,7 +7,7 @@
  * orchestration, and domain logic are separated more clearly.
  */
 
-import { SIMULATION_CLASSES, type SimulationClass } from '../selection/data.ts';
+import { SIMULATION_CLASSES, type SimulationClass } from '../selection/simulation-catalog.ts';
 import { applyTheme, getInitialTheme, type ThemeId } from '../selection/theme.ts';
 import { createViewport } from '../video_player/viewport.ts';
 import { createTimeline } from '../video_player/timeline.ts';

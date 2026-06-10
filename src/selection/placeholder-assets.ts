@@ -5,7 +5,7 @@
  * bundles), then falls back to flat placeholder assets per simulation family.
  */
 
-import type { SimParameter } from './data.ts';
+import type { SimParameter } from './simulation-catalog.ts';
 import { withBaseUrl } from '../shared/urls.ts';
 import { getVideoMetadataUrl } from './video-run-metadata.ts';
 

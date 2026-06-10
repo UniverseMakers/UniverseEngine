@@ -8,7 +8,7 @@
  * - the run trigger that moves the app into loading/display mode
  */
 
-import type { SimulationClass } from './data.ts';
+import type { SimulationClass } from './simulation-catalog.ts';
 import { getCredits } from '../data/credits.ts';
 import { createParameterEditor } from './parameter-editor.ts';
 import {

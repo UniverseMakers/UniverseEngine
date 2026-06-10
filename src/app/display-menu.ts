@@ -6,7 +6,7 @@
  * simple DOM builder rather than a framework-style component.
  */
 
-import type { SimulationClass } from '../selection/data.ts';
+import type { SimulationClass } from '../selection/simulation-catalog.ts';
 
 export interface DisplayMenuController {
   /** Close the menu popover if it is open. */

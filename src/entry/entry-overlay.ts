@@ -7,7 +7,7 @@
  * Once a family is chosen, the app shell transitions into config mode.
  */
 
-import { SIMULATION_CLASSES, type SimulationClass } from '../selection/data.ts';
+import { SIMULATION_CLASSES, type SimulationClass } from '../selection/simulation-catalog.ts';
 import { withBaseUrl } from '../shared/urls.ts';
 
 export interface EntryOverlayController {

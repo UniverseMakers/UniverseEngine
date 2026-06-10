@@ -1,0 +1,93 @@
+# Parameter definitions for each simulation family.
+#
+# Each top-level key is a simulation family. Parameters are keyed by id
+# and define the range, step, defaults, and display formatting used by the
+# parameter editor sliders in the selection overlay.
+#
+# `description` fields appear in a popover when the user clicks the info
+# button next to a parameter name.
+
+planetary:
+  impactor_mass:
+    label: Impactor Mass
+    description: Mass of the body colliding with the proto-Earth. Determines the mass of the debris disk and the resulting moon mass.
+    unit: M⊕
+    min: 0.01
+    max: 10
+    step: 0.01
+    default: 0.1
+  impactor_velocity:
+    label: Impactor Velocity
+    description: Relative velocity at which the impactor strikes the proto-Earth. Higher velocities produce more energetic collisions and hotter debris disks.
+    unit: km/s
+    min: 1
+    max: 50
+    step: 0.5
+    default: 12
+  impactor_angle:
+    label: Impactor Angle
+    description: Impact angle relative to the proto-Earth surface. Oblique impacts can produce different disk geometries than head-on collisions.
+    unit: °
+    min: 0
+    max: 90
+    step: 1
+    default: 45
+
+galaxy:
+  star_formation_rate:
+    label: Star Formation Rate
+    description: Rate at which gas is converted into stars. Higher values produce more stellar mass, enriching the galaxy with metals from supernovae.
+    unit: M☉/yr
+    min: 0.1
+    max: 100
+    step: 0.1
+    default: 3
+  black_hole_mass:
+    label: Black Hole Mass
+    description: Initial mass of the supermassive black hole at the galactic centre. Drives active galactic nucleus feedback that can quench star formation.
+    unit: '×10⁶ M☉'
+    min: 0.1
+    max: 1000
+    step: 0.1
+    default: 4
+  stellar_mass:
+    label: Stellar Mass
+    description: Total stellar mass of the galaxy. Controls luminosity, metal production, and the gravitational potential well of the system.
+    unit: '×10¹⁰ M☉'
+    min: 0.01
+    max: 50
+    step: 0.01
+    default: 5
+
+cosmos:
+  baryon_fraction:
+    label: Baryon Fraction
+    description: The fraction of matter that is ordinary (visible/baryonic) versus dark matter. This controls the amount of gas available in the Universe for star and galaxy formation. One of the main goals in cosmological simulations is testing fundamental cosmological parameters such as this fraction.
+    unit: ''
+    min: 0.10
+    max: 4
+    step: 0.01
+    default: 1
+    value_scale: 0.1536
+  black_hole_strength:
+    label: Black Hole Strength
+    description: The temperature of gas that can escape from a black hole. As gas falls in towards a black hole, it becomes superheated and forms an "accretion disc" around the black hole. This superheated plasma wants to escape and does so either as heat dumped into the environment or "jets" blasted out from the poles. Astrophysicists call this "feedback" but exactly how strong this feedback is, and the manner in which it leaves the black hole is up for debate.
+    unit: 'K'
+    min: 0.01
+    max: 6.67
+    step: 0.01
+    default: 1
+    value_scale: 1.0e8
+    display_format: scientific
+    display_significant_figures: 3
+  gravity_strength:
+    label: Gravity
+    description: The strength of gravity, as described by Newton's gravitational constant G. Varying G changes the rate at which matter collapses into cosmic structures like dark matter halos and the cosmic web.
+    unit: 'm^3 kg^-1 s^-2'
+    min: 0.01
+    max: 10
+    step: 0.01
+    default: 1
+    value_scale: 6.6743e-11
+    display_format: scientific
+    display_significant_figures: 3
