@@ -13,6 +13,7 @@
     - text: 'INIT_PHYSICAL_LAWS :: removing sanity from quantum mechanics'
     - text: 'INIT_PHYSICAL_LAWS :: bending spacetime to eventually drop apples'
     - text: 'INIT_PHYSICAL_LAWS :: making the cosmological constant small but nonzero, just to mess with everyone'
+    - text: 'INIT_PHYSICAL_LAWS :: making time run 10 quadrillion times faster'
 - options:
     - text: 'INIT_COSMOS :: finding the edge of the observable universe, give or take a few billion light-years'
     - text: "INIT_COSMOS :: hiding dark matter's origin"

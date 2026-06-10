@@ -2,8 +2,8 @@
  * YAML-driven initialization text loader.
  *
  * Each simulation class owns a YAML file containing N entries, where each entry
- * offers multiple candidate lines. At runtime we pick one random line from each
- * entry to keep the boot sequence varied.
+ * offers multiple candidate lines. At runtime we pick a random number (2-4) of
+ * lines from each entry to keep the boot sequence varied.
  */
 
 import { parse } from 'yaml';
@@ -34,7 +34,7 @@ const RAW_BY_CLASS: Record<SimulationClass['id'], string> = {
  *
  * The YAML file is structured as a list of "entries" (think of them as line
  * slots in the boot sequence). Each entry contains N candidate line options.
- * This helper picks exactly one option per entry — randomly — so every boot
+ * This helper picks 2-4 options per entry — randomly — so every boot
  * sequence feels slightly different while staying within a curated set of
  * scientifically plausible initialization messages.
  *
@@ -53,14 +53,11 @@ export function getInitializationLines(
       );
     }
 
-    // Randomly select one of the candidate lines for this entry slot.
-    const option = entry.options[randomInteger(0, entry.options.length - 1)];
+    const count = randomInteger(2, Math.min(4, entry.options.length));
 
-    return [
-      {
-        text: option.text,
-      },
-    ];
+    return pickRandom(entry.options, count).map((option) => ({
+      text: option.text,
+    }));
   });
 }
 
@@ -73,4 +70,16 @@ export function getInitializationLines(
  */
 function randomInteger(min: number, max: number): number {
   return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+function pickRandom<T>(items: T[], count: number): T[] {
+  const shuffled = [...items];
+
+  for (let i = shuffled.length - 1; i > 0; i -= 1) {
+    const j = Math.floor(Math.random() * (i + 1));
+
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+  }
+
+  return shuffled.slice(0, count);
 }

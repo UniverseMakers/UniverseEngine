@@ -49,12 +49,8 @@ export function createLoadingOverlay(container: HTMLElement): LoadingOverlayCont
       <span class="terminal__dot"></span>
       <span class="terminal__header-label">UNIVERSE_ENGINE_v9.5.1</span>
     </div>
-    <div class="terminal__header-right">
-      <span class="terminal__header-meta terminal__load">LOAD: 0%</span>
-    </div>
   `;
 
-  const loadReadout = header.querySelector('.terminal__load') as HTMLSpanElement;
   const log = document.createElement('div');
 
   log.className = 'terminal__log';
@@ -92,12 +88,6 @@ export function createLoadingOverlay(container: HTMLElement): LoadingOverlayCont
     });
   }
 
-  function setLoad(progress: number) {
-    // Clamp to 0..100 so callers can pass defensive values without breaking the UI.
-    const percent = Math.round(Math.max(0, Math.min(1, progress)) * 100);
-
-    loadReadout.textContent = `LOAD: ${percent}%`;
-  }
 
   async function typeLine(line: string, token: number): Promise<void> {
     // Each line gets its own cursor so the typing effect feels like a real shell
@@ -147,7 +137,6 @@ export function createLoadingOverlay(container: HTMLElement): LoadingOverlayCont
       log.innerHTML = '';
       overlay.hidden = false;
       overlay.classList.remove('is-hidden');
-      setLoad(0);
 
       for (const [index, line] of lines.entries()) {
         if (token !== sequenceToken) {
@@ -159,13 +148,11 @@ export function createLoadingOverlay(container: HTMLElement): LoadingOverlayCont
         const stampedLine = `${formatTimestamp(index)} ${line.text}`;
 
         await typeLine(stampedLine, token);
-        setLoad((index + 1) / Math.max(1, lines.length));
       }
 
-      setLoad(1);
       if (token === sequenceToken) {
-        // Hold the final 100% state briefly so the user perceives completion
-        // before the app swaps into display mode.
+        // Hold briefly so the user perceives completion before the app swaps
+        // into display mode.
         await wait(FINAL_PAUSE_MS, token);
         onComplete();
       }
@@ -176,7 +163,6 @@ export function createLoadingOverlay(container: HTMLElement): LoadingOverlayCont
       overlay.hidden = true;
       overlay.classList.add('is-hidden');
       log.innerHTML = '';
-      setLoad(0);
     },
   };
 }

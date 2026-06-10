@@ -9,7 +9,7 @@
 /** Initialization/boot-sequence tuning. */
 export const INITIALIZATION = {
   /** Constant terminal typing speed (milliseconds per character). */
-  TYPING_MS_PER_CHAR: 15,
+  TYPING_MS_PER_CHAR: 7.5,
   /** Final pause after the last line has finished typing. */
   FINAL_PAUSE_MS: 1000,
 } as const;
