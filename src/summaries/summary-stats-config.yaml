@@ -1,0 +1,95 @@
+# Summary overlay display configuration for each simulation family.
+#
+# - ids can refer to built-in app metrics such as `runtime`
+# - ids can also refer to keys under the selected run's `run_summary.yaml`
+#   `summaryMetrics` map
+# - `display_format` can be `integer`, `float`, or `scientific`
+# - `precision` controls decimal places or scientific significant figures
+# - `from_video: true` means the final value should be pulled from the active
+#   video's sidecar metadata YAML
+# - `video_key` can override which metadata key should be used
+
+planetary:
+  summaryStats:
+    - id: runtime
+      value: '0.00'
+      unit: hours
+      from_video: true
+      video_key: wallclockSeconds
+    - id: similarityScore
+      value: 100/100
+    - id: carbonBurnt
+      value: '0.00'
+      unit: kgCO2e
+      from_video: true
+    - id: computeUsed
+      value: '0.0'
+      unit: smartphones
+      from_video: true
+    - id: memoryUsed
+      value: '0.0'
+      unit: GB
+      from_video: true
+    - id: particlesUpdated
+      value: '0'
+      label: Particle updates
+      from_video: true
+
+galaxy:
+  summaryStats:
+    - id: runtime
+      value: '0.00'
+      unit: hours
+      from_video: true
+      video_key: wallclockSeconds
+    - id: similarityScore
+      value: 100/100
+    - id: carbonBurnt
+      value: '0.00'
+      unit: kgCO2e
+      from_video: true
+    - id: computeUsed
+      value: '0.0'
+      unit: smartphones
+      from_video: true
+    - id: memoryUsed
+      value: '0.0'
+      unit: GB
+      from_video: true
+    - id: particlesUpdated
+      value: '0'
+      label: Particle updates
+      from_video: true
+
+cosmos:
+  summaryStats:
+    - id: runtime
+      value: '0.00'
+      unit: hours
+      from_video: true
+      video_key: wallclockSeconds
+    - id: similarityScore
+      value: 100/100
+    - id: carbonBurnt
+      value: '0.00'
+      unit: kgCO2e
+      from_video: true
+      display_format: float
+      precision: 2
+    - id: computeUsed
+      value: '0.0'
+      unit: smartphones
+      from_video: true
+      display_format: float
+      precision: 1
+    - id: memoryUsed
+      value: '0.0'
+      unit: GB
+      from_video: true
+      display_format: float
+      precision: 1
+    - id: particlesUpdated
+      value: '0'
+      label: Particle updates
+      from_video: true
+      display_format: integer

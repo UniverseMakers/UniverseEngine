@@ -1,11 +1,27 @@
 /**
- * Selection overlay (parameter configuration + settings).
+ * Config panel — the primary overlay for parameter tuning, theme settings,
+ * credits, and the system console.
  *
- * This is the primary control surface for choosing simulation parameters.
- * It combines:
- * - parameter editing sliders
- * - theme settings
- * - the run trigger that moves the app into loading/display mode
+ * This is a multi-purpose modal with four tabbed subviews. The same panel
+ * shell is reused for all of them — only the body content and the footer
+ * button label change per view.
+ *
+ * ── Views ──────────────────────────────────────────────────────────────
+ * `parameters`   Sliders for tweaking simulation knobs before a run.
+ *                Footer button: "Run" → kicks off the simulation.
+ * `settings`     Theme picker (choose the visual era for this session).
+ *                Footer button: "Apply" → saves theme and closes.
+ * `credits`      Read-only list of project contributors.
+ *                Footer button: "Close" → dismisses the overlay.
+ * `terminal`     Placeholder system console (reserved for future log viewer).
+ *                Footer button: "Close" → dismisses the overlay.
+ *
+ * ── Architecture ───────────────────────────────────────────────────────
+ * The panel is mounted once and stays alive for the lifetime of the app.
+ * Switching views calls `setView()` which updates a CSS data attribute so
+ * that section visibility is handled declaratively. The panel does not own
+ * application state — it fires callbacks and the app shell decides what to
+ * do with them.
  */
 
 import type { SimulationClass } from './simulation-catalog.ts';
@@ -17,11 +33,11 @@ import {
   type ThemePickerController,
 } from './theme.ts';
 
-export interface SelectionOverlayController {
-  /** Reveal the overlay. */
+export interface ConfigPanelController {
+  /** Reveal the panel. */
   show: () => void;
 
-  /** Hide the overlay. */
+  /** Hide the panel. */
   hide: () => void;
 
   /** Replace the active simulation family and parameter values. */
@@ -30,13 +46,14 @@ export interface SelectionOverlayController {
   /** Update the selected theme button state. */
   setTheme: (theme: ThemeId) => void;
 
-  /** Switch the visible section within the overlay. */
-  setView: (view: SelectionOverlayView) => void;
+  /** Switch the visible section within the panel. */
+  setView: (view: ConfigPanelView) => void;
 }
 
-export type SelectionOverlayView = 'parameters' | 'settings' | 'credits' | 'terminal';
+/** Which subview the config panel is currently displaying. */
+export type ConfigPanelView = 'parameters' | 'settings' | 'credits' | 'terminal';
 
-interface SelectionOverlayOptions {
+interface ConfigPanelOptions {
   simClass: SimulationClass;
   values: Record<string, number>;
   theme: ThemeId;
@@ -45,31 +62,35 @@ interface SelectionOverlayOptions {
   onRun: () => void;
   onApplySettings: () => void;
   onClose: () => void;
-  initialView?: SelectionOverlayView;
+  initialView?: ConfigPanelView;
 }
 
 /**
- * Create and mount the selection/configuration overlay.
+ * Create and mount the config panel.
  *
  * @param container - Overlay layer host element.
  * @param options - Initial state and callback hooks.
- * @returns Controller for showing/hiding and syncing state.
+ * @returns Controller for showing/hiding, syncing state, and switching views.
  */
-export function createSelectionOverlay(
+export function createConfigPanel(
   container: HTMLElement,
-  options: SelectionOverlayOptions,
-): SelectionOverlayController {
-  // Full-screen shell that sits above the viewport while the user is choosing
-  // parameters, tweaking theme settings, or reading credits/terminal copy.
+  options: ConfigPanelOptions,
+): ConfigPanelController {
+  // ── Shell ──────────────────────────────────────────────────────────────
+  // Full-screen backdrop that sits above the viewport. Hidden by default;
+  // shown/hidden via `show()` / `hide()` on the returned controller.
+
   const overlay = document.createElement('section');
 
   overlay.className = 'overlay overlay--config';
   overlay.hidden = true;
   overlay.classList.add('is-hidden');
 
-  // The visual panel is split into two halves: left media/branding, right
-  // controls. The shell element exists so CSS can switch layouts without this
-  // module caring about breakpoints.
+  // ── Two-column layout ──────────────────────────────────────────────────
+  // Left: media block (atmospheric — placeholder image + branding headline).
+  // Right: controls column (header, body sections, footer button).
+  // CSS handles responsive collapse so this module stays layout-agnostic.
+
   const panel = document.createElement('div');
 
   panel.className = 'config-overlay';
@@ -77,6 +98,8 @@ export function createSelectionOverlay(
   const shell = document.createElement('div');
 
   shell.className = 'config-overlay__shell';
+
+  // Left column —───────────────────────────────────────────────────────────
 
   const media = document.createElement('div');
 
@@ -87,8 +110,6 @@ export function createSelectionOverlay(
   mediaImage.src = options.simClass.placeholderImage;
   mediaImage.alt = `${options.simClass.label} preview`;
 
-  // The left-hand media block is largely atmospheric. The real interaction
-  // lives on the control side where users set parameters and launch runs.
   media.innerHTML = `
     <div class="config-overlay__media-copy">
       <h1 class="config-overlay__headline">Universe \n Engine</h1>
@@ -96,10 +117,15 @@ export function createSelectionOverlay(
   `;
   media.prepend(mediaImage);
 
+  // Right column —──────────────────────────────────────────────────────────
+
   const controls = document.createElement('div');
 
   controls.className = 'config-overlay__controls';
   controls.dataset.view = options.initialView ?? 'parameters';
+
+  // ── Header ─────────────────────────────────────────────────────────────
+  // Fixed row: section indicator (top-left label), title block, close button.
 
   const header = document.createElement('div');
 
@@ -129,8 +155,11 @@ export function createSelectionOverlay(
   header.appendChild(titleBlock);
   header.appendChild(closeButton);
 
-  // Parameters are mounted by the dedicated editor helper so this overlay does
-  // not need to own slider rendering details directly.
+  // ── Body: Parameters section ───────────────────────────────────────────
+  // Sliders for each tunable parameter of the active simulation family.
+  // Rendered by the dedicated parameter-editor helper so this module doesn't
+  // own slider creation or value-binding logic.
+
   const parameterSection = document.createElement('section');
 
   parameterSection.className = 'config-overlay__section config-overlay__section--grow';
@@ -138,6 +167,10 @@ export function createSelectionOverlay(
   const parametersHost = document.createElement('div');
 
   parameterSection.appendChild(parametersHost);
+
+  // ── Body: Settings section ─────────────────────────────────────────────
+  // Theme picker — lets the user choose a visual era (Tron, Matrix, etc.)
+  // that applies immediately to this session.
 
   const settingsSection = document.createElement('section');
 
@@ -151,7 +184,10 @@ export function createSelectionOverlay(
 
   settingsSection.appendChild(themePickerHost);
 
-  // Credits are static project data, so we render them once up front.
+  // ── Body: Credits section ──────────────────────────────────────────────
+  // Static project credit entries loaded from the data module. Rendered once
+  // at construction time since credits don't change during a session.
+
   const creditsSection = document.createElement('section');
 
   creditsSection.className = 'config-overlay__section config-overlay__section--grow';
@@ -210,8 +246,10 @@ export function createSelectionOverlay(
     }
   }
 
-  // The terminal tab is intentionally placeholder content for now. Keeping the
-  // tab in place now gives us a stable home for real logs later.
+  // ── Body: Terminal section ─────────────────────────────────────────────
+  // Placeholder system console. The console lines are decorative for now,
+  // but this section is reserved for a real simulation log viewer.
+
   const terminalSection = document.createElement('section');
 
   terminalSection.className = 'config-overlay__section config-overlay__section--grow';
@@ -233,17 +271,27 @@ export function createSelectionOverlay(
     .querySelector('.config-overlay__console')
     ?.prepend(terminalProfileLine);
 
+  // ── Footer ─────────────────────────────────────────────────────────────
+  // The single footer button is context-sensitive — its label and action
+  // change depending on which subview is active:
+  //   parameters → "Run"    (launches the simulation)
+  //   settings   → "Apply"  (saves theme, returns to display)
+  //   credits    → "Close"  (dismisses the overlay)
+  //   terminal   → "Close"  (dismisses the overlay)
+
   const footer = document.createElement('div');
 
   footer.className = 'config-overlay__footer';
 
-  const runButton = document.createElement('button');
+  const footerButton = document.createElement('button');
 
-  runButton.className = 'run-button';
-  runButton.type = 'button';
-  runButton.textContent = 'Run';
+  footerButton.className = 'run-button';
+  footerButton.type = 'button';
+  footerButton.textContent = 'Run';
 
-  footer.appendChild(runButton);
+  footer.appendChild(footerButton);
+
+  // ── Assemble ───────────────────────────────────────────────────────────
 
   controls.appendChild(header);
   controls.appendChild(parameterSection);
@@ -258,7 +306,10 @@ export function createSelectionOverlay(
   overlay.appendChild(panel);
   container.appendChild(overlay);
 
-  // Mount the two sub-controllers after their host nodes exist.
+  // ── Sub-controllers ────────────────────────────────────────────────────
+  // Mount parameter editor and theme picker into their host elements after
+  // the DOM nodes exist.
+
   const parameterEditor = createParameterEditor(
     parametersHost,
     options.simClass,
@@ -275,9 +326,16 @@ export function createSelectionOverlay(
 
   applyView(options.initialView ?? 'parameters');
 
-  function applyView(view: SelectionOverlayView): void {
-    // We store the active view as data so CSS can switch visible sections
-    // declaratively instead of this module toggling many classes by hand.
+  // ── View switching ─────────────────────────────────────────────────────
+
+  /**
+   * Switch the visible body section and update the footer button.
+   *
+   * Section visibility is driven by a `data-view` attribute on the controls
+   * container — CSS rules handle show/hide declaratively so we don't need to
+   * toggle individual `display` properties by hand.
+   */
+  function applyView(view: ConfigPanelView): void {
     controls.dataset.view = view;
     sectionLabel.textContent =
       view === 'parameters'
@@ -288,28 +346,30 @@ export function createSelectionOverlay(
             ? 'Credits'
             : 'Terminal';
 
-    // The footer button changes job based on the active section. Reusing one
-    // button keeps the bottom chrome stable while the body content changes.
+    // The footer button is context-sensitive — its label reflects what
+    // pressing it will actually do in the active view.
     if (view === 'settings') {
-      runButton.textContent = 'Apply';
+      footerButton.textContent = 'Apply';
     } else if (view === 'terminal' || view === 'credits') {
-      runButton.textContent = 'Close';
+      footerButton.textContent = 'Close';
     } else {
-      runButton.textContent = 'Run';
+      footerButton.textContent = 'Run';
     }
   }
 
-  runButton.addEventListener('click', () => {
-    const activeView = controls.dataset.view as SelectionOverlayView;
+  // ── Footer button actions ──────────────────────────────────────────────
 
-    // Settings uses the footer button as an "apply and close" affordance.
+  footerButton.addEventListener('click', () => {
+    const activeView = controls.dataset.view as ConfigPanelView;
+
     if (activeView === 'settings') {
       options.onApplySettings();
 
       return;
     }
 
-    // Read-only tabs simply close the overlay when the footer button is pressed.
+    // Credits and terminal are read-only views — the footer button just
+    // dismisses the overlay back to the previous mode.
     if (activeView === 'terminal') {
       options.onClose();
 
@@ -322,9 +382,11 @@ export function createSelectionOverlay(
       return;
     }
 
-    // Parameter mode is the only view that actually kicks off a simulation run.
+    // Only the parameters view triggers an actual simulation run.
     options.onRun();
   });
+
+  // ── Public controller ──────────────────────────────────────────────────
 
   return {
     show() {
@@ -345,7 +407,7 @@ export function createSelectionOverlay(
     setTheme(theme: ThemeId) {
       themePicker.setActive(theme);
     },
-    setView(view: SelectionOverlayView) {
+    setView(view: ConfigPanelView) {
       applyView(view);
     },
   };

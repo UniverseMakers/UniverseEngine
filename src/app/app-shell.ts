@@ -17,9 +17,9 @@ import { createViewSwitcher } from '../video_player/view-switcher.ts';
 import { createEntryOverlay } from '../entry/entry-overlay.ts';
 import { createSummaryOverlay } from '../summaries/summary-overlay.ts';
 import {
-  createSelectionOverlay,
-  type SelectionOverlayView,
-} from '../selection/overlay.ts';
+  createConfigPanel,
+  type ConfigPanelView,
+} from '../selection/config-panel.ts';
 import { createLoadingOverlay } from '../loading/overlay.ts';
 import { createDisplayMenu } from './display-menu.ts';
 import { getInitializationLines } from '../loading/init-text.ts';
@@ -167,7 +167,7 @@ export function createAppShell(app: HTMLElement): void {
   createDisplayMenu(topLeft, SIMULATION_CLASSES, {
     onSimulationSelected(simClass) {
       handleClassChange(simClass);
-      openSelectionView('parameters');
+      openConfigPanel('parameters');
     },
     onViewSelected(view) {
       if (view === 'terminal') {
@@ -177,12 +177,12 @@ export function createAppShell(app: HTMLElement): void {
       }
 
       if (view === 'credits') {
-        openSelectionView('credits');
+        openConfigPanel('credits');
 
         return;
       }
 
-      openSelectionView(view);
+      openConfigPanel(view);
     },
   });
 
@@ -334,7 +334,7 @@ export function createAppShell(app: HTMLElement): void {
   // Mount the end-of-run summary overlay that appears when a video finishes.
   const summaryOverlay = createSummaryOverlay(overlayLayer, {
     onReplay: handleReplay,
-    onNew: () => openSelectionView('parameters'),
+    onNew: () => openConfigPanel('parameters'),
     onTerminal: handleOpenTerminalFromSummary,
   });
 
@@ -353,11 +353,11 @@ export function createAppShell(app: HTMLElement): void {
   // Mount the first-load entry overlay — the very first thing the user sees.
   const entryOverlay = createEntryOverlay(overlayLayer, (simClass) => {
     handleClassChange(simClass);
-    openSelectionView('parameters');
+    openConfigPanel('parameters');
   });
 
   // Mount the main selection overlay — parameters, settings, credits, etc.
-  const selectionOverlay = createSelectionOverlay(overlayLayer, {
+  const configPanel = createConfigPanel(overlayLayer, {
     simClass: activeClass,
     values: getActiveValues(),
     theme: activeTheme,
@@ -466,7 +466,7 @@ export function createAppShell(app: HTMLElement): void {
     // Apply the scale's signature theme.
     handleThemeChange(SCALE_TO_THEME[newClass.id]);
     // Rebuild the config overlay so the parameters match the new family.
-    selectionOverlay.setSimulation(activeClass, getActiveValues());
+    configPanel.setSimulation(activeClass, getActiveValues());
     timeline.setPosition(0);
     refreshDisplayData();
     refreshDisplayTerminal();
@@ -496,7 +496,7 @@ export function createAppShell(app: HTMLElement): void {
   function handleThemeChange(theme: ThemeId): void {
     activeTheme = theme;
     applyTheme(theme);
-    selectionOverlay.setTheme(theme);
+    configPanel.setTheme(theme);
   }
 
   /**
@@ -505,11 +505,11 @@ export function createAppShell(app: HTMLElement): void {
    * @param view - Which config subview to display.
    * @returns void
    */
-  function openSelectionView(view: SelectionOverlayView): void {
+  function openConfigPanel(view: ConfigPanelView): void {
     // Close the display terminal first — it's a separate concern from config.
     isDisplayTerminalOpen = false;
     displayTerminal.hide();
-    selectionOverlay.setView(view);
+    configPanel.setView(view);
     setMode('config');
   }
 
@@ -528,7 +528,7 @@ export function createAppShell(app: HTMLElement): void {
     }
 
     // Otherwise keep showing the parameter view so the user can start a run.
-    selectionOverlay.setView('parameters');
+    configPanel.setView('parameters');
   }
 
   /**
@@ -719,10 +719,10 @@ export function createAppShell(app: HTMLElement): void {
     // Config overlay: only shown when we're explicitly in config mode.
     if (nextMode === 'config') {
       loadingOverlay.hide();
-      selectionOverlay.setSimulation(activeClass, getActiveValues());
-      selectionOverlay.show();
+      configPanel.setSimulation(activeClass, getActiveValues());
+      configPanel.show();
     } else {
-      selectionOverlay.hide();
+      configPanel.hide();
     }
 
     // Display terminal: hidden outside display mode, but restored if the user

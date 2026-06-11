@@ -1,16 +1,18 @@
 /**
  * Simulation class definitions loaded from YAML.
  *
- * The config is split across three YAML files so concerns stay separate:
+ * The config is split across YAML files so concerns stay separate:
  * - `simulation-catalog.yaml`   Family metadata (labels, scoring)
  * - `parameter-info.yaml`       Parameter ranges, defaults, and descriptions
- * - `stats-config.yaml`         Display stat configuration (summary + live)
+ * - `../summaries/summary-stats-config.yaml`  Summary overlay stat config
+ * - `../live-data/live-stats-config.yaml`     Live telemetry stat config
  */
 
 import { parse } from 'yaml';
 import catalogRaw from './simulation-catalog.yaml?raw';
 import paramsRaw from './parameter-info.yaml?raw';
-import statsRaw from './stats-config.yaml?raw';
+import summaryStatsRaw from '../summaries/summary-stats-config.yaml?raw';
+import liveStatsRaw from '../live-data/live-stats-config.yaml?raw';
 import { withBaseUrl } from '../shared/urls.ts';
 
 export interface SimParameter {
@@ -141,11 +143,13 @@ type FamilyId = string;
 
 const catalog = parse(catalogRaw) as Record<FamilyId, RawCatalogEntry>;
 const paramsByFamily = parse(paramsRaw) as Record<FamilyId, Record<string, RawParameterConfig>>;
-const statsByFamily = parse(statsRaw) as Record<FamilyId, RawStatsConfig>;
+const summaryStatsByFamily = parse(summaryStatsRaw) as Record<FamilyId, RawStatsConfig>;
+const liveStatsByFamily = parse(liveStatsRaw) as Record<FamilyId, RawStatsConfig>;
 
 export const SIMULATION_CLASSES: SimulationClass[] = Object.entries(catalog).map(
   ([id, entry]) => {
-    const stats = statsByFamily[id] ?? { summaryStats: [], liveStats: [] };
+    const summaryStats = summaryStatsByFamily[id]?.summaryStats ?? [];
+    const liveStats = liveStatsByFamily[id]?.liveStats ?? [];
     const rawParams = paramsByFamily[id] ?? {};
 
     return {
@@ -155,8 +159,8 @@ export const SIMULATION_CLASSES: SimulationClass[] = Object.entries(catalog).map
       metadata: {
         distinctSimulations: entry.metadata.distinctSimulations,
         correctValues: entry.metadata.correctValues,
-        summaryStats: stats.summaryStats.map(normalizeStatConfig),
-        liveStats: stats.liveStats.map(normalizeStatConfig),
+        summaryStats: summaryStats.map(normalizeStatConfig),
+        liveStats: liveStats.map(normalizeStatConfig),
       },
       parameters: Object.entries(rawParams).map(([parameterId, parameter]) => ({
         id: parameterId,

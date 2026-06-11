@@ -1,0 +1,109 @@
+# Live telemetry HUD display configuration for each simulation family.
+#
+# - `value` is the initial/fallback display value
+# - `unit` is appended by the app
+# - `live: true` means a CSV stream should provide updates
+# - `live_key` can override which CSV column should be used
+# - `from_video: true` means the final value should be pulled from the active
+#   video's sidecar metadata YAML
+# - `video_key` can override which metadata key should be used
+# - `scale_with_time: true` (when `live`) scales the final metadata value
+#   linearly by normalized playback time
+# - `value_scale` multiplies a live numeric value before formatting
+
+planetary:
+  liveStats:
+    - id: impactor_mass
+      value: '0.10'
+      unit: M⊕
+      live: false
+    - id: impactor_velocity
+      value: '12.0'
+      unit: km/s
+      live: false
+    - id: impactor_angle
+      value: '45'
+      unit: °
+      live: false
+    - id: time
+      value: 0.0
+      unit: hours
+      live: true
+    - id: temperature
+      value: 0.0
+      unit: K
+      live: true
+    - id: Earth mass
+      value: 1.0
+      unit: M⊕
+      live: true
+    - id: particlesUpdated
+      value: '0'
+      label: Particle updates
+      live: true
+      from_video: true
+      scale_with_time: true
+      integer: true
+
+galaxy:
+  liveStats:
+    - id: star_formation_rate
+      value: '3.0'
+      unit: M☉/yr
+      live: true
+    - id: black_hole_mass
+      value: '4.0'
+      unit: ×10⁶ M☉
+      live: true
+    - id: stellar_mass
+      value: '5.0'
+      unit: ×10¹⁰ M☉
+      live: true
+    - id: size
+      value: 0.0
+      unit: kpc
+      live: true
+    - id: age
+      value: 0.0
+      unit: Gyr
+      live: true
+    - id: particlesUpdated
+      value: '0'
+      label: Particle updates
+      live: true
+      from_video: true
+      scale_with_time: true
+      integer: true
+
+cosmos:
+  liveStats:
+    - id: age
+      value: 0.0
+      unit: Gyr
+      live: true
+      live_key: age_years
+      value_scale: 1.0e-9
+    - id: redshift
+      value: 0.0
+      unit: ''
+      live: true
+    - id: stellar_mass
+      value: '0'
+      label: Stellar Mass
+      unit: Msun
+      live: true
+    - id: bh_mass
+      value: '0'
+      label: Black Hole Mass
+      unit: Msun
+      live: true
+    - id: sfr
+      value: '0'
+      label: SFR
+      unit: Msun/yr
+      live: true
+    - id: g_updates_total
+      value: '0'
+      label: Particle updates
+      live: true
+      integer: true
