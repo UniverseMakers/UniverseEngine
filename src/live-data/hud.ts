@@ -12,7 +12,7 @@ import type {
   StatDisplayConfig,
   SummaryStatId,
 } from '../selection/simulation-catalog.ts';
-import { formatMaybeNumber, formatParameterValue, withUnit } from '../shared/format.ts';
+import { formatCompactNumber, formatMaybeNumber, formatParameterValue, withUnit } from '../shared/format.ts';
 
 export interface TelemetryPanelController {
   /** Render metric rows for the active simulation and its current values. */
@@ -194,15 +194,9 @@ function selectMetric(
 /**
  * Apply optional numeric scaling/rounding to a resolved stat value.
  *
- * If the stat has a `valueScale`, we always run it through `formatMaybeNumber`
- * to apply the multiplier. Otherwise, we only format if the value came from a
- * live source or needs integer rounding — static placeholder strings like
- * "Present" or "N/A" should pass through untouched.
- *
- * @param value - Raw value string.
- * @param stat - Display config for the row.
- * @param shouldFormat - Whether the value came from a live source and should be formatted.
- * @returns Display-ready value.
+ * Live numeric values are formatted compactly (K / M / B suffixes) so the
+ * HUD panel stays readable and stable. Static placeholder strings pass
+ * through unchanged.
  */
 function formatMetricValue(
   value: string,
@@ -213,18 +207,30 @@ function formatMetricValue(
     return value;
   }
 
-  // If a scale is configured, always apply it (e.g. converting seconds to hours).
-  if (stat.valueScale !== undefined) {
-    return formatMaybeNumber(value, {
-      scale: stat.valueScale,
-      integer: stat.integer,
-    });
+  const numeric = Number(value);
+
+  // Pass through non-numeric strings unchanged.
+  if (!Number.isFinite(numeric)) {
+    return value;
   }
 
-  // Format live values or integer-configured stats; pass static strings through.
-  if (shouldFormat || stat.integer) {
-    return formatMaybeNumber(value, { integer: stat.integer });
+  const scale = stat.valueScale ?? 1;
+  const scaled = numeric * scale;
+
+  // Live-updating values always use compact formatting first — even
+  // integer-configured stats like particle counts benefit from it when
+  // streaming (e.g. "1.2M" instead of "1,234,567").
+  if (shouldFormat) {
+    return stat.integer
+      ? formatCompactNumber(Math.round(scaled))
+      : formatCompactNumber(scaled);
   }
 
-  return value;
+  // Non-live integer-configured stats use locale-grouped digits.
+  if (stat.integer) {
+    return Math.max(0, Math.round(scaled)).toLocaleString(undefined);
+  }
+
+  // Static parameter values keep their step-aligned precision.
+  return formatMaybeNumber(value, { integer: stat.integer });
 }

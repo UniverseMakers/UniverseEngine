@@ -618,8 +618,7 @@ button {
 /* ── Data Panel (HUD) ────────────────────────────────────────────────────── */
 
 .data-panel {
-  width: fit-content;
-  min-width: 18rem;
+  width: 18rem;
   max-width: calc(100vw - 2rem);
   padding: 1.05rem 1.2rem 1rem;
   background: rgba(0, 0, 0, 0.34);
@@ -637,9 +636,8 @@ button {
 
 .data-panel__metric {
   display: grid;
-  grid-template-columns: max-content max-content;
+  grid-template-columns: auto 1fr;
   align-items: baseline;
-  justify-content: space-between;
   column-gap: 1rem;
   padding-bottom: 0.9rem;
   border-bottom: 1px solid var(--line);
@@ -647,11 +645,6 @@ button {
 
 .data-panel__metric-label {
   white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.data-panel__metric-label {
   color: var(--text-muted);
   font-family: var(--font-mono);
   font-size: 0.72rem;
@@ -1780,8 +1773,8 @@ button {
   }
 
   .data-panel {
-    width: fit-content;
-    min-width: 16rem;
+    width: 16rem;
+    min-width: 0;
     max-width: calc(100vw - 2rem);
   }
 
@@ -2047,8 +2040,8 @@ button {
   }
 
   .data-panel {
-    width: fit-content;
-    min-width: 15.5rem;
+    width: 14rem;
+    min-width: 0;
     max-width: calc(100vw - 1.5rem);
     padding: 0.9rem 1rem;
   }

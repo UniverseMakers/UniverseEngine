@@ -83,10 +83,12 @@ cosmos:
       live: true
       live_key: age_years
       value_scale: 1.0e-9
+      label: Universe Age
     - id: redshift
       value: 0.0
       unit: ''
       live: true
+      label: Redshift
     - id: stellar_mass
       value: '0'
       label: Stellar Mass

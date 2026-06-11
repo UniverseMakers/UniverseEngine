@@ -41,6 +41,60 @@ export function withUnit(value: string, unit?: string): string {
 }
 
 /**
+ * Format a number compactly using magnitude suffixes.
+ *
+ * Values are auto-scaled to their natural magnitude tier:
+ *   < 1,000          → "123" (or "123.5" with one decimal)
+ *   1,000 – 999,999  → "1.23K"
+ *   1M – 999M        → "1.23M"
+ *   1B – 999B        → "1.23B"
+ *   ≥ 1T             → "1.23T" / "12.3T" / "1,230T" (stays in trillions)
+ *
+ * @param value - Numeric value.
+ * @returns Compact display string.
+ */
+export function formatCompactNumber(value: number): string {
+  const abs = Math.abs(value);
+  const sign = value < 0 ? '−' : '';
+
+  if (!Number.isFinite(value)) {
+    return String(value);
+  }
+
+  if (abs < 1_000) {
+    return formatSmall(value);
+  }
+
+  if (abs < 1_000_000) {
+    return `${sign}${formatSmall(value / 1_000)}K`;
+  }
+
+  if (abs < 1_000_000_000) {
+    return `${sign}${formatSmall(value / 1_000_000)}M`;
+  }
+
+  if (abs < 1_000_000_000_000) {
+    return `${sign}${formatSmall(value / 1_000_000_000)}B`;
+  }
+
+  // Beyond billions: scale in trillions. Numbers in this range are
+  // intrinsically in the trillions so we keep the suffix and adjust
+  // the mantissa for readability (up to one decimal).
+  return `${sign}${formatSmall(value / 1_000_000_000_000)}T`;
+}
+
+/**
+ * Format a small-ish number (typically after magnitude division) with up to
+ * one decimal place, stripping trailing zeros.
+ */
+function formatSmall(value: number): string {
+  return value
+    .toFixed(1)
+    .replace(/\.0+$|(?<=\..*?)0+$/g, '')
+    .replace(/\.$/, '');
+}
+
+/**
  * Format a live numeric string compactly for UI display.
  *
  * @param raw - Raw value string.
