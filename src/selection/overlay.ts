@@ -157,30 +157,56 @@ export function createSelectionOverlay(
   creditsSection.className = 'config-overlay__section config-overlay__section--grow';
   creditsSection.dataset.section = 'credits';
   creditsSection.innerHTML = `
-    <div class="config-overlay__console" data-credits></div>
+    <div class="credits-list" data-credits></div>
   `;
 
-  const creditsConsole = creditsSection.querySelector(
+  const creditsList = creditsSection.querySelector(
     '[data-credits]',
   ) as HTMLDivElement;
 
   const credits = getCredits();
 
-  creditsConsole.innerHTML = '';
+  creditsList.innerHTML = '';
 
   if (credits.length === 0) {
-    const row = document.createElement('div');
+    const entry = document.createElement('div');
 
-    row.className = 'config-overlay__console-line';
-    row.textContent = 'To be credited...';
-    creditsConsole.appendChild(row);
+    entry.className = 'credits-list__entry';
+    entry.textContent = 'To be credited...';
+    creditsList.appendChild(entry);
   } else {
     for (const credit of credits) {
-      const row = document.createElement('div');
+      if (credit.header) {
+        const heading = document.createElement('div');
 
-      row.className = 'config-overlay__console-line';
-      row.textContent = credit.text;
-      creditsConsole.appendChild(row);
+        heading.className = 'credits-list__heading';
+        heading.textContent = credit.text;
+        creditsList.appendChild(heading);
+      } else {
+        const entry = document.createElement('div');
+
+        entry.className = 'credits-list__entry';
+        const textSpan = document.createElement('span');
+
+        textSpan.className = 'credits-list__text';
+
+        if (credit.url) {
+          const link = document.createElement('a');
+
+          link.className = 'credits-list__link';
+          link.href = credit.url;
+          link.target = '_blank';
+          link.rel = 'noopener noreferrer';
+          link.textContent = credit.text;
+          textSpan.appendChild(link);
+        } else {
+          textSpan.textContent = credit.text;
+        }
+
+        entry.appendChild(textSpan);
+
+        creditsList.appendChild(entry);
+      }
     }
   }
 

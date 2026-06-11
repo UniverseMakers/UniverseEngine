@@ -13,6 +13,12 @@ import creditsRaw from './credits.yaml?raw';
 export interface CreditEntry {
   /** Exact text that must appear in the credits. */
   text: string;
+  /** Optional URL that makes the credit entry a clickable link. */
+  url?: string;
+  /** Optional path to a logo image (relative to public/). */
+  logo?: string;
+  /** When true this entry is rendered as a section heading, not a regular entry. */
+  header?: boolean;
 }
 
 /**
@@ -47,7 +53,30 @@ export function getCredits(): CreditEntry[] {
       continue;
     }
 
-    credits.push({ text });
+    const credit: CreditEntry = { text };
+
+    // Optional URL that turns the credit line into a clickable link.
+    const url = (entry as { url?: unknown }).url;
+
+    if (typeof url === 'string' && url.trim().length > 0) {
+      credit.url = url;
+    }
+
+    // Optional logo path displayed inline before the text.
+    const logo = (entry as { logo?: unknown }).logo;
+
+    if (typeof logo === 'string' && logo.trim().length > 0) {
+      credit.logo = logo;
+    }
+
+    // When true the entry is rendered as a section heading.
+    const header = (entry as { header?: unknown }).header;
+
+    if (header === true) {
+      credit.header = true;
+    }
+
+    credits.push(credit);
   }
 
   return credits;

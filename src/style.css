@@ -1500,6 +1500,55 @@ button {
   text-transform: uppercase;
 }
 
+/* ── Credits list (scrollable, text-left / logo-right) ─────────────────── */
+
+.credits-list {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.credits-list__heading {
+  padding-top: 1.2rem;
+  padding-bottom: 0.3rem;
+  color: var(--text-primary);
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  border-bottom: 1px solid var(--line-strong);
+}
+
+.credits-list__heading:first-child {
+  padding-top: 0;
+}
+
+.credits-list__entry {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.3rem 0;
+}
+
+.credits-list__text {
+  color: var(--text-secondary);
+  font-size: 0.8rem;
+  line-height: 1.4;
+}
+
+.credits-list__link {
+  color: var(--accent);
+  text-decoration: none;
+  transition: color 0.15s;
+}
+
+.credits-list__link:hover,
+.credits-list__link:focus-visible {
+  color: var(--text-primary);
+  text-decoration: underline;
+}
+
 .theme-picker__option {
   display: flex;
   align-items: center;
