@@ -88,7 +88,34 @@ export function createDisplayMenu(
     }),
   );
 
+  const fullscreenButton = createMenuButton('Fullscreen', () => {
+    close();
+    if (document.fullscreenElement) {
+      document.exitFullscreen();
+    } else {
+      document.getElementById('app')?.requestFullscreen();
+    }
+  });
+
+  menu.appendChild(fullscreenButton);
+
   host.appendChild(menu);
+
+  function updateFullscreenLabel() {
+    const label = fullscreenButton.querySelector('.display-menu__item-label');
+
+    if (label) {
+      label.textContent = document.fullscreenElement ? 'Exit Fullscreen' : 'Fullscreen';
+    }
+
+    const app = document.getElementById('app');
+
+    if (app) {
+      app.classList.toggle('is-fullscreen', Boolean(document.fullscreenElement));
+    }
+  }
+
+  document.addEventListener('fullscreenchange', updateFullscreenLabel);
 
   // Toggle the popover from the burger button.
   trigger.addEventListener('click', () => {

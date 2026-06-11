@@ -539,8 +539,9 @@ button {
   display: none;
 }
 
-/* Burger menu is redundant while the config overlay is open. */
-#app[data-mode='config'] .display-chrome__top-left {
+/* Burger menu is redundant while the config overlay or loading screen is open. */
+#app[data-mode='config'] .display-chrome__top-left,
+#app[data-mode='initializing'] .display-chrome__top-left {
   display: none;
 }
 
@@ -1161,6 +1162,8 @@ button {
 .terminal {
   position: relative;
   z-index: 1;
+  display: flex;
+  flex-direction: column;
   width: min(68.5rem, calc(100vw - 2rem));
   height: min(52rem, calc(100vh - 2.5rem));
   height: min(52rem, calc(100dvh - 2.5rem));
@@ -1641,8 +1644,8 @@ button {
 }
 
 .terminal__log {
-  min-height: 22rem;
-  max-height: min(56vh, 32rem);
+  flex: 1;
+  min-height: 0;
   overflow: auto;
   padding: 1.8rem 2rem 1.2rem;
   font-family: var(--font-mono);
@@ -2235,4 +2238,37 @@ button {
   .orientation-overlay {
     display: grid;
   }
+}
+
+/* ── SWIFT logo (bottom-right corner) ─────────────────────────────────── */
+
+.swift-logo {
+  position: fixed;
+  right: 1.5rem;
+  bottom: 1.5rem;
+  z-index: 3;
+  display: flex;
+  align-items: flex-end;
+  opacity: 0.45;
+  transition: opacity 0.25s;
+  pointer-events: none;
+}
+
+.swift-logo:hover {
+  opacity: 0.75;
+}
+
+.swift-logo__image {
+  width: auto;
+  height: 8vh;
+  display: block;
+}
+
+/* ── Fullscreen ───────────────────────────────────────────────────────────── */
+
+#app:fullscreen,
+#app:-webkit-full-screen,
+#app.is-fullscreen {
+  overflow: hidden;
+  background: #000;
 }

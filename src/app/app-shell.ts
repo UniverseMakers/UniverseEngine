@@ -142,11 +142,25 @@ export function createAppShell(app: HTMLElement): void {
   `;
   app.appendChild(orientationOverlay);
 
-  // Build the burger-menu host in the upper-left corner of the chrome.
+  // Persistent SWIFT logo — bottom-right corner for subtle attribution.
+  const swiftLogo = document.createElement('div');
+
+  swiftLogo.className = 'swift-logo';
+  swiftLogo.innerHTML = `
+    <img
+      class="swift-logo__image"
+      src="assets/credits/swift-logo.png"
+      alt="SWIFT"
+    />
+  `;
+  app.appendChild(swiftLogo);
+
+  // Build the burger-menu host in the upper-left corner of the app.
+  // Mounted outside displayChrome so it is available on the landing page too.
   const topLeft = document.createElement('div');
 
-  topLeft.className = 'display-chrome__top-left';
-  displayChrome.appendChild(topLeft);
+  topLeft.className = 'display-chrome__top-left is-hidden';
+  app.appendChild(topLeft);
 
   // Mount the display menu and delegate actions back into the shell state.
   // The menu doesn't know about modes or state — it just fires callbacks.
@@ -689,6 +703,11 @@ export function createAppShell(app: HTMLElement): void {
     const showDisplay = nextMode === 'display' || nextMode === 'config';
 
     setElementVisibility(displayChrome, showDisplay);
+    setElementVisibility(swiftLogo, nextMode === 'display');
+
+    // Burger menu: visible on landing page and display, hidden during loading
+    // and config (config already hides it via the CSS mode selector).
+    setElementVisibility(topLeft, nextMode === 'entry' || nextMode === 'display');
 
     // Entry overlay: shown only in entry mode, hidden everywhere else.
     if (nextMode === 'entry') {
