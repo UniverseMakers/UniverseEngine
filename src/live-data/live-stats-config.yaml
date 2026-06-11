@@ -97,11 +97,6 @@ cosmos:
       label: Black Hole Mass
       unit: Msun
       live: true
-    - id: sfr
-      value: '0'
-      label: SFR
-      unit: Msun/yr
-      live: true
     - id: g_updates_total
       value: '0'
       label: Particle updates

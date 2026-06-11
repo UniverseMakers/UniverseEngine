@@ -12,14 +12,13 @@ import { applyTheme, getInitialTheme, type ThemeId } from '../selection/theme.ts
 import { createViewport } from '../video_player/viewport.ts';
 import { createTimeline } from '../video_player/timeline.ts';
 import { createTelemetryPanel } from '../live-data/hud.ts';
-import { createDisplayTerminal } from '../overlays/display-terminal.ts';
-import { createViewSwitcher } from '../video_player/view-switcher.ts';
 import { createEntryOverlay } from '../entry/entry-overlay.ts';
 import { createSummaryOverlay } from '../summaries/summary-overlay.ts';
+import { createViewSwitcher } from '../video_player/view-switcher.ts';
 import {
-  createConfigPanel,
-  type ConfigPanelView,
-} from '../selection/config-panel.ts';
+  createOverlayPanel,
+  type OverlayPanelView,
+} from '../selection/overlay-panel.ts';
 import { createLoadingOverlay } from '../loading/overlay.ts';
 import { createDisplayMenu } from './display-menu.ts';
 import { getInitializationLines } from '../loading/init-text.ts';
@@ -71,12 +70,8 @@ export function createAppShell(app: HTMLElement): void {
   // color scheme from the very first frame.
   let activeTheme: ThemeId = getInitialTheme();
 
-  // Track whether the display-side terminal viewer is open so we can restore it
-  // when the user comes back to display mode.
-  let isDisplayTerminalOpen = false;
-
   // Track whether the currently loaded video has reached the end — we need this
-  // to know if we should re-show the summary overlay after closing the terminal.
+  // to know if we should re-show the summary overlay.
   let hasCompletedPlayback = false;
 
   // Sidecar run metadata for the currently loaded video (wallclock, compute, etc).
@@ -170,12 +165,6 @@ export function createAppShell(app: HTMLElement): void {
       openConfigPanel('parameters');
     },
     onViewSelected(view) {
-      if (view === 'terminal') {
-        toggleDisplayTerminal();
-
-        return;
-      }
-
       if (view === 'credits') {
         openConfigPanel('credits');
 
@@ -204,16 +193,6 @@ export function createAppShell(app: HTMLElement): void {
   dataPanelHost.className = 'display-chrome__top-right';
   displayChrome.appendChild(dataPanelHost);
   const dataPanel = createTelemetryPanel(dataPanelHost);
-
-  // Mount the centered display terminal overlay host. This shows placeholder
-  // log lines while the simulation is running.
-  const displayTerminalHost = document.createElement('div');
-
-  displayTerminalHost.className = 'display-chrome__terminal';
-  displayChrome.appendChild(displayTerminalHost);
-  const displayTerminal = createDisplayTerminal(displayTerminalHost, {
-    onClose: handleCloseTerminal,
-  });
 
   // Mount the decorative center status frame used by tablet/mobile layouts.
   // This is purely cosmetic — it gives the display mode a bit of visual weight
@@ -335,7 +314,6 @@ export function createAppShell(app: HTMLElement): void {
   const summaryOverlay = createSummaryOverlay(overlayLayer, {
     onReplay: handleReplay,
     onNew: () => openConfigPanel('parameters'),
-    onTerminal: handleOpenTerminalFromSummary,
   });
 
   // When playback ends, remember that state and show the summary overlay.
@@ -357,7 +335,7 @@ export function createAppShell(app: HTMLElement): void {
   });
 
   // Mount the main selection overlay — parameters, settings, credits, etc.
-  const configPanel = createConfigPanel(overlayLayer, {
+  const overlayPanel = createOverlayPanel(overlayLayer, {
     simClass: activeClass,
     values: getActiveValues(),
     theme: activeTheme,
@@ -379,7 +357,6 @@ export function createAppShell(app: HTMLElement): void {
 
   timeline.setPosition(0);
   refreshDisplayData();
-  refreshDisplayTerminal();
   summaryOverlay.hide();
 
   // ── Collapsible Left-Side UI ────────────────────────────────────────────
@@ -466,10 +443,9 @@ export function createAppShell(app: HTMLElement): void {
     // Apply the scale's signature theme.
     handleThemeChange(SCALE_TO_THEME[newClass.id]);
     // Rebuild the config overlay so the parameters match the new family.
-    configPanel.setSimulation(activeClass, getActiveValues());
+    overlayPanel.setSimulation(activeClass, getActiveValues());
     timeline.setPosition(0);
     refreshDisplayData();
-    refreshDisplayTerminal();
     refreshViewSwitcher();
   }
 
@@ -482,9 +458,8 @@ export function createAppShell(app: HTMLElement): void {
   function handleValuesChange(values: Record<string, number>): void {
     // Take a defensive copy so the caller can't mutate our internal state.
     valuesByClass[activeClass.id] = { ...values };
-    // The HUD and terminal show parameter values, so refresh them immediately.
+    // The HUD shows parameter values, so refresh it immediately.
     refreshDisplayData();
-    refreshDisplayTerminal();
   }
 
   /**
@@ -496,7 +471,7 @@ export function createAppShell(app: HTMLElement): void {
   function handleThemeChange(theme: ThemeId): void {
     activeTheme = theme;
     applyTheme(theme);
-    configPanel.setTheme(theme);
+    overlayPanel.setTheme(theme);
   }
 
   /**
@@ -505,11 +480,8 @@ export function createAppShell(app: HTMLElement): void {
    * @param view - Which config subview to display.
    * @returns void
    */
-  function openConfigPanel(view: ConfigPanelView): void {
-    // Close the display terminal first — it's a separate concern from config.
-    isDisplayTerminalOpen = false;
-    displayTerminal.hide();
-    configPanel.setView(view);
+  function openConfigPanel(view: OverlayPanelView): void {
+    overlayPanel.setView(view);
     setMode('config');
   }
 
@@ -528,7 +500,7 @@ export function createAppShell(app: HTMLElement): void {
     }
 
     // Otherwise keep showing the parameter view so the user can start a run.
-    configPanel.setView('parameters');
+    overlayPanel.setView('parameters');
   }
 
   /**
@@ -541,16 +513,6 @@ export function createAppShell(app: HTMLElement): void {
     // If we've been through init at least once, going back to display makes
     // sense. Otherwise the video hasn't loaded yet — send them to entry.
     setMode(hasCompletedInitialization ? 'display' : 'entry');
-  }
-
-  /**
-   * Toggle the display-side terminal viewer.
-   *
-   * @returns void
-   */
-  function toggleDisplayTerminal(): void {
-    isDisplayTerminalOpen = displayTerminal.toggle();
-    summaryOverlay.hide();
   }
 
   /**
@@ -568,37 +530,6 @@ export function createAppShell(app: HTMLElement): void {
       viewport.setMuted(true);
       void viewport.play();
     });
-  }
-
-  /**
-   * Open the terminal viewer directly from the summary overlay.
-   *
-   * @returns void
-   */
-  function handleOpenTerminalFromSummary(): void {
-    summaryOverlay.hide();
-    isDisplayTerminalOpen = true;
-    displayTerminal.show();
-  }
-
-  /**
-   * When the display terminal closes, restore the summary overlay if playback
-   * had already ended — we don't want the terminal to swallow the summary.
-   *
-   * @returns void
-   */
-  function handleCloseTerminal(): void {
-    isDisplayTerminalOpen = false;
-
-    if (hasCompletedPlayback) {
-      summaryOverlay.update(
-        activeClass,
-        getActiveValues(),
-        viewport.getDurationSeconds(),
-        activeRunMetadata,
-      );
-      summaryOverlay.show();
-    }
   }
 
   /**
@@ -719,18 +650,10 @@ export function createAppShell(app: HTMLElement): void {
     // Config overlay: only shown when we're explicitly in config mode.
     if (nextMode === 'config') {
       loadingOverlay.hide();
-      configPanel.setSimulation(activeClass, getActiveValues());
-      configPanel.show();
+      overlayPanel.setSimulation(activeClass, getActiveValues());
+      overlayPanel.show();
     } else {
-      configPanel.hide();
-    }
-
-    // Display terminal: hidden outside display mode, but restored if the user
-    // had it open before leaving display mode.
-    if (nextMode !== 'display') {
-      displayTerminal.hide();
-    } else if (isDisplayTerminalOpen) {
-      displayTerminal.show();
+      overlayPanel.hide();
     }
 
     // Summary overlay: hidden outside display mode, but re-shown if playback
@@ -789,15 +712,6 @@ export function createAppShell(app: HTMLElement): void {
   }
 
   /**
-   * Refresh the display-side terminal placeholder content.
-   *
-   * @returns void
-   */
-  function refreshDisplayTerminal(): void {
-    displayTerminal.update(activeClass, getActiveValues());
-  }
-
-  /**
    * Refresh the display-side video-view switcher.
    *
    * @param selectedId - Optional selected view override.
@@ -829,12 +743,10 @@ export function createAppShell(app: HTMLElement): void {
   function resetSimulationState(): void {
     activeLiveStatsFrames = EMPTY_LIVE_STATS_DATASET;
     hasCompletedPlayback = false;
-    isDisplayTerminalOpen = false;
     activeRunMetadata = null;
     activeRunMatch = null;
     lastPlaybackSeconds = 0;
     summaryOverlay.hide();
-    displayTerminal.hide();
     viewSwitcher.hide();
     viewport.pause();
     viewport.resetPlayback();

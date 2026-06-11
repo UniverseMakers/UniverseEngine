@@ -289,7 +289,6 @@ button {
 .display-chrome__left-center,
 .display-chrome__top-right,
 .display-chrome__center-status,
-.display-chrome__terminal,
 .display-chrome__bottom {
   position: absolute;
 }
@@ -314,15 +313,6 @@ button {
   right: 1.25rem;
   z-index: 2;
   pointer-events: auto;
-}
-
-.display-chrome__terminal {
-  inset: 0;
-  display: grid;
-  place-items: center;
-  padding: 1.5rem;
-  z-index: 4;
-  pointer-events: none;
 }
 
 .display-chrome__bottom {
@@ -534,7 +524,6 @@ button {
 #app[data-mode='config'] .display-chrome__left-center,
 #app[data-mode='config'] .display-chrome__top-right,
 #app[data-mode='config'] .display-chrome__center-status,
-#app[data-mode='config'] .display-chrome__terminal,
 #app[data-mode='config'] .display-chrome__bottom {
   display: none;
 }
@@ -686,83 +675,6 @@ button {
   border-radius: 50%;
   background: var(--accent);
   opacity: 0.85;
-}
-
-/* ── Display Terminal ─────────────────────────────────────────────────────── */
-
-.display-terminal {
-  width: min(58rem, calc(100vw - 3rem));
-  max-height: calc(100vh - 6rem);
-  background: rgba(0, 0, 0, 0.42);
-  border: 1px solid var(--line-strong);
-  border-radius: 0;
-  box-shadow: var(--shadow-ambient);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
-  pointer-events: auto;
-}
-
-.display-terminal__header {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 1rem;
-  padding: 0.9rem 1rem 0.65rem;
-}
-
-.display-terminal__title {
-  color: var(--accent);
-  font-family: var(--font-mono);
-  font-size: 0.8rem;
-  letter-spacing: 0.2em;
-  text-transform: uppercase;
-}
-
-.display-terminal__subtitle,
-.display-terminal__meta,
-.display-terminal__line {
-  font-family: var(--font-mono);
-}
-
-.display-terminal__subtitle,
-.display-terminal__meta {
-  color: var(--text-muted);
-  font-size: 0.64rem;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-}
-
-.display-terminal__meta {
-  padding: 0 1rem 0.65rem;
-  border-bottom: 1px solid var(--line);
-}
-
-.display-terminal__close {
-  width: 2rem;
-  height: 2rem;
-  border: 1px solid var(--line);
-  border-radius: 0;
-  background: rgba(255, 255, 255, 0.02);
-  color: var(--accent);
-  font-family: var(--font-mono);
-  font-size: 1rem;
-  line-height: 1;
-}
-
-.display-terminal__log {
-  display: grid;
-  gap: 0.5rem;
-  max-height: 18rem;
-  overflow: auto;
-  padding: 0.9rem 1rem 1rem;
-}
-
-.display-terminal__line {
-  color: var(--accent);
-  font-size: 0.72rem;
-  letter-spacing: 0.06em;
-  line-height: 1.45;
-  word-break: break-word;
 }
 
 /* ── Timeline ─────────────────────────────────────────────────────────────── */
@@ -1323,17 +1235,11 @@ button {
 
 .config-overlay__controls[data-view='parameters'] [data-section='settings'],
 .config-overlay__controls[data-view='parameters'] [data-section='credits'],
-.config-overlay__controls[data-view='parameters'] [data-section='terminal'],
 .config-overlay__controls[data-view='settings'] [data-section='parameters'],
 .config-overlay__controls[data-view='settings'] [data-section='credits'],
-.config-overlay__controls[data-view='settings'] [data-section='terminal'],
 /* Credits view hides everything except the credits section itself. */
 .config-overlay__controls[data-view='credits'] [data-section='parameters'],
-.config-overlay__controls[data-view='credits'] [data-section='settings'],
-.config-overlay__controls[data-view='credits'] [data-section='terminal'],
-.config-overlay__controls[data-view='terminal'] [data-section='parameters'],
-.config-overlay__controls[data-view='terminal'] [data-section='settings'],
-.config-overlay__controls[data-view='terminal'] [data-section='credits'] {
+.config-overlay__controls[data-view='credits'] [data-section='settings'] {
   display: none;
 }
 
@@ -1670,7 +1576,6 @@ button {
 
 [data-theme='hal'] .display-menu,
 [data-theme='hal'] .data-panel,
-[data-theme='hal'] .display-terminal,
 [data-theme='hal'] .entry-overlay,
 [data-theme='hal'] .summary-overlay,
 [data-theme='hal'] .config-overlay,
@@ -1708,7 +1613,6 @@ button {
 
 [data-theme='nostromo'] .display-menu,
 [data-theme='nostromo'] .data-panel,
-[data-theme='nostromo'] .display-terminal,
 [data-theme='nostromo'] .entry-overlay,
 [data-theme='nostromo'] .summary-overlay,
 [data-theme='nostromo'] .config-overlay,
@@ -1739,8 +1643,7 @@ button {
 
 [data-theme='nostromo'] .data-panel__metric-value,
 [data-theme='nostromo'] .summary-overlay__metric-value,
-[data-theme='nostromo'] .config-overlay__headline,
-[data-theme='nostromo'] .display-terminal__title {
+[data-theme='nostromo'] .config-overlay__headline {
   color: #dca94a;
 }
 
@@ -1784,10 +1687,6 @@ button {
     top: 1rem;
     right: 1rem;
     bottom: auto;
-  }
-
-  .display-chrome__terminal {
-    padding: 1.25rem;
   }
 
   .display-chrome__center-status {
@@ -2147,10 +2046,6 @@ button {
     bottom: auto;
   }
 
-  .display-chrome__terminal {
-    padding: 0.75rem;
-  }
-
   .data-panel {
     width: fit-content;
     min-width: 15.5rem;
@@ -2166,19 +2061,6 @@ button {
     overscroll-behavior: contain;
     touch-action: pan-y;
     padding-right: 0.25rem;
-  }
-
-  .display-terminal__log {
-    max-height: 9.5rem;
-  }
-
-  .display-terminal__line {
-    font-size: 0.64rem;
-  }
-
-  .display-terminal {
-    width: calc(100vw - 1.5rem);
-    max-height: calc(100vh - 8rem);
   }
 
   .display-chrome__bottom {

@@ -31,7 +31,6 @@ export interface SummaryOverlayController {
 interface SummaryOverlayOptions {
   onReplay: () => void;
   onNew: () => void;
-  onTerminal: () => void;
 }
 
 /**
@@ -93,22 +92,13 @@ export function createSummaryOverlay(
   newButton.type = 'button';
   newButton.textContent = 'New';
 
-  // Add button to open the terminal view after playback completes.
-  const terminalButton = document.createElement('button');
-
-  terminalButton.className = 'summary-overlay__button';
-  terminalButton.type = 'button';
-  terminalButton.textContent = 'Terminal';
-
   // The overlay never owns application state. It only forwards user intent back
-  // to the app shell which decides what replay/new/terminal actually do.
+  // to the app shell which decides what replay/new actually does.
   replayButton.addEventListener('click', options.onReplay);
   newButton.addEventListener('click', options.onNew);
-  terminalButton.addEventListener('click', options.onTerminal);
 
   actions.appendChild(replayButton);
   actions.appendChild(newButton);
-  actions.appendChild(terminalButton);
 
   panel.appendChild(metrics);
   panel.appendChild(actions);
