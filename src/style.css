@@ -1385,6 +1385,114 @@ button {
   gap: 0.6rem;
 }
 
+.advanced-settings {
+  display: grid;
+  gap: 0.9rem;
+  margin-top: 1.6rem;
+  padding-top: 1.6rem;
+  border-top: 1px solid rgba(123, 208, 255, 0.12);
+}
+
+.advanced-settings__access,
+.advanced-settings__unlock,
+.advanced-settings__select {
+  width: 100%;
+  padding: 0.85rem 0.9rem;
+  border: 1px solid var(--line-strong);
+  border-radius: 0;
+  background: var(--surface-high);
+  color: var(--text-primary);
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.advanced-settings__auth,
+.advanced-settings__form {
+  display: grid;
+  gap: 0.8rem;
+}
+
+.advanced-settings[data-state='closed'] .advanced-settings__auth,
+.advanced-settings[data-state='closed'] .advanced-settings__form,
+.advanced-settings[data-state='auth'] .advanced-settings__form,
+.advanced-settings[data-state='open'] .advanced-settings__auth {
+  display: none;
+}
+
+.advanced-settings__password {
+  width: 100%;
+  padding: 0.85rem 0.9rem;
+  border: 1px solid var(--line);
+  border-radius: 0;
+  background: var(--surface-high);
+  color: var(--text-primary);
+  font-family: var(--font-mono);
+  font-size: 0.82rem;
+}
+
+.advanced-settings__message {
+  margin: 0;
+  color: var(--accent);
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.advanced-settings__field {
+  display: grid;
+  gap: 0.55rem;
+  padding: 0.95rem;
+  border: 1px solid var(--line);
+  background: rgba(0, 0, 0, 0.18);
+}
+
+.advanced-settings__field--inline {
+  grid-template-columns: auto 1fr;
+  align-items: start;
+  gap: 0.9rem;
+}
+
+.advanced-settings__label {
+  color: var(--text-primary);
+  font-family: var(--font-mono);
+  font-size: 0.74rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.advanced-settings__help {
+  display: block;
+  color: var(--text-secondary);
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  line-height: 1.6;
+  letter-spacing: 0.06em;
+  text-transform: none;
+}
+
+.advanced-settings__options {
+  display: grid;
+  gap: 0.55rem;
+}
+
+.advanced-settings__choice {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  color: var(--text-secondary);
+  font-family: var(--font-mono);
+  font-size: 0.76rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.advanced-settings__checkbox {
+  margin-top: 0.1rem;
+}
+
 .config-overlay__console {
   display: grid;
   gap: 0.65rem;

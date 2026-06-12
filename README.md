@@ -43,7 +43,7 @@ Simulation assets are moving to a run-based layout under `public/assets/`:
 - `public/assets/<simulation-id>/<run-id>/final_snapshot_summary.csv`
 - `public/assets/<simulation-id>/<run-id>/run_summary.yaml`
 
-The app reads a generated manifest at `public/assets/run-manifest.json` for nearest-grid-point lookup.
+The app reads a generated manifest at `public/assets/local-manifest.json` for nearest-grid-point lookup.
 
 Generate or refresh the manifest with:
 
@@ -53,8 +53,7 @@ This script:
 
 - scans `public/assets/planetary/`, `public/assets/galaxy/`, and `public/assets/cosmos/`
 - parses supported parameter tokens from each run directory name
-- writes one `run_summary.yaml` per run directory
-- writes `public/assets/run-manifest.json`
+- writes `public/assets/local-manifest.json`
 
 Current supported cosmos run-name tokens are:
 
@@ -62,4 +61,4 @@ Current supported cosmos run-name tokens are:
 - `Ef` -> `black_hole_strength`
 - `G` -> `gravity_strength`
 
-The manifest keeps local relative asset paths today, but the same schema can later be regenerated with remote URLs for Cloudflare-hosted assets.
+The manifest keeps local relative asset paths today, but the same schema can later be regenerated as `run-manifest.json` with remote URLs for Cloudflare-hosted assets.

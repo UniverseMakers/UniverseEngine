@@ -6,18 +6,20 @@
  * simple DOM builder rather than a framework-style component.
  */
 
-import type { SimulationClass } from '../selection/simulation-catalog.ts';
-
 export interface DisplayMenuController {
   /** Close the menu popover if it is open. */
   close: () => void;
+  /** Update whether the Home action should be shown. */
+  setHomeVisible: (isVisible: boolean) => void;
 }
 
 interface DisplayMenuOptions {
-  /** Called after the user picks a new simulation family from the menu. */
-  onSimulationSelected: (simClass: SimulationClass) => void;
+  /** Called after the user chooses to return to the scale selector. */
+  onHome: () => void;
   /** Called after the user picks a non-simulation view entry. */
   onViewSelected: (view: 'settings' | 'credits') => void;
+  /** Whether the Home action should be visible. */
+  showHome?: boolean;
 }
 
 /**
@@ -33,7 +35,6 @@ interface DisplayMenuOptions {
  */
 export function createDisplayMenu(
   host: HTMLElement,
-  simulationClasses: SimulationClass[],
   options: DisplayMenuOptions,
 ): DisplayMenuController {
   // Three stacked spans → the classic hamburger icon. CSS handles the styling.
@@ -54,18 +55,15 @@ export function createDisplayMenu(
   const header = document.createElement('div');
 
   header.className = 'display-menu__header';
-  header.textContent = 'Core Menu';
+  header.textContent = 'Menu';
   menu.appendChild(header);
 
-  // First render the simulation-family shortcuts, then append utility views.
-  for (const simClass of simulationClasses) {
-    menu.appendChild(
-      createMenuButton(simClass.label, () => {
-        close();
-        options.onSimulationSelected(simClass);
-      }),
-    );
-  }
+  const homeButton = createMenuButton('Home', () => {
+    close();
+    options.onHome();
+  });
+
+  menu.appendChild(homeButton);
 
   menu.appendChild(
     createMenuButton('Settings', () => {
@@ -123,8 +121,11 @@ export function createDisplayMenu(
     }
   });
 
+  setHomeVisible(options.showHome ?? true);
+
   return {
     close,
+    setHomeVisible,
   };
 
   /**
@@ -155,5 +156,10 @@ export function createDisplayMenu(
    */
   function close() {
     host.classList.remove('open');
+  }
+
+  function setHomeVisible(isVisible: boolean) {
+    homeButton.hidden = !isVisible;
+    homeButton.classList.toggle('is-hidden', !isVisible);
   }
 }

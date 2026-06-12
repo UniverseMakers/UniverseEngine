@@ -1,24 +1,8 @@
 /**
  * Overlay panel — a generic multi-purpose modal reused across the app.
  *
- * This is a shell with three tabbed subviews. The same panel is repurposed
- * for different tasks — only the body content and the footer button label
- * change per view.
- *
- * ── Views ──────────────────────────────────────────────────────────────
- * `parameters`   Sliders for tweaking simulation knobs before a run.
- *                Footer button: "Run" → kicks off the simulation.
- * `settings`     Theme picker (choose the visual era for this session).
- *                Footer button: "Apply" → saves theme and closes.
- * `credits`      Read-only list of project contributors.
- *                Footer button: "Close" → dismisses the panel.
- *
- * ── Architecture ───────────────────────────────────────────────────────
- * The panel is mounted once and stays alive for the lifetime of the app.
- * Switching views calls `setView()` which updates a CSS data attribute so
- * that section visibility is handled declaratively. The panel does not own
- * application state — it fires callbacks and the app shell decides what to
- * do with them.
+ * This is a shell with three tabbed subviews. The settings view also contains
+ * the password-gated advanced controls used for kiosk/exhibit configuration.
  */
 
 import type { SimulationClass } from './simulation-catalog.ts';
@@ -29,6 +13,10 @@ import {
   type ThemeId,
   type ThemePickerController,
 } from './theme.ts';
+import {
+  ADVANCED_SETTINGS_PASSWORD,
+  type AdvancedSettings,
+} from '../shared/advanced-settings.ts';
 
 export interface OverlayPanelController {
   show: () => void;
@@ -36,6 +24,7 @@ export interface OverlayPanelController {
   setSimulation: (simClass: SimulationClass, values: Record<string, number>) => void;
   setTheme: (theme: ThemeId) => void;
   setView: (view: OverlayPanelView) => void;
+  setAdvancedSettings: (settings: AdvancedSettings) => void;
 }
 
 export type OverlayPanelView = 'parameters' | 'settings' | 'credits';
@@ -44,23 +33,20 @@ interface OverlayPanelOptions {
   simClass: SimulationClass;
   values: Record<string, number>;
   theme: ThemeId;
+  advancedSettings: AdvancedSettings;
+  availableScales: SimulationClass[];
   onValuesChange: (values: Record<string, number>) => void;
   onThemeChange: (theme: ThemeId) => void;
   onRun: () => void;
-  onApplySettings: () => void;
+  onApplySettings: (settings: AdvancedSettings) => void;
   onClose: () => void;
   initialView?: OverlayPanelView;
 }
 
-/**
- * Create and mount the overlay panel.
- */
 export function createOverlayPanel(
   container: HTMLElement,
   options: OverlayPanelOptions,
 ): OverlayPanelController {
-  // ── Shell ──────────────────────────────────────────────────────────────
-
   const overlay = document.createElement('section');
 
   overlay.className = 'overlay overlay--config';
@@ -74,8 +60,6 @@ export function createOverlayPanel(
   const shell = document.createElement('div');
 
   shell.className = 'config-overlay__shell';
-
-  // ── Left column: media block ──────────────────────────────────────────
 
   const media = document.createElement('div');
 
@@ -93,14 +77,10 @@ export function createOverlayPanel(
   `;
   media.prepend(mediaImage);
 
-  // ── Right column: controls ────────────────────────────────────────────
-
   const controls = document.createElement('div');
 
   controls.className = 'config-overlay__controls';
   controls.dataset.view = options.initialView ?? 'parameters';
-
-  // ── Header ─────────────────────────────────────────────────────────────
 
   const header = document.createElement('div');
 
@@ -130,8 +110,6 @@ export function createOverlayPanel(
   header.appendChild(titleBlock);
   header.appendChild(closeButton);
 
-  // ── Body: Parameters ──────────────────────────────────────────────────
-
   const parameterSection = document.createElement('section');
 
   parameterSection.className = 'config-overlay__section config-overlay__section--grow';
@@ -139,8 +117,6 @@ export function createOverlayPanel(
   const parametersHost = document.createElement('div');
 
   parameterSection.appendChild(parametersHost);
-
-  // ── Body: Settings ────────────────────────────────────────────────────
 
   const settingsSection = document.createElement('section');
 
@@ -154,7 +130,152 @@ export function createOverlayPanel(
 
   settingsSection.appendChild(themePickerHost);
 
-  // ── Body: Credits ─────────────────────────────────────────────────────
+  const advancedPanel = document.createElement('section');
+
+  advancedPanel.className = 'advanced-settings';
+  advancedPanel.dataset.state = 'closed';
+  advancedPanel.innerHTML = `
+    <div class="advanced-settings__header">
+      <p class="config-overlay__eyebrow">Advanced settings</p>
+      <p class="config-overlay__settings-copy">Password-gated controls for scale locking, asset source selection, logging, and scale visibility.</p>
+    </div>
+  `;
+
+  const advancedAccessButton = document.createElement('button');
+
+  advancedAccessButton.className = 'advanced-settings__access';
+  advancedAccessButton.type = 'button';
+  advancedAccessButton.textContent = 'Advanced Settings';
+  advancedPanel.appendChild(advancedAccessButton);
+
+  const advancedAuth = document.createElement('div');
+
+  advancedAuth.className = 'advanced-settings__auth';
+  const passwordInput = document.createElement('input');
+
+  passwordInput.className = 'advanced-settings__password';
+  passwordInput.type = 'password';
+  passwordInput.placeholder = 'Enter password';
+  passwordInput.autocomplete = 'off';
+
+  const unlockButton = document.createElement('button');
+
+  unlockButton.className = 'advanced-settings__unlock';
+  unlockButton.type = 'button';
+  unlockButton.textContent = 'Unlock';
+
+  const authMessage = document.createElement('p');
+
+  authMessage.className = 'advanced-settings__message';
+
+  advancedAuth.appendChild(passwordInput);
+  advancedAuth.appendChild(unlockButton);
+  advancedAuth.appendChild(authMessage);
+  advancedPanel.appendChild(advancedAuth);
+
+  const advancedForm = document.createElement('div');
+
+  advancedForm.className = 'advanced-settings__form';
+
+  const lockField = document.createElement('label');
+
+  lockField.className = 'advanced-settings__field';
+  lockField.innerHTML = `
+    <span class="advanced-settings__label">Scale lock</span>
+    <span class="advanced-settings__help">Lock the app to one scale and hide the Home action.</span>
+  `;
+  const lockSelect = document.createElement('select');
+
+  lockSelect.className = 'advanced-settings__select';
+  lockSelect.appendChild(new Option('None', ''));
+
+  for (const scale of options.availableScales) {
+    lockSelect.appendChild(new Option(scale.label, scale.id));
+  }
+
+  lockField.appendChild(lockSelect);
+  advancedForm.appendChild(lockField);
+
+  const sourceField = document.createElement('div');
+
+  sourceField.className = 'advanced-settings__field';
+  sourceField.innerHTML = `
+    <span class="advanced-settings__label">Video source</span>
+    <span class="advanced-settings__help">Local uses public/assets. Online uses the future Cloudflare-backed manifest.</span>
+  `;
+  const sourceOptions = document.createElement('div');
+
+  sourceOptions.className = 'advanced-settings__options';
+  const localSourceLabel = document.createElement('label');
+  const localSourceInput = document.createElement('input');
+
+  localSourceLabel.className = 'advanced-settings__choice';
+  localSourceInput.type = 'radio';
+  localSourceInput.name = 'manifest-source';
+  localSourceInput.value = 'local';
+  localSourceLabel.appendChild(localSourceInput);
+  localSourceLabel.append('Local manifest');
+
+  const onlineSourceLabel = document.createElement('label');
+  const onlineSourceInput = document.createElement('input');
+
+  onlineSourceLabel.className = 'advanced-settings__choice';
+  onlineSourceInput.type = 'radio';
+  onlineSourceInput.name = 'manifest-source';
+  onlineSourceInput.value = 'online';
+  onlineSourceLabel.appendChild(onlineSourceInput);
+  onlineSourceLabel.append('Online manifest');
+
+  sourceOptions.appendChild(localSourceLabel);
+  sourceOptions.appendChild(onlineSourceLabel);
+  sourceField.appendChild(sourceOptions);
+  advancedForm.appendChild(sourceField);
+
+  const verboseField = document.createElement('label');
+
+  verboseField.className = 'advanced-settings__field advanced-settings__field--inline';
+  const verboseInput = document.createElement('input');
+  const verboseCopy = document.createElement('span');
+
+  verboseInput.type = 'checkbox';
+  verboseInput.className = 'advanced-settings__checkbox';
+  verboseCopy.innerHTML = `
+    <span class="advanced-settings__label">Verbose logging</span>
+    <span class="advanced-settings__help">Adds parameter, manifest, and run-selection logs to the console.</span>
+  `;
+  verboseField.appendChild(verboseInput);
+  verboseField.appendChild(verboseCopy);
+  advancedForm.appendChild(verboseField);
+
+  const visibilityField = document.createElement('div');
+
+  visibilityField.className = 'advanced-settings__field';
+  visibilityField.innerHTML = `
+    <span class="advanced-settings__label">Visible scales</span>
+    <span class="advanced-settings__help">Hide scales from the landing screen without changing their data.</span>
+  `;
+  const visibilityOptions = document.createElement('div');
+
+  visibilityOptions.className = 'advanced-settings__options';
+  const visibilityInputs = new Map<string, HTMLInputElement>();
+
+  for (const scale of options.availableScales) {
+    const choice = document.createElement('label');
+    const checkbox = document.createElement('input');
+
+    choice.className = 'advanced-settings__choice';
+    checkbox.type = 'checkbox';
+    checkbox.value = scale.id;
+    visibilityInputs.set(scale.id, checkbox);
+    choice.appendChild(checkbox);
+    choice.append(`Show ${scale.label}`);
+    visibilityOptions.appendChild(choice);
+  }
+
+  visibilityField.appendChild(visibilityOptions);
+  advancedForm.appendChild(visibilityField);
+  advancedPanel.appendChild(advancedForm);
+  settingsSection.appendChild(advancedPanel);
 
   const creditsSection = document.createElement('section');
 
@@ -164,10 +285,7 @@ export function createOverlayPanel(
     <div class="credits-list" data-credits></div>
   `;
 
-  const creditsList = creditsSection.querySelector(
-    '[data-credits]',
-  ) as HTMLDivElement;
-
+  const creditsList = creditsSection.querySelector('[data-credits]') as HTMLDivElement;
   const credits = getCredits();
 
   creditsList.innerHTML = '';
@@ -213,12 +331,6 @@ export function createOverlayPanel(
     }
   }
 
-  // ── Footer ─────────────────────────────────────────────────────────────
-  // Context-sensitive button:
-  //   parameters → "Run"    (launches the simulation)
-  //   settings   → "Apply"  (saves theme, returns to display)
-  //   credits    → "Close"  (dismisses the panel)
-
   const footer = document.createElement('div');
 
   footer.className = 'config-overlay__footer';
@@ -230,8 +342,6 @@ export function createOverlayPanel(
   footerButton.textContent = 'Run';
 
   footer.appendChild(footerButton);
-
-  // ── Assemble ───────────────────────────────────────────────────────────
 
   controls.appendChild(header);
   controls.appendChild(parameterSection);
@@ -245,7 +355,8 @@ export function createOverlayPanel(
   overlay.appendChild(panel);
   container.appendChild(overlay);
 
-  // ── Sub-controllers ────────────────────────────────────────────────────
+  let pendingAdvancedSettings = cloneAdvancedSettings(options.advancedSettings);
+  let advancedState: 'closed' | 'auth' | 'open' = 'closed';
 
   const parameterEditor = createParameterEditor(
     parametersHost,
@@ -260,10 +371,66 @@ export function createOverlayPanel(
   );
 
   closeButton.addEventListener('click', options.onClose);
+  advancedAccessButton.addEventListener('click', () => {
+    if (advancedState === 'open') {
+      setAdvancedPanelState('closed');
+
+      return;
+    }
+
+    setAdvancedPanelState('auth');
+    passwordInput.focus();
+  });
+  unlockButton.addEventListener('click', unlockAdvancedSettings);
+  passwordInput.addEventListener('keydown', (event) => {
+    if (event.key === 'Enter') {
+      unlockAdvancedSettings();
+    }
+  });
+
+  lockSelect.addEventListener('change', () => {
+    pendingAdvancedSettings.lockedScaleId = lockSelect.value || null;
+    syncAdvancedControls();
+  });
+  localSourceInput.addEventListener('change', () => {
+    if (localSourceInput.checked) {
+      pendingAdvancedSettings.manifestSource = 'local';
+    }
+  });
+  onlineSourceInput.addEventListener('change', () => {
+    if (onlineSourceInput.checked) {
+      pendingAdvancedSettings.manifestSource = 'online';
+    }
+  });
+  verboseInput.addEventListener('change', () => {
+    pendingAdvancedSettings.verboseLogging = verboseInput.checked;
+  });
+
+  for (const [scaleId, checkbox] of visibilityInputs.entries()) {
+    checkbox.addEventListener('change', () => {
+      const visibleScaleIds = Array.from(visibilityInputs.entries())
+        .filter(([, input]) => input.checked)
+        .map(([id]) => id);
+
+      if (visibleScaleIds.length === 0 && !pendingAdvancedSettings.lockedScaleId) {
+        checkbox.checked = true;
+
+        return;
+      }
+
+      pendingAdvancedSettings.hiddenScaleIds = Array.from(visibilityInputs.keys()).filter(
+        (id) => !visibilityInputs.get(id)?.checked && id !== pendingAdvancedSettings.lockedScaleId,
+      );
+      syncAdvancedControls();
+    });
+
+    if (scaleId === pendingAdvancedSettings.lockedScaleId) {
+      checkbox.disabled = true;
+    }
+  }
 
   applyView(options.initialView ?? 'parameters');
-
-  // ── View switching ─────────────────────────────────────────────────────
+  syncAdvancedControls();
 
   function applyView(view: OverlayPanelView): void {
     controls.dataset.view = view;
@@ -279,13 +446,60 @@ export function createOverlayPanel(
     }
   }
 
-  // ── Footer button actions ──────────────────────────────────────────────
+  function syncAdvancedControls(): void {
+    lockSelect.value = pendingAdvancedSettings.lockedScaleId ?? '';
+    localSourceInput.checked = pendingAdvancedSettings.manifestSource === 'local';
+    onlineSourceInput.checked = pendingAdvancedSettings.manifestSource === 'online';
+    verboseInput.checked = pendingAdvancedSettings.verboseLogging;
+
+    for (const [scaleId, checkbox] of visibilityInputs.entries()) {
+      const isLockedScale = pendingAdvancedSettings.lockedScaleId === scaleId;
+
+      checkbox.checked =
+        isLockedScale || !pendingAdvancedSettings.hiddenScaleIds.includes(scaleId);
+      checkbox.disabled = isLockedScale;
+    }
+  }
+
+  function unlockAdvancedSettings(): void {
+    if (passwordInput.value !== ADVANCED_SETTINGS_PASSWORD) {
+      authMessage.textContent = 'Incorrect password';
+
+      return;
+    }
+
+    passwordInput.value = '';
+    authMessage.textContent = '';
+    setAdvancedPanelState('open');
+  }
+
+  function setAdvancedPanelState(state: 'closed' | 'auth' | 'open'): void {
+    advancedState = state;
+    advancedPanel.dataset.state = state;
+    advancedAccessButton.textContent =
+      state === 'open' ? 'Hide Advanced Settings' : 'Advanced Settings';
+
+    if (state !== 'auth') {
+      authMessage.textContent = '';
+    }
+  }
+
+  function resetAdvancedPanel(): void {
+    passwordInput.value = '';
+    authMessage.textContent = '';
+    setAdvancedPanelState('closed');
+  }
+
+  function resetAdvancedDraft(): void {
+    pendingAdvancedSettings = cloneAdvancedSettings(options.advancedSettings);
+    syncAdvancedControls();
+  }
 
   footerButton.addEventListener('click', () => {
     const activeView = controls.dataset.view as OverlayPanelView;
 
     if (activeView === 'settings') {
-      options.onApplySettings();
+      options.onApplySettings(cloneAdvancedSettings(pendingAdvancedSettings));
 
       return;
     }
@@ -299,8 +513,6 @@ export function createOverlayPanel(
     options.onRun();
   });
 
-  // ── Public controller ──────────────────────────────────────────────────
-
   return {
     show() {
       overlay.hidden = false;
@@ -309,6 +521,8 @@ export function createOverlayPanel(
     hide() {
       overlay.hidden = true;
       overlay.classList.add('is-hidden');
+      resetAdvancedDraft();
+      resetAdvancedPanel();
     },
     setSimulation(simClass: SimulationClass, values: Record<string, number>) {
       parameterEditor.setSimClass(simClass, values);
@@ -320,6 +534,24 @@ export function createOverlayPanel(
     },
     setView(view: OverlayPanelView) {
       applyView(view);
+      if (view !== 'settings') {
+        resetAdvancedPanel();
+      }
     },
+    setAdvancedSettings(settings: AdvancedSettings) {
+      options.advancedSettings = cloneAdvancedSettings(settings);
+      pendingAdvancedSettings = cloneAdvancedSettings(settings);
+      syncAdvancedControls();
+      resetAdvancedPanel();
+    },
+  };
+}
+
+function cloneAdvancedSettings(settings: AdvancedSettings): AdvancedSettings {
+  return {
+    lockedScaleId: settings.lockedScaleId,
+    manifestSource: settings.manifestSource,
+    verboseLogging: settings.verboseLogging,
+    hiddenScaleIds: [...settings.hiddenScaleIds],
   };
 }

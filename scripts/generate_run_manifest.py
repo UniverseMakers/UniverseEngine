@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """Generate the run manifest consumed by the frontend.
 
-Scans the local asset tree under ``public/assets/<family>/`` and emits
-``run-manifest.json`` — a registry of every available run with its video views,
-parameter values, and paths to sidecar data files.
+Scans the local asset tree under ``public/assets/<family>/`` and emits a
+manifest registry of every available run with its video views, parameter
+values, and paths to sidecar data files.
 
 Run ``generate_run_summaries.py`` first to create the per-run
 ``run_summary.yaml`` files that this script references.
@@ -11,10 +11,11 @@ Run ``generate_run_summaries.py`` first to create the per-run
 
 from __future__ import annotations
 
+import argparse
 import json
 import re
 from pathlib import Path
-from typing import Any
+from typing import Any, Callable
 
 import yaml
 
@@ -22,8 +23,9 @@ import yaml
 REPO_ROOT = Path(__file__).resolve().parent.parent
 PUBLIC_ROOT = REPO_ROOT / "public"
 ASSET_ROOT = PUBLIC_ROOT / "assets"
-SIM_CONFIG_PATH = REPO_ROOT / "src" / "data" / "simulations.yaml"
-MANIFEST_PATH = ASSET_ROOT / "run-manifest.json"
+SIM_CONFIG_PATH = REPO_ROOT / "src" / "selection" / "simulation-catalog.yaml"
+LOCAL_MANIFEST_PATH = ASSET_ROOT / "local-manifest.json"
+ONLINE_MANIFEST_PATH = ASSET_ROOT / "run-manifest.json"
 
 SIMULATION_DIRECTORIES = ("planetary", "galaxy", "cosmos")
 
@@ -185,8 +187,11 @@ def _should_skip_file(path: Path) -> bool:
 
 
 def main() -> None:
-    """Entry point: scan run directories and write ``run-manifest.json``."""
+    """Entry point: scan run directories and write the selected manifest."""
+    args = parse_args()
     sim_config = load_simulation_config()
+    output_path = resolve_output_path(args)
+    path_builder = build_path_builder(args)
     manifest: dict[str, object] = {"version": 1, "runs": []}
 
     for simulation_id in SIMULATION_DIRECTORIES:
@@ -197,15 +202,55 @@ def main() -> None:
         for run_dir in sorted(
             path for path in sim_root.iterdir() if path.is_dir()
         ):
-            entry = build_manifest_entry(simulation_id, run_dir, sim_config)
+            entry = build_manifest_entry(
+                simulation_id, run_dir, sim_config, path_builder
+            )
             if entry is not None:
                 manifest["runs"].append(entry)  # type: ignore[union-attr]
 
-    MANIFEST_PATH.parent.mkdir(parents=True, exist_ok=True)
-    MANIFEST_PATH.write_text(
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    output_path.write_text(
         json.dumps(manifest, indent=2) + "\n", encoding="utf-8"
     )
-    print(MANIFEST_PATH)
+    print(output_path)
+
+
+def parse_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument(
+        "--local",
+        action="store_true",
+        help="Generate a local manifest using public/assets-relative paths.",
+    )
+    parser.add_argument(
+        "--cloudflare-base",
+        help="Public base URL used to emit online asset URLs.",
+    )
+    parser.add_argument(
+        "--output",
+        help="Optional explicit output path for the generated manifest.",
+    )
+    return parser.parse_args()
+
+
+def resolve_output_path(args: argparse.Namespace) -> Path:
+    if args.output:
+        return Path(args.output).resolve()
+    if args.local or not args.cloudflare_base:
+        return LOCAL_MANIFEST_PATH
+    return ONLINE_MANIFEST_PATH
+
+
+def build_path_builder(args: argparse.Namespace) -> Callable[[Path], str]:
+    if args.local or not args.cloudflare_base:
+        return to_public_relative_path
+
+    cloudflare_base = args.cloudflare_base.rstrip("/")
+
+    def to_cloudflare_path(path: Path) -> str:
+        return f"{cloudflare_base}/{path.relative_to(ASSET_ROOT).as_posix()}"
+
+    return to_cloudflare_path
 
 
 def load_simulation_config() -> dict[str, Any]:
@@ -224,6 +269,7 @@ def build_manifest_entry(
     simulation_id: str,
     run_dir: Path,
     sim_config: dict[str, Any],
+    path_builder: Callable[[Path], str],
 ) -> dict[str, Any] | None:
     """Build a single manifest entry for one run directory.
 
@@ -248,7 +294,7 @@ def build_manifest_entry(
     run_summary_yaml = run_dir / "run_summary.yaml"
 
     view_paths = {
-        infer_view_id(video): to_public_relative_path(video)
+        infer_view_id(video): path_builder(video)
         for video in videos
     }
     default_view = pick_default_view(view_paths)
@@ -257,8 +303,8 @@ def build_manifest_entry(
         "simulationId": simulation_id,
         "runId": run_dir.name,
         "parameters": parse_run_parameters(simulation_id, run_dir),
-        "liveDataPath": to_public_relative_path(live_data_path),
-        "summaryPath": to_public_relative_path(run_summary_yaml),
+        "liveDataPath": path_builder(live_data_path),
+        "summaryPath": path_builder(run_summary_yaml),
         "defaultView": default_view,
         "views": view_paths,
         "availableViews": sorted(view_paths.keys()),

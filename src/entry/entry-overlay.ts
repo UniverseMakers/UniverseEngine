@@ -7,10 +7,7 @@
  * Once a family is chosen, the app shell transitions into config mode.
  */
 
-import {
-  SIMULATION_CLASSES,
-  type SimulationClass,
-} from '../selection/simulation-catalog.ts';
+import type { SimulationClass } from '../selection/simulation-catalog.ts';
 import { withBaseUrl } from '../shared/urls.ts';
 
 export interface EntryOverlayController {
@@ -18,6 +15,8 @@ export interface EntryOverlayController {
   show: () => void;
   /** Hide the overlay without destroying DOM. */
   hide: () => void;
+  /** Replace the list of visible simulation classes. */
+  setSimulationClasses: (simulationClasses: SimulationClass[]) => void;
 }
 
 /**
@@ -29,6 +28,7 @@ export interface EntryOverlayController {
  */
 export function createEntryOverlay(
   container: HTMLElement,
+  simulationClasses: SimulationClass[],
   onSelect: (simClass: SimulationClass) => void,
 ): EntryOverlayController {
   // Static banner asset shown at the top of the first-load overlay.
@@ -58,18 +58,24 @@ export function createEntryOverlay(
 
   actions.className = 'entry-overlay__actions';
 
-  for (const simClass of SIMULATION_CLASSES) {
-    const button = document.createElement('button');
+  function renderSimulationClasses(nextSimulationClasses: SimulationClass[]): void {
+    actions.innerHTML = '';
 
-    button.className = 'entry-overlay__button';
-    button.type = 'button';
+    for (const simClass of nextSimulationClasses) {
+      const button = document.createElement('button');
 
-    button.innerHTML = `
-      <span class="entry-overlay__button-label">${simClass.label}</span>
-    `;
-    button.addEventListener('click', () => onSelect(simClass));
-    actions.appendChild(button);
+      button.className = 'entry-overlay__button';
+      button.type = 'button';
+
+      button.innerHTML = `
+        <span class="entry-overlay__button-label">${simClass.label}</span>
+      `;
+      button.addEventListener('click', () => onSelect(simClass));
+      actions.appendChild(button);
+    }
   }
+
+  renderSimulationClasses(simulationClasses);
 
   panel.appendChild(actions);
   overlay.appendChild(panel);
@@ -83,6 +89,9 @@ export function createEntryOverlay(
     hide() {
       overlay.hidden = true;
       overlay.classList.add('is-hidden');
+    },
+    setSimulationClasses(nextSimulationClasses) {
+      renderSimulationClasses(nextSimulationClasses);
     },
   };
 }

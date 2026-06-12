@@ -23,7 +23,7 @@ import { createLoadingOverlay } from '../loading/overlay.ts';
 import { createDisplayMenu } from './display-menu.ts';
 import { getInitializationLines } from '../loading/init-text.ts';
 import {
-  findNearestVideo,
+  createManifestController,
   getLocalPlaceholderVideo,
   type VideoMatch,
 } from '../selection/placeholder-assets.ts';
@@ -38,6 +38,13 @@ import {
   type LiveStatsDataset,
 } from '../live-data/csv.ts';
 import { countDecimals } from '../shared/format.ts';
+import {
+  getVisibleScaleIds,
+  loadAdvancedSettings,
+  saveAdvancedSettings,
+  type AdvancedSettings,
+} from '../shared/advanced-settings.ts';
+import { logInfo, logWarn } from '../shared/logger.ts';
 
 type AppMode = 'entry' | 'config' | 'initializing' | 'display';
 
@@ -58,17 +65,26 @@ const SCALE_TO_THEME: Record<string, ThemeId> = {
  * @returns void
  */
 export function createAppShell(app: HTMLElement): void {
+  const scaleIds = SIMULATION_CLASSES.map((simClass) => simClass.id);
+  let advancedSettings = loadAdvancedSettings(scaleIds);
+  let availableSimulationClasses = getSelectableSimulationClasses(advancedSettings);
+  const manifestController = createManifestController(advancedSettings.manifestSource);
   // ── State ────────────────────────────────────────────────────────────────
   // Everything the shell needs to track lives here so it's easy to see what's
   // being managed at a glance. We keep these as closure variables rather than
   // a formal state object because the data is all independently scoped.
 
   // Start on the first simulation class defined in the catalog.
-  let activeClass: SimulationClass = SIMULATION_CLASSES[0];
+  let activeClass: SimulationClass =
+    getSimulationClassById(advancedSettings.lockedScaleId) ??
+    availableSimulationClasses[0] ??
+    SIMULATION_CLASSES[0];
 
   // Load the user's persisted theme immediately so the UI renders in the right
   // color scheme from the very first frame.
-  let activeTheme: ThemeId = getInitialTheme();
+  let activeTheme: ThemeId = advancedSettings.lockedScaleId
+    ? SCALE_TO_THEME[activeClass.id]
+    : getInitialTheme();
 
   // Track whether the currently loaded video has reached the end — we need this
   // to know if we should re-show the summary overlay.
@@ -159,10 +175,9 @@ export function createAppShell(app: HTMLElement): void {
 
   // Mount the display menu and delegate actions back into the shell state.
   // The menu doesn't know about modes or state — it just fires callbacks.
-  createDisplayMenu(topLeft, SIMULATION_CLASSES, {
-    onSimulationSelected(simClass) {
-      handleClassChange(simClass);
-      openConfigPanel('parameters');
+  const displayMenu = createDisplayMenu(topLeft, {
+    onHome() {
+      handleHome();
     },
     onViewSelected(view) {
       if (view === 'credits') {
@@ -173,6 +188,7 @@ export function createAppShell(app: HTMLElement): void {
 
       openConfigPanel(view);
     },
+    showHome: !advancedSettings.lockedScaleId,
   });
 
   // Left-center slot: the view-switcher that appears when a run has multiple
@@ -329,7 +345,7 @@ export function createAppShell(app: HTMLElement): void {
   });
 
   // Mount the first-load entry overlay — the very first thing the user sees.
-  const entryOverlay = createEntryOverlay(overlayLayer, (simClass) => {
+  const entryOverlay = createEntryOverlay(overlayLayer, availableSimulationClasses, (simClass) => {
     handleClassChange(simClass);
     openConfigPanel('parameters');
   });
@@ -339,6 +355,8 @@ export function createAppShell(app: HTMLElement): void {
     simClass: activeClass,
     values: getActiveValues(),
     theme: activeTheme,
+    advancedSettings,
+    availableScales: SIMULATION_CLASSES,
     onValuesChange: handleValuesChange,
     onThemeChange: handleThemeChange,
     onRun: () => {
@@ -423,10 +441,11 @@ export function createAppShell(app: HTMLElement): void {
     collapseOneNow(el);
   }
 
-  // Start in entry mode with the media hidden and paused.
+  // Start in entry mode with the media hidden and paused unless the app has
+  // been locked to a single scale, in which case we open directly to config.
   viewport.hideMedia();
   viewport.pause();
-  setMode('entry');
+  setMode(advancedSettings.lockedScaleId ? 'config' : 'entry');
 
   /**
    * Switch to a new simulation family and reset any playback/session state.
@@ -436,7 +455,7 @@ export function createAppShell(app: HTMLElement): void {
    */
   function handleClassChange(newClass: SimulationClass): void {
     // If the user picks the family they're already on, skip the reset entirely.
-    if (newClass.id === activeClass.id) return;
+    if (newClass.id === activeClass.id && hasCompletedInitialization) return;
 
     activeClass = newClass;
     resetSimulationState();
@@ -458,6 +477,10 @@ export function createAppShell(app: HTMLElement): void {
   function handleValuesChange(values: Record<string, number>): void {
     // Take a defensive copy so the caller can't mutate our internal state.
     valuesByClass[activeClass.id] = { ...values };
+    logInfo('Parameter values updated', {
+      simClassId: activeClass.id,
+      values: valuesByClass[activeClass.id],
+    });
     // The HUD shows parameter values, so refresh it immediately.
     refreshDisplayData();
   }
@@ -490,7 +513,9 @@ export function createAppShell(app: HTMLElement): void {
    *
    * @returns void
    */
-  function handleApplySettings(): void {
+  function handleApplySettings(nextAdvancedSettings: AdvancedSettings): void {
+    applyAdvancedSettings(nextAdvancedSettings);
+
     // If we've already initialized a run, just go back to display mode.
     if (hasCompletedInitialization) {
       summaryOverlay.hide();
@@ -510,9 +535,27 @@ export function createAppShell(app: HTMLElement): void {
    */
   function handleCloseConfig(): void {
     summaryOverlay.hide();
+    if (!hasCompletedInitialization && advancedSettings.lockedScaleId) {
+      overlayPanel.setView('parameters');
+
+      return;
+    }
+
     // If we've been through init at least once, going back to display makes
     // sense. Otherwise the video hasn't loaded yet — send them to entry.
     setMode(hasCompletedInitialization ? 'display' : 'entry');
+  }
+
+  function handleHome(): void {
+    if (advancedSettings.lockedScaleId) {
+      return;
+    }
+
+    logInfo('Returning to home screen', { simClassId: activeClass.id });
+    resetSimulationState();
+    hasCompletedInitialization = false;
+    viewport.hideMedia();
+    setMode('entry');
   }
 
   /**
@@ -570,8 +613,13 @@ export function createAppShell(app: HTMLElement): void {
    */
   async function handleRun(): Promise<void> {
     const values = getActiveValues();
+    logInfo('Starting run', {
+      simClassId: activeClass.id,
+      values,
+      manifestSource: manifestController.getSource(),
+    });
     // Query the manifest for the best-matching precomputed video asset.
-    const match = await findNearestVideo(
+    const match = await manifestController.findNearestVideo(
       activeClass.id,
       activeClass.parameters,
       values,
@@ -638,10 +686,13 @@ export function createAppShell(app: HTMLElement): void {
 
     // Burger menu: visible on landing page and display, hidden during loading
     // and config (config already hides it via the CSS mode selector).
-    setElementVisibility(topLeft, nextMode === 'entry' || nextMode === 'display');
+    setElementVisibility(
+      topLeft,
+      (nextMode === 'entry' && !advancedSettings.lockedScaleId) || nextMode === 'display',
+    );
 
     // Entry overlay: shown only in entry mode, hidden everywhere else.
-    if (nextMode === 'entry') {
+    if (nextMode === 'entry' && !advancedSettings.lockedScaleId) {
       entryOverlay.show();
     } else {
       entryOverlay.hide();
@@ -857,8 +908,12 @@ export function createAppShell(app: HTMLElement): void {
   async function loadActiveLiveStats(url: string): Promise<void> {
     try {
       activeLiveStatsFrames = await loadLiveStatsCsv(url);
-    } catch {
+    } catch (error) {
       activeLiveStatsFrames = EMPTY_LIVE_STATS_DATASET;
+      logWarn('Failed to load live stats', {
+        url,
+        error: error instanceof Error ? error.message : String(error),
+      });
     }
 
     refreshDisplayData();
@@ -987,5 +1042,50 @@ export function createAppShell(app: HTMLElement): void {
     }
 
     return match.views[viewId] ?? null;
+  }
+
+  function getSelectableSimulationClasses(
+    settings: AdvancedSettings,
+  ): SimulationClass[] {
+    const visibleScaleIds = new Set(getVisibleScaleIds(settings, scaleIds));
+
+    return SIMULATION_CLASSES.filter((simClass) => visibleScaleIds.has(simClass.id));
+  }
+
+  function getSimulationClassById(simClassId: string | null): SimulationClass | null {
+    if (!simClassId) {
+      return null;
+    }
+
+    return SIMULATION_CLASSES.find((simClass) => simClass.id === simClassId) ?? null;
+  }
+
+  function applyAdvancedSettings(nextAdvancedSettings: AdvancedSettings): void {
+    const previousActiveClassId = activeClass.id;
+
+    advancedSettings = saveAdvancedSettings(nextAdvancedSettings, scaleIds);
+    availableSimulationClasses = getSelectableSimulationClasses(advancedSettings);
+    manifestController.setSource(advancedSettings.manifestSource);
+    displayMenu.setHomeVisible(!advancedSettings.lockedScaleId);
+    entryOverlay.setSimulationClasses(availableSimulationClasses);
+    overlayPanel.setAdvancedSettings(advancedSettings);
+    logInfo('Advanced settings updated', advancedSettings);
+
+    const lockedClass = getSimulationClassById(advancedSettings.lockedScaleId);
+
+    if (lockedClass) {
+      handleClassChange(lockedClass);
+
+      if (lockedClass.id !== previousActiveClassId) {
+        hasCompletedInitialization = false;
+        viewport.hideMedia();
+        overlayPanel.setView('parameters');
+      }
+
+      if (!hasCompletedInitialization) {
+        handleThemeChange(SCALE_TO_THEME[lockedClass.id]);
+        overlayPanel.setSimulation(activeClass, getActiveValues());
+      }
+    }
   }
 }

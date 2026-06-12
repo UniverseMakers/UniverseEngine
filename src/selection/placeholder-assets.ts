@@ -8,6 +8,8 @@
 import type { SimParameter } from './simulation-catalog.ts';
 import { withBaseUrl } from '../shared/urls.ts';
 import { getVideoMetadataUrl } from './video-run-metadata.ts';
+import type { ManifestSource } from '../shared/advanced-settings.ts';
+import { logInfo, logWarn } from '../shared/logger.ts';
 
 export interface VideoMatch {
   url: string;
@@ -33,7 +35,68 @@ interface RunManifestEntry {
   views: Record<string, string>;
 }
 
-let manifestPromise: Promise<RunManifest> | null = null;
+export interface ManifestController {
+  getSource: () => ManifestSource;
+  setSource: (source: ManifestSource) => void;
+  resetCache: () => void;
+  findNearestVideo: (
+    simClassId: string,
+    params: SimParameter[],
+    values: Record<string, number>,
+  ) => Promise<VideoMatch>;
+}
+
+const MANIFEST_PATHS: Record<ManifestSource, string> = {
+  local: 'assets/local-manifest.json',
+  online: 'assets/run-manifest.json',
+};
+
+export function createManifestController(
+  initialSource: ManifestSource = 'local',
+): ManifestController {
+  let source = initialSource;
+  const manifestPromises = new Map<ManifestSource, Promise<RunManifest>>();
+
+  return {
+    getSource() {
+      return source;
+    },
+    setSource(nextSource) {
+      source = nextSource;
+      logInfo('Manifest source updated', { source: nextSource });
+    },
+    resetCache() {
+      manifestPromises.clear();
+    },
+    async findNearestVideo(simClassId, params, values) {
+      const manifestMatch = await findManifestBackedRun(
+        source,
+        manifestPromises,
+        simClassId,
+        params,
+        values,
+      );
+
+      if (manifestMatch) {
+        return manifestMatch;
+      }
+
+      const fallbackUrl = getLocalPlaceholderVideo(simClassId);
+
+      logWarn('Falling back to placeholder assets', {
+        simClassId,
+        source,
+        fallbackUrl,
+      });
+
+      return {
+        url: fallbackUrl,
+        liveDataUrl: getLocalPlaceholderStats(simClassId),
+        summaryUrl: getVideoMetadataUrl(fallbackUrl),
+      };
+    },
+  };
+}
 
 /**
  * Resolve the local placeholder video for a simulation family.
@@ -83,38 +146,38 @@ export function getLocalPlaceholderStats(simClassId: string): string {
  * @param values - Current parameter values.
  * @returns Matched video bundle.
  */
-export async function findNearestVideo(
-  simClassId: string,
-  params: SimParameter[],
-  values: Record<string, number>,
-): Promise<VideoMatch> {
-  const manifestMatch = await findManifestBackedRun(simClassId, params, values);
+async function loadRunManifest(
+  source: ManifestSource,
+  manifestPromises: Map<ManifestSource, Promise<RunManifest>>,
+): Promise<RunManifest> {
+  const cached = manifestPromises.get(source);
 
-  if (manifestMatch) {
-    return manifestMatch;
+  if (cached) {
+    return cached;
   }
 
-  const fallbackUrl = getLocalPlaceholderVideo(simClassId);
+  const manifestPath = MANIFEST_PATHS[source];
+  const manifestPromise = fetch(withBaseUrl(manifestPath))
+    .then(async (response) => {
+      if (!response.ok) {
+        throw new Error(`Failed to load manifest: ${manifestPath}`);
+      }
 
-  return {
-    url: fallbackUrl,
-    liveDataUrl: getLocalPlaceholderStats(simClassId),
-    summaryUrl: getVideoMetadataUrl(fallbackUrl),
-  };
-}
+      logInfo('Loaded manifest', { source, manifestPath });
 
-async function loadRunManifest(): Promise<RunManifest> {
-  if (!manifestPromise) {
-    manifestPromise = fetch(withBaseUrl('assets/run-manifest.json'))
-      .then(async (response) => {
-        if (!response.ok) {
-          throw new Error('Failed to load run manifest');
-        }
+      return (await response.json()) as RunManifest;
+    })
+    .catch((error) => {
+      logWarn('Manifest unavailable', {
+        source,
+        manifestPath,
+        error: error instanceof Error ? error.message : String(error),
+      });
 
-        return (await response.json()) as RunManifest;
-      })
-      .catch(() => ({ version: 1, runs: [] }));
-  }
+      return { version: 1, runs: [] };
+    });
+
+  manifestPromises.set(source, manifestPromise);
 
   return manifestPromise;
 }
@@ -128,14 +191,18 @@ async function loadRunManifest(): Promise<RunManifest> {
  * @returns Matched run bundle or `null` when unavailable.
  */
 async function findManifestBackedRun(
+  source: ManifestSource,
+  manifestPromises: Map<ManifestSource, Promise<RunManifest>>,
   simClassId: string,
   params: SimParameter[],
   values: Record<string, number>,
 ): Promise<VideoMatch | null> {
-  const manifest = await loadRunManifest();
+  const manifest = await loadRunManifest(source, manifestPromises);
   const runs = manifest.runs.filter((entry) => entry.simulationId === simClassId);
 
   if (runs.length === 0) {
+    logWarn('No manifest runs found for simulation', { simClassId, source });
+
     return null;
   }
 
@@ -157,6 +224,15 @@ async function findManifestBackedRun(
   if (!videoPath) {
     return null;
   }
+
+  logInfo('Selected manifest-backed run', {
+    simClassId,
+    source,
+    runId: bestEntry.runId,
+    selectedValues: values,
+    distance: bestDistance,
+    viewId,
+  });
 
   return {
     url: withBaseUrl(videoPath),

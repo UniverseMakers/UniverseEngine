@@ -10,7 +10,7 @@
     "lint": "eslint \"src/**/*.ts\"",
     "lint:fix": "eslint --fix \"src/**/*.ts\"",
     "preview": "vite preview",
-    "generate:run-manifest": "python3 scripts/generate_run_manifest.py",
+    "generate:run-manifest": "python3 scripts/generate_run_manifest.py --local",
     "format": "prettier --write \"src/**/*.{ts,css,yaml,yml}\" \"*.{md,json}\"",
     "format:check": "prettier --check \"src/**/*.{ts,css,yaml,yml}\" \"*.{md,json}\""
   },
