@@ -25,6 +25,7 @@ REPO_ROOT = Path(__file__).resolve().parent.parent
 EXCLUDED_DIRECTORY_NAMES = frozenset({"dist", ".git", "__pycache__"})
 MAX_WIDTH = 1920
 MAX_HEIGHT = 1080
+GOP_DURATION_SECONDS = 0.5
 STOP_EVENT = threading.Event()
 TEMP_PATHS: set[Path] = set()
 TEMP_PATHS_LOCK = threading.Lock()
@@ -176,16 +177,21 @@ def ensure_dependencies() -> None:
 
 
 def calculate_gop_frames(fps: int) -> int:
-    """Return the GOP size, in frames, for a one-second closed GOP."""
+    """Return the GOP size, in frames, for a fixed 0.5-second closed GOP."""
     if fps <= 0:
         raise ValueError("fps must be positive")
-    return fps
+    return max(1, round(fps * GOP_DURATION_SECONDS))
 
 
 def duration_tolerance_seconds(fps: int) -> float:
     """Allow output duration to drift by up to one second."""
     _ = fps
     return 1.0
+
+
+def keyframe_gap_tolerance_seconds(fps: int) -> float:
+    """Allow keyframe spacing to drift by at most one output frame."""
+    return 1.0 / fps
 
 
 def is_excluded_directory(path: Path) -> bool:
@@ -369,7 +375,7 @@ def get_probe_issues(probe: VideoProbe, fps: int) -> list[str]:
     issues: list[str] = []
     expected_fps = float(fps)
     measured_fps = parse_frame_rate(probe.avg_frame_rate)
-    max_keyframe_gap = 1.0 + duration_tolerance_seconds(fps)
+    max_keyframe_gap = GOP_DURATION_SECONDS + keyframe_gap_tolerance_seconds(fps)
 
     if probe.codec_name != "h264":
         issues.append(f"codec={probe.codec_name}")
