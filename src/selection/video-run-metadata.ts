@@ -23,6 +23,8 @@ export interface VideoRunMetadata {
   carbonBurnt: number;
   /** Number of particles that changed state during the run. */
   particlesUpdated: number;
+  /** Input parameter values stored with the selected run when available. */
+  parameterValues: Record<string, number>;
   /** Display-friendly metrics shown in the summary overlay. */
   summaryMetrics: Record<string, VideoRunSummaryMetric>;
 }
@@ -77,6 +79,7 @@ export async function loadVideoRunMetadata(
     const memoryUsed = toNumber(raw.memoryUsed);
     const carbonBurnt = toNumber(raw.carbonBurnt);
     const particlesUpdated = toNumber(raw.particlesUpdated);
+    const parameterValues = await loadRunParameterValues(url);
     const summaryMetrics = toSummaryMetrics(raw.summaryMetrics);
 
     // ── Guard: every required field must be present and finite ──────────
@@ -98,6 +101,7 @@ export async function loadVideoRunMetadata(
       memoryUsed,
       carbonBurnt,
       particlesUpdated,
+      parameterValues,
       summaryMetrics,
     };
   } catch {
@@ -105,6 +109,27 @@ export async function loadVideoRunMetadata(
     // "metadata not available" rather than crashing the UI.
     return null;
   }
+}
+
+async function loadRunParameterValues(url: string): Promise<Record<string, number>> {
+  try {
+    const response = await fetch(getRunParametersUrl(url));
+
+    if (!response.ok) {
+      return {};
+    }
+
+    const text = await response.text();
+    const raw = parse(text) as Record<string, unknown>;
+
+    return toNumberRecord(raw);
+  } catch {
+    return {};
+  }
+}
+
+function getRunParametersUrl(url: string): string {
+  return url.replace(/run_summary\.yaml($|\?)/, 'parameters.yaml$1');
 }
 
 /**
@@ -162,6 +187,26 @@ function toSummaryMetrics(value: unknown): Record<string, VideoRunSummaryMetric>
       label,
       value: String(rawValue),
     };
+  }
+
+  return output;
+}
+
+function toNumberRecord(value: unknown): Record<string, number> {
+  if (!value || typeof value !== 'object') {
+    return {};
+  }
+
+  const output: Record<string, number> = {};
+
+  for (const [key, rawEntry] of Object.entries(value as Record<string, unknown>)) {
+    const numeric = toNumber(rawEntry);
+
+    if (numeric === null) {
+      continue;
+    }
+
+    output[key] = numeric;
   }
 
   return output;

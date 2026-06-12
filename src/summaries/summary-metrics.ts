@@ -18,9 +18,10 @@ export interface SummaryMetricValue {
  * Build the full set of known summary metrics for a completed run.
  *
  * The scoring model is intentionally simple: we measure how far the user's
- * selected parameters are from the "correct" values defined in the YAML config
- * (which represent the ground-truth simulation that produced the video). Closer
- * matches get higher similarity scores.
+ * selected parameters are from the parameter-space "correct" values defined in
+ * the YAML config. Only entries whose ids match actual parameter ids contribute
+ * to this score, which lets other scales use separate result-based targets in
+ * the same metadata block for the summary bars.
  *
  * For resource metrics (carbon, compute, memory), we use real values from the
  * run metadata when available, or derive plausible-looking placeholder values
@@ -38,15 +39,16 @@ export function buildSummaryMetricMap(
   // Measure how far the selected parameters are from the configured "correct"
   // values. Each parameter is normalized to its own range so different scales
   // contribute equally to the final score.
-  const normalizedDistances = simClass.parameters.map((parameter) => {
-    const value = values[parameter.id] ?? parameter.defaultValue;
-    const correctValue =
-      simClass.metadata.correctValues[parameter.id] ?? parameter.defaultValue;
+  const normalizedDistances = simClass.parameters
+    .filter((parameter) => simClass.metadata.correctValues[parameter.id] !== undefined)
+    .map((parameter) => {
+      const value = values[parameter.id] ?? parameter.defaultValue;
+      const correctValue = simClass.metadata.correctValues[parameter.id] ?? parameter.defaultValue;
 
-    return (
-      Math.abs(value - correctValue) / Math.max(parameter.max - parameter.min, 1e-9)
-    );
-  });
+      return (
+        Math.abs(value - correctValue) / Math.max(parameter.max - parameter.min, 1e-9)
+      );
+    });
 
   // ── Step 2: Mean distance across all parameters ─────────────────────────
   // Collapse the per-parameter distances into one average value (0 = perfect).

@@ -5,8 +5,10 @@
 # Display stat configuration lives in `stats-config.yaml`.
 #
 # `metadata.correctValues`
-#   The "ground truth" values used to compute similarity scores when
-#   comparing user-chosen parameters against canonical results.
+#   Canonical target values for summary comparisons.
+#   - when an id matches a simulation parameter, parameter-based similarity can use it
+#   - when an id matches a run `parameters.yaml` entry or `run_summary.yaml`
+#     summary metric, the summary overlay can render answer-closeness bars for it
 #
 # `views`
 #   Optional display-mode video tabs.
@@ -20,9 +22,11 @@ planetary:
   metadata:
     distinctSimulations: 384
     correctValues:
-      impactor_mass: 0.12
-      impactor_velocity: 14
-      impactor_angle: 43
+      moon_mass: 1.0
+      earth_mass: 1.0
+      spin: 1.0
+      moon_iron: 1.0
+      proto_earth_in_moon: 1.0
 
 galaxy:
   label: Galaxy

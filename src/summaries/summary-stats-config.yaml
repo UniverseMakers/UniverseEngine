@@ -18,6 +18,26 @@ planetary:
       video_key: wallclockSeconds
     - id: similarityScore
       value: 100/100
+    - id: moon_mass
+      label: Moon mass
+      value: '1.05'
+      scientific: true
+    - id: earth_mass
+      label: Earth mass
+      value: '1.55'
+      scientific: true
+    - id: spin
+      label: Spin of Earth-Moon system
+      value: '0.30'
+      scientific: true
+    - id: moon_iron
+      label: Moon iron
+      value: '0.70'
+      scientific: true
+    - id: proto_earth_in_moon
+      label: Proto-Earth in Moon
+      value: '1.25'
+      scientific: true
     - id: carbonBurnt
       value: '0.00'
       unit: kgCO2e
