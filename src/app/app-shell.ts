@@ -172,16 +172,16 @@ export function createAppShell(app: HTMLElement): void {
   displayChrome.classList.add('is-hidden');
   app.appendChild(displayChrome);
 
-  // Mobile-only helper overlay shown when the device is in landscape.
-  // We mount it unconditionally; CSS media queries control visibility.
+  // Mobile-only helper overlay shown when the device is in portrait.
+
   const orientationOverlay = document.createElement('div');
 
   orientationOverlay.className = 'orientation-overlay';
   orientationOverlay.innerHTML = `
     <div class="orientation-overlay__card" role="status" aria-live="polite">
       <div class="orientation-overlay__icon" aria-hidden="true"></div>
-      <p class="orientation-overlay__title">Please rotate to portrait</p>
-      <p class="orientation-overlay__copy">Landscape support is coming soon.</p>
+      <p class="orientation-overlay__title">Please rotate to landscape</p>
+      <p class="orientation-overlay__copy">Portrait mode is not supported.</p>
     </div>
   `;
   app.appendChild(orientationOverlay);

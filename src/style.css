@@ -2544,7 +2544,7 @@ button {
   }
 }
 
-@media (max-width: 920px) and (orientation: landscape) {
+@media (max-width: 920px) and (orientation: portrait) {
   .orientation-overlay {
     display: grid;
   }
