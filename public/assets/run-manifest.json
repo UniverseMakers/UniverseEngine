@@ -1,0 +1,869 @@
+{
+  "version": 1,
+  "runs": [
+    {
+      "simulationId": "cosmos",
+      "runId": "Fb0.10_AGN1.00_G0.01",
+      "parameters": {
+        "baryon_fraction": 0.1,
+        "gravity_strength": 0.01
+      },
+      "liveDataPath": "https://pub-e00201311979473b8a30e279dcc56838.r2.dev/engine/cosmos/Fb0.10_AGN1.00_G0.01/live_data_table.csv",
+      "summaryPath": "https://pub-e00201311979473b8a30e279dcc56838.r2.dev/engine/cosmos/Fb0.10_AGN1.00_G0.01/run_summary.yaml",
+      "defaultView": "gas_density",
+      "views": {
+        "dark_matter_density": "https://pub-e00201311979473b8a30e279dcc56838.r2.dev/engine/cosmos/Fb0.10_AGN1.00_G0.01/animations/DM_Density_-_Emergency.mp4",
+        "gas_density": "https://pub-e00201311979473b8a30e279dcc56838.r2.dev/engine/cosmos/Fb0.10_AGN1.00_G0.01/animations/Gas_Density_-_Viola.mp4",
+        "gas_metallicity_plus_stellar_density": "https://pub-e00201311979473b8a30e279dcc56838.r2.dev/engine/cosmos/Fb0.10_AGN1.00_G0.01/animations/Gas_Metallicity_plus_Stellar_Density.mp4",
+        "gas_temperature": "https://pub-e00201311979473b8a30e279dcc56838.r2.dev/engine/cosmos/Fb0.10_AGN1.00_G0.01/animations/Gas_Temperature_-_Pride.mp4"
+      },
+      "availableViews": [
+        "dark_matter_density",
+        "gas_density",
+        "gas_metallicity_plus_stellar_density",
+        "gas_temperature"
+      ],
+      "parameterDefaults": {}
+    },
+    {
+      "simulationId": "cosmos",
+      "runId": "Fb0.10_AGN1.00_G0.10",
+      "parameters": {
+        "baryon_fraction": 0.1,
+        "gravity_strength": 0.1
+      },
+      "liveDataPath": "https://pub-e00201311979473b8a30e279dcc56838.r2.dev/engine/cosmos/Fb0.10_AGN1.00_G0.10/live_data_table.csv",
+      "summaryPath": "https://pub-e00201311979473b8a30e279dcc56838.r2.dev/engine/cosmos/Fb0.10_AGN1.00_G0.10/run_summary.yaml",
+      "defaultView": "gas_density",
+      "views": {
+        "dark_matter_density": "https://pub-e00201311979473b8a30e279dcc56838.r2.dev/engine/cosmos/Fb0.10_AGN1.00_G0.10/animations/DM_Density_-_Emergency.mp4",
+        "gas_density": "https://pub-e00201311979473b8a30e279dcc56838.r2.dev/engine/cosmos/Fb0.10_AGN1.00_G0.10/animations/Gas_Density_-_Viola.mp4",
+        "gas_metallicity_plus_stellar_density": "https://pub-e00201311979473b8a30e279dcc56838.r2.dev/engine/cosmos/Fb0.10_AGN1.00_G0.10/animations/Gas_Metallicity_plus_Stellar_Density.mp4",
+        "gas_temperature": "https://pub-e00201311979473b8a30e279dcc56838.r2.dev/engine/cosmos/Fb0.10_AGN1.00_G0.10/animations/Gas_Temperature_-_Pride.mp4"
+      },
+      "availableViews": [
+        "dark_matter_density",
+        "gas_density",
+        "gas_metallicity_plus_stellar_density",
+        "gas_temperature"
+      ],
+      "parameterDefaults": {}
+    },
+    {
+      "simulationId": "cosmos",
+      "runId": "Fb0.10_AGN1.00_G1.00",
+      "parameters": {
+        "baryon_fraction": 0.1,
+        "gravity_strength": 1.0
+      },
+      "liveDataPath": "https://pub-e00201311979473b8a30e279dcc56838.r2.dev/engine/cosmos/Fb0.10_AGN1.00_G1.00/live_data_table.csv",
+      "summaryPath": "https://pub-e00201311979473b8a30e279dcc56838.r2.dev/engine/cosmos/Fb0.10_AGN1.00_G1.00/run_summary.yaml",
+      "defaultView": "gas_density",
+      "views": {
+        "dark_matter_density": "https://pub-e00201311979473b8a30e279dcc56838.r2.dev/engine/cosmos/Fb0.10_AGN1.00_G1.00/animations/DM_Density_-_Emergency.mp4",
+        "gas_density": "https://pub-e00201311979473b8a30e279dcc56838.r2.dev/engine/cosmos/Fb0.10_AGN1.00_G1.00/animations/Gas_Density_-_Viola.mp4",
+        "gas_metallicity_plus_stellar_density": "https://pub-e00201311979473b8a30e279dcc56838.r2.dev/engine/cosmos/Fb0.10_AGN1.00_G1.00/animations/Gas_Metallicity_plus_Stellar_Density.mp4",
+        "gas_temperature": "https://pub-e00201311979473b8a30e279dcc56838.r2.dev/engine/cosmos/Fb0.10_AGN1.00_G1.00/animations/Gas_Temperature_-_Pride.mp4"
+      },
+      "availableViews": [
+        "dark_matter_density",
+        "gas_density",
+        "gas_metallicity_plus_stellar_density",
+        "gas_temperature"
+      ],
+      "parameterDefaults": {}
+    },
+    {
+      "simulationId": "cosmos",
+      "runId": "Fb0.10_AGN1.00_G10.00",
+      "parameters": {
+        "baryon_fraction": 0.1,
+        "gravity_strength": 10.0
+      },
+      "liveDataPath": "https://pub-e00201311979473b8a30e279dcc56838.r2.dev/engine/cosmos/Fb0.10_AGN1.00_G10.00/live_data_table.csv",
+      "summaryPath": "https://pub-e00201311979473b8a30e279dcc56838.r2.dev/engine/cosmos/Fb0.10_AGN1.00_G10.00/run_summary.yaml",
+      "defaultView": "gas_density",
+      "views": {
+        "dark_matter_density": "https://pub-e00201311979473b8a30e279dcc56838.r2.dev/engine/cosmos/Fb0.10_AGN1.00_G10.00/animations/DM_Density_-_Emergency.mp4",
+        "gas_density": "https://pub-e00201311979473b8a30e279dcc56838.r2.dev/engine/cosmos/Fb0.10_AGN1.00_G10.00/animations/Gas_Density_-_Viola.mp4",
+        "gas_metallicity_plus_stellar_density": "https://pub-e00201311979473b8a30e279dcc56838.r2.dev/engine/cosmos/Fb0.10_AGN1.00_G10.00/animations/Gas_Metallicity_plus_Stellar_Density.mp4",
+        "gas_temperature": "https://pub-e00201311979473b8a30e279dcc56838.r2.dev/engine/cosmos/Fb0.10_AGN1.00_G10.00/animations/Gas_Temperature_-_Pride.mp4"
+      },
+      "availableViews": [
+        "dark_matter_density",
+        "gas_density",
+        "gas_metallicity_plus_stellar_density",
+        "gas_temperature"
+      ],
+      "parameterDefaults": {}
+    },
+    {
+      "simulationId": "cosmos",
+      "runId": "Fb0.10_AGN1.00_G5.00",
+      "parameters": {
+        "baryon_fraction": 0.1,
+        "gravity_strength": 5.0
+      },
+      "liveDataPath": "https://pub-e00201311979473b8a30e279dcc56838.r2.dev/engine/cosmos/Fb0.10_AGN1.00_G5.00/live_data_table.csv",
+      "summaryPath": "https://pub-e00201311979473b8a30e279dcc56838.r2.dev/engine/cosmos/Fb0.10_AGN1.00_G5.00/run_summary.yaml",
+      "defaultView": "gas_density",
+      "views": {
+        "dark_matter_density": "https://pub-e00201311979473b8a30e279dcc56838.r2.dev/engine/cosmos/Fb0.10_AGN1.00_G5.00/animations/DM_Density_-_Emergency.mp4",
+        "gas_density": "https://pub-e00201311979473b8a30e279dcc56838.r2.dev/engine/cosmos/Fb0.10_AGN1.00_G5.00/animations/Gas_Density_-_Viola.mp4",
+        "gas_metallicity_plus_stellar_density": "https://pub-e00201311979473b8a30e279dcc56838.r2.dev/engine/cosmos/Fb0.10_AGN1.00_G5.00/animations/Gas_Metallicity_plus_Stellar_Density.mp4",
+        "gas_temperature": "https://pub-e00201311979473b8a30e279dcc56838.r2.dev/engine/cosmos/Fb0.10_AGN1.00_G5.00/animations/Gas_Temperature_-_Pride.mp4"
+      },
+      "availableViews": [
+        "dark_matter_density",
+        "gas_density",
+        "gas_metallicity_plus_stellar_density",
+        "gas_temperature"
+      ],
+      "parameterDefaults": {}
+    },
+    {
+      "simulationId": "cosmos",
+      "runId": "Fb0.10_AGN10.00_G0.01",
+      "parameters": {
+        "baryon_fraction": 0.1,
+        "gravity_strength": 0.01
+      },
+      "liveDataPath": "https://pub-e00201311979473b8a30e279dcc56838.r2.dev/engine/cosmos/Fb0.10_AGN10.00_G0.01/live_data_table.csv",
+      "summaryPath": "https://pub-e00201311979473b8a30e279dcc56838.r2.dev/engine/cosmos/Fb0.10_AGN10.00_G0.01/run_summary.yaml",
+      "defaultView": "gas_density",
+      "views": {
+        "dark_matter_density": "https://pub-e00201311979473b8a30e279dcc56838.r2.dev/engine/cosmos/Fb0.10_AGN10.00_G0.01/animations/DM_Density_-_Emergency.mp4",
+        "gas_density": "https://pub-e00201311979473b8a30e279dcc56838.r2.dev/engine/cosmos/Fb0.10_AGN10.00_G0.01/animations/Gas_Density_-_Viola.mp4",
+        "gas_metallicity_plus_stellar_density": "https://pub-e00201311979473b8a30e279dcc56838.r2.dev/engine/cosmos/Fb0.10_AGN10.00_G0.01/animations/Gas_Metallicity_plus_Stellar_Density.mp4",
+        "gas_temperature": "https://pub-e00201311979473b8a30e279dcc56838.r2.dev/engine/cosmos/Fb0.10_AGN10.00_G0.01/animations/Gas_Temperature_-_Pride.mp4"
+      },
+      "availableViews": [
+        "dark_matter_density",
+        "gas_density",
+        "gas_metallicity_plus_stellar_density",
+        "gas_temperature"
+      ],
+      "parameterDefaults": {}
+    },
+    {
+      "simulationId": "cosmos",
+      "runId": "Fb0.10_AGN10.00_G1.00",
+      "parameters": {
+        "baryon_fraction": 0.1,
+        "gravity_strength": 1.0
+      },
+      "liveDataPath": "https://pub-e00201311979473b8a30e279dcc56838.r2.dev/engine/cosmos/Fb0.10_AGN10.00_G1.00/live_data_table.csv",
+      "summaryPath": "https://pub-e00201311979473b8a30e279dcc56838.r2.dev/engine/cosmos/Fb0.10_AGN10.00_G1.00/run_summary.yaml",
+      "defaultView": "gas_density",
+      "views": {
+        "dark_matter_density": "https://pub-e00201311979473b8a30e279dcc56838.r2.dev/engine/cosmos/Fb0.10_AGN10.00_G1.00/animations/DM_Density_-_Emergency.mp4",
+        "gas_density": "https://pub-e00201311979473b8a30e279dcc56838.r2.dev/engine/cosmos/Fb0.10_AGN10.00_G1.00/animations/Gas_Density_-_Viola.mp4",
+        "gas_metallicity_plus_stellar_density": "https://pub-e00201311979473b8a30e279dcc56838.r2.dev/engine/cosmos/Fb0.10_AGN10.00_G1.00/animations/Gas_Metallicity_plus_Stellar_Density.mp4",
+        "gas_temperature": "https://pub-e00201311979473b8a30e279dcc56838.r2.dev/engine/cosmos/Fb0.10_AGN10.00_G1.00/animations/Gas_Temperature_-_Pride.mp4"
+      },
+      "availableViews": [
+        "dark_matter_density",
+        "gas_density",
+        "gas_metallicity_plus_stellar_density",
+        "gas_temperature"
+      ],
+      "parameterDefaults": {}
+    },
+    {
+      "simulationId": "cosmos",
+      "runId": "Fb0.10_AGN5.00_G0.01",
+      "parameters": {
+        "baryon_fraction": 0.1,
+        "gravity_strength": 0.01
+      },
+      "liveDataPath": "https://pub-e00201311979473b8a30e279dcc56838.r2.dev/engine/cosmos/Fb0.10_AGN5.00_G0.01/live_data_table.csv",
+      "summaryPath": "https://pub-e00201311979473b8a30e279dcc56838.r2.dev/engine/cosmos/Fb0.10_AGN5.00_G0.01/run_summary.yaml",
+      "defaultView": "gas_density",
+      "views": {
+        "dark_matter_density": "https://pub-e00201311979473b8a30e279dcc56838.r2.dev/engine/cosmos/Fb0.10_AGN5.00_G0.01/animations/DM_Density_-_Emergency.mp4",
+        "gas_density": "https://pub-e00201311979473b8a30e279dcc56838.r2.dev/engine/cosmos/Fb0.10_AGN5.00_G0.01/animations/Gas_Density_-_Viola.mp4",
+        "gas_metallicity_plus_stellar_density": "https://pub-e00201311979473b8a30e279dcc56838.r2.dev/engine/cosmos/Fb0.10_AGN5.00_G0.01/animations/Gas_Metallicity_plus_Stellar_Density.mp4",
+        "gas_temperature": "https://pub-e00201311979473b8a30e279dcc56838.r2.dev/engine/cosmos/Fb0.10_AGN5.00_G0.01/animations/Gas_Temperature_-_Pride.mp4"
+      },
+      "availableViews": [
+        "dark_matter_density",
+        "gas_density",
+        "gas_metallicity_plus_stellar_density",
+        "gas_temperature"
+      ],
+      "parameterDefaults": {}
+    },
+    {
+      "simulationId": "cosmos",
+      "runId": "Fb0.10_AGN5.00_G0.10",
+      "parameters": {
+        "baryon_fraction": 0.1,
+        "gravity_strength": 0.1
+      },
+      "liveDataPath": "https://pub-e00201311979473b8a30e279dcc56838.r2.dev/engine/cosmos/Fb0.10_AGN5.00_G0.10/live_data_table.csv",
+      "summaryPath": "https://pub-e00201311979473b8a30e279dcc56838.r2.dev/engine/cosmos/Fb0.10_AGN5.00_G0.10/run_summary.yaml",
+      "defaultView": "gas_density",
+      "views": {
+        "dark_matter_density": "https://pub-e00201311979473b8a30e279dcc56838.r2.dev/engine/cosmos/Fb0.10_AGN5.00_G0.10/animations/DM_Density_-_Emergency.mp4",
+        "gas_density": "https://pub-e00201311979473b8a30e279dcc56838.r2.dev/engine/cosmos/Fb0.10_AGN5.00_G0.10/animations/Gas_Density_-_Viola.mp4",
+        "gas_metallicity_plus_stellar_density": "https://pub-e00201311979473b8a30e279dcc56838.r2.dev/engine/cosmos/Fb0.10_AGN5.00_G0.10/animations/Gas_Metallicity_plus_Stellar_Density.mp4",
+        "gas_temperature": "https://pub-e00201311979473b8a30e279dcc56838.r2.dev/engine/cosmos/Fb0.10_AGN5.00_G0.10/animations/Gas_Temperature_-_Pride.mp4"
+      },
+      "availableViews": [
+        "dark_matter_density",
+        "gas_density",
+        "gas_metallicity_plus_stellar_density",
+        "gas_temperature"
+      ],
+      "parameterDefaults": {}
+    },
+    {
+      "simulationId": "cosmos",
+      "runId": "Fb1.00_AGN0.01_G0.01",
+      "parameters": {
+        "baryon_fraction": 1.0,
+        "gravity_strength": 0.01
+      },
+      "liveDataPath": "https://pub-e00201311979473b8a30e279dcc56838.r2.dev/engine/cosmos/Fb1.00_AGN0.01_G0.01/live_data_table.csv",
+      "summaryPath": "https://pub-e00201311979473b8a30e279dcc56838.r2.dev/engine/cosmos/Fb1.00_AGN0.01_G0.01/run_summary.yaml",
+      "defaultView": "gas_density",
+      "views": {
+        "dark_matter_density": "https://pub-e00201311979473b8a30e279dcc56838.r2.dev/engine/cosmos/Fb1.00_AGN0.01_G0.01/animations/DM_Density_-_Emergency.mp4",
+        "gas_density": "https://pub-e00201311979473b8a30e279dcc56838.r2.dev/engine/cosmos/Fb1.00_AGN0.01_G0.01/animations/Gas_Density_-_Viola.mp4",
+        "gas_metallicity_plus_stellar_density": "https://pub-e00201311979473b8a30e279dcc56838.r2.dev/engine/cosmos/Fb1.00_AGN0.01_G0.01/animations/Gas_Metallicity_plus_Stellar_Density.mp4",
+        "gas_temperature": "https://pub-e00201311979473b8a30e279dcc56838.r2.dev/engine/cosmos/Fb1.00_AGN0.01_G0.01/animations/Gas_Temperature_-_Pride.mp4"
+      },
+      "availableViews": [
+        "dark_matter_density",
+        "gas_density",
+        "gas_metallicity_plus_stellar_density",
+        "gas_temperature"
+      ],
+      "parameterDefaults": {}
+    },
+    {
+      "simulationId": "cosmos",
+      "runId": "Fb1.00_AGN0.01_G0.10",
+      "parameters": {
+        "baryon_fraction": 1.0,
+        "gravity_strength": 0.1
+      },
+      "liveDataPath": "https://pub-e00201311979473b8a30e279dcc56838.r2.dev/engine/cosmos/Fb1.00_AGN0.01_G0.10/live_data_table.csv",
+      "summaryPath": "https://pub-e00201311979473b8a30e279dcc56838.r2.dev/engine/cosmos/Fb1.00_AGN0.01_G0.10/run_summary.yaml",
+      "defaultView": "gas_density",
+      "views": {
+        "dark_matter_density": "https://pub-e00201311979473b8a30e279dcc56838.r2.dev/engine/cosmos/Fb1.00_AGN0.01_G0.10/animations/DM_Density_-_Emergency.mp4",
+        "gas_density": "https://pub-e00201311979473b8a30e279dcc56838.r2.dev/engine/cosmos/Fb1.00_AGN0.01_G0.10/animations/Gas_Density_-_Viola.mp4",
+        "gas_metallicity_plus_stellar_density": "https://pub-e00201311979473b8a30e279dcc56838.r2.dev/engine/cosmos/Fb1.00_AGN0.01_G0.10/animations/Gas_Metallicity_plus_Stellar_Density.mp4",
+        "gas_temperature": "https://pub-e00201311979473b8a30e279dcc56838.r2.dev/engine/cosmos/Fb1.00_AGN0.01_G0.10/animations/Gas_Temperature_-_Pride.mp4"
+      },
+      "availableViews": [
+        "dark_matter_density",
+        "gas_density",
+        "gas_metallicity_plus_stellar_density",
+        "gas_temperature"
+      ],
+      "parameterDefaults": {}
+    },
+    {
+      "simulationId": "cosmos",
+      "runId": "Fb1.00_AGN0.01_G1.00",
+      "parameters": {
+        "baryon_fraction": 1.0,
+        "gravity_strength": 1.0
+      },
+      "liveDataPath": "https://pub-e00201311979473b8a30e279dcc56838.r2.dev/engine/cosmos/Fb1.00_AGN0.01_G1.00/live_data_table.csv",
+      "summaryPath": "https://pub-e00201311979473b8a30e279dcc56838.r2.dev/engine/cosmos/Fb1.00_AGN0.01_G1.00/run_summary.yaml",
+      "defaultView": "gas_density",
+      "views": {
+        "dark_matter_density": "https://pub-e00201311979473b8a30e279dcc56838.r2.dev/engine/cosmos/Fb1.00_AGN0.01_G1.00/animations/DM_Density_-_Emergency.mp4",
+        "gas_density": "https://pub-e00201311979473b8a30e279dcc56838.r2.dev/engine/cosmos/Fb1.00_AGN0.01_G1.00/animations/Gas_Density_-_Viola.mp4",
+        "gas_metallicity_plus_stellar_density": "https://pub-e00201311979473b8a30e279dcc56838.r2.dev/engine/cosmos/Fb1.00_AGN0.01_G1.00/animations/Gas_Metallicity_plus_Stellar_Density.mp4",
+        "gas_temperature": "https://pub-e00201311979473b8a30e279dcc56838.r2.dev/engine/cosmos/Fb1.00_AGN0.01_G1.00/animations/Gas_Temperature_-_Pride.mp4"
+      },
+      "availableViews": [
+        "dark_matter_density",
+        "gas_density",
+        "gas_metallicity_plus_stellar_density",
+        "gas_temperature"
+      ],
+      "parameterDefaults": {}
+    },
+    {
+      "simulationId": "cosmos",
+      "runId": "Fb1.00_AGN0.10_G0.01",
+      "parameters": {
+        "baryon_fraction": 1.0,
+        "gravity_strength": 0.01
+      },
+      "liveDataPath": "https://pub-e00201311979473b8a30e279dcc56838.r2.dev/engine/cosmos/Fb1.00_AGN0.10_G0.01/live_data_table.csv",
+      "summaryPath": "https://pub-e00201311979473b8a30e279dcc56838.r2.dev/engine/cosmos/Fb1.00_AGN0.10_G0.01/run_summary.yaml",
+      "defaultView": "gas_density",
+      "views": {
+        "dark_matter_density": "https://pub-e00201311979473b8a30e279dcc56838.r2.dev/engine/cosmos/Fb1.00_AGN0.10_G0.01/animations/DM_Density_-_Emergency.mp4",
+        "gas_density": "https://pub-e00201311979473b8a30e279dcc56838.r2.dev/engine/cosmos/Fb1.00_AGN0.10_G0.01/animations/Gas_Density_-_Viola.mp4",
+        "gas_metallicity_plus_stellar_density": "https://pub-e00201311979473b8a30e279dcc56838.r2.dev/engine/cosmos/Fb1.00_AGN0.10_G0.01/animations/Gas_Metallicity_plus_Stellar_Density.mp4",
+        "gas_temperature": "https://pub-e00201311979473b8a30e279dcc56838.r2.dev/engine/cosmos/Fb1.00_AGN0.10_G0.01/animations/Gas_Temperature_-_Pride.mp4"
+      },
+      "availableViews": [
+        "dark_matter_density",
+        "gas_density",
+        "gas_metallicity_plus_stellar_density",
+        "gas_temperature"
+      ],
+      "parameterDefaults": {}
+    },
+    {
+      "simulationId": "cosmos",
+      "runId": "Fb1.00_AGN0.10_G0.10",
+      "parameters": {
+        "baryon_fraction": 1.0,
+        "gravity_strength": 0.1
+      },
+      "liveDataPath": "https://pub-e00201311979473b8a30e279dcc56838.r2.dev/engine/cosmos/Fb1.00_AGN0.10_G0.10/live_data_table.csv",
+      "summaryPath": "https://pub-e00201311979473b8a30e279dcc56838.r2.dev/engine/cosmos/Fb1.00_AGN0.10_G0.10/run_summary.yaml",
+      "defaultView": "gas_density",
+      "views": {
+        "dark_matter_density": "https://pub-e00201311979473b8a30e279dcc56838.r2.dev/engine/cosmos/Fb1.00_AGN0.10_G0.10/animations/DM_Density_-_Emergency.mp4",
+        "gas_density": "https://pub-e00201311979473b8a30e279dcc56838.r2.dev/engine/cosmos/Fb1.00_AGN0.10_G0.10/animations/Gas_Density_-_Viola.mp4",
+        "gas_metallicity_plus_stellar_density": "https://pub-e00201311979473b8a30e279dcc56838.r2.dev/engine/cosmos/Fb1.00_AGN0.10_G0.10/animations/Gas_Metallicity_plus_Stellar_Density.mp4",
+        "gas_temperature": "https://pub-e00201311979473b8a30e279dcc56838.r2.dev/engine/cosmos/Fb1.00_AGN0.10_G0.10/animations/Gas_Temperature_-_Pride.mp4"
+      },
+      "availableViews": [
+        "dark_matter_density",
+        "gas_density",
+        "gas_metallicity_plus_stellar_density",
+        "gas_temperature"
+      ],
+      "parameterDefaults": {}
+    },
+    {
+      "simulationId": "cosmos",
+      "runId": "Fb1.00_AGN0.10_G1.00",
+      "parameters": {
+        "baryon_fraction": 1.0,
+        "gravity_strength": 1.0
+      },
+      "liveDataPath": "https://pub-e00201311979473b8a30e279dcc56838.r2.dev/engine/cosmos/Fb1.00_AGN0.10_G1.00/live_data_table.csv",
+      "summaryPath": "https://pub-e00201311979473b8a30e279dcc56838.r2.dev/engine/cosmos/Fb1.00_AGN0.10_G1.00/run_summary.yaml",
+      "defaultView": "gas_density",
+      "views": {
+        "dark_matter_density": "https://pub-e00201311979473b8a30e279dcc56838.r2.dev/engine/cosmos/Fb1.00_AGN0.10_G1.00/animations/DM_Density_-_Emergency.mp4",
+        "gas_density": "https://pub-e00201311979473b8a30e279dcc56838.r2.dev/engine/cosmos/Fb1.00_AGN0.10_G1.00/animations/Gas_Density_-_Viola.mp4",
+        "gas_metallicity_plus_stellar_density": "https://pub-e00201311979473b8a30e279dcc56838.r2.dev/engine/cosmos/Fb1.00_AGN0.10_G1.00/animations/Gas_Metallicity_plus_Stellar_Density.mp4",
+        "gas_temperature": "https://pub-e00201311979473b8a30e279dcc56838.r2.dev/engine/cosmos/Fb1.00_AGN0.10_G1.00/animations/Gas_Temperature_-_Pride.mp4"
+      },
+      "availableViews": [
+        "dark_matter_density",
+        "gas_density",
+        "gas_metallicity_plus_stellar_density",
+        "gas_temperature"
+      ],
+      "parameterDefaults": {}
+    },
+    {
+      "simulationId": "cosmos",
+      "runId": "Fb1.00_AGN1.00_G0.01",
+      "parameters": {
+        "baryon_fraction": 1.0,
+        "gravity_strength": 0.01
+      },
+      "liveDataPath": "https://pub-e00201311979473b8a30e279dcc56838.r2.dev/engine/cosmos/Fb1.00_AGN1.00_G0.01/live_data_table.csv",
+      "summaryPath": "https://pub-e00201311979473b8a30e279dcc56838.r2.dev/engine/cosmos/Fb1.00_AGN1.00_G0.01/run_summary.yaml",
+      "defaultView": "gas_density",
+      "views": {
+        "dark_matter_density": "https://pub-e00201311979473b8a30e279dcc56838.r2.dev/engine/cosmos/Fb1.00_AGN1.00_G0.01/animations/DM_Density_-_Emergency.mp4",
+        "gas_density": "https://pub-e00201311979473b8a30e279dcc56838.r2.dev/engine/cosmos/Fb1.00_AGN1.00_G0.01/animations/Gas_Density_-_Viola.mp4",
+        "gas_metallicity_plus_stellar_density": "https://pub-e00201311979473b8a30e279dcc56838.r2.dev/engine/cosmos/Fb1.00_AGN1.00_G0.01/animations/Gas_Metallicity_plus_Stellar_Density.mp4",
+        "gas_temperature": "https://pub-e00201311979473b8a30e279dcc56838.r2.dev/engine/cosmos/Fb1.00_AGN1.00_G0.01/animations/Gas_Temperature_-_Pride.mp4"
+      },
+      "availableViews": [
+        "dark_matter_density",
+        "gas_density",
+        "gas_metallicity_plus_stellar_density",
+        "gas_temperature"
+      ],
+      "parameterDefaults": {}
+    },
+    {
+      "simulationId": "cosmos",
+      "runId": "Fb1.00_AGN1.00_G0.10",
+      "parameters": {
+        "baryon_fraction": 1.0,
+        "gravity_strength": 0.1
+      },
+      "liveDataPath": "https://pub-e00201311979473b8a30e279dcc56838.r2.dev/engine/cosmos/Fb1.00_AGN1.00_G0.10/live_data_table.csv",
+      "summaryPath": "https://pub-e00201311979473b8a30e279dcc56838.r2.dev/engine/cosmos/Fb1.00_AGN1.00_G0.10/run_summary.yaml",
+      "defaultView": "gas_density",
+      "views": {
+        "dark_matter_density": "https://pub-e00201311979473b8a30e279dcc56838.r2.dev/engine/cosmos/Fb1.00_AGN1.00_G0.10/animations/DM_Density_-_Emergency.mp4",
+        "gas_density": "https://pub-e00201311979473b8a30e279dcc56838.r2.dev/engine/cosmos/Fb1.00_AGN1.00_G0.10/animations/Gas_Density_-_Viola.mp4",
+        "gas_metallicity_plus_stellar_density": "https://pub-e00201311979473b8a30e279dcc56838.r2.dev/engine/cosmos/Fb1.00_AGN1.00_G0.10/animations/Gas_Metallicity_plus_Stellar_Density.mp4",
+        "gas_temperature": "https://pub-e00201311979473b8a30e279dcc56838.r2.dev/engine/cosmos/Fb1.00_AGN1.00_G0.10/animations/Gas_Temperature_-_Pride.mp4"
+      },
+      "availableViews": [
+        "dark_matter_density",
+        "gas_density",
+        "gas_metallicity_plus_stellar_density",
+        "gas_temperature"
+      ],
+      "parameterDefaults": {}
+    },
+    {
+      "simulationId": "cosmos",
+      "runId": "Fb1.00_AGN1.00_G1.00",
+      "parameters": {
+        "baryon_fraction": 1.0,
+        "gravity_strength": 1.0
+      },
+      "liveDataPath": "https://pub-e00201311979473b8a30e279dcc56838.r2.dev/engine/cosmos/Fb1.00_AGN1.00_G1.00/live_data_table.csv",
+      "summaryPath": "https://pub-e00201311979473b8a30e279dcc56838.r2.dev/engine/cosmos/Fb1.00_AGN1.00_G1.00/run_summary.yaml",
+      "defaultView": "gas_density",
+      "views": {
+        "dark_matter_density": "https://pub-e00201311979473b8a30e279dcc56838.r2.dev/engine/cosmos/Fb1.00_AGN1.00_G1.00/animations/DM_Density_-_Emergency.mp4",
+        "gas_density": "https://pub-e00201311979473b8a30e279dcc56838.r2.dev/engine/cosmos/Fb1.00_AGN1.00_G1.00/animations/Gas_Density_-_Viola.mp4",
+        "gas_metallicity_plus_stellar_density": "https://pub-e00201311979473b8a30e279dcc56838.r2.dev/engine/cosmos/Fb1.00_AGN1.00_G1.00/animations/Gas_Metallicity_plus_Stellar_Density.mp4",
+        "gas_temperature": "https://pub-e00201311979473b8a30e279dcc56838.r2.dev/engine/cosmos/Fb1.00_AGN1.00_G1.00/animations/Gas_Temperature_-_Pride.mp4"
+      },
+      "availableViews": [
+        "dark_matter_density",
+        "gas_density",
+        "gas_metallicity_plus_stellar_density",
+        "gas_temperature"
+      ],
+      "parameterDefaults": {}
+    },
+    {
+      "simulationId": "cosmos",
+      "runId": "Fb1.00_AGN1.00_G10.00",
+      "parameters": {
+        "baryon_fraction": 1.0,
+        "gravity_strength": 10.0
+      },
+      "liveDataPath": "https://pub-e00201311979473b8a30e279dcc56838.r2.dev/engine/cosmos/Fb1.00_AGN1.00_G10.00/live_data_table.csv",
+      "summaryPath": "https://pub-e00201311979473b8a30e279dcc56838.r2.dev/engine/cosmos/Fb1.00_AGN1.00_G10.00/run_summary.yaml",
+      "defaultView": "gas_density",
+      "views": {
+        "dark_matter_density": "https://pub-e00201311979473b8a30e279dcc56838.r2.dev/engine/cosmos/Fb1.00_AGN1.00_G10.00/animations/DM_Density_-_Emergency.mp4",
+        "gas_density": "https://pub-e00201311979473b8a30e279dcc56838.r2.dev/engine/cosmos/Fb1.00_AGN1.00_G10.00/animations/Gas_Density_-_Viola.mp4",
+        "gas_metallicity_plus_stellar_density": "https://pub-e00201311979473b8a30e279dcc56838.r2.dev/engine/cosmos/Fb1.00_AGN1.00_G10.00/animations/Gas_Metallicity_plus_Stellar_Density.mp4",
+        "gas_temperature": "https://pub-e00201311979473b8a30e279dcc56838.r2.dev/engine/cosmos/Fb1.00_AGN1.00_G10.00/animations/Gas_Temperature_-_Pride.mp4"
+      },
+      "availableViews": [
+        "dark_matter_density",
+        "gas_density",
+        "gas_metallicity_plus_stellar_density",
+        "gas_temperature"
+      ],
+      "parameterDefaults": {}
+    },
+    {
+      "simulationId": "cosmos",
+      "runId": "Fb1.00_AGN1.00_G5.00",
+      "parameters": {
+        "baryon_fraction": 1.0,
+        "gravity_strength": 5.0
+      },
+      "liveDataPath": "https://pub-e00201311979473b8a30e279dcc56838.r2.dev/engine/cosmos/Fb1.00_AGN1.00_G5.00/live_data_table.csv",
+      "summaryPath": "https://pub-e00201311979473b8a30e279dcc56838.r2.dev/engine/cosmos/Fb1.00_AGN1.00_G5.00/run_summary.yaml",
+      "defaultView": "gas_density",
+      "views": {
+        "dark_matter_density": "https://pub-e00201311979473b8a30e279dcc56838.r2.dev/engine/cosmos/Fb1.00_AGN1.00_G5.00/animations/DM_Density_-_Emergency.mp4",
+        "gas_density": "https://pub-e00201311979473b8a30e279dcc56838.r2.dev/engine/cosmos/Fb1.00_AGN1.00_G5.00/animations/Gas_Density_-_Viola.mp4",
+        "gas_metallicity_plus_stellar_density": "https://pub-e00201311979473b8a30e279dcc56838.r2.dev/engine/cosmos/Fb1.00_AGN1.00_G5.00/animations/Gas_Metallicity_plus_Stellar_Density.mp4",
+        "gas_temperature": "https://pub-e00201311979473b8a30e279dcc56838.r2.dev/engine/cosmos/Fb1.00_AGN1.00_G5.00/animations/Gas_Temperature_-_Pride.mp4"
+      },
+      "availableViews": [
+        "dark_matter_density",
+        "gas_density",
+        "gas_metallicity_plus_stellar_density",
+        "gas_temperature"
+      ],
+      "parameterDefaults": {}
+    },
+    {
+      "simulationId": "cosmos",
+      "runId": "Fb1.00_AGN10.00_G0.01",
+      "parameters": {
+        "baryon_fraction": 1.0,
+        "gravity_strength": 0.01
+      },
+      "liveDataPath": "https://pub-e00201311979473b8a30e279dcc56838.r2.dev/engine/cosmos/Fb1.00_AGN10.00_G0.01/live_data_table.csv",
+      "summaryPath": "https://pub-e00201311979473b8a30e279dcc56838.r2.dev/engine/cosmos/Fb1.00_AGN10.00_G0.01/run_summary.yaml",
+      "defaultView": "gas_density",
+      "views": {
+        "dark_matter_density": "https://pub-e00201311979473b8a30e279dcc56838.r2.dev/engine/cosmos/Fb1.00_AGN10.00_G0.01/animations/DM_Density_-_Emergency.mp4",
+        "gas_density": "https://pub-e00201311979473b8a30e279dcc56838.r2.dev/engine/cosmos/Fb1.00_AGN10.00_G0.01/animations/Gas_Density_-_Viola.mp4",
+        "gas_metallicity_plus_stellar_density": "https://pub-e00201311979473b8a30e279dcc56838.r2.dev/engine/cosmos/Fb1.00_AGN10.00_G0.01/animations/Gas_Metallicity_plus_Stellar_Density.mp4",
+        "gas_temperature": "https://pub-e00201311979473b8a30e279dcc56838.r2.dev/engine/cosmos/Fb1.00_AGN10.00_G0.01/animations/Gas_Temperature_-_Pride.mp4"
+      },
+      "availableViews": [
+        "dark_matter_density",
+        "gas_density",
+        "gas_metallicity_plus_stellar_density",
+        "gas_temperature"
+      ],
+      "parameterDefaults": {}
+    },
+    {
+      "simulationId": "cosmos",
+      "runId": "Fb1.00_AGN10.00_G0.10",
+      "parameters": {
+        "baryon_fraction": 1.0,
+        "gravity_strength": 0.1
+      },
+      "liveDataPath": "https://pub-e00201311979473b8a30e279dcc56838.r2.dev/engine/cosmos/Fb1.00_AGN10.00_G0.10/live_data_table.csv",
+      "summaryPath": "https://pub-e00201311979473b8a30e279dcc56838.r2.dev/engine/cosmos/Fb1.00_AGN10.00_G0.10/run_summary.yaml",
+      "defaultView": "gas_density",
+      "views": {
+        "dark_matter_density": "https://pub-e00201311979473b8a30e279dcc56838.r2.dev/engine/cosmos/Fb1.00_AGN10.00_G0.10/animations/DM_Density_-_Emergency.mp4",
+        "gas_density": "https://pub-e00201311979473b8a30e279dcc56838.r2.dev/engine/cosmos/Fb1.00_AGN10.00_G0.10/animations/Gas_Density_-_Viola.mp4",
+        "gas_metallicity_plus_stellar_density": "https://pub-e00201311979473b8a30e279dcc56838.r2.dev/engine/cosmos/Fb1.00_AGN10.00_G0.10/animations/Gas_Metallicity_plus_Stellar_Density.mp4",
+        "gas_temperature": "https://pub-e00201311979473b8a30e279dcc56838.r2.dev/engine/cosmos/Fb1.00_AGN10.00_G0.10/animations/Gas_Temperature_-_Pride.mp4"
+      },
+      "availableViews": [
+        "dark_matter_density",
+        "gas_density",
+        "gas_metallicity_plus_stellar_density",
+        "gas_temperature"
+      ],
+      "parameterDefaults": {}
+    },
+    {
+      "simulationId": "cosmos",
+      "runId": "Fb1.00_AGN10.00_G1.00",
+      "parameters": {
+        "baryon_fraction": 1.0,
+        "gravity_strength": 1.0
+      },
+      "liveDataPath": "https://pub-e00201311979473b8a30e279dcc56838.r2.dev/engine/cosmos/Fb1.00_AGN10.00_G1.00/live_data_table.csv",
+      "summaryPath": "https://pub-e00201311979473b8a30e279dcc56838.r2.dev/engine/cosmos/Fb1.00_AGN10.00_G1.00/run_summary.yaml",
+      "defaultView": "gas_density",
+      "views": {
+        "dark_matter_density": "https://pub-e00201311979473b8a30e279dcc56838.r2.dev/engine/cosmos/Fb1.00_AGN10.00_G1.00/animations/DM_Density_-_Emergency.mp4",
+        "gas_density": "https://pub-e00201311979473b8a30e279dcc56838.r2.dev/engine/cosmos/Fb1.00_AGN10.00_G1.00/animations/Gas_Density_-_Viola.mp4",
+        "gas_metallicity_plus_stellar_density": "https://pub-e00201311979473b8a30e279dcc56838.r2.dev/engine/cosmos/Fb1.00_AGN10.00_G1.00/animations/Gas_Metallicity_plus_Stellar_Density.mp4",
+        "gas_temperature": "https://pub-e00201311979473b8a30e279dcc56838.r2.dev/engine/cosmos/Fb1.00_AGN10.00_G1.00/animations/Gas_Temperature_-_Pride.mp4"
+      },
+      "availableViews": [
+        "dark_matter_density",
+        "gas_density",
+        "gas_metallicity_plus_stellar_density",
+        "gas_temperature"
+      ],
+      "parameterDefaults": {}
+    },
+    {
+      "simulationId": "cosmos",
+      "runId": "Fb1.00_AGN5.00_G0.01",
+      "parameters": {
+        "baryon_fraction": 1.0,
+        "gravity_strength": 0.01
+      },
+      "liveDataPath": "https://pub-e00201311979473b8a30e279dcc56838.r2.dev/engine/cosmos/Fb1.00_AGN5.00_G0.01/live_data_table.csv",
+      "summaryPath": "https://pub-e00201311979473b8a30e279dcc56838.r2.dev/engine/cosmos/Fb1.00_AGN5.00_G0.01/run_summary.yaml",
+      "defaultView": "gas_density",
+      "views": {
+        "dark_matter_density": "https://pub-e00201311979473b8a30e279dcc56838.r2.dev/engine/cosmos/Fb1.00_AGN5.00_G0.01/animations/DM_Density_-_Emergency.mp4",
+        "gas_density": "https://pub-e00201311979473b8a30e279dcc56838.r2.dev/engine/cosmos/Fb1.00_AGN5.00_G0.01/animations/Gas_Density_-_Viola.mp4",
+        "gas_metallicity_plus_stellar_density": "https://pub-e00201311979473b8a30e279dcc56838.r2.dev/engine/cosmos/Fb1.00_AGN5.00_G0.01/animations/Gas_Metallicity_plus_Stellar_Density.mp4",
+        "gas_temperature": "https://pub-e00201311979473b8a30e279dcc56838.r2.dev/engine/cosmos/Fb1.00_AGN5.00_G0.01/animations/Gas_Temperature_-_Pride.mp4"
+      },
+      "availableViews": [
+        "dark_matter_density",
+        "gas_density",
+        "gas_metallicity_plus_stellar_density",
+        "gas_temperature"
+      ],
+      "parameterDefaults": {}
+    },
+    {
+      "simulationId": "cosmos",
+      "runId": "Fb1.00_AGN5.00_G0.10",
+      "parameters": {
+        "baryon_fraction": 1.0,
+        "gravity_strength": 0.1
+      },
+      "liveDataPath": "https://pub-e00201311979473b8a30e279dcc56838.r2.dev/engine/cosmos/Fb1.00_AGN5.00_G0.10/live_data_table.csv",
+      "summaryPath": "https://pub-e00201311979473b8a30e279dcc56838.r2.dev/engine/cosmos/Fb1.00_AGN5.00_G0.10/run_summary.yaml",
+      "defaultView": "gas_density",
+      "views": {
+        "dark_matter_density": "https://pub-e00201311979473b8a30e279dcc56838.r2.dev/engine/cosmos/Fb1.00_AGN5.00_G0.10/animations/DM_Density_-_Emergency.mp4",
+        "gas_density": "https://pub-e00201311979473b8a30e279dcc56838.r2.dev/engine/cosmos/Fb1.00_AGN5.00_G0.10/animations/Gas_Density_-_Viola.mp4",
+        "gas_metallicity_plus_stellar_density": "https://pub-e00201311979473b8a30e279dcc56838.r2.dev/engine/cosmos/Fb1.00_AGN5.00_G0.10/animations/Gas_Metallicity_plus_Stellar_Density.mp4",
+        "gas_temperature": "https://pub-e00201311979473b8a30e279dcc56838.r2.dev/engine/cosmos/Fb1.00_AGN5.00_G0.10/animations/Gas_Temperature_-_Pride.mp4"
+      },
+      "availableViews": [
+        "dark_matter_density",
+        "gas_density",
+        "gas_metallicity_plus_stellar_density",
+        "gas_temperature"
+      ],
+      "parameterDefaults": {}
+    },
+    {
+      "simulationId": "cosmos",
+      "runId": "Fb1.00_AGN5.00_G1.00",
+      "parameters": {
+        "baryon_fraction": 1.0,
+        "gravity_strength": 1.0
+      },
+      "liveDataPath": "https://pub-e00201311979473b8a30e279dcc56838.r2.dev/engine/cosmos/Fb1.00_AGN5.00_G1.00/live_data_table.csv",
+      "summaryPath": "https://pub-e00201311979473b8a30e279dcc56838.r2.dev/engine/cosmos/Fb1.00_AGN5.00_G1.00/run_summary.yaml",
+      "defaultView": "gas_density",
+      "views": {
+        "dark_matter_density": "https://pub-e00201311979473b8a30e279dcc56838.r2.dev/engine/cosmos/Fb1.00_AGN5.00_G1.00/animations/DM_Density_-_Emergency.mp4",
+        "gas_density": "https://pub-e00201311979473b8a30e279dcc56838.r2.dev/engine/cosmos/Fb1.00_AGN5.00_G1.00/animations/Gas_Density_-_Viola.mp4",
+        "gas_metallicity_plus_stellar_density": "https://pub-e00201311979473b8a30e279dcc56838.r2.dev/engine/cosmos/Fb1.00_AGN5.00_G1.00/animations/Gas_Metallicity_plus_Stellar_Density.mp4",
+        "gas_temperature": "https://pub-e00201311979473b8a30e279dcc56838.r2.dev/engine/cosmos/Fb1.00_AGN5.00_G1.00/animations/Gas_Temperature_-_Pride.mp4"
+      },
+      "availableViews": [
+        "dark_matter_density",
+        "gas_density",
+        "gas_metallicity_plus_stellar_density",
+        "gas_temperature"
+      ],
+      "parameterDefaults": {}
+    },
+    {
+      "simulationId": "cosmos",
+      "runId": "Fb2.00_AGN0.01_G0.01",
+      "parameters": {
+        "baryon_fraction": 2.0,
+        "gravity_strength": 0.01
+      },
+      "liveDataPath": "https://pub-e00201311979473b8a30e279dcc56838.r2.dev/engine/cosmos/Fb2.00_AGN0.01_G0.01/live_data_table.csv",
+      "summaryPath": "https://pub-e00201311979473b8a30e279dcc56838.r2.dev/engine/cosmos/Fb2.00_AGN0.01_G0.01/run_summary.yaml",
+      "defaultView": "gas_density",
+      "views": {
+        "dark_matter_density": "https://pub-e00201311979473b8a30e279dcc56838.r2.dev/engine/cosmos/Fb2.00_AGN0.01_G0.01/animations/DM_Density_-_Emergency.mp4",
+        "gas_density": "https://pub-e00201311979473b8a30e279dcc56838.r2.dev/engine/cosmos/Fb2.00_AGN0.01_G0.01/animations/Gas_Density_-_Viola.mp4",
+        "gas_metallicity_plus_stellar_density": "https://pub-e00201311979473b8a30e279dcc56838.r2.dev/engine/cosmos/Fb2.00_AGN0.01_G0.01/animations/Gas_Metallicity_plus_Stellar_Density.mp4",
+        "gas_temperature": "https://pub-e00201311979473b8a30e279dcc56838.r2.dev/engine/cosmos/Fb2.00_AGN0.01_G0.01/animations/Gas_Temperature_-_Pride.mp4"
+      },
+      "availableViews": [
+        "dark_matter_density",
+        "gas_density",
+        "gas_metallicity_plus_stellar_density",
+        "gas_temperature"
+      ],
+      "parameterDefaults": {}
+    },
+    {
+      "simulationId": "cosmos",
+      "runId": "Fb2.00_AGN0.01_G0.10",
+      "parameters": {
+        "baryon_fraction": 2.0,
+        "gravity_strength": 0.1
+      },
+      "liveDataPath": "https://pub-e00201311979473b8a30e279dcc56838.r2.dev/engine/cosmos/Fb2.00_AGN0.01_G0.10/live_data_table.csv",
+      "summaryPath": "https://pub-e00201311979473b8a30e279dcc56838.r2.dev/engine/cosmos/Fb2.00_AGN0.01_G0.10/run_summary.yaml",
+      "defaultView": "gas_density",
+      "views": {
+        "dark_matter_density": "https://pub-e00201311979473b8a30e279dcc56838.r2.dev/engine/cosmos/Fb2.00_AGN0.01_G0.10/animations/DM_Density_-_Emergency.mp4",
+        "gas_density": "https://pub-e00201311979473b8a30e279dcc56838.r2.dev/engine/cosmos/Fb2.00_AGN0.01_G0.10/animations/Gas_Density_-_Viola.mp4",
+        "gas_metallicity_plus_stellar_density": "https://pub-e00201311979473b8a30e279dcc56838.r2.dev/engine/cosmos/Fb2.00_AGN0.01_G0.10/animations/Gas_Metallicity_plus_Stellar_Density.mp4",
+        "gas_temperature": "https://pub-e00201311979473b8a30e279dcc56838.r2.dev/engine/cosmos/Fb2.00_AGN0.01_G0.10/animations/Gas_Temperature_-_Pride.mp4"
+      },
+      "availableViews": [
+        "dark_matter_density",
+        "gas_density",
+        "gas_metallicity_plus_stellar_density",
+        "gas_temperature"
+      ],
+      "parameterDefaults": {}
+    },
+    {
+      "simulationId": "cosmos",
+      "runId": "Fb2.00_AGN0.01_G1.00",
+      "parameters": {
+        "baryon_fraction": 2.0,
+        "gravity_strength": 1.0
+      },
+      "liveDataPath": "https://pub-e00201311979473b8a30e279dcc56838.r2.dev/engine/cosmos/Fb2.00_AGN0.01_G1.00/live_data_table.csv",
+      "summaryPath": "https://pub-e00201311979473b8a30e279dcc56838.r2.dev/engine/cosmos/Fb2.00_AGN0.01_G1.00/run_summary.yaml",
+      "defaultView": "gas_density",
+      "views": {
+        "dark_matter_density": "https://pub-e00201311979473b8a30e279dcc56838.r2.dev/engine/cosmos/Fb2.00_AGN0.01_G1.00/animations/DM_Density_-_Emergency.mp4",
+        "gas_density": "https://pub-e00201311979473b8a30e279dcc56838.r2.dev/engine/cosmos/Fb2.00_AGN0.01_G1.00/animations/Gas_Density_-_Viola.mp4",
+        "gas_metallicity_plus_stellar_density": "https://pub-e00201311979473b8a30e279dcc56838.r2.dev/engine/cosmos/Fb2.00_AGN0.01_G1.00/animations/Gas_Metallicity_plus_Stellar_Density.mp4",
+        "gas_temperature": "https://pub-e00201311979473b8a30e279dcc56838.r2.dev/engine/cosmos/Fb2.00_AGN0.01_G1.00/animations/Gas_Temperature_-_Pride.mp4"
+      },
+      "availableViews": [
+        "dark_matter_density",
+        "gas_density",
+        "gas_metallicity_plus_stellar_density",
+        "gas_temperature"
+      ],
+      "parameterDefaults": {}
+    },
+    {
+      "simulationId": "cosmos",
+      "runId": "Fb2.00_AGN0.10_G0.01",
+      "parameters": {
+        "baryon_fraction": 2.0,
+        "gravity_strength": 0.01
+      },
+      "liveDataPath": "https://pub-e00201311979473b8a30e279dcc56838.r2.dev/engine/cosmos/Fb2.00_AGN0.10_G0.01/live_data_table.csv",
+      "summaryPath": "https://pub-e00201311979473b8a30e279dcc56838.r2.dev/engine/cosmos/Fb2.00_AGN0.10_G0.01/run_summary.yaml",
+      "defaultView": "gas_density",
+      "views": {
+        "dark_matter_density": "https://pub-e00201311979473b8a30e279dcc56838.r2.dev/engine/cosmos/Fb2.00_AGN0.10_G0.01/animations/DM_Density_-_Emergency.mp4",
+        "gas_density": "https://pub-e00201311979473b8a30e279dcc56838.r2.dev/engine/cosmos/Fb2.00_AGN0.10_G0.01/animations/Gas_Density_-_Viola.mp4",
+        "gas_metallicity_plus_stellar_density": "https://pub-e00201311979473b8a30e279dcc56838.r2.dev/engine/cosmos/Fb2.00_AGN0.10_G0.01/animations/Gas_Metallicity_plus_Stellar_Density.mp4",
+        "gas_temperature": "https://pub-e00201311979473b8a30e279dcc56838.r2.dev/engine/cosmos/Fb2.00_AGN0.10_G0.01/animations/Gas_Temperature_-_Pride.mp4"
+      },
+      "availableViews": [
+        "dark_matter_density",
+        "gas_density",
+        "gas_metallicity_plus_stellar_density",
+        "gas_temperature"
+      ],
+      "parameterDefaults": {}
+    },
+    {
+      "simulationId": "cosmos",
+      "runId": "Fb2.00_AGN0.10_G1.00",
+      "parameters": {
+        "baryon_fraction": 2.0,
+        "gravity_strength": 1.0
+      },
+      "liveDataPath": "https://pub-e00201311979473b8a30e279dcc56838.r2.dev/engine/cosmos/Fb2.00_AGN0.10_G1.00/live_data_table.csv",
+      "summaryPath": "https://pub-e00201311979473b8a30e279dcc56838.r2.dev/engine/cosmos/Fb2.00_AGN0.10_G1.00/run_summary.yaml",
+      "defaultView": "gas_density",
+      "views": {
+        "dark_matter_density": "https://pub-e00201311979473b8a30e279dcc56838.r2.dev/engine/cosmos/Fb2.00_AGN0.10_G1.00/animations/DM_Density_-_Emergency.mp4",
+        "gas_density": "https://pub-e00201311979473b8a30e279dcc56838.r2.dev/engine/cosmos/Fb2.00_AGN0.10_G1.00/animations/Gas_Density_-_Viola.mp4",
+        "gas_metallicity_plus_stellar_density": "https://pub-e00201311979473b8a30e279dcc56838.r2.dev/engine/cosmos/Fb2.00_AGN0.10_G1.00/animations/Gas_Metallicity_plus_Stellar_Density.mp4",
+        "gas_temperature": "https://pub-e00201311979473b8a30e279dcc56838.r2.dev/engine/cosmos/Fb2.00_AGN0.10_G1.00/animations/Gas_Temperature_-_Pride.mp4"
+      },
+      "availableViews": [
+        "dark_matter_density",
+        "gas_density",
+        "gas_metallicity_plus_stellar_density",
+        "gas_temperature"
+      ],
+      "parameterDefaults": {}
+    },
+    {
+      "simulationId": "cosmos",
+      "runId": "Fb2.00_AGN1.00_G0.01",
+      "parameters": {
+        "baryon_fraction": 2.0,
+        "gravity_strength": 0.01
+      },
+      "liveDataPath": "https://pub-e00201311979473b8a30e279dcc56838.r2.dev/engine/cosmos/Fb2.00_AGN1.00_G0.01/live_data_table.csv",
+      "summaryPath": "https://pub-e00201311979473b8a30e279dcc56838.r2.dev/engine/cosmos/Fb2.00_AGN1.00_G0.01/run_summary.yaml",
+      "defaultView": "gas_density",
+      "views": {
+        "dark_matter_density": "https://pub-e00201311979473b8a30e279dcc56838.r2.dev/engine/cosmos/Fb2.00_AGN1.00_G0.01/animations/DM_Density_-_Emergency.mp4",
+        "gas_density": "https://pub-e00201311979473b8a30e279dcc56838.r2.dev/engine/cosmos/Fb2.00_AGN1.00_G0.01/animations/Gas_Density_-_Viola.mp4",
+        "gas_metallicity_plus_stellar_density": "https://pub-e00201311979473b8a30e279dcc56838.r2.dev/engine/cosmos/Fb2.00_AGN1.00_G0.01/animations/Gas_Metallicity_plus_Stellar_Density.mp4",
+        "gas_temperature": "https://pub-e00201311979473b8a30e279dcc56838.r2.dev/engine/cosmos/Fb2.00_AGN1.00_G0.01/animations/Gas_Temperature_-_Pride.mp4"
+      },
+      "availableViews": [
+        "dark_matter_density",
+        "gas_density",
+        "gas_metallicity_plus_stellar_density",
+        "gas_temperature"
+      ],
+      "parameterDefaults": {}
+    },
+    {
+      "simulationId": "cosmos",
+      "runId": "Fb2.00_AGN1.00_G0.10",
+      "parameters": {
+        "baryon_fraction": 2.0,
+        "gravity_strength": 0.1
+      },
+      "liveDataPath": "https://pub-e00201311979473b8a30e279dcc56838.r2.dev/engine/cosmos/Fb2.00_AGN1.00_G0.10/live_data_table.csv",
+      "summaryPath": "https://pub-e00201311979473b8a30e279dcc56838.r2.dev/engine/cosmos/Fb2.00_AGN1.00_G0.10/run_summary.yaml",
+      "defaultView": "gas_density",
+      "views": {
+        "dark_matter_density": "https://pub-e00201311979473b8a30e279dcc56838.r2.dev/engine/cosmos/Fb2.00_AGN1.00_G0.10/animations/DM_Density_-_Emergency.mp4",
+        "gas_density": "https://pub-e00201311979473b8a30e279dcc56838.r2.dev/engine/cosmos/Fb2.00_AGN1.00_G0.10/animations/Gas_Density_-_Viola.mp4",
+        "gas_metallicity_plus_stellar_density": "https://pub-e00201311979473b8a30e279dcc56838.r2.dev/engine/cosmos/Fb2.00_AGN1.00_G0.10/animations/Gas_Metallicity_plus_Stellar_Density.mp4",
+        "gas_temperature": "https://pub-e00201311979473b8a30e279dcc56838.r2.dev/engine/cosmos/Fb2.00_AGN1.00_G0.10/animations/Gas_Temperature_-_Pride.mp4"
+      },
+      "availableViews": [
+        "dark_matter_density",
+        "gas_density",
+        "gas_metallicity_plus_stellar_density",
+        "gas_temperature"
+      ],
+      "parameterDefaults": {}
+    },
+    {
+      "simulationId": "cosmos",
+      "runId": "Fb2.00_AGN1.00_G1.00",
+      "parameters": {
+        "baryon_fraction": 2.0,
+        "gravity_strength": 1.0
+      },
+      "liveDataPath": "https://pub-e00201311979473b8a30e279dcc56838.r2.dev/engine/cosmos/Fb2.00_AGN1.00_G1.00/live_data_table.csv",
+      "summaryPath": "https://pub-e00201311979473b8a30e279dcc56838.r2.dev/engine/cosmos/Fb2.00_AGN1.00_G1.00/run_summary.yaml",
+      "defaultView": "gas_density",
+      "views": {
+        "dark_matter_density": "https://pub-e00201311979473b8a30e279dcc56838.r2.dev/engine/cosmos/Fb2.00_AGN1.00_G1.00/animations/DM_Density_-_Emergency.mp4",
+        "gas_density": "https://pub-e00201311979473b8a30e279dcc56838.r2.dev/engine/cosmos/Fb2.00_AGN1.00_G1.00/animations/Gas_Density_-_Viola.mp4",
+        "gas_metallicity_plus_stellar_density": "https://pub-e00201311979473b8a30e279dcc56838.r2.dev/engine/cosmos/Fb2.00_AGN1.00_G1.00/animations/Gas_Metallicity_plus_Stellar_Density.mp4",
+        "gas_temperature": "https://pub-e00201311979473b8a30e279dcc56838.r2.dev/engine/cosmos/Fb2.00_AGN1.00_G1.00/animations/Gas_Temperature_-_Pride.mp4"
+      },
+      "availableViews": [
+        "dark_matter_density",
+        "gas_density",
+        "gas_metallicity_plus_stellar_density",
+        "gas_temperature"
+      ],
+      "parameterDefaults": {}
+    },
+    {
+      "simulationId": "cosmos",
+      "runId": "Fb2.00_AGN1.00_G10.00",
+      "parameters": {
+        "baryon_fraction": 2.0,
+        "gravity_strength": 10.0
+      },
+      "liveDataPath": "https://pub-e00201311979473b8a30e279dcc56838.r2.dev/engine/cosmos/Fb2.00_AGN1.00_G10.00/live_data_table.csv",
+      "summaryPath": "https://pub-e00201311979473b8a30e279dcc56838.r2.dev/engine/cosmos/Fb2.00_AGN1.00_G10.00/run_summary.yaml",
+      "defaultView": "gas_density",
+      "views": {
+        "dark_matter_density": "https://pub-e00201311979473b8a30e279dcc56838.r2.dev/engine/cosmos/Fb2.00_AGN1.00_G10.00/animations/DM_Density_-_Emergency.mp4",
+        "gas_density": "https://pub-e00201311979473b8a30e279dcc56838.r2.dev/engine/cosmos/Fb2.00_AGN1.00_G10.00/animations/Gas_Density_-_Viola.mp4",
+        "gas_metallicity_plus_stellar_density": "https://pub-e00201311979473b8a30e279dcc56838.r2.dev/engine/cosmos/Fb2.00_AGN1.00_G10.00/animations/Gas_Metallicity_plus_Stellar_Density.mp4",
+        "gas_temperature": "https://pub-e00201311979473b8a30e279dcc56838.r2.dev/engine/cosmos/Fb2.00_AGN1.00_G10.00/animations/Gas_Temperature_-_Pride.mp4"
+      },
+      "availableViews": [
+        "dark_matter_density",
+        "gas_density",
+        "gas_metallicity_plus_stellar_density",
+        "gas_temperature"
+      ],
+      "parameterDefaults": {}
+    },
+    {
+      "simulationId": "cosmos",
+      "runId": "Fb2.00_AGN1.00_G5.00",
+      "parameters": {
+        "baryon_fraction": 2.0,
+        "gravity_strength": 5.0
+      },
+      "liveDataPath": "https://pub-e00201311979473b8a30e279dcc56838.r2.dev/engine/cosmos/Fb2.00_AGN1.00_G5.00/live_data_table.csv",
+      "summaryPath": "https://pub-e00201311979473b8a30e279dcc56838.r2.dev/engine/cosmos/Fb2.00_AGN1.00_G5.00/run_summary.yaml",
+      "defaultView": "gas_density",
+      "views": {
+        "dark_matter_density": "https://pub-e00201311979473b8a30e279dcc56838.r2.dev/engine/cosmos/Fb2.00_AGN1.00_G5.00/animations/DM_Density_-_Emergency.mp4",
+        "gas_density": "https://pub-e00201311979473b8a30e279dcc56838.r2.dev/engine/cosmos/Fb2.00_AGN1.00_G5.00/animations/Gas_Density_-_Viola.mp4",
+        "gas_metallicity_plus_stellar_density": "https://pub-e00201311979473b8a30e279dcc56838.r2.dev/engine/cosmos/Fb2.00_AGN1.00_G5.00/animations/Gas_Metallicity_plus_Stellar_Density.mp4",
+        "gas_temperature": "https://pub-e00201311979473b8a30e279dcc56838.r2.dev/engine/cosmos/Fb2.00_AGN1.00_G5.00/animations/Gas_Temperature_-_Pride.mp4"
+      },
+      "availableViews": [
+        "dark_matter_density",
+        "gas_density",
+        "gas_metallicity_plus_stellar_density",
+        "gas_temperature"
+      ],
+      "parameterDefaults": {}
+    }
+  ]
+}
