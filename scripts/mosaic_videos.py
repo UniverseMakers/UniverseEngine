@@ -1,0 +1,160 @@
+#!/usr/bin/env python3
+
+import argparse
+import random
+import subprocess
+from pathlib import Path
+
+
+def main() -> None:
+    parser = argparse.ArgumentParser(
+        description="Create a randomly sampled 1080p video mosaic."
+    )
+    parser.add_argument(
+        "directory",
+        type=Path,
+        help="Directory containing input MP4 files.",
+    )
+    parser.add_argument(
+        "-o",
+        "--output",
+        type=Path,
+        default=Path("mosaic.mp4"),
+        help="Output filename.",
+    )
+    parser.add_argument(
+        "--rows",
+        type=int,
+        default=4,
+        help="Number of mosaic rows.",
+    )
+    parser.add_argument(
+        "--cols",
+        type=int,
+        default=4,
+        help="Number of mosaic columns.",
+    )
+    parser.add_argument(
+        "--duration",
+        type=float,
+        default=30.0,
+        help="Output duration in seconds.",
+    )
+    parser.add_argument(
+        "--fps",
+        type=int,
+        default=30,
+        help="Output frame rate.",
+    )
+    parser.add_argument(
+        "--border",
+        type=int,
+        default=4,
+        help="Border thickness around each tile in pixels.",
+    )
+    parser.add_argument(
+        "--border-color",
+        default="white",
+        help="Border color for each tile.",
+    )
+
+    args = parser.parse_args()
+
+    if args.rows <= 0 or args.cols <= 0:
+        raise ValueError("Rows and columns must both be positive.")
+    if args.border < 0:
+        raise ValueError("Border must be non-negative.")
+
+    files = sorted(args.directory.rglob("*.mp4"))
+    tile_count = args.rows * args.cols
+
+    if len(files) < tile_count:
+        raise RuntimeError(
+            f"Need at least {tile_count} MP4 files, but found {len(files)}."
+        )
+
+    selected = random.sample(files, tile_count)
+
+    output_width = 1920
+    output_height = 1080
+
+    tile_width = output_width // args.cols
+    tile_height = output_height // args.rows
+    inner_width = tile_width - 2 * args.border
+    inner_height = tile_height - 2 * args.border
+
+    if inner_width <= 0 or inner_height <= 0:
+        raise ValueError(
+            "Border is too large for the computed tile size; inner width and height must remain positive."
+        )
+
+    command = ["ffmpeg", "-y"]
+
+    for filename in selected:
+        command.extend(
+            [
+                "-stream_loop",
+                "-1",
+                "-i",
+                str(filename),
+            ]
+        )
+
+    filter_parts = []
+
+    for index in range(tile_count):
+        filter_parts.append(
+            f"[{index}:v]"
+            f"scale={inner_width}:{inner_height}:"
+            f"force_original_aspect_ratio=increase,"
+            f"crop={inner_width}:{inner_height},"
+            f"pad={tile_width}:{tile_height}:{args.border}:{args.border}:{args.border_color},"
+            f"fps={args.fps},"
+            f"setpts=PTS-STARTPTS"
+            f"[v{index}]"
+        )
+
+    inputs = "".join(f"[v{index}]" for index in range(tile_count))
+
+    layout = "|".join(
+        f"{column * tile_width}_{row * tile_height}"
+        for row in range(args.rows)
+        for column in range(args.cols)
+    )
+
+    filter_parts.append(
+        f"{inputs}xstack=inputs={tile_count}:layout={layout}:fill=black[out]"
+    )
+
+    command.extend(
+        [
+            "-filter_complex",
+            ";".join(filter_parts),
+            "-map",
+            "[out]",
+            "-t",
+            str(args.duration),
+            "-an",
+            "-c:v",
+            "libx264",
+            "-preset",
+            "medium",
+            "-crf",
+            "20",
+            "-pix_fmt",
+            "yuv420p",
+            "-movflags",
+            "+faststart",
+            str(args.output),
+        ]
+    )
+
+    print("Selected videos:")
+    for filename in selected:
+        print(f"  {filename}")
+
+    subprocess.run(command, check=True)
+
+
+if __name__ == "__main__":
+    main()
