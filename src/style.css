@@ -2238,6 +2238,8 @@ button {
     border-left: 0;
     border-right: 0;
     padding: 2rem 1rem;
+    overflow: auto;
+    -webkit-overflow-scrolling: touch;
   }
 
   .entry-overlay__banner-frame {
