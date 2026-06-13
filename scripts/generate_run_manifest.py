@@ -1,19 +1,23 @@
 #!/usr/bin/env python3
 """Generate the run manifest consumed by the frontend.
 
-Scans the local asset tree under ``public/assets/<family>/`` and emits a
-manifest registry of every available run with its video views, parameter
-values, and paths to sidecar data files.
+Modes:
 
-Run ``generate_run_summaries.py`` first to create the per-run
-``run_summary.yaml`` files that this script references.
+* ``--local``: scan ``public/assets/<family>/`` and write
+  ``public/assets/local-manifest.json``.
+* default: scan the actual R2 bucket contents below ``engine/`` and write
+  ``public/assets/run-manifest.json``.
+
+Run ``generate_run_summaries.py`` first when refreshing local assets.
 """
 
 from __future__ import annotations
 
 import argparse
 import json
+import os
 import re
+import sys
 from pathlib import Path
 from typing import Any, Callable
 
@@ -26,6 +30,7 @@ ASSET_ROOT = PUBLIC_ROOT / "assets"
 SIM_CONFIG_PATH = REPO_ROOT / "src" / "selection" / "simulation-catalog.yaml"
 LOCAL_MANIFEST_PATH = ASSET_ROOT / "local-manifest.json"
 ONLINE_MANIFEST_PATH = ASSET_ROOT / "run-manifest.json"
+R2_ENGINE_PREFIX = "engine"
 
 SIMULATION_DIRECTORIES = ("planetary", "galaxy", "cosmos")
 
@@ -190,23 +195,8 @@ def main() -> None:
     """Entry point: scan run directories and write the selected manifest."""
     args = parse_args()
     sim_config = load_simulation_config()
-    output_path = resolve_output_path(args)
-    path_builder = build_path_builder(args)
-    manifest: dict[str, object] = {"version": 1, "runs": []}
-
-    for simulation_id in SIMULATION_DIRECTORIES:
-        sim_root = ASSET_ROOT / simulation_id
-        if not sim_root.exists():
-            continue
-
-        for run_dir in sorted(
-            path for path in sim_root.iterdir() if path.is_dir()
-        ):
-            entry = build_manifest_entry(
-                simulation_id, run_dir, sim_config, path_builder
-            )
-            if entry is not None:
-                manifest["runs"].append(entry)  # type: ignore[union-attr]
+    output_path = LOCAL_MANIFEST_PATH if args.local else ONLINE_MANIFEST_PATH
+    manifest = build_manifest(args, sim_config)
 
     output_path.parent.mkdir(parents=True, exist_ok=True)
     output_path.write_text(
@@ -222,35 +212,42 @@ def parse_args() -> argparse.Namespace:
         action="store_true",
         help="Generate a local manifest using public/assets-relative paths.",
     )
-    parser.add_argument(
-        "--cloudflare-base",
-        help="Public base URL used to emit online asset URLs.",
-    )
-    parser.add_argument(
-        "--output",
-        help="Optional explicit output path for the generated manifest.",
-    )
     return parser.parse_args()
 
 
-def resolve_output_path(args: argparse.Namespace) -> Path:
-    if args.output:
-        return Path(args.output).resolve()
-    if args.local or not args.cloudflare_base:
-        return LOCAL_MANIFEST_PATH
-    return ONLINE_MANIFEST_PATH
-
-
 def build_path_builder(args: argparse.Namespace) -> Callable[[Path], str]:
-    if args.local or not args.cloudflare_base:
-        return to_public_relative_path
+    _ = args
+    return to_public_relative_path
 
-    cloudflare_base = args.cloudflare_base.rstrip("/")
 
-    def to_cloudflare_path(path: Path) -> str:
-        return f"{cloudflare_base}/{path.relative_to(ASSET_ROOT).as_posix()}"
+def build_manifest(
+    args: argparse.Namespace,
+    sim_config: dict[str, Any],
+) -> dict[str, object]:
+    """Build the frontend run manifest from either local files or R2."""
+    manifest: dict[str, object] = {"version": 1, "runs": []}
 
-    return to_cloudflare_path
+    if not args.local:
+        for entry in build_manifest_entries_from_r2(args, sim_config):
+            manifest["runs"].append(entry)  # type: ignore[union-attr]
+        return manifest
+
+    path_builder = build_path_builder(args)
+    for simulation_id in SIMULATION_DIRECTORIES:
+        sim_root = ASSET_ROOT / simulation_id
+        if not sim_root.exists():
+            continue
+
+        for run_dir in sorted(
+            path for path in sim_root.iterdir() if path.is_dir()
+        ):
+            entry = build_manifest_entry(
+                simulation_id, run_dir, sim_config, path_builder
+            )
+            if entry is not None:
+                manifest["runs"].append(entry)  # type: ignore[union-attr]
+
+    return manifest
 
 
 def load_simulation_config() -> dict[str, Any]:
@@ -314,6 +311,101 @@ def build_manifest_entry(
     }
 
 
+def build_manifest_entries_from_r2(
+    args: argparse.Namespace,
+    sim_config: dict[str, Any],
+) -> list[dict[str, Any]]:
+    """Build manifest entries by scanning object keys from an R2 bucket."""
+    _ = args
+    bucket = os.environ.get("R2_BUCKET", "").strip()
+    if not bucket:
+        raise SystemExit(
+            "ERROR: R2_BUCKET must be set when generating the online manifest."
+        )
+
+    bucket_public_base = os.environ.get("R2_PUBLIC_BASE", "").strip().rstrip("/")
+    if not bucket_public_base:
+        raise SystemExit(
+            "ERROR: R2_PUBLIC_BASE must be set when generating the online manifest."
+        )
+    public_base = f"{bucket_public_base}/{R2_ENGINE_PREFIX}"
+
+    s3 = create_r2_client(
+        _env_or_die("R2_ACCOUNT_ID"),
+        _env_or_die("R2_ACCESS_KEY_ID"),
+        _env_or_die("R2_SECRET_ACCESS_KEY"),
+    )
+    objects_by_run = list_r2_run_objects(s3, bucket, R2_ENGINE_PREFIX)
+    entries: list[dict[str, Any]] = []
+
+    for simulation_id in SIMULATION_DIRECTORIES:
+        runs = objects_by_run.get(simulation_id, {})
+        for run_id in sorted(runs):
+            entry = build_manifest_entry_from_r2(
+                simulation_id=simulation_id,
+                run_id=run_id,
+                object_keys=runs[run_id],
+                sim_config=sim_config,
+                public_base=public_base,
+                bucket=bucket,
+                s3=s3,
+            )
+            if entry is not None:
+                entries.append(entry)
+
+    return entries
+
+
+def build_manifest_entry_from_r2(
+    *,
+    simulation_id: str,
+    run_id: str,
+    object_keys: list[str],
+    sim_config: dict[str, Any],
+    public_base: str,
+    bucket: str,
+    s3: Any,
+) -> dict[str, Any] | None:
+    """Build one frontend manifest entry from a set of remote object keys."""
+    video_keys = sorted(
+        key
+        for key in object_keys
+        if key.endswith(".mp4") and "/animations/" in key
+    )
+    if not video_keys:
+        return None
+
+    run_root = _strip_run_relative_path(video_keys[0], "animations/")
+    live_data_key = f"{run_root}live_data_table.csv"
+    summary_key = f"{run_root}run_summary.yaml"
+    parameter_key = f"{run_root}parameters.yaml"
+
+    view_paths = {
+        infer_view_id(Path(video_key)): to_public_object_url(public_base, video_key)
+        for video_key in video_keys
+    }
+    default_view = pick_default_view(view_paths)
+
+    return {
+        "simulationId": simulation_id,
+        "runId": run_id,
+        "parameters": parse_r2_run_parameters(
+            simulation_id=simulation_id,
+            run_id=run_id,
+            parameter_key=parameter_key,
+            object_keys=object_keys,
+            bucket=bucket,
+            s3=s3,
+        ),
+        "liveDataPath": to_public_object_url(public_base, live_data_key),
+        "summaryPath": to_public_object_url(public_base, summary_key),
+        "defaultView": default_view,
+        "views": view_paths,
+        "availableViews": sorted(view_paths.keys()),
+        "parameterDefaults": build_parameter_defaults(simulation_id, sim_config),
+    }
+
+
 def build_parameter_defaults(
     simulation_id: str,
     sim_config: dict[str, Any],
@@ -353,6 +445,28 @@ def parse_run_parameters(
         return {str(k): float(v) for k, v in raw.items()}
 
     return _parse_run_parameters_from_tokens(simulation_id, run_dir.name)
+
+
+def parse_r2_run_parameters(
+    *,
+    simulation_id: str,
+    run_id: str,
+    parameter_key: str,
+    object_keys: list[str],
+    bucket: str,
+    s3: Any,
+) -> dict[str, float]:
+    """Read run parameters from a remote parameters.yaml or run-id tokens."""
+    if parameter_key in object_keys:
+        try:
+            response = s3.get_object(Bucket=bucket, Key=parameter_key)
+            payload = response["Body"].read().decode("utf-8")
+            raw: dict[str, Any] = yaml.safe_load(payload) or {}
+            return {str(k): float(v) for k, v in raw.items()}
+        except Exception:
+            pass
+
+    return _parse_run_parameters_from_tokens(simulation_id, run_id)
 
 
 def _parse_run_parameters_from_tokens(
@@ -402,6 +516,84 @@ def parse_parameter_tokens(run_id: str) -> list[dict[str, str | float]]:
             }
         )
     return tokens
+
+
+def create_r2_client(account_id: str, access_key: str, secret_key: str) -> Any:
+    """Return a boto3 S3 client pointed at the R2 endpoint."""
+    try:
+        import boto3
+        from botocore.config import Config as BotoConfig
+    except ImportError:
+        print(
+            "ERROR: boto3 is not installed. Install it with:\n"
+            "  pip install boto3",
+            file=sys.stderr,
+        )
+        sys.exit(1)
+
+    endpoint = f"https://{account_id}.r2.cloudflarestorage.com"
+    return boto3.client(
+        "s3",
+        endpoint_url=endpoint,
+        aws_access_key_id=access_key,
+        aws_secret_access_key=secret_key,
+        config=BotoConfig(
+            region_name="auto",
+            retries={"max_attempts": 3, "mode": "standard"},
+            s3={"addressing_style": "path"},
+        ),
+    )
+
+
+def list_r2_run_objects(
+    s3: Any,
+    bucket: str,
+    prefix: str,
+) -> dict[str, dict[str, list[str]]]:
+    """Group remote object keys by simulation id and run id."""
+    objects_by_run: dict[str, dict[str, list[str]]] = {}
+    paginator = s3.get_paginator("list_objects_v2")
+    scan_prefix = f"{prefix}/" if prefix else ""
+
+    for page in paginator.paginate(Bucket=bucket, Prefix=scan_prefix):
+        for obj in page.get("Contents", []):
+            key = str(obj.get("Key") or "")
+            relative_key = key[len(scan_prefix) :] if scan_prefix and key.startswith(scan_prefix) else key
+            parts = relative_key.split("/")
+            if len(parts) < 3:
+                continue
+            simulation_id = parts[0]
+            run_id = parts[1]
+            if simulation_id not in SIMULATION_DIRECTORIES:
+                continue
+            objects_by_run.setdefault(simulation_id, {}).setdefault(run_id, []).append(relative_key)
+
+    return objects_by_run
+
+
+def to_public_object_url(public_base: str, object_key: str) -> str:
+    """Join a public base URL to a relative object key."""
+    return f"{public_base}/{object_key.lstrip('/')}"
+
+
+def _strip_run_relative_path(object_key: str, marker: str) -> str:
+    """Return the run-root prefix of an object key up to a known marker."""
+    before, _sep, _after = object_key.partition(marker)
+    return f"{before}"
+
+
+def _env_or_die(name: str) -> str:
+    """Read a required env var or exit with a helpful message."""
+    value = os.environ.get(name, "").strip()
+    if not value:
+        print(
+            f"ERROR: Environment variable {name} is not set.\n"
+            f"Set it before running this script, e.g.:\n"
+            f"  export {name}=<value>",
+            file=sys.stderr,
+        )
+        sys.exit(1)
+    return value
 
 
 def infer_view_id(video_path: Path) -> str:

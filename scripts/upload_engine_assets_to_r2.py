@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
-"""Upload engine simulation assets to Cloudflare R2 and publish a manifest.
+"""Upload engine simulation assets to Cloudflare R2.
 
 This script recursively walks a local assets/ directory tree, uploads every
 relevant file to Cloudflare R2 (preserving directory structure under a
-configurable remote prefix), and writes a manifest.json that the frontend
-app uses to discover available themes, runs, videos, and metadata files.
+configurable remote prefix), and can optionally upload an already-generated
+frontend manifest as a final publishing step.
 
 Requirements
 ------------
@@ -31,6 +31,11 @@ Usage Examples
     python scripts/upload_engine_assets_to_r2.py \\
         --assets-dir public/assets --prefix engine
 
+    # Upload assets, then publish an already-generated online manifest
+    python scripts/upload_engine_assets_to_r2.py \\
+        --assets-dir public/assets --prefix engine \\
+        --manifest-path public/assets/run-manifest.json
+
     # Force re-upload every file regardless of remote state
     python scripts/upload_engine_assets_to_r2.py \\
         --assets-dir public/assets --prefix engine --force
@@ -43,8 +48,6 @@ Usage Examples
 from __future__ import annotations
 
 import argparse
-import datetime
-import json
 import mimetypes
 import os
 import sys
@@ -151,7 +154,7 @@ def _get_content_type(file_path: Path) -> str:
 
 def _get_cache_control(file_path: Path, remote_key: str) -> str:
     """Return the appropriate Cache-Control value for a remote object."""
-    if remote_key.endswith("/manifest.json"):
+    if remote_key.endswith("/manifest.json") or remote_key.endswith("/run-manifest.json"):
         return CACHE_MANIFEST
     ext = file_path.suffix.lower()
     if ext in VIDEO_EXTENSIONS or ext in STATIC_EXTENSIONS:
@@ -233,62 +236,6 @@ def _discover_files_local(
 
 
 # ===========================================================================
-# Manifest generation
-# ===========================================================================
-
-def build_manifest(
-    assets_root: Path,
-    prefix: str,
-    themes: tuple[str, ...] = DEFAULT_THEMES,
-) -> dict[str, Any]:
-    """Produce a manifest dict describing every theme / run / file.
-
-    The manifest is uploaded to R2 as ``<prefix>/manifest.json`` and is
-    consumed by the frontend to discover available assets.
-    """
-    discovered: dict[str, dict[str, dict[str, list[Path]]]]
-    if _use_shared_discovery:
-        discovered = discover_files_for_upload(assets_root, themes)
-    else:
-        discovered = _discover_files_local(assets_root, themes)
-
-    themes_out: dict[str, Any] = {}
-
-    for theme_name in sorted(discovered):
-        runs_out: dict[str, Any] = {}
-        for run_name in sorted(discovered[theme_name]):
-            run = discovered[theme_name][run_name]
-            if not run["animations"]:
-                continue  # skip runs with no videos — frontend can't play them
-            animations: list[str] = []
-            metadata: dict[str, str] = {}
-
-            for anim in sorted(run["animations"]):
-                rel = _relative_to_assets_root(anim, assets_root)
-                animations.append(_normalise_remote_key(prefix, rel))
-
-            for meta in sorted(run["metadata"]):
-                rel = _relative_to_assets_root(meta, assets_root)
-                key = meta.name
-                metadata[key] = _normalise_remote_key(prefix, rel)
-
-            runs_out[run_name] = {
-                "animations": animations,
-                "metadata":  metadata,
-            }
-
-        if runs_out:
-            themes_out[theme_name] = {"runs": runs_out}
-
-    return {
-        "version":   "1.0.0",
-        "generated": datetime.datetime.now(datetime.timezone.utc).isoformat(),
-        "prefix":    prefix,
-        "themes":    themes_out,
-    }
-
-
-# ===========================================================================
 # R2 client
 # ===========================================================================
 
@@ -327,7 +274,6 @@ def _collect_upload_tasks(
     assets_root: Path,
     prefix: str,
     themes: tuple[str, ...],
-    manifest: dict[str, Any],
 ) -> list[tuple[Path, str, str, str]]:
     """Return a flat list of (local_path, remote_key, content_type, cache_control)."""
     tasks: list[tuple[Path, str, str, str]] = []
@@ -351,11 +297,24 @@ def _collect_upload_tasks(
                     cc = _get_cache_control(file_path, key)
                     tasks.append((file_path, key, ct, cc))
 
-    # Manifest is uploaded last; we add it as a synthetic task at the end.
-    manifest_key = _normalise_remote_key(prefix, "manifest.json")
-    tasks.append((Path("manifest.json"), manifest_key, "application/json", CACHE_MANIFEST))
-
     return tasks
+
+
+def _resolve_manifest_upload(
+    manifest_path: Path | None,
+    manifest_key: str,
+    prefix: str,
+) -> tuple[Path, str] | None:
+    """Resolve an optional existing manifest to upload after asset files."""
+    if manifest_path is None:
+        return None
+
+    resolved_path = manifest_path.expanduser().resolve()
+    if not resolved_path.is_file():
+        raise SystemExit(f"ERROR: Manifest file does not exist: {resolved_path}")
+
+    remote_key = _normalise_remote_key(prefix, manifest_key)
+    return resolved_path, remote_key
 
 
 def _remote_exists(
@@ -440,14 +399,20 @@ def main() -> None:
     parser.add_argument(
         "--prefix",
         type=str,
-        default="simulations",
-        help="Remote key prefix (default: simulations)",
+        default="engine",
+        help="Remote key prefix (default: engine)",
     )
     parser.add_argument(
-        "--manifest-out",
+        "--manifest-path",
         type=Path,
         default=None,
-        help="Also write the generated manifest to this local file path",
+        help="Optional existing manifest file to upload after the assets.",
+    )
+    parser.add_argument(
+        "--manifest-key",
+        type=str,
+        default="run-manifest.json",
+        help="Remote manifest object key relative to --prefix (default: run-manifest.json)",
     )
     parser.add_argument(
         "--dry-run",
@@ -501,26 +466,21 @@ def main() -> None:
                 detected.append(d.name)
         themes = tuple(detected) if detected else DEFAULT_THEMES
 
-    # -----------------------------------------------------------------------
-    # 2. Build manifest
-    # -----------------------------------------------------------------------
-    manifest = build_manifest(assets_root, prefix, themes)
-
-    if args.manifest_out:
-        out_path = args.manifest_out.resolve()
-        out_path.parent.mkdir(parents=True, exist_ok=True)
-        out_path.write_text(json.dumps(manifest, indent=2) + "\n", encoding="utf-8")
-        print(f"Manifest written to: {out_path}")
+    manifest_upload = _resolve_manifest_upload(
+        args.manifest_path,
+        args.manifest_key,
+        prefix,
+    )
 
     # -----------------------------------------------------------------------
-    # 3. Dry-run: print everything and exit
+    # 2. Dry-run: print everything and exit
     # -----------------------------------------------------------------------
     if args.dry_run:
-        _print_dry_run(args, themes, manifest)
+        _print_dry_run(args, themes, manifest_upload)
         return
 
     # -----------------------------------------------------------------------
-    # 4. Validate bucket and credentials (required for real uploads)
+    # 3. Validate bucket and credentials (required for real uploads)
     # -----------------------------------------------------------------------
     bucket = args.bucket or os.environ.get("R2_BUCKET", "").strip()
     if not bucket:
@@ -537,13 +497,12 @@ def main() -> None:
     s3 = _create_r2_client(account_id, access_key, secret_key)
 
     # -----------------------------------------------------------------------
-    # 5. Collect upload tasks
+    # 4. Collect upload tasks
     # -----------------------------------------------------------------------
-    tasks = _collect_upload_tasks(assets_root, prefix, themes, manifest)
-    manifest_task = tasks.pop()  # manifest is always the last task; upload it last
+    tasks = _collect_upload_tasks(assets_root, prefix, themes)
 
     # -----------------------------------------------------------------------
-    # 6. Upload assets
+    # 5. Upload assets
     # -----------------------------------------------------------------------
     stats = {
         "scanned": len(tasks),
@@ -582,27 +541,30 @@ def main() -> None:
             print(f"  ERROR {remote_key}: {exc}", file=sys.stderr)
 
     # -----------------------------------------------------------------------
-    # 7. Upload manifest
+    # 6. Upload manifest
     # -----------------------------------------------------------------------
-    manifest_key = manifest_task[1]
-    manifest_body = json.dumps(manifest, indent=2).encode("utf-8")
-    try:
-        print(f"  PUT   {manifest_key}")
-        s3.put_object(
-            Bucket=bucket,
-            Key=manifest_key,
-            Body=manifest_body,
-            ContentType="application/json",
-            CacheControl=CACHE_MANIFEST,
-        )
-        stats["uploaded"] += 1
-        stats["bytes_uploaded"] += len(manifest_body)
-    except Exception as exc:
-        stats["errors"] += 1
-        print(f"  ERROR {manifest_key}: {exc}", file=sys.stderr)
+    manifest_key: str | None = None
+    if manifest_upload is not None:
+        manifest_path, manifest_key = manifest_upload
+        try:
+            print(f"  PUT   {manifest_key}  ({_format_size(manifest_path.stat().st_size)})")
+            s3.upload_file(
+                str(manifest_path),
+                bucket,
+                manifest_key,
+                ExtraArgs={
+                    "ContentType": "application/json",
+                    "CacheControl": CACHE_MANIFEST,
+                },
+            )
+            stats["uploaded"] += 1
+            stats["bytes_uploaded"] += manifest_path.stat().st_size
+        except Exception as exc:
+            stats["errors"] += 1
+            print(f"  ERROR {manifest_key}: {exc}", file=sys.stderr)
 
     # -----------------------------------------------------------------------
-    # 8. Delete stale remote objects (opt-in)
+    # 7. Delete stale remote objects (opt-in)
     # -----------------------------------------------------------------------
     if args.delete_stale:
         print()
@@ -610,7 +572,8 @@ def main() -> None:
         print("  Scanning for remote objects that no longer exist locally...")
 
         local_keys: set[str] = {t[1] for t in tasks}
-        local_keys.add(manifest_key)
+        if manifest_key is not None:
+            local_keys.add(manifest_key)
         remote_keys: set[str] = set()
 
         paginator = s3.get_paginator("list_objects_v2")
@@ -630,7 +593,7 @@ def main() -> None:
             print("  No stale remote files found.")
 
     # -----------------------------------------------------------------------
-    # 9. Summary
+    # 8. Summary
     # -----------------------------------------------------------------------
     print()
     print("  ──────────────────────────────────────────")
@@ -642,7 +605,8 @@ def main() -> None:
     if stats["errors"]:
         print(f"  Errors:               {stats['errors']}")
     print(f"  Total bytes uploaded: {_format_size(stats['bytes_uploaded'])}")
-    print(f"  Manifest path:        {manifest_key}")
+    if manifest_key is not None:
+        print(f"  Manifest path:        {manifest_key}")
     print(f"  Bucket:               {bucket}")
     print(f"  Remote prefix:        {prefix}/")
     print("  ──────────────────────────────────────────")
@@ -655,7 +619,11 @@ def main() -> None:
 # Dry-run output
 # ===========================================================================
 
-def _print_dry_run(args: argparse.Namespace, themes: tuple[str, ...], manifest: dict[str, Any]) -> None:
+def _print_dry_run(
+    args: argparse.Namespace,
+    themes: tuple[str, ...],
+    manifest_upload: tuple[Path, str] | None,
+) -> None:
     """Pretty-print what would happen in a real run."""
     print(f"DRY-RUN MODE — no files will be modified\n")
     print(f"  Assets dir:  {args.assets_dir}")
@@ -665,14 +633,15 @@ def _print_dry_run(args: argparse.Namespace, themes: tuple[str, ...], manifest: 
         print(f"  Mode:        --force (all files re-uploaded)")
     if args.delete_stale:
         print(f"  Mode:        --delete-stale (stale remote files would be deleted)")
-    if args.manifest_out:
-        print(f"  Local manifest out: {args.manifest_out}")
+    if args.manifest_path:
+        print(f"  Manifest path: {args.manifest_path}")
+        print(f"  Manifest key:  {_normalise_remote_key(args.prefix, args.manifest_key)}")
     print()
 
-    tasks = _collect_upload_tasks(args.assets_dir, args.prefix, themes, manifest)
-    manifest_task = tasks.pop()
+    tasks = _collect_upload_tasks(args.assets_dir, args.prefix, themes)
 
-    print(f"  Files to upload ({len(tasks)}):")
+    extra_files = 1 if manifest_upload is not None else 0
+    print(f"  Files to upload ({len(tasks) + extra_files}):")
     print(f"  {'─' * 72}")
 
     total_bytes = 0
@@ -684,23 +653,15 @@ def _print_dry_run(args: argparse.Namespace, themes: tuple[str, ...], manifest: 
             size = 0
         print(f"  {_format_size(size):>8}  {content_type:<24}  {remote_key}")
 
-    manifest_body = json.dumps(manifest, indent=2).encode("utf-8")
-    manifest_size = len(manifest_body)
+    if manifest_upload is not None:
+        manifest_path, manifest_key = manifest_upload
+        manifest_size = manifest_path.stat().st_size
+        print(f"  {'─' * 72}")
+        print(f"  {_format_size(manifest_size):>8}  application/json         {manifest_key}  (manifest)")
+        total_bytes += manifest_size
 
     print(f"  {'─' * 72}")
-    print(f"  {_format_size(manifest_size):>8}  application/json         {manifest_task[1]}  (manifest)")
-    print(f"  {'─' * 72}")
-    total_bytes += manifest_size
-    print(f"  {_format_size(total_bytes):>8}  TOTAL across {len(tasks) + 1} files")
-
-    # Preview manifest
-    print(f"\n  Manifest preview:")
-    print(f"  {'─' * 72}")
-    for line in json.dumps(manifest, indent=2).splitlines()[:30]:
-        print(f"  {line}")
-    remaining = len(json.dumps(manifest, indent=2).splitlines()) - 30
-    if remaining > 0:
-        print(f"  ... ({remaining} more lines)")
+    print(f"  {_format_size(total_bytes):>8}  TOTAL across {len(tasks) + extra_files} files")
 
 
 def _format_size(num_bytes: float | int) -> str:

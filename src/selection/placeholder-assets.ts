@@ -7,6 +7,7 @@
 
 import type { SimParameter } from './simulation-catalog.ts';
 import { withBaseUrl } from '../shared/urls.ts';
+import { ONLINE_MANIFEST_URL } from '../shared/constants.ts';
 import { getVideoMetadataUrl } from './video-run-metadata.ts';
 import type { ManifestSource } from '../shared/advanced-settings.ts';
 import { logInfo, logWarn } from '../shared/logger.ts';
@@ -39,6 +40,7 @@ export interface ManifestController {
   getSource: () => ManifestSource;
   setSource: (source: ManifestSource) => void;
   resetCache: () => void;
+  preloadActiveManifest: () => Promise<void>;
   findNearestVideo: (
     simClassId: string,
     params: SimParameter[],
@@ -48,7 +50,7 @@ export interface ManifestController {
 
 const MANIFEST_PATHS: Record<ManifestSource, string> = {
   local: 'assets/local-manifest.json',
-  online: 'assets/run-manifest.json',
+  online: ONLINE_MANIFEST_URL,
 };
 
 export function createManifestController(
@@ -62,11 +64,17 @@ export function createManifestController(
       return source;
     },
     setSource(nextSource) {
+      if (nextSource === 'online') {
+        manifestPromises.delete('online');
+      }
       source = nextSource;
       logInfo('Manifest source updated', { source: nextSource });
     },
     resetCache() {
       manifestPromises.clear();
+    },
+    async preloadActiveManifest() {
+      await loadRunManifest(source, manifestPromises);
     },
     async findNearestVideo(simClassId, params, values) {
       const manifestMatch = await findManifestBackedRun(

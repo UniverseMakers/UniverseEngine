@@ -69,6 +69,9 @@ export function createAppShell(app: HTMLElement): void {
   let advancedSettings = loadAdvancedSettings(scaleIds);
   let availableSimulationClasses = getSelectableSimulationClasses(advancedSettings);
   const manifestController = createManifestController(advancedSettings.manifestSource);
+  if (advancedSettings.manifestSource === 'online') {
+    void manifestController.preloadActiveManifest();
+  }
   // ── State ────────────────────────────────────────────────────────────────
   // Everything the shell needs to track lives here so it's easy to see what's
   // being managed at a glance. We keep these as closure variables rather than
@@ -1062,14 +1065,22 @@ export function createAppShell(app: HTMLElement): void {
 
   function applyAdvancedSettings(nextAdvancedSettings: AdvancedSettings): void {
     const previousActiveClassId = activeClass.id;
+    const previousManifestSource = advancedSettings.manifestSource;
 
     advancedSettings = saveAdvancedSettings(nextAdvancedSettings, scaleIds);
     availableSimulationClasses = getSelectableSimulationClasses(advancedSettings);
     manifestController.setSource(advancedSettings.manifestSource);
+    if (advancedSettings.manifestSource === 'online') {
+      void manifestController.preloadActiveManifest();
+    }
     displayMenu.setHomeVisible(!advancedSettings.lockedScaleId);
     entryOverlay.setSimulationClasses(availableSimulationClasses);
     overlayPanel.setAdvancedSettings(advancedSettings);
     logInfo('Advanced settings updated', advancedSettings);
+
+    if (previousManifestSource !== advancedSettings.manifestSource) {
+      activeRunMatch = null;
+    }
 
     const lockedClass = getSimulationClassById(advancedSettings.lockedScaleId);
 

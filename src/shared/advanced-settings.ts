@@ -14,7 +14,7 @@ export const ADVANCED_SETTINGS_PASSWORD = 'RSSSE26UM_Engine';
 export function getDefaultAdvancedSettings(): AdvancedSettings {
   return {
     lockedScaleId: null,
-    manifestSource: 'local',
+    manifestSource: 'online',
     verboseLogging: false,
     hiddenScaleIds: [],
   };
@@ -42,7 +42,14 @@ export function saveAdvancedSettings(
 ): AdvancedSettings {
   const normalized = normalizeAdvancedSettings(settings, scaleIds);
 
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(normalized));
+  localStorage.setItem(
+    STORAGE_KEY,
+    JSON.stringify({
+      lockedScaleId: normalized.lockedScaleId,
+      verboseLogging: normalized.verboseLogging,
+      hiddenScaleIds: normalized.hiddenScaleIds,
+    }),
+  );
 
   return normalized;
 }

@@ -23,3 +23,7 @@ export const SUMMARY_OVERLAY = {
    */
   HIDE_AFTER_MS: 980,
 } as const;
+
+/** Bucket-hosted online manifest URL used by online mode. */
+export const ONLINE_MANIFEST_URL =
+  'https://pub-e00201311979473b8a30e279dcc56838.r2.dev/engine/run-manifest.json';

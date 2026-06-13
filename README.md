@@ -35,8 +35,10 @@ Advanced settings include:
 
 Current default behavior:
 
-- the app uses `public/assets/local-manifest.json`
-- online manifest support exists, but is intended for the future Cloudflare-backed asset bucket
+- the app defaults to `online` manifest mode
+- online manifest mode fetches the bucket-hosted `run-manifest.json` from the fixed URL in `src/shared/constants.ts`
+- `local` manifest mode is still available in Advanced Settings as an explicit fallback override
+- the manifest-source choice is not persisted, so each fresh boot starts from the default again
 
 ## Current UI Structure
 
@@ -115,21 +117,35 @@ This writes:
 
 ### 3. Refresh the online manifest
 
-When the Cloudflare / R2 asset bucket is available, generate the online manifest with a public base URL:
+The online manifest is generated from the actual R2 bucket contents under the
+fixed `engine/` prefix.
+
+Set these environment variables first:
 
 ```bash
-python3 scripts/generate_run_manifest.py --cloudflare-base "https://YOUR_PUBLIC_R2_BASE"
+export R2_BUCKET="YOUR_BUCKET"
+export R2_PUBLIC_BASE="https://YOUR_PUBLIC_R2_BASE"
+export R2_ACCOUNT_ID="YOUR_ACCOUNT_ID"
+export R2_ACCESS_KEY_ID="YOUR_ACCESS_KEY_ID"
+export R2_SECRET_ACCESS_KEY="YOUR_SECRET_ACCESS_KEY"
 ```
 
-Equivalent explicit form:
+Then generate the online manifest:
 
 ```bash
-python3 scripts/generate_run_manifest.py --cloudflare-base "https://YOUR_PUBLIC_R2_BASE" --output "public/assets/run-manifest.json"
+python3 scripts/generate_run_manifest.py
 ```
 
 This writes:
 
 - `public/assets/run-manifest.json`
+
+The generator:
+
+- scans the actual bucket contents below `engine/`
+- groups objects into simulation runs
+- fetches `parameters.yaml` when present
+- writes the frontend manifest based on what is actually online
 
 ### Recommended local workflow
 
@@ -146,7 +162,28 @@ If you are preparing a Cloudflare-backed manifest, run:
 
 ```bash
 python3 scripts/generate_run_summaries.py
-python3 scripts/generate_run_manifest.py --cloudflare-base "https://YOUR_PUBLIC_R2_BASE"
+python3 scripts/generate_run_manifest.py
+```
+
+### Upload workflow
+
+Manifest generation is intentionally separate from the upload step.
+
+1. Generate `public/assets/run-manifest.json` locally.
+2. Upload the assets tree to R2.
+3. Upload the already-generated manifest as a final publishing step.
+
+Example:
+
+```bash
+python3 scripts/generate_run_manifest.py
+python3 scripts/upload_engine_assets_to_r2.py --assets-dir public/assets --manifest-path public/assets/run-manifest.json
+```
+
+Or, if you only need to publish the manifest after regenerating it:
+
+```bash
+python3 scripts/upload_run_manifest_to_r2.py
 ```
 
 The manifest generator:

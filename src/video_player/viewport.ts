@@ -56,6 +56,12 @@ export interface ViewportController {
 
   /** Access the root viewport element. */
   getElement: () => HTMLElement;
+
+  /** Ask the browser to begin buffering a set of likely-next videos. */
+  prewarmSources: (sources: string[]) => void;
+
+  /** Drop any prewarmed video elements for the previous run. */
+  clearPrewarmedSources: () => void;
 }
 
 export interface ViewportSourceOptions {
@@ -89,7 +95,7 @@ export function createViewport(
   video.loop = false;
   video.muted = true;
   video.playsInline = true;
-  video.preload = 'metadata';
+  video.preload = 'auto';
   video.setAttribute('aria-label', 'Simulation output');
 
   viewport.appendChild(video);
@@ -98,6 +104,7 @@ export function createViewport(
   let timeUpdateCallback: ((fraction: number) => void) | undefined;
   let endedCallback: (() => void) | undefined;
   let playStateCallback: ((isPaused: boolean) => void) | undefined;
+  const prewarmedVideos = new Map<string, HTMLVideoElement>();
 
   video.addEventListener('play', () => playStateCallback?.(false));
   video.addEventListener('pause', () => playStateCallback?.(true));
@@ -213,6 +220,44 @@ export function createViewport(
     timeUpdateCallback?.(0);
   }
 
+  function prewarmSources(sources: string[]): void {
+    const wanted = new Set(sources.filter(Boolean).filter((src) => src !== video.currentSrc));
+
+    for (const [src, prewarmedVideo] of prewarmedVideos.entries()) {
+      if (wanted.has(src)) {
+        continue;
+      }
+
+      prewarmedVideo.removeAttribute('src');
+      prewarmedVideo.load();
+      prewarmedVideos.delete(src);
+    }
+
+    for (const src of wanted) {
+      if (prewarmedVideos.has(src)) {
+        continue;
+      }
+
+      const prewarmedVideo = document.createElement('video');
+
+      prewarmedVideo.preload = 'auto';
+      prewarmedVideo.muted = true;
+      prewarmedVideo.playsInline = true;
+      prewarmedVideo.src = src;
+      prewarmedVideo.load();
+      prewarmedVideos.set(src, prewarmedVideo);
+    }
+  }
+
+  function clearPrewarmedSources(): void {
+    for (const prewarmedVideo of prewarmedVideos.values()) {
+      prewarmedVideo.removeAttribute('src');
+      prewarmedVideo.load();
+    }
+
+    prewarmedVideos.clear();
+  }
+
   function onTimeUpdate(callback: (fraction: number) => void): void {
     timeUpdateCallback = callback;
   }
@@ -250,5 +295,7 @@ export function createViewport(
       playStateCallback = callback;
     },
     getElement: () => viewport,
+    prewarmSources,
+    clearPrewarmedSources,
   };
 }

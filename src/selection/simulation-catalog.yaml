@@ -51,7 +51,7 @@ cosmos:
     - id: dark_matter_density
       label: Dark Matter
       icon: dark-matter
-    - id: gas_metallicity_stellar_density
+    - id: gas_metallicity_plus_stellar_density
       label: Metals + Stars
       icon: metals-stars
   metadata:
