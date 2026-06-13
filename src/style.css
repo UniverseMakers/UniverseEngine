@@ -2228,6 +2228,9 @@ button {
 
   .overlay {
     padding: 0;
+    place-items: stretch;
+    overflow: auto;
+    -webkit-overflow-scrolling: touch;
   }
 
   .entry-overlay {
@@ -2323,14 +2326,19 @@ button {
     height: 100dvh;
     max-height: 100vh;
     max-height: 100dvh;
+    overflow: hidden;
     border-radius: 0;
     border-left: 0;
     border-right: 0;
   }
 
-  /* Let the control column size correctly so the section can scroll. */
+  /* Turn the desktop modal into a full-height mobile sheet with one primary
+     vertical scroll area so Safari does not get stuck between nested scrollers. */
   .config-overlay__shell {
+    display: flex;
+    flex-direction: column;
     height: 100%;
+    min-height: 0;
   }
 
   .config-overlay__controls,
@@ -2352,8 +2360,8 @@ button {
 
   .config-overlay__section-indicator {
     min-width: 0;
-    font-size: 2.05rem;
-    letter-spacing: 0.12em;
+    font-size: 1.15rem;
+    letter-spacing: 0.18em;
     color: var(--accent);
   }
 
@@ -2380,6 +2388,9 @@ button {
   }
 
   .config-overlay__controls {
+    height: 100%;
+    min-height: 0;
+    overflow: hidden;
     gap: 1.75rem;
     padding-top: 2.2rem;
     padding-bottom: calc(2.2rem + env(safe-area-inset-bottom));
@@ -2390,14 +2401,48 @@ button {
   }
 
   .config-overlay__shell {
-    display: block;
-    min-height: 100vh;
-    overflow: auto;
+    min-height: 0;
+  }
+
+  .config-overlay__section--grow,
+  .terminal__log {
+    min-height: 0;
+    overflow-x: hidden;
+    overflow-y: auto;
     -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+    touch-action: pan-y;
+  }
+
+  .config-overlay__section--grow {
+    padding-bottom: 0.5rem;
+  }
+
+  .parameter-editor,
+  .parameter-editor__list {
+    min-height: 0;
+  }
+
+  .parameter-editor__heading {
+    display: grid;
+    gap: 0.3rem;
+    margin-bottom: 1.15rem;
+  }
+
+  .parameter-editor__title {
+    font-size: 1.15rem;
+    letter-spacing: 0.08em;
   }
 
   .param__name {
     font-size: 0.84rem;
+  }
+
+  .param__range {
+    display: block;
+    margin-top: 0.35rem;
+    letter-spacing: 0.12em;
+    line-height: 1.5;
   }
 
   .param__readout {
@@ -2545,12 +2590,6 @@ button {
 
   .terminal__cursor {
     padding: 0 1rem 1rem;
-  }
-}
-
-@media (max-width: 920px) and (orientation: portrait) {
-  .orientation-overlay {
-    display: grid;
   }
 }
 
