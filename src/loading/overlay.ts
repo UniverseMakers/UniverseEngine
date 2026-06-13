@@ -9,10 +9,17 @@
 import type { InitializationLine } from './init-text.ts';
 import { INITIALIZATION } from '../shared/constants.ts';
 
-/** Terminal-style loading overlay shown between config and display mode. */
+/** Terminal-style loading overlay shown between config and display mode.
+ *
+ * The overlay types a script of terminal lines and, if a `ready` promise is
+ * supplied, stays visible with a progress animation until that promise
+ * resolves.  This lets the app hide the full active-video download and
+ * progressive buffer build-up behind the terminal without risking a "frozen"
+ * screen when the network is slow. */
 export interface LoadingOverlayController {
-  /** Start streaming terminal lines and call `onComplete` when finished. */
-  show: (lines: InitializationLine[], onComplete: () => void) => void;
+  /** Start streaming terminal lines and call `onComplete` when the overlay
+   *  has been shown for long enough AND `ready` (if supplied) has resolved. */
+  show: (lines: InitializationLine[], onComplete: () => void, ready?: Promise<void>) => void;
   /** Immediately hide the overlay and clear any queued timers. */
   hide: () => void;
 }
@@ -128,7 +135,7 @@ export function createLoadingOverlay(container: HTMLElement): LoadingOverlayCont
   }
 
   return {
-    async show(lines: InitializationLine[], onComplete: () => void) {
+    async show(lines: InitializationLine[], onComplete: () => void, ready?: Promise<void>) {
       // Starting a new show() always invalidates any prior sequence first.
       clearTimers();
       sequenceToken += 1;
@@ -148,6 +155,37 @@ export function createLoadingOverlay(container: HTMLElement): LoadingOverlayCont
         const stampedLine = `${formatTimestamp(index)} ${line.text}`;
 
         await typeLine(stampedLine, token);
+      }
+
+      // When the caller supplies a `ready` promise the terminal stays visible
+      // with a syncing animation rather than showing a frozen screen.
+      if (ready) {
+        const syncingRow = document.createElement('div');
+
+        syncingRow.className = 'terminal__line terminal__line--syncing';
+        syncingRow.textContent = `${formatTimestamp(lines.length)} STARTING SIMULATION`;
+        log.appendChild(syncingRow);
+
+        let dotCount = 0;
+        const dotInterval = window.setInterval(() => {
+          dotCount = (dotCount + 1) % 4;
+          const dots = '.'.repeat(dotCount);
+
+          syncingRow.textContent = `${formatTimestamp(lines.length)} STARTING SIMULATION${dots}`;
+          log.scrollTop = log.scrollHeight;
+        }, 400);
+
+        timers.push(dotInterval);
+
+        try {
+          await ready;
+        } catch {
+          // The ready promise rejected — carry on.
+        }
+
+        window.clearInterval(dotInterval);
+        syncingRow.textContent = `${formatTimestamp(lines.length)} STARTING SIMULATION...`;
+        log.scrollTop = log.scrollHeight;
       }
 
       if (token === sequenceToken) {

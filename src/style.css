@@ -1987,6 +1987,10 @@ button {
   animation: blink 0.8s step-end infinite;
 }
 
+.terminal__line--syncing {
+  opacity: 0.65;
+}
+
 /* -------------------------------------------------------------------------- */
 /* Theme-Specific Surface Overrides                                            */
 /* -------------------------------------------------------------------------- */

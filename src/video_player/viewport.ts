@@ -3,6 +3,20 @@
  *
  * The viewport hosts a real video element. Media is visually hidden until
  * initialization finishes, so the display only "comes alive" once ready.
+ *
+ * ── Loading philosophy ─────────────────────────────────────────────────
+ * This module tries to keep tab switches and re-seeks network-free wherever
+ * possible while avoiding premature prewarm work that would compete with
+ * the active video's initial buffer.
+ *
+ *   • The active video uses `preload="auto"` so the browser can fetch ahead.
+ *   • `prewarmSources()` runs detached `<video>` preloading + full-Blob
+ *     fetches for likely-next views *after* the active video is revealed.
+ *   • `setSource()` silently substitutes a primed Blob URL for the remote
+ *     URL, so the caller (app-shell) can stay simple and never worry about
+ *     whether the video is local or remote.
+ *   • `clearPrewarmedSources()` revokes everything when the run changes,
+ *     keeping memory and object-URL references clean.
  */
 
 export interface ViewportController {
@@ -29,6 +43,12 @@ export interface ViewportController {
 
   /** Reset playback back to the start. */
   resetPlayback: () => void;
+
+  /** Wait for the current source to have decoded initial media data. */
+  waitForLoadedData: (timeoutMs?: number) => Promise<void>;
+
+  /** Wait until the current source has buffered ahead by the requested amount. */
+  waitForBufferedAhead: (minSeconds: number, timeoutMs?: number) => Promise<void>;
 
   /** Subscribe to normalized time updates. */
   onTimeUpdate: (callback: (fraction: number) => void) => void;
@@ -57,16 +77,44 @@ export interface ViewportController {
   /** Access the root viewport element. */
   getElement: () => HTMLElement;
 
-  /** Ask the browser to begin buffering a set of likely-next videos. */
+  /** Ask the browser to begin buffering a set of likely-next videos.
+   *
+   *  This runs two strategies in parallel for every candidate URL:
+   *
+   *  1.  **Media-element preloading** — a detached `<video>` element whose
+   *      `preload="auto"` tells the browser to fetch and cache a useful
+   *      buffer window.  If the user later switches tabs, the browser's
+   *      media cache may serve the data directly.
+   *
+   *  2.  **Background blob pre-fetch** — a `fetch()` of the full file.  When
+   *      it completes the resulting Blob URL is stored so that
+   *      `setSource()` can swap it in silently, giving the viewport a
+   *      completely local media source with zero network activity on the
+   *      next seek or tab switch.
+   *
+   *  Pre-fetched blob URLs are automatically consumed and cleaned up by
+   *  `setSource()` (so the caller does not need to look them up) and are
+   *  revoked together when `clearPrewarmedSources()` runs.
+   *
+   *  ── Why both strategies? ──────────────────────────────────────────
+   *  Media-element preloading is fast to start and lets progressive
+   *  playback begin quickly.  Background blob pre-fetch eliminates
+   *  network reads and decode stalls entirely once the file is local.
+   *  Together they give the best chance of an instant tab switch
+   *  regardless of which strategy finishes first. */
   prewarmSources: (sources: string[]) => void;
 
   /** Drop any prewarmed video elements for the previous run. */
   clearPrewarmedSources: () => void;
+
+  /** Return a pre-fetched blob URL if one was primed by prewarmSources. */
+  getPrewarmedBlobUrl: (src: string) => string | null;
 }
 
 export interface ViewportSourceOptions {
   seekFraction?: number;
   autoplay?: boolean;
+  ownedObjectUrl?: boolean;
 }
 
 /**
@@ -105,6 +153,8 @@ export function createViewport(
   let endedCallback: (() => void) | undefined;
   let playStateCallback: ((isPaused: boolean) => void) | undefined;
   const prewarmedVideos = new Map<string, HTMLVideoElement>();
+  const prewarmedBlobUrls = new Map<string, string>();
+  let ownedObjectUrl: string | null = null;
 
   video.addEventListener('play', () => playStateCallback?.(false));
   video.addEventListener('pause', () => playStateCallback?.(true));
@@ -132,7 +182,32 @@ export function createViewport(
   // speed preference survives view switches and run restarts.
   let desiredRate = video.playbackRate;
 
+  function releaseOwnedObjectUrl(): void {
+    if (!ownedObjectUrl) {
+      return;
+    }
+
+    URL.revokeObjectURL(ownedObjectUrl);
+    ownedObjectUrl = null;
+  }
+
   function setSource(src: string, options: ViewportSourceOptions = {}): void {
+    // ── Blob-URL substitution ──────────────────────────────────────────
+    // If a background pre-fetch primed a local Blob URL for this remote
+    // source, substitute it now.  This is how tab switches and re-selects
+    // get instant local scrubbing without any special-case code in the
+    // callers.  The Blob URL is consumed on first use (removed from the
+    // cache) so that a subsequent call with the same remote source won't
+    // accidentally re-use a stale reference.
+    const primedBlobUrl = prewarmedBlobUrls.get(src);
+
+    if (primedBlobUrl) {
+      prewarmedBlobUrls.delete(src);
+      options = { ...options, ownedObjectUrl: true };
+
+      src = primedBlobUrl;
+    }
+
     // Fade out first so swapping sources feels deliberate rather than like a
     // hard cut between two unrelated videos.
     video.classList.add('fade-out');
@@ -148,6 +223,8 @@ export function createViewport(
 
       const resumeMuted = video.muted;
       const seekFraction = options.seekFraction;
+      releaseOwnedObjectUrl();
+      ownedObjectUrl = options.ownedObjectUrl ? src : null;
 
       // Replace the source and wait for media data before seeking/autoplaying.
       video.src = src;
@@ -220,6 +297,99 @@ export function createViewport(
     timeUpdateCallback?.(0);
   }
 
+  function waitForLoadedData(timeoutMs = 8000): Promise<void> {
+    if (video.readyState >= HTMLMediaElement.HAVE_CURRENT_DATA) {
+      return Promise.resolve();
+    }
+
+    return new Promise((resolve) => {
+      const handleLoaded = () => {
+        cleanup();
+        resolve();
+      };
+      const handleTimeout = window.setTimeout(() => {
+        cleanup();
+        resolve();
+      }, Math.max(0, timeoutMs));
+
+      function cleanup() {
+        window.clearTimeout(handleTimeout);
+        video.removeEventListener('loadeddata', handleLoaded);
+      }
+
+      video.addEventListener('loadeddata', handleLoaded, { once: true });
+    });
+  }
+
+  function waitForBufferedAhead(minSeconds: number, timeoutMs = 8000): Promise<void> {
+    const target = Math.max(0, minSeconds);
+    if (target === 0 || hasBufferedAhead(target)) {
+      return Promise.resolve();
+    }
+
+    return new Promise((resolve) => {
+      const handleProgress = () => {
+        if (!hasBufferedAhead(target)) {
+          return;
+        }
+
+        cleanup();
+        resolve();
+      };
+      const handleTimeout = window.setTimeout(() => {
+        cleanup();
+        resolve();
+      }, Math.max(0, timeoutMs));
+
+      function cleanup() {
+        window.clearTimeout(handleTimeout);
+        video.removeEventListener('progress', handleProgress);
+        video.removeEventListener('canplay', handleProgress);
+        video.removeEventListener('loadeddata', handleProgress);
+      }
+
+      video.addEventListener('progress', handleProgress);
+      video.addEventListener('canplay', handleProgress);
+      video.addEventListener('loadeddata', handleProgress);
+      handleProgress()
+    });
+  }
+
+  function hasBufferedAhead(minSeconds: number): boolean {
+    const currentTime = video.currentTime;
+
+    for (let index = 0; index < video.buffered.length; index += 1) {
+      const start = video.buffered.start(index);
+      const end = video.buffered.end(index);
+
+      if (currentTime < start || currentTime > end) {
+        continue;
+      }
+
+      return end - currentTime >= minSeconds;
+    }
+
+    return false;
+  }
+
+  // ── Prewarm / background-fetch strategy ──────────────────────────────
+  //
+  // Alternate-video views are prewarmed *after* the active video has been
+  // revealed, so they never compete for bandwidth during the critical
+  // initial-buffering window.
+  //
+  // Prewarming runs two parallel strategies (see the interface doc above):
+  // detached <video> preloading + background Blob fetches.
+  //
+  // When `setSource()` is later called with a remote URL for which a Blob
+  // is already primed, the Blob URL is silently substituted.  That gives the
+  // viewport a fully local source — network-free scrubbing — with no extra
+  // work or delay in the tab-switch code path.
+  //
+  // ── Cleanup ──────────────────────────────────────────────────────────
+  // `clearPrewarmedSources()` revokes all tracked Blob URLs and resets the
+  // detached media elements so the next run starts from a clean state.
+
   function prewarmSources(sources: string[]): void {
     const wanted = new Set(sources.filter(Boolean).filter((src) => src !== video.currentSrc));
 
@@ -247,15 +417,59 @@ export function createViewport(
       prewarmedVideo.load();
       prewarmedVideos.set(src, prewarmedVideo);
     }
+
+    // In parallel with media-element preloading, attempt full background
+    // fetches for each wanted source so that tab switches can use a local
+    // blob URL with zero network lag.
+    for (const src of wanted) {
+      if (prewarmedBlobUrls.has(src)) {
+        continue;
+      }
+
+      // Append a cache-busting query parameter so that Cloudflare's edge
+      // cache serves a fresh response with CORS headers.  Without a custom
+      // domain the dashboard cache-purge controls are unavailable.
+      const cacheBustedUrl = `${src}?_=${Date.now()}`;
+
+      void fetch(cacheBustedUrl)
+        .then(async (response) => {
+          if (!response.ok) {
+            return;
+          }
+
+          const blob = await response.blob();
+
+          prewarmedBlobUrls.set(src, URL.createObjectURL(blob));
+        })
+        .catch(() => {
+          // Background fetch failed — either CORS headers are still
+          // propagating through Cloudflare's cache or the preflight
+          // was rejected.  The <video>-element preload and the
+          // progressive path will handle this view.
+        });
+    }
   }
 
   function clearPrewarmedSources(): void {
+    // Reset detached <video> elements and revoke every background Blob URL
+    // so the next run starts with a clean prewarm cache and no leaked Blob
+    // references.
     for (const prewarmedVideo of prewarmedVideos.values()) {
       prewarmedVideo.removeAttribute('src');
       prewarmedVideo.load();
     }
 
     prewarmedVideos.clear();
+
+    for (const blobUrl of prewarmedBlobUrls.values()) {
+      URL.revokeObjectURL(blobUrl);
+    }
+
+    prewarmedBlobUrls.clear();
+  }
+
+  function getPrewarmedBlobUrl(src: string): string | null {
+    return prewarmedBlobUrls.get(src) ?? null;
   }
 
   function onTimeUpdate(callback: (fraction: number) => void): void {
@@ -275,6 +489,8 @@ export function createViewport(
     showMedia,
     seekToFraction,
     resetPlayback,
+    waitForLoadedData,
+    waitForBufferedAhead,
     onTimeUpdate,
     onEnded,
     getDurationSeconds: () => (Number.isFinite(video.duration) ? video.duration : 0),
@@ -297,5 +513,6 @@ export function createViewport(
     getElement: () => viewport,
     prewarmSources,
     clearPrewarmedSources,
+    getPrewarmedBlobUrl,
   };
 }

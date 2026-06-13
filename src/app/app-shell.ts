@@ -48,6 +48,40 @@ import { logInfo, logWarn } from '../shared/logger.ts';
 
 type AppMode = 'entry' | 'config' | 'initializing' | 'display';
 
+interface PreparedVideoSource {
+  src: string;
+  ownedObjectUrl: boolean;
+  shouldWaitForBuffer: boolean;
+}
+
+// ── Hybrid active-video loading strategy ─────────────────────────────────
+//
+// The app tries to hide cold-network time behind the faux terminal boot
+// sequence.  For the *selected* active view it has two paths:
+//
+//   1.  Full local fetch (≤ ACTIVE_VIDEO_FULL_FETCH_MAX_BYTES behind the
+//       terminal) — after that scrubbing is entirely local and instant.
+//   2.  Progressive remote playback — the browser buffers via native HTTP
+//       byte ranges.  The terminal holds until a useful buffer-ahead window
+//       is reached (ACTIVE_VIDEO_BUFFER_SECONDS), with a hard timeout
+//       (ACTIVE_VIDEO_BUFFER_WAIT_MS) so the user is never stalled forever.
+//
+// This hybrid design balances smooth UX (arbitrary scrubbing, quick tab
+// switches) against Cloudflare R2 Class B operation costs: downloading one
+// full video *once* per selected run is often cheaper in operations than
+// many scattered byte-range reads during heavy scrubbing, and local Blobs
+// completely eliminate network activity for that view.
+//
+// Alternate views are *not* downloaded during the loading phase — that
+// would compete for bandwidth with the active view.  Instead they are
+// prewarmed in the background *after* the active video has been revealed
+// (see `viewport.prewarmSources`).
+
+const ACTIVE_VIDEO_FULL_FETCH_MAX_BYTES = 50 * 1024 * 1024;
+const ACTIVE_VIDEO_BUFFER_SECONDS = 8;
+const ACTIVE_VIDEO_BUFFER_WAIT_MS = 6000;
+const ACTIVE_VIDEO_LOADED_DATA_WAIT_MS = 8000;
+
 /** Maps each cosmic scale to its default visual theme. */
 const SCALE_TO_THEME: Record<string, ThemeId> = {
   galaxy: 'tron',
@@ -98,10 +132,6 @@ export function createAppShell(app: HTMLElement): void {
 
   // Manifest-backed run selection for the currently loaded simulation.
   let activeRunMatch: VideoMatch | null = null;
-
-  // Persist the user's preferred view per simulation family so switching
-  // families and coming back remembers which view they last chose.
-  const preferredViewByClass: Record<string, string | undefined> = {};
 
   // Last-known playback time in seconds; used to refresh HUD after async loads
   // complete (e.g. CSV parsing or YAML fetch).
@@ -363,6 +393,9 @@ export function createAppShell(app: HTMLElement): void {
     onValuesChange: handleValuesChange,
     onThemeChange: handleThemeChange,
     onRun: () => {
+      logInfo('Parameters submitted — starting run', {
+        simClassId: activeClass.id,
+      });
       void handleRun();
     },
     onApplySettings: handleApplySettings,
@@ -610,13 +643,19 @@ export function createAppShell(app: HTMLElement): void {
    * Start a new run for the active simulation class.
    *
    * The flow: find the nearest matching video in the manifest → load its live
-   * stats and metadata → show the boot sequence → reveal the viewport → play.
+   * stats and metadata → start full-fetching the active video AND prewarming
+   * alternate views, all behind the terminal boot sequence.  The loading
+   * overlay stays visible with a "STARTING SIMULATION..." animation until
+   * the active video is truly ready.  Everything that can be preloaded has
+   * the entire terminal window to do so.  Views that fail to finish in time
+   * simply fall back to progressive playback — the user never waits for
+   * them.
    *
    * @returns void
    */
   async function handleRun(): Promise<void> {
     const values = getActiveValues();
-    logInfo('Starting run', {
+    logInfo('Run requested', {
       simClassId: activeClass.id,
       values,
       manifestSource: manifestController.getSource(),
@@ -633,9 +672,10 @@ export function createAppShell(app: HTMLElement): void {
     // Resolve which view (dark matter, gas density, etc.) to show first.
     const selectedViewId = resolveSelectedViewId(activeClass, match);
     const selectedViewUrl = getViewUrl(match, selectedViewId) ?? match.url;
+    const alternateViewUrls = Object.entries(match.views ?? {})
+      .filter(([viewId]) => viewId !== selectedViewId)
+      .map(([, url]) => url);
 
-    viewport.setSource(selectedViewUrl);
-    viewport.pause();
     // Fire-and-forget the async data loads — they'll update the HUD when done.
     void loadActiveLiveStats(match.liveDataUrl);
     void loadActiveRunMetadata(match.summaryUrl);
@@ -643,20 +683,191 @@ export function createAppShell(app: HTMLElement): void {
     refreshViewSwitcher(selectedViewId);
     setMode('initializing');
 
-    // Kick off the terminal boot sequence. When it finishes, reveal the video
-    // and try to play it. If autoplay is blocked, fall back to muted.
-    loadingOverlay.show(getInitializationLines(activeClass), () => {
-      hasCompletedInitialization = true;
-      viewport.showMedia();
-      void viewport.play().catch(() => {
-        viewport.setMuted(true);
-        void viewport.play().catch(() => {
-          // Leave the media paused if the browser still rejects playback.
-          // This is expected on some mobile browsers without a user gesture.
-        });
+    // Start both the active video and alternate views downloading
+    // immediately so that the entire loading-terminal window is used
+    // for pre-warming.  Views that complete their full fetch get a
+    // local Blob; views that do not simply fall through to the
+    // progressive path — the user is never blocked on them.
+    const preparedSourcePromise = prepareActiveVideoSource(selectedViewUrl);
+    viewport.prewarmSources(alternateViewUrls);
+
+    const videoReady = (async (): Promise<void> => {
+      const preparedSource = await preparedSourcePromise;
+
+      logInfo(
+        `Prepared active video source: ${preparedSource.ownedObjectUrl ? 'FULL-FETCH' : 'PROGRESSIVE'}`,
+        { selectedViewUrl, waitsForBuffer: preparedSource.shouldWaitForBuffer },
+      );
+
+      viewport.setSource(preparedSource.src, {
+        ownedObjectUrl: preparedSource.ownedObjectUrl,
       });
-      setMode('display');
+      viewport.pause();
+
+      await viewport.waitForLoadedData(ACTIVE_VIDEO_LOADED_DATA_WAIT_MS);
+
+      if (preparedSource.shouldWaitForBuffer) {
+        await viewport.waitForBufferedAhead(
+          ACTIVE_VIDEO_BUFFER_SECONDS,
+          ACTIVE_VIDEO_BUFFER_WAIT_MS,
+        );
+      }
+    })();
+
+    const loadingFinished = new Promise<void>((resolve) => {
+      loadingOverlay.show(getInitializationLines(activeClass), resolve, videoReady);
     });
+
+    await loadingFinished;
+
+    hasCompletedInitialization = true;
+    viewport.showMedia();
+    void viewport.play().catch(() => {
+      viewport.setMuted(true);
+      void viewport.play().catch(() => {
+        // Leave the media paused if the browser still rejects playback.
+        // This is expected on some mobile browsers without a user gesture.
+      });
+    });
+    setMode('display');
+  }
+
+  /**
+   * Decide how to load the active video: full local download or progressive.
+   *
+   * ── Why probe size first? ────────────────────────────────────────────
+   * A small Range GET gives us Content-Length without fetching the whole
+   * file.  If the video is small enough to download fully while the terminal
+   * plays we do that — a single GET that may be cheaper in Class B
+   * operations than dozens of scattered byte-range reads during heavy
+   * scrubbing.  If the video is too large we fall back to native progressive
+   * playback so the user is never blocked on a multi-minute download.
+   *
+   * ── Why Range instead of HEAD? ───────────────────────────────────────
+   * Cloudflare R2's CORS policy may not include Access-Control-Allow-Origin
+   * on HEAD responses even when GET works correctly.  A Range GET (bytes=0-0)
+   * is treated as a simple CORS request and consistently returns the headers
+   * we need.
+   */
+  async function prepareActiveVideoSource(videoUrl: string): Promise<PreparedVideoSource> {
+    const contentLength = await probeContentLength(videoUrl);
+
+    if (
+      contentLength !== null &&
+      contentLength > 0 &&
+      contentLength <= ACTIVE_VIDEO_FULL_FETCH_MAX_BYTES
+    ) {
+      logInfo('Downloading active video behind loading overlay', {
+        videoUrl,
+        contentLength,
+      });
+
+      try {
+        const mediaResponse = await fetch(videoUrl);
+
+        if (!mediaResponse.ok) {
+          throw new Error(`Failed to download active video: ${videoUrl}`);
+        }
+
+        const blob = await mediaResponse.blob();
+
+        logInfo(`Active video full fetch complete: ${blob.size} bytes`, {
+          videoUrl,
+          blobType: blob.type,
+        });
+
+        return {
+          src: URL.createObjectURL(blob),
+          ownedObjectUrl: true,
+          shouldWaitForBuffer: false,
+        };
+      } catch (error) {
+        logWarn(`Full-fetch FAILED; falling back to progressive: ${error instanceof Error ? error.message : String(error)}`, {
+          videoUrl,
+        });
+      }
+    }
+
+    if (contentLength !== null) {
+      logInfo('Active video exceeds full-fetch threshold; using progressive load', {
+        videoUrl,
+        contentLength,
+        fullFetchMaxBytes: ACTIVE_VIDEO_FULL_FETCH_MAX_BYTES,
+      });
+    } else {
+      logInfo('Could not determine active video size; using progressive load', {
+        videoUrl,
+      });
+    }
+
+    logInfo('Using progressive active video load', { videoUrl });
+
+    return {
+      src: videoUrl,
+      ownedObjectUrl: false,
+      shouldWaitForBuffer: true,
+    };
+  }
+
+  async function probeContentLength(videoUrl: string): Promise<number | null> {
+    try {
+      const rangeResponse = await fetch(videoUrl, {
+        headers: { Range: 'bytes=0-0' },
+      });
+
+      logInfo('Probed active video size with range request', {
+        videoUrl,
+        ok: rangeResponse.ok,
+        status: rangeResponse.status,
+        contentLength: rangeResponse.headers.get('Content-Length'),
+        contentRange: rangeResponse.headers.get('Content-Range'),
+      });
+
+      const contentLength = parseContentLength(rangeResponse.headers.get('Content-Length'));
+
+      if (contentLength !== null) {
+        return contentLength;
+      }
+
+      const sizeFromRange = parseContentRangeTotal(rangeResponse.headers.get('Content-Range'));
+      if (sizeFromRange !== null) {
+        return sizeFromRange;
+      }
+
+      return null;
+    } catch (error) {
+      logWarn('Could not probe active video size', {
+        videoUrl,
+        error: error instanceof Error ? error.message : String(error),
+      });
+      return null;
+    }
+  }
+
+  function parseContentRangeTotal(header: string | null): number | null {
+    if (!header) {
+      return null;
+    }
+
+    const match = header.match(/bytes\s+\d+-\d+\/(\d+)/i);
+
+    if (!match) {
+      return null;
+    }
+
+    const parsed = Number(match[1]);
+
+    return Number.isFinite(parsed) && parsed > 0 ? parsed : null;
+  }
+
+  function parseContentLength(value: string | null): number | null {
+    if (!value) {
+      return null;
+    }
+
+    const parsed = Number(value);
+
+    return Number.isFinite(parsed) ? parsed : null;
   }
 
   /**
@@ -803,6 +1014,7 @@ export function createAppShell(app: HTMLElement): void {
     summaryOverlay.hide();
     viewSwitcher.hide();
     viewport.pause();
+    viewport.clearPrewarmedSources();
     viewport.resetPlayback();
     timeline.setPosition(0);
   }
@@ -813,6 +1025,21 @@ export function createAppShell(app: HTMLElement): void {
    * Views are alternate video renderings of the same simulation run (e.g. dark
    * matter vs. gas density). Switching views should feel seamless — we preserve
    * the current seek position and autoplay state.
+   *
+   * ── Why this path does NOT probe or full-fetch ────────────────────────
+   * Every millisecond of delay on a tab switch is directly visible to the
+   * user.  Instead, alternate views were already prewarmed in the background
+   * after the active video revealed (see `viewport.prewarmSources`).  That
+   * prewarm runs full fetches AND progressive preloading; when the user
+   * switches, `viewport.setSource` automatically picks up any primed blob
+   * URL with zero extra work.  If the prewarm has not finished yet the
+   * browser falls through to its already-buffered media data.
+   *
+   * ── Why we no longer remember the last-selected view ──────────────────
+   * Every fresh run always starts on the canonical default view (e.g. gas
+   * density for cosmos).  This makes the loading path predictable: we know
+   * which video to download behind the terminal, and the remaining views
+   * can warm in the background on a fixed schedule.
    *
    * @param viewId - Manifest/YAML view id.
    * @returns void
@@ -833,8 +1060,6 @@ export function createAppShell(app: HTMLElement): void {
       return;
     }
 
-    // Remember the user's preference for this simulation family.
-    preferredViewByClass[activeClass.id] = viewId;
     activeRunMatch.viewId = viewId;
 
     // Determine whether the video was playing before the switch.
@@ -1002,30 +1227,23 @@ export function createAppShell(app: HTMLElement): void {
   }
 
   /**
-   * Resolve the preferred or default view id for the active simulation.
+   * Resolve the default view id for the active simulation.
    *
-   * Priority order: user's saved preference → manifest's default view → the
-   * first view in the manifest's views object. This ensures the switcher always
-   * has a valid starting selection.
+   * Priority order: manifest's default view → the first view in the manifest's
+   * views object. This ensures every fresh run starts on the canonical entry
+   * view for that simulation family.
    *
    * @param simClass - Simulation family.
    * @param match - Active manifest-backed run.
    * @returns View id when available.
    */
   function resolveSelectedViewId(
-    simClass: SimulationClass,
+    _simClass: SimulationClass,
     match: VideoMatch | null,
   ): string | undefined {
     // No views configured? Just return whatever the match has.
     if (!match?.views) {
       return match?.viewId;
-    }
-
-    // Check for a user preference saved from a previous selection.
-    const preferred = preferredViewByClass[simClass.id];
-
-    if (preferred && match.views[preferred]) {
-      return preferred;
     }
 
     // Fall back to the manifest's default, or the first view alphabetically.
