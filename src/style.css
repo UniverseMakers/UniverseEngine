@@ -2392,6 +2392,8 @@ button {
   .config-overlay__shell {
     display: block;
     min-height: 100vh;
+    overflow: auto;
+    -webkit-overflow-scrolling: touch;
   }
 
   .param__name {
