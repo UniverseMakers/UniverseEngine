@@ -68,22 +68,22 @@ cosmos:
     max: 4
     step: 0.01
     default: 1
-    value_scale: 0.1536
+    value_scale: 0.159
   black_hole_strength:
     label: Black Hole Strength
-    description: The temperature of gas that can escape from a black hole. As gas falls in towards a black hole, it becomes superheated and forms an "accretion disc" around the black hole. This superheated plasma wants to escape and does so either as heat dumped into the environment or "jets" blasted out from the poles. Astrophysicists call this "feedback" but exactly how strong this feedback is, and the manner in which it leaves the black hole is up for debate.
+    description: The temperature of gas escaping from a black hole. As gas falls in towards a black hole, it becomes superheated and forms an "accretion disc" around the black hole. This superheated plasma wants to escape and does so either as heat dumped into the environment or "jets" blasted out from the poles. Astrophysicists call this "feedback" but exactly how strong this feedback is, and the manner in which it leaves the black hole is up for debate.
     unit: 'K'
     min: 0.01
-    max: 6.67
+    max: 50.0
     step: 0.01
     default: 1
-    value_scale: 1.0e8
+    value_scale: 8.80e7
     display_format: scientific
     display_significant_figures: 3
   gravity_strength:
     label: Gravity
     description: The strength of gravity, as described by Newton's gravitational constant G. Varying G changes the rate at which matter collapses into cosmic structures like dark matter halos and the cosmic web.
-    unit: 'm^3 kg^-1 s^-2'
+    unit: ''
     min: 0.01
     max: 10
     step: 0.01
