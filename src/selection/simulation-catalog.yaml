@@ -34,9 +34,9 @@ galaxy:
   metadata:
     distinctSimulations: 20488
     correctValues:
-      star_formation_rate: 2.4
-      black_hole_mass: 4.3
       stellar_mass: 5.1
+      black_hole_mass: 4.3
+      galaxy_age: 12.6
 
 cosmos:
   label: Cosmos

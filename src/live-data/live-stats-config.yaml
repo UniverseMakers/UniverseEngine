@@ -47,33 +47,49 @@ planetary:
 
 galaxy:
   liveStats:
-    - id: star_formation_rate
-      value: '3.0'
-      unit: M☉/yr
-      live: true
-    - id: black_hole_mass
-      value: '4.0'
-      unit: ×10⁶ M☉
-      live: true
-    - id: stellar_mass
-      value: '5.0'
-      unit: ×10¹⁰ M☉
-      live: true
-    - id: size
+    - id: redshift
       value: 0.0
-      unit: kpc
+      unit: ''
+      label: Redshift
       live: true
-    - id: age
+      live_key: Redshift
+    - id: cosmic_time
       value: 0.0
       unit: Gyr
+      label: Cosmic Time
       live: true
-    - id: particlesUpdated
+      live_key: CosmicTime_Gyr
+    - id: stellar_mass
       value: '0'
-      label: Particle updates
+      unit: Msun
+      label: Stellar Mass
       live: true
-      from_video: true
-      scale_with_time: true
-      integer: true
+      live_key: StellarMassWithinR200_Msun
+    - id: stellar_size
+      value: 0.0
+      unit: kpc
+      label: Stellar Size
+      live: true
+      live_key: StellarHalfMassRadius_kpc
+    - id: black_hole_mass
+      value: '0'
+      unit: Msun
+      label: Black Hole Mass
+      live: true
+      live_key: BHSubgridMassWithinR200_Msun
+    - id: star_formation_rate
+      value: 0.0
+      unit: Msun/yr
+      label: SFR
+      live: true
+      live_key: StarFormationRateWithinR200_Msun_per_yr
+    - id: galaxy_age
+      value: 0.0
+      unit: Gyr
+      label: Mass-Weighted Age
+      live: true
+      live_key: StellarMassWeightedAge_yr
+      value_scale: 1.0e-9
 
 cosmos:
   liveStats:
