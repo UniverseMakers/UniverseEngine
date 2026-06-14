@@ -101,8 +101,8 @@ interface RawParameterConfig {
   unit?: string;
   min: number;
   max: number;
-  step: number;
-  default: number;
+  step?: number;
+  default?: number;
   description?: string;
   value_scale?: number;
   display_unit?: string;
@@ -162,20 +162,26 @@ export const SIMULATION_CLASSES: SimulationClass[] = Object.entries(catalog).map
         summaryStats: summaryStats.map(normalizeStatConfig),
         liveStats: liveStats.map(normalizeStatConfig),
       },
-      parameters: Object.entries(rawParams).map(([parameterId, parameter]) => ({
-        id: parameterId,
-        label: parameter.label,
-        unit: parameter.unit ?? '',
-        min: parameter.min,
-        max: parameter.max,
-        step: parameter.step,
-        defaultValue: parameter.default,
-        description: parameter.description,
-        valueScale: parameter.value_scale,
-        displayUnit: parameter.display_unit,
-        displayFormat: parameter.display_format,
-        displaySignificantFigures: parameter.display_significant_figures,
-      })),
+      parameters: Object.entries(rawParams).map(([parameterId, parameter]) => {
+        const step = parameter.step ?? inferParameterStep(parameter.min, parameter.max);
+        const defaultValue =
+          parameter.default ?? entry.metadata.correctValues[parameterId] ?? midpoint(parameter.min, parameter.max);
+
+        return {
+          id: parameterId,
+          label: parameter.label,
+          unit: parameter.unit ?? '',
+          min: parameter.min,
+          max: parameter.max,
+          step,
+          defaultValue,
+          description: parameter.description,
+          valueScale: parameter.value_scale,
+          displayUnit: parameter.display_unit,
+          displayFormat: parameter.display_format,
+          displaySignificantFigures: parameter.display_significant_figures,
+        };
+      }),
       views: (entry.views ?? []).map((view) => ({
         id: view.id,
         label: view.label,
@@ -201,4 +207,29 @@ function normalizeStatConfig(config: RawStatDisplayConfig): StatDisplayConfig {
     displayFormat: config.display_format,
     precision: config.precision,
   };
+}
+
+function inferParameterStep(min: number, max: number): number {
+  const range = Math.max(max - min, 1e-9);
+  const target = range / 100;
+  const magnitude = 10 ** Math.floor(Math.log10(target));
+  const normalized = target / magnitude;
+
+  let bucket = 1;
+
+  if (normalized <= 1) {
+    bucket = 1;
+  } else if (normalized <= 2) {
+    bucket = 2;
+  } else if (normalized <= 5) {
+    bucket = 5;
+  } else {
+    bucket = 10;
+  }
+
+  return bucket * magnitude;
+}
+
+function midpoint(min: number, max: number): number {
+  return min + (max - min) / 2;
 }
