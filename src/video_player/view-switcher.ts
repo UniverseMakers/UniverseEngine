@@ -124,6 +124,29 @@ function createViewIcon(iconId?: string): SVGSVGElement | null {
         <path d="M7.2 7.2h2.5"></path>
         <path d="M14.3 16.8h2.5"></path>
       `);
+    case 'hubble-space-telescope':
+      return createSvg(`
+        <path d="M12 4.5v5.2"></path>
+        <path d="M8.2 7.1 15.8 7.1"></path>
+        <path d="M10.1 9.7h3.8v6.3h-3.8z"></path>
+        <path d="M7.2 16 16.8 16"></path>
+        <path d="M9.1 16 7 19.5"></path>
+        <path d="M14.9 16 17 19.5"></path>
+        <path d="M6.3 19.5h11.4"></path>
+      `);
+    case 'large-scale-structure':
+      return createSvg(`
+        <circle cx="6" cy="7" r="1.4"></circle>
+        <circle cx="18" cy="6" r="1.2"></circle>
+        <circle cx="12" cy="12" r="1.5"></circle>
+        <circle cx="7.5" cy="17" r="1.2"></circle>
+        <circle cx="17.5" cy="18" r="1.4"></circle>
+        <path d="M7.1 7.7 10.9 11"></path>
+        <path d="M13.4 11 16.9 6.9"></path>
+        <path d="M11.3 13.3 8.3 16"></path>
+        <path d="M13.1 13.5 16.4 16.9"></path>
+        <path d="M8.8 17.2 16.2 17.8"></path>
+      `);
     default:
       return null;
   }

@@ -116,6 +116,48 @@ const MESSAGES: Record<string, Record<string, string>> = {
 };
 
 const TARGET_MESSAGES: Record<string, Record<string, string>> = {
+  stellar_mass: {
+    greenLow:
+      'Very close. This galaxy ends up just a little less massive in stars than the Milky Way.',
+    greenHigh:
+      'Very close. This galaxy ends up just a little more massive in stars than the Milky Way.',
+    amberLow:
+      'A bit low. This galaxy built less stellar mass than the Milky Way, so it would look more like a smaller disc system.',
+    amberHigh:
+      'A bit high. This galaxy built more stellar mass than the Milky Way, so it would be a noticeably heavier stellar system.',
+    redLow:
+      'Far too low. This galaxy is much less stellar-massive than the Milky Way.',
+    redHigh:
+      'Far too high. This galaxy is much more stellar-massive than the Milky Way.',
+  },
+  black_hole_mass: {
+    greenLow:
+      'Very close. The central black hole is just a little lighter than Sagittarius A* in the Milky Way.',
+    greenHigh:
+      'Very close. The central black hole is just a little heavier than Sagittarius A* in the Milky Way.',
+    amberLow:
+      'A bit low. The central black hole is smaller than the Milky Way\'s Sagittarius A*.',
+    amberHigh:
+      'A bit high. The central black hole is larger than the Milky Way\'s Sagittarius A*.',
+    redLow:
+      'Far too low. The central black hole is much smaller than Sagittarius A* in the Milky Way.',
+    redHigh:
+      'Far too high. The central black hole is much larger than Sagittarius A* in the Milky Way.',
+  },
+  galaxy_age: {
+    greenLow:
+      'Very close. The galaxy\'s mass-weighted stellar age is just a little younger than the Milky Way\'s.',
+    greenHigh:
+      'Very close. The galaxy\'s mass-weighted stellar age is just a little older than the Milky Way\'s.',
+    amberLow:
+      'A bit low. The stars in this galaxy are younger on average than the Milky Way\'s stellar population.',
+    amberHigh:
+      'A bit high. The stars in this galaxy are older on average than the Milky Way\'s stellar population.',
+    redLow:
+      'Far too low. This galaxy\'s stellar population is much younger, on average, than the Milky Way\'s.',
+    redHigh:
+      'Far too high. This galaxy\'s stellar population is much older, on average, than the Milky Way\'s.',
+  },
   baryon_fraction: {
     greenLow:
       'Very close. You chose a little less ordinary matter than the reference universe, so there is slightly less gas available to build stars and galaxies.',

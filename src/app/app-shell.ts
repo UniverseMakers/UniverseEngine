@@ -460,7 +460,10 @@ export function createAppShell(app: HTMLElement): void {
     el.classList.add('side-collapsed');
   };
 
-  for (const el of [topLeft, leftCenter]) {
+  const bindCollapsibleChrome = (
+    el: HTMLElement,
+    options: { toggleOnClick: boolean },
+  ) => {
     el.addEventListener('mouseenter', () => expandOne(el));
     el.addEventListener('mouseleave', () => scheduleCollapseOne(el));
     el.addEventListener('focusin', () => expandOne(el));
@@ -473,14 +476,23 @@ export function createAppShell(app: HTMLElement): void {
       if (el.classList.contains('side-collapsed')) {
         expandOne(el);
         scheduleCollapseOne(el);
-      } else {
+        return;
+      }
+
+      if (options.toggleOnClick) {
         collapseOneNow(el);
+      } else {
+        scheduleCollapseOne(el);
       }
     });
 
     // Start collapsed.
     collapseOneNow(el);
-  }
+  };
+
+  bindCollapsibleChrome(topLeft, { toggleOnClick: true });
+  bindCollapsibleChrome(leftCenter, { toggleOnClick: true });
+  bindCollapsibleChrome(timelineHost, { toggleOnClick: false });
 
   // Start in entry mode with the media hidden and paused unless the app has
   // been locked to a single scale, in which case we open directly to config.

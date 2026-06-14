@@ -34,9 +34,9 @@ DEFAULT_GALAXY_ROOT = REPO_ROOT / "public" / "assets" / "galaxy"
 SKIP_NAMES = frozenset({".DS_Store", "__pycache__", ".ipynb_checkpoints"})
 
 MILKY_WAY_REFERENCE = {
-    "stellar_mass": 5.1,
+    "stellar_mass": 6.1,
     "black_hole_mass": 4.3,
-    "galaxy_age": 12.6,
+    "galaxy_age": 8.5,
 }
 
 CSV_COLUMNS = {

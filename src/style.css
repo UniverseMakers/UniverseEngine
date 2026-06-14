@@ -439,7 +439,8 @@ button {
 .display-chrome__top-left .display-button,
 .display-chrome__left-center .view-switcher,
 .display-chrome__left-center .view-switcher__button,
-.display-chrome__left-center .view-switcher__label {
+.display-chrome__left-center .view-switcher__label,
+.display-chrome__bottom {
   transition:
     opacity 0.28s ease,
     padding 0.28s ease,
@@ -493,6 +494,17 @@ button {
   padding: 0.6rem 0.9rem;
   justify-content: flex-start;
   gap: 0.7rem;
+}
+
+.display-chrome__bottom.side-collapsed {
+  opacity: 0.26;
+  transform: translateY(0.65rem) scaleY(0.92);
+  transform-origin: bottom center;
+}
+
+.display-chrome__bottom:not(.side-collapsed) {
+  opacity: 1;
+  transform: translateY(0) scaleY(1);
 }
 
 @media (hover: hover) {

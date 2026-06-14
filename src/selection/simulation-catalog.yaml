@@ -31,12 +31,19 @@ planetary:
 galaxy:
   label: Galaxy
   placeholderImage: assets/galaxy_example.webp
+  views:
+    - id: hst
+      label: Hubble Space Telescope
+      icon: hubble-space-telescope
+    - id: sph_plus_hst
+      label: Large Scale Structure
+      icon: large-scale-structure
   metadata:
     distinctSimulations: 20488
     correctValues:
-      stellar_mass: 5.1
-      black_hole_mass: 4.3
-      galaxy_age: 12.6
+      stellar_mass: 6.1 # in units of 1e10 Msun
+      black_hole_mass: 4.3 # in units of 1e6 Msun
+      galaxy_age: 8.5 # in Gyr; approximate Milky Way mass-weighted stellar age
 
 cosmos:
   label: Cosmos

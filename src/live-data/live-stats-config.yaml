@@ -56,7 +56,7 @@ galaxy:
     - id: cosmic_time
       value: 0.0
       unit: Gyr
-      label: Cosmic Time
+      label: Universe Age
       live: true
       live_key: CosmicTime_Gyr
     - id: stellar_mass
