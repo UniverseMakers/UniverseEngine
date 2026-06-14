@@ -22,8 +22,6 @@ from __future__ import annotations
 
 import argparse
 import csv
-import hashlib
-import subprocess
 from pathlib import Path
 from typing import Any
 
@@ -138,7 +136,7 @@ def process_run(run_dir: Path, *, dry_run: bool) -> None:
         return
 
     parameters = build_parameters(last_row)
-    resource_metrics = build_resource_metrics(run_dir)
+    resource_metrics = load_existing_resource_metrics(summary_path)
     summary_metrics = build_summary_metrics(last_row, parameters)
     payload = {
         **resource_metrics,
@@ -176,16 +174,25 @@ def build_parameters(last_row: dict[str, str]) -> dict[str, float]:
     }
 
 
-def build_resource_metrics(run_dir: Path) -> dict[str, float | int]:
-    seed = int(hashlib.sha256(str(run_dir).encode("utf-8")).hexdigest()[:12], 16)
-    duration_seconds = probe_duration_seconds(find_reference_video(run_dir))
+def load_existing_resource_metrics(summary_path: Path) -> dict[str, float | int]:
+    if not summary_path.exists():
+        return {
+            "wallclockSeconds": 0,
+            "computeUsed": 0.0,
+            "memoryUsed": 0.0,
+            "carbonBurnt": 0.0,
+            "particlesUpdated": 0,
+        }
+
+    with summary_path.open("r", encoding="utf-8") as handle:
+        raw = yaml.safe_load(handle) or {}
 
     return {
-        "wallclockSeconds": round(18 * 3600 + (seed % 11) * 5400 + duration_seconds * 120),
-        "computeUsed": round(18.0 + (seed % 37) * 1.35, 1),
-        "memoryUsed": round(24.0 + (seed % 29) * 2.5, 1),
-        "carbonBurnt": round(0.8 + (seed % 41) * 0.27, 2),
-        "particlesUpdated": int(5_000_000_000 + (seed % 7_000) * 1_000_000),
+        "wallclockSeconds": int(raw.get("wallclockSeconds", 0) or 0),
+        "computeUsed": float(raw.get("computeUsed", 0.0) or 0.0),
+        "memoryUsed": float(raw.get("memoryUsed", 0.0) or 0.0),
+        "carbonBurnt": float(raw.get("carbonBurnt", 0.0) or 0.0),
+        "particlesUpdated": int(raw.get("particlesUpdated", 0) or 0),
     }
 
 
@@ -264,33 +271,6 @@ def build_summary_text(parameters: dict[str, float]) -> str:
         f"{format_decimal(MILKY_WAY_REFERENCE['black_hole_mass'])} x10^6 Msun for Sagittarius A*, and about "
         f"{format_decimal(MILKY_WAY_REFERENCE['galaxy_age'])} Gyr old."
     )
-
-
-def find_reference_video(run_dir: Path) -> Path:
-    animations_dir = run_dir / "animations"
-    if not animations_dir.is_dir():
-        raise SystemExit(f"Missing animations directory: {animations_dir}")
-
-    videos = sorted(animations_dir.glob("*.mp4"))
-    if not videos:
-        raise SystemExit(f"No MP4 videos found in {animations_dir}")
-
-    return videos[0]
-
-
-def probe_duration_seconds(video_path: Path) -> float:
-    command = [
-        "ffprobe",
-        "-v",
-        "error",
-        "-show_entries",
-        "format=duration",
-        "-of",
-        "default=noprint_wrappers=1:nokey=1",
-        str(video_path),
-    ]
-    result = subprocess.run(command, capture_output=True, text=True, check=True)
-    return max(float(result.stdout.strip()), 0.0)
 
 
 def scaled_value(last_row: dict[str, str], column: str, divisor: float) -> float:
