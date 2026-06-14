@@ -396,7 +396,12 @@ export function createAppShell(app: HTMLElement): void {
       logInfo('Parameters submitted — starting run', {
         simClassId: activeClass.id,
       });
-      void handleRun();
+      void handleRun().catch((error) => {
+        logWarn('Run failed to start', {
+          simClassId: activeClass.id,
+          error: error instanceof Error ? error.message : String(error),
+        });
+      });
     },
     onApplySettings: handleApplySettings,
     onClose: handleCloseConfig,
@@ -661,11 +666,6 @@ export function createAppShell(app: HTMLElement): void {
       manifestSource: manifestController.getSource(),
     });
 
-    // Request fullscreen immediately while we still have the user gesture
-    // from the Run button press.  Modern mobile browsers require a gesture
-    // for the Fullscreen API; failing silently is fine — the user can
-    // always toggle fullscreen from the display menu later.
-    void document.documentElement.requestFullscreen().catch(() => {});
     // Query the manifest for the best-matching precomputed video asset.
     const match = await manifestController.findNearestVideo(
       activeClass.id,

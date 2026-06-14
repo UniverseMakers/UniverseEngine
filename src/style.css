@@ -1913,11 +1913,13 @@ button {
   font-size: 0.98rem;
   font-weight: 700;
   letter-spacing: 0.4em;
+  touch-action: manipulation;
   text-transform: uppercase;
 }
 
 .config-overlay__footer {
   margin-top: auto;
+  flex-shrink: 0;
   flex-direction: column;
   align-items: stretch;
   gap: 1rem;
@@ -2416,6 +2418,21 @@ button {
 
   .config-overlay__section--grow {
     padding-bottom: 0.5rem;
+  }
+
+  .config-overlay__footer {
+    position: sticky;
+    bottom: 0;
+    z-index: 2;
+    margin-top: 0;
+    padding-top: 1rem;
+    padding-bottom: calc(0.35rem + env(safe-area-inset-bottom));
+    background: linear-gradient(
+      to bottom,
+      rgba(8, 11, 16, 0),
+      rgba(8, 11, 16, 0.96) 1.1rem,
+      rgba(8, 11, 16, 0.99)
+    );
   }
 
   .parameter-editor,
