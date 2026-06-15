@@ -360,6 +360,7 @@ def build_manifest_entries_from_r2(
                 simulation_id=simulation_id,
                 run_id=run_id,
                 object_keys=runs[run_id],
+                object_prefix=R2_ENGINE_PREFIX,
                 public_base=public_base,
                 bucket=bucket,
                 s3=s3,
@@ -375,6 +376,7 @@ def build_manifest_entry_from_r2(
     simulation_id: str,
     run_id: str,
     object_keys: list[str],
+    object_prefix: str,
     public_base: str,
     bucket: str,
     s3: Any,
@@ -405,6 +407,7 @@ def build_manifest_entry_from_r2(
         "parameters": parse_r2_run_parameters(
             simulation_id=simulation_id,
             run_id=run_id,
+            object_prefix=object_prefix,
             parameter_key=parameter_key,
             summary_key=summary_key,
             object_keys=object_keys,
@@ -449,6 +452,7 @@ def parse_r2_run_parameters(
     *,
     simulation_id: str,
     run_id: str,
+    object_prefix: str,
     parameter_key: str,
     summary_key: str,
     object_keys: list[str],
@@ -458,7 +462,10 @@ def parse_r2_run_parameters(
     """Read run parameters from a remote parameters.yaml or run-id tokens."""
     if parameter_key in object_keys:
         try:
-            response = s3.get_object(Bucket=bucket, Key=parameter_key)
+            response = s3.get_object(
+                Bucket=bucket,
+                Key=to_r2_object_key(object_prefix, parameter_key),
+            )
             payload = response["Body"].read().decode("utf-8")
             raw: dict[str, Any] = yaml.safe_load(payload) or {}
             return {str(k): float(v) for k, v in raw.items()}
@@ -467,7 +474,10 @@ def parse_r2_run_parameters(
 
     if summary_key in object_keys:
         try:
-            response = s3.get_object(Bucket=bucket, Key=summary_key)
+            response = s3.get_object(
+                Bucket=bucket,
+                Key=to_r2_object_key(object_prefix, summary_key),
+            )
             payload = response["Body"].read().decode("utf-8")
             summary_params = _parse_run_parameters_from_summary_payload(
                 simulation_id, payload
@@ -627,6 +637,15 @@ def list_r2_run_objects(
 def to_public_object_url(public_base: str, object_key: str) -> str:
     """Join a public base URL to a relative object key."""
     return f"{public_base}/{object_key.lstrip('/')}"
+
+
+def to_r2_object_key(prefix: str, object_key: str) -> str:
+    """Join an R2 prefix to a relative object key for bucket API calls."""
+    prefix = prefix.strip("/")
+    object_key = object_key.lstrip("/")
+    if prefix:
+        return f"{prefix}/{object_key}"
+    return object_key
 
 
 def _strip_run_relative_path(object_key: str, marker: str) -> str:
