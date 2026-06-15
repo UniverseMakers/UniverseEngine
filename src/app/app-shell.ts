@@ -38,6 +38,7 @@ import {
   type LiveStatsDataset,
 } from '../live-data/csv.ts';
 import { countDecimals } from '../shared/format.ts';
+import { withBaseUrl } from '../shared/urls.ts';
 import {
   getVisibleScaleIds,
   loadAdvancedSettings,
@@ -193,8 +194,11 @@ export function createAppShell(app: HTMLElement): void {
   swiftLogo.innerHTML = `
     <img
       class="swift-logo__image"
-      src="assets/credits/swift-logo.png"
+      src="${withBaseUrl('assets/credits/swift-logo.png')}"
       alt="SWIFT"
+      width="478"
+      height="169"
+      decoding="async"
     />
   `;
   app.appendChild(swiftLogo);

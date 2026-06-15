@@ -32,7 +32,11 @@ export function createEntryOverlay(
   onSelect: (simClass: SimulationClass) => void,
 ): EntryOverlayController {
   // Static banner asset shown at the top of the first-load overlay.
-  const bannerSrc = withBaseUrl('assets/banner.jpg');
+  const bannerSrc = withBaseUrl('assets/banner-1600.webp');
+  const bannerSrcSet = [
+    `${withBaseUrl('assets/banner-960.webp')} 960w`,
+    `${withBaseUrl('assets/banner-1600.webp')} 1600w`,
+  ].join(', ');
 
   // Full-screen overlay wrapper.
   const overlay = document.createElement('section');
@@ -47,7 +51,7 @@ export function createEntryOverlay(
   panel.className = 'entry-overlay';
   panel.innerHTML = `
     <div class="entry-overlay__banner-frame" aria-hidden="true">
-      <img class="entry-overlay__banner" src="${bannerSrc}" alt="" loading="eager" decoding="async" />
+      <img class="entry-overlay__banner" src="${bannerSrc}" srcset="${bannerSrcSet}" sizes="(max-width: 640px) 100vw, 38rem" width="1600" height="381" alt="" loading="eager" fetchpriority="high" decoding="async" />
     </div>
     <p class="entry-overlay__eyebrow">Universe Engine</p>
     <h1 class="entry-overlay__title">Choose a cosmic scale</h1>

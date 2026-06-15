@@ -34,3 +34,6 @@ PROGRESS.md
 # Local test artifacts
 test*.mp4
 test_*.csv
+
+# Ignore all videos we don't want to track them
+**/*.mp4
