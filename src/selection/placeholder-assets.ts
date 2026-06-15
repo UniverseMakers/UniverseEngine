@@ -191,6 +191,8 @@ async function loadRunManifest(
 
 /**
  * Brute-force nearest-neighbor search over the generated manifest.
+ * This picks the closest precomputed run for playback only; scoring remains
+ * based on the user's chosen slider values elsewhere in the app.
  *
  * @param simClassId - Simulation family id.
  * @param params - Parameter definitions for normalization.
@@ -273,8 +275,8 @@ function getEntryDistance(
   }
 
   const total = params.reduce((sum, parameter) => {
-    const selected = values[parameter.id] ?? parameter.defaultValue;
-    const candidate = entry.parameters?.[parameter.id] ?? parameter.defaultValue;
+    const selected = values[parameter.id] ?? parameter.fallbackValue;
+    const candidate = entry.parameters?.[parameter.id] ?? parameter.fallbackValue;
     const range = Math.max(parameter.max - parameter.min, 1e-9);
 
     return sum + Math.abs(selected - candidate) / range;

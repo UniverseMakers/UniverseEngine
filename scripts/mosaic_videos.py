@@ -1,4 +1,10 @@
 #!/usr/bin/env python3
+"""Create a randomly sampled video mosaic with ``ffmpeg``.
+
+The script selects enough MP4 files to fill an ``rows x cols`` grid, loops each
+input indefinitely, scales and crops each tile to fit, and renders a single
+1080p mosaic video.
+"""
 
 import argparse
 import random
@@ -6,7 +12,12 @@ import subprocess
 from pathlib import Path
 
 
-def main() -> None:
+def parse_args() -> argparse.Namespace:
+    """Parse command-line arguments.
+
+    Returns:
+        Parsed CLI namespace.
+    """
     parser = argparse.ArgumentParser(
         description="Create a randomly sampled 1080p video mosaic."
     )
@@ -57,8 +68,12 @@ def main() -> None:
         default="white",
         help="Border color for each tile.",
     )
+    return parser.parse_args()
 
-    args = parser.parse_args()
+
+def main() -> None:
+    """Create the requested mosaic video."""
+    args = parse_args()
 
     if args.rows <= 0 or args.cols <= 0:
         raise ValueError("Rows and columns must both be positive.")

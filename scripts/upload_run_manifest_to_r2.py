@@ -16,7 +16,11 @@ CACHE_MANIFEST = "public, max-age=300"
 
 
 def parse_args() -> argparse.Namespace:
-    """Parse CLI arguments."""
+    """Parse command-line arguments.
+
+    Returns:
+        Parsed CLI namespace.
+    """
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
         "--manifest-path",
@@ -43,7 +47,7 @@ def parse_args() -> argparse.Namespace:
 
 
 def main() -> None:
-    """CLI entrypoint."""
+    """Upload the selected manifest file to R2."""
     args = parse_args()
     manifest_path = args.manifest_path.expanduser().resolve()
     if not manifest_path.is_file():
@@ -98,7 +102,11 @@ def main() -> None:
 
 
 def validate_manifest_json(path: Path) -> None:
-    """Fail early if the manifest is not valid JSON."""
+    """Fail early if a manifest file is not valid run-manifest JSON.
+
+    Args:
+        path: Path to the manifest JSON file.
+    """
     try:
         with path.open("r", encoding="utf-8") as handle:
             payload = json.load(handle)
@@ -110,7 +118,14 @@ def validate_manifest_json(path: Path) -> None:
 
 
 def format_size(num_bytes: float | int) -> str:
-    """Human-readable size string."""
+    """Format a byte count for terminal output.
+
+    Args:
+        num_bytes: Byte count.
+
+    Returns:
+        Human-readable size string.
+    """
     value = float(num_bytes)
     for unit in ("B", "KB", "MB", "GB", "TB"):
         if abs(value) < 1024.0:

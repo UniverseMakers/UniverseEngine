@@ -49,9 +49,9 @@ export function createParameterEditor(
     nextValues?: Record<string, number>,
   ): void {
     // Swap the active class and either keep caller-provided values or fall back
-    // to that class's defaults when no explicit value map was supplied.
+    // to that class's fallback values when no explicit value map was supplied.
     currentClass = simClass;
-    values = nextValues ? { ...nextValues } : createDefaultValues(simClass);
+    values = nextValues ? { ...nextValues } : createFallbackValues(simClass);
     root.innerHTML = '';
 
     // The heading gives the slider bank some context whenever the user switches
@@ -112,7 +112,7 @@ export function createParameterEditor(
     slider.min = String(param.min);
     slider.max = String(param.max);
     slider.step = String(param.step);
-    slider.value = String(values[param.id] ?? param.defaultValue);
+    slider.value = String(values[param.id] ?? param.fallbackValue);
     slider.setAttribute('aria-label', param.label);
 
     function sync(value: number): void {
@@ -143,10 +143,10 @@ export function createParameterEditor(
     // visible snap from default browser state to our styled state.
     slider.style.setProperty(
       '--fill',
-      `${calculateFill(values[param.id] ?? param.defaultValue, param.min, param.max)}%`,
+      `${calculateFill(values[param.id] ?? param.fallbackValue, param.min, param.max)}%`,
     );
     readout.textContent = withUnit(
-      formatParameterValue(values[param.id] ?? param.defaultValue, param.step, {
+      formatParameterValue(values[param.id] ?? param.fallbackValue, param.step, {
         scale: param.valueScale,
         format: param.displayFormat,
         significantFigures: param.displaySignificantFigures,
@@ -206,11 +206,10 @@ export function createParameterEditor(
   };
 }
 
-function createDefaultValues(simClass: SimulationClass): Record<string, number> {
-  // Defaults come directly from the simulation schema so adding a new parameter
-  // in YAML automatically gives it a sane starting value in the editor.
+function createFallbackValues(simClass: SimulationClass): Record<string, number> {
+  // These values are only used when the caller did not supply a real value map.
   return Object.fromEntries(
-    simClass.parameters.map((parameter) => [parameter.id, parameter.defaultValue]),
+    simClass.parameters.map((parameter) => [parameter.id, parameter.fallbackValue]),
   );
 }
 

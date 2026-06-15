@@ -22,7 +22,8 @@ export interface SimParameter {
   min: number;
   max: number;
   step: number;
-  defaultValue: number;
+  /** Internal midpoint fallback used when no explicit value is available. */
+  fallbackValue: number;
   description?: string;
   valueScale?: number;
   displayUnit?: string;
@@ -163,7 +164,10 @@ export const SIMULATION_CLASSES: SimulationClass[] = Object.entries(catalog).map
       },
       parameters: Object.entries(rawParams).map(([parameterId, parameter]) => {
         const step = parameter.step ?? inferParameterStep(parameter.min, parameter.max);
-        const defaultValue = midpoint(parameter.min, parameter.max);
+        // Parameters no longer carry authored defaults in YAML. We keep one
+        // internal midpoint fallback so partially populated value maps still
+        // render and match runs deterministically.
+        const fallbackValue = midpoint(parameter.min, parameter.max);
 
         return {
           id: parameterId,
@@ -172,7 +176,7 @@ export const SIMULATION_CLASSES: SimulationClass[] = Object.entries(catalog).map
           min: parameter.min,
           max: parameter.max,
           step,
-          defaultValue,
+          fallbackValue,
           description: parameter.description,
           valueScale: parameter.value_scale,
           displayUnit: parameter.display_unit,

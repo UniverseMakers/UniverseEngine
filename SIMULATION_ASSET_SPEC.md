@@ -66,12 +66,12 @@ Notes:
 
 ## How The UI Knows What To Display
 
-The simulation family catalog lives in `src/selection/simulation-catalog.yaml`.
+Simulation-family metadata lives in `src/selection/simulation-catalog.yaml`.
 
 Important fields:
 
-- `summary-stats-config.yaml`: controls which rows appear in the end-of-run summary.
-- `live-stats-config.yaml`: controls which rows appear in the live telemetry panel.
+- `src/summaries/summary-stats-config.yaml`: controls which rows appear in the end-of-run summary.
+- `src/live-data/live-stats-config.yaml`: controls which rows appear in the live telemetry panel.
 
 Per-stat fields used by the app:
 
@@ -80,7 +80,7 @@ Per-stat fields used by the app:
 - `unit` (optional): appended in UI.
 - `live: true`: the stat is expected to update over time.
 - `live_key` (optional): CSV column key to use instead of `id`.
-- `from_video: true`: pull the _final_ value from the video sidecar YAML.
-- `video_key` (optional): YAML key to use instead of `id`.
+- `from_video: true`: for live HUD stats only, pull the _final_ value from the video sidecar YAML.
+- `video_key` (optional): for live HUD stats only, use a YAML key other than `id`.
 - `scale_with_time: true`: when `live` and `from_video`, scale the final metadata value linearly by playback time.
 - `integer: true`: when scaling, force values to be whole numbers.

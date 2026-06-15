@@ -19,7 +19,7 @@ export interface VideoRunMetadata {
   computeUsed: number;
   /** Peak memory used during simulation (GB). */
   memoryUsed: number;
-  /** Estimated carbon emissions (gCO2). */
+  /** Estimated carbon emissions (kgCO2e). */
   carbonBurnt: number;
   /** Number of particles that changed state during the run. */
   particlesUpdated: number;

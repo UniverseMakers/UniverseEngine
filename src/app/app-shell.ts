@@ -147,7 +147,7 @@ export function createAppShell(app: HTMLElement): void {
   // Persist parameter values per simulation family so users can switch between
   // families without losing their slider positions.
   const valuesByClass = Object.fromEntries(
-    SIMULATION_CLASSES.map((simClass) => [simClass.id, createDefaultValues(simClass)]),
+    SIMULATION_CLASSES.map((simClass) => [simClass.id, createRandomizedValues(simClass)]),
   ) as Record<string, Record<string, number>>;
 
   // ── UI Assembly ──────────────────────────────────────────────────────────
@@ -1120,7 +1120,7 @@ export function createAppShell(app: HTMLElement): void {
    * @param simClass - Simulation family to initialize.
    * @returns Parameter map keyed by parameter id.
    */
-  function createDefaultValues(simClass: SimulationClass): Record<string, number> {
+  function createRandomizedValues(simClass: SimulationClass): Record<string, number> {
     return Object.fromEntries(
       simClass.parameters.map((parameter) => [
         parameter.id,
@@ -1130,7 +1130,7 @@ export function createAppShell(app: HTMLElement): void {
   }
 
   function randomizeActiveValues(): void {
-    valuesByClass[activeClass.id] = createDefaultValues(activeClass);
+    valuesByClass[activeClass.id] = createRandomizedValues(activeClass);
   }
 
   /**

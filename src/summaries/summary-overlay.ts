@@ -308,7 +308,7 @@ function resolveScientificValue(
     // Intentional: the scientific bars score the user's chosen slider values,
     // not the nearest precomputed run's exact parameters. The manifest match is
     // only used to choose which video to play back.
-    return values[id] ?? selectedParameter.defaultValue;
+    return values[id] ?? selectedParameter.fallbackValue;
   }
 
   const parameterValue = runMetadata?.parameterValues[id];

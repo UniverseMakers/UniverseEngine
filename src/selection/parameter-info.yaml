@@ -4,6 +4,8 @@
 # and define the range, step, and display formatting used by the
 # parameter editor sliders in the selection overlay.
 #
+# Slider starting values are randomized in app code rather than authored here.
+#
 # `description` fields appear in a popover when the user clicks the info
 # button next to a parameter name.
 

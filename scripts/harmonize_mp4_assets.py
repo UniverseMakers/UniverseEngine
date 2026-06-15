@@ -33,6 +33,8 @@ TEMP_PATHS_LOCK = threading.Lock()
 
 @dataclass(frozen=True)
 class CliOptions:
+    """Parsed command-line options for the harmonizer."""
+
     assets_dir: Path
     fps: int
     crf: int
@@ -45,6 +47,8 @@ class CliOptions:
 
 @dataclass(frozen=True)
 class VideoProbe:
+    """Subset of video metadata required for compliance checks."""
+
     path: Path
     duration_seconds: float
     codec_name: str
@@ -62,12 +66,16 @@ class VideoProbe:
 
 @dataclass(frozen=True)
 class ScanResult:
+    """Filesystem scan results for MP4 discovery."""
+
     files: list[Path]
     symlinks: list[Path]
 
 
 @dataclass(frozen=True)
 class ComplianceResult:
+    """Compliance check result for one probed MP4 file."""
+
     compliant: bool
     issues: list[str]
     probe: VideoProbe
@@ -75,6 +83,8 @@ class ComplianceResult:
 
 @dataclass(frozen=True)
 class FileOutcome:
+    """Conversion outcome for one processed MP4 file."""
+
     path: Path
     status: str
     message: str
@@ -86,6 +96,8 @@ class FileOutcome:
 
 @dataclass
 class Summary:
+    """Aggregate counters and failure details for a harmonizer run."""
+
     total_files: int = 0
     symlinks_skipped: int = 0
     compliant_skipped: int = 0

@@ -100,7 +100,7 @@ function buildAvailableMetrics(
       {
         label: parameter.label,
         value: formatParameterValue(
-          values[parameter.id] ?? parameter.defaultValue,
+          values[parameter.id] ?? parameter.fallbackValue,
           parameter.step,
           {
             scale: parameter.valueScale,

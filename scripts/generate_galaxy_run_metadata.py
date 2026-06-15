@@ -1,21 +1,17 @@
 """Generate galaxy run metadata from the final live-data CSV row.
 
-This script scans either a galaxy theme directory (for example
-``public/assets/galaxy``) or a single galaxy run directory. For each run it:
+This script scans either a galaxy family directory such as
+``public/assets/galaxy`` or a single galaxy run directory. For each run it:
 
 * reads the final row of ``live_data_table.csv``
-* writes ``parameters.yaml`` using the selected comparison parameters
-* writes ``run_summary.yaml`` with display-friendly galaxy summary metrics
+* writes ``parameters.yaml`` with the scored comparison parameters
+* writes ``run_summary.yaml`` with display-friendly summary metrics
 
 The three scored galaxy parameters are derived from these CSV columns:
 
 * ``StellarMassWithinR200_Msun`` -> ``stellar_mass`` (x10^10 Msun)
 * ``BHSubgridMassWithinR200_Msun`` -> ``black_hole_mass`` (x10^6 Msun)
 * ``StellarMassWeightedAge_yr`` -> ``galaxy_age`` (Gyr)
-
-Usage::
-
-    python3 scripts/generate_galaxy_run_metadata.py public/assets/galaxy
 """
 
 from __future__ import annotations
@@ -73,6 +69,11 @@ SUMMARY_LABELS = {
 
 
 def parse_args() -> argparse.Namespace:
+    """Parse command-line arguments.
+
+    Returns:
+        Parsed CLI namespace.
+    """
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
         "path",
@@ -89,6 +90,7 @@ def parse_args() -> argparse.Namespace:
 
 
 def main() -> None:
+    """Run the metadata generation workflow."""
     args = parse_args()
     target = Path(args.path).expanduser().resolve()
     run_dirs = discover_run_dirs(target)
@@ -101,6 +103,14 @@ def main() -> None:
 
 
 def discover_run_dirs(target: Path) -> list[Path]:
+    """Resolve one or more galaxy run directories from a user path.
+
+    Args:
+        target: Either a family directory or a single run directory.
+
+    Returns:
+        Sorted list of galaxy run directories.
+    """
     if not target.exists():
         raise SystemExit(f"Path does not exist: {target}")
 
@@ -120,6 +130,12 @@ def discover_run_dirs(target: Path) -> list[Path]:
 
 
 def process_run(run_dir: Path, *, dry_run: bool) -> None:
+    """Generate metadata files for one run directory.
+
+    Args:
+        run_dir: Galaxy run directory to process.
+        dry_run: When ``True``, only report what would be written.
+    """
     live_data_path = run_dir / "live_data_table.csv"
     parameters_path = run_dir / "parameters.yaml"
     summary_path = run_dir / "run_summary.yaml"
@@ -149,6 +165,15 @@ def process_run(run_dir: Path, *, dry_run: bool) -> None:
 
 
 def read_last_live_data_row(path: Path) -> dict[str, str]:
+    """Read the final telemetry row from a live-data CSV.
+
+    Args:
+        path: Path to ``live_data_table.csv``.
+
+    Returns:
+        Final row keyed by CSV column name, or an empty mapping when the file is
+        empty.
+    """
     with path.open("r", encoding="utf-8", newline="") as handle:
         reader = csv.DictReader(handle)
         last_row: dict[str, str] | None = None
@@ -158,6 +183,14 @@ def read_last_live_data_row(path: Path) -> dict[str, str]:
 
 
 def build_parameters(last_row: dict[str, str]) -> dict[str, float]:
+    """Extract the scored galaxy parameters from the final telemetry row.
+
+    Args:
+        last_row: Final CSV row keyed by column name.
+
+    Returns:
+        Parameter mapping written to ``parameters.yaml``.
+    """
     return {
         "stellar_mass": scaled_value(last_row, CSV_COLUMNS["stellar_mass"], 1.0e10),
         "black_hole_mass": scaled_value(
@@ -168,6 +201,15 @@ def build_parameters(last_row: dict[str, str]) -> dict[str, float]:
 
 
 def load_existing_resource_metrics(summary_path: Path) -> dict[str, float | int]:
+    """Preserve existing resource totals from an existing summary file.
+
+    Args:
+        summary_path: Path to ``run_summary.yaml``.
+
+    Returns:
+        Resource metric mapping with sensible zeros when the file does not yet
+        exist.
+    """
     if not summary_path.exists():
         return {
             "wallclockSeconds": 0,
@@ -192,6 +234,15 @@ def load_existing_resource_metrics(summary_path: Path) -> dict[str, float | int]
 def build_summary_metrics(
     last_row: dict[str, str], parameters: dict[str, float]
 ) -> dict[str, dict[str, str]]:
+    """Build display-ready galaxy summary metrics.
+
+    Args:
+        last_row: Final CSV row keyed by column name.
+        parameters: Derived scored parameter values.
+
+    Returns:
+        Mapping of summary metric id to ``label`` and ``value`` strings.
+    """
     metrics: dict[str, dict[str, str]] = {
         "stellar_mass": metric("stellar_mass", format_decimal(parameters["stellar_mass"])),
         "stellar_mass_msun": metric(
@@ -255,10 +306,29 @@ def build_summary_metrics(
 
 
 def scaled_value(last_row: dict[str, str], column: str, divisor: float) -> float:
+    """Read one raw value and scale it into display units.
+
+    Args:
+        last_row: Final CSV row keyed by column name.
+        column: Source CSV column name.
+        divisor: Scaling factor converting raw units into display units.
+
+    Returns:
+        Scaled numeric value.
+    """
     return raw_value(last_row, column) / divisor
 
 
 def raw_value(last_row: dict[str, str], column: str) -> float:
+    """Read one required numeric value from the final CSV row.
+
+    Args:
+        last_row: Final CSV row keyed by column name.
+        column: Required source column name.
+
+    Returns:
+        Parsed float value.
+    """
     raw = (last_row.get(column) or "").strip()
     if not raw:
         raise SystemExit(f"Missing required column value: {column}")
@@ -266,6 +336,15 @@ def raw_value(last_row: dict[str, str], column: str) -> float:
 
 
 def metric(metric_id: str, value: str) -> dict[str, str]:
+    """Build one summary metric payload row.
+
+    Args:
+        metric_id: Stable metric identifier.
+        value: Display-ready metric value.
+
+    Returns:
+        Mapping with ``label`` and ``value`` keys.
+    """
     return {
         "label": SUMMARY_LABELS[metric_id],
         "value": value,
@@ -273,18 +352,48 @@ def metric(metric_id: str, value: str) -> dict[str, str]:
 
 
 def format_decimal(value: float) -> str:
+    """Format a decimal value for YAML output.
+
+    Args:
+        value: Numeric value.
+
+    Returns:
+        Decimal string without redundant trailing zeros.
+    """
     return f"{value:.6f}".rstrip("0").rstrip(".")
 
 
 def format_scientific(value: float) -> str:
+    """Format a value in scientific notation.
+
+    Args:
+        value: Numeric value.
+
+    Returns:
+        Scientific-notation string.
+    """
     return f"{value:.6e}"
 
 
 def format_integer(value: float) -> str:
+    """Format a value as a rounded integer string.
+
+    Args:
+        value: Numeric value.
+
+    Returns:
+        Rounded integer string.
+    """
     return str(int(round(value)))
 
 
 def write_yaml(path: Path, payload: dict[str, Any]) -> None:
+    """Write a YAML payload with stable key ordering.
+
+    Args:
+        path: Destination YAML path.
+        payload: Mapping to serialize.
+    """
     path.write_text(
         yaml.safe_dump(payload, sort_keys=False, allow_unicode=False),
         encoding="utf-8",

@@ -379,6 +379,7 @@ def _delete_remote_keys(
 # ===========================================================================
 
 def main() -> None:
+    """Upload selected engine assets, and optionally the manifest, to R2."""
     parser = argparse.ArgumentParser(
         description="Upload Universe Engine assets to Cloudflare R2.",
         formatter_class=argparse.RawDescriptionHelpFormatter,
@@ -624,7 +625,13 @@ def _print_dry_run(
     themes: tuple[str, ...],
     manifest_upload: tuple[Path, str] | None,
 ) -> None:
-    """Pretty-print what would happen in a real run."""
+    """Pretty-print what would happen in a real run.
+
+    Args:
+        args: Parsed CLI arguments.
+        themes: Theme ids included in the upload.
+        manifest_upload: Optional manifest path and remote key pair.
+    """
     print(f"DRY-RUN MODE — no files will be modified\n")
     print(f"  Assets dir:  {args.assets_dir}")
     print(f"  Prefix:      {args.prefix}/")
@@ -665,7 +672,14 @@ def _print_dry_run(
 
 
 def _format_size(num_bytes: float | int) -> str:
-    """Human-readable size string."""
+    """Format a byte count for terminal output.
+
+    Args:
+        num_bytes: Byte count.
+
+    Returns:
+        Human-readable size string.
+    """
     for unit in ("B", "KB", "MB", "GB", "TB"):
         if abs(num_bytes) < 1024.0:
             return f"{num_bytes:.1f} {unit}"

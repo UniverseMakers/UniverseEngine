@@ -8,7 +8,8 @@ Modes:
 * default: scan the actual R2 bucket contents below ``engine/`` and write
   ``public/assets/run-manifest.json``.
 
-Run ``generate_run_summaries.py`` first when refreshing local assets.
+Refresh any per-family metadata first so each run directory already contains
+current ``parameters.yaml`` and ``run_summary.yaml`` files.
 """
 
 from __future__ import annotations
@@ -204,6 +205,11 @@ def main() -> None:
 
 
 def parse_args() -> argparse.Namespace:
+    """Parse command-line arguments.
+
+    Returns:
+        Parsed CLI namespace.
+    """
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
         "--local",
@@ -214,6 +220,14 @@ def parse_args() -> argparse.Namespace:
 
 
 def build_path_builder(args: argparse.Namespace) -> Callable[[Path], str]:
+    """Return the path-to-manifest string converter for this invocation.
+
+    Args:
+        args: Parsed CLI arguments.
+
+    Returns:
+        Callable converting concrete filesystem paths into manifest paths.
+    """
     _ = args
     return to_public_relative_path
 
@@ -255,7 +269,6 @@ def build_manifest_entry(
     Args:
         simulation_id: Simulation family name (e.g. "cosmos").
         run_dir: Path to the run's directory.
-        sim_config: Parsed simulation configuration.
 
     Returns:
         Manifest entry dict, or None if the run has no video files.

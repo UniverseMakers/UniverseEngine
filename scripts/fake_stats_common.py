@@ -1,10 +1,16 @@
 #!/usr/bin/env python3
-"""Generate fake CSV stat streams from ``src/data/simulations.yaml``.
+"""Shared fake live-stat CSV generation helpers.
 
-This module exists so each simulation type can have a tiny wrapper script while
-all of the shared logic lives in one place. The generated CSV is intentionally
-simple: a ``t`` column plus one column per live stat (using ``live_key`` when
-present, otherwise the stat id).
+This module powers the tiny per-family wrapper scripts such as
+``generate_galaxy_csv.py``. It reads the current split frontend config files,
+probes an input video's duration, and writes a deterministic fake telemetry CSV
+ containing:
+
+* a ``t`` column with timestamps in seconds
+* one column per configured live HUD stat, keyed by ``live_key`` or ``id``
+
+The generated data is only for local placeholders and demos, so the goal is
+repeatable, plausible-looking trends rather than physical accuracy.
 """
 
 from __future__ import annotations
@@ -16,26 +22,60 @@ import math
 import random
 import subprocess
 from pathlib import Path
-from typing import Any
+from typing import Any, TypedDict, cast
 
 import yaml
 
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
-SIM_CONFIG_PATH = REPO_ROOT / "src" / "data" / "simulations.yaml"
+PARAMETER_INFO_PATH = REPO_ROOT / "src" / "selection" / "parameter-info.yaml"
+SIMULATION_CATALOG_PATH = REPO_ROOT / "src" / "selection" / "simulation-catalog.yaml"
+LIVE_STATS_CONFIG_PATH = REPO_ROOT / "src" / "live-data" / "live-stats-config.yaml"
 
 
-def build_arg_parser(sim_type: str) -> argparse.ArgumentParser:
-    """Create the CLI parser for one simulation type.
+class RawParameterConfig(TypedDict, total=False):
+    """YAML-backed parameter schema for one slider."""
+
+    min: float
+    max: float
+    step: float
+    value_scale: float
+
+
+class RawLiveStatConfig(TypedDict, total=False):
+    """YAML-backed live-stat display config for one HUD row."""
+
+    id: str
+    value: str | float | int
+    live: bool
+    live_key: str
+
+
+class RawCatalogEntry(TypedDict):
+    """Minimal family metadata loaded from ``simulation-catalog.yaml``."""
+
+    metadata: dict[str, Any]
+
+
+class FamilyConfig(TypedDict):
+    """Merged config view consumed by the fake CSV generator."""
+
+    parameters: dict[str, RawParameterConfig]
+    correct_values: dict[str, float]
+    live_stats: list[RawLiveStatConfig]
+
+
+def build_arg_parser(simulation_id: str) -> argparse.ArgumentParser:
+    """Create the CLI parser for one simulation family.
 
     Args:
-        sim_type: Simulation family id (e.g. "cosmos").
+        simulation_id: Simulation family id such as ``"cosmos"``.
 
     Returns:
-        Configured ArgumentParser instance.
+        Configured argument parser.
     """
     parser = argparse.ArgumentParser(
-        description=f"Generate fake {sim_type} live-stat CSV from an MP4 duration.",
+        description=f"Generate fake {simulation_id} live-stat CSV from an MP4 duration.",
     )
     parser.add_argument("video", help="Path to the MP4 video file")
     parser.add_argument(
@@ -46,57 +86,105 @@ def build_arg_parser(sim_type: str) -> argparse.ArgumentParser:
     return parser
 
 
-def run(sim_type: str) -> None:
-    """CLI entrypoint for generating one simulation family's live-stat CSV.
+def run(simulation_id: str) -> None:
+    """Run the fake CSV generator for one simulation family.
 
     Args:
-        sim_type: Simulation family id (e.g. "galaxy").
-
-    Returns:
-        None
+        simulation_id: Simulation family id such as ``"galaxy"``.
     """
-    args = build_arg_parser(sim_type).parse_args()
+    args = build_arg_parser(simulation_id).parse_args()
     video_path = Path(args.video).expanduser().resolve()
     if not video_path.exists():
         raise SystemExit(f"Video not found: {video_path}")
 
-    config = load_simulation_config(sim_type)
+    config = load_family_config(simulation_id)
     duration_seconds = probe_duration_seconds(video_path)
     output_path = (
         Path(args.output).expanduser().resolve()
         if args.output
-        else video_path.with_name(f"{video_path.stem}_{sim_type}_stats.csv")
+        else video_path.with_name(f"{video_path.stem}_{simulation_id}_stats.csv")
     )
 
-    write_fake_csv(sim_type, config, duration_seconds, output_path, video_path.name)
+    write_fake_csv(
+        simulation_id=simulation_id,
+        config=config,
+        duration_seconds=duration_seconds,
+        output_path=output_path,
+        video_name=video_path.name,
+    )
     print(output_path)
 
 
-def load_simulation_config(sim_type: str) -> dict[str, Any]:
-    """Load one simulation family's YAML config from the repository.
+def load_family_config(simulation_id: str) -> FamilyConfig:
+    """Load the split frontend config for one simulation family.
 
     Args:
-        sim_type: Simulation family id.
+        simulation_id: Simulation family id.
 
     Returns:
-        Parsed YAML mapping for that simulation family.
+        Merged family config containing parameters, target values, and live-stat
+        display rows.
     """
-    with SIM_CONFIG_PATH.open("r", encoding="utf-8") as handle:
-        config = yaml.safe_load(handle)
+    parameter_data = load_yaml_file(PARAMETER_INFO_PATH)
+    catalog_data = load_yaml_file(SIMULATION_CATALOG_PATH)
+    live_stats_data = load_yaml_file(LIVE_STATS_CONFIG_PATH)
 
-    if sim_type not in config:
-        raise SystemExit(f"Simulation type '{sim_type}' not found in {SIM_CONFIG_PATH}")
-    return config[sim_type]
+    if simulation_id not in parameter_data:
+        raise SystemExit(
+            f"Simulation type {simulation_id!r} not found in {PARAMETER_INFO_PATH}"
+        )
+    if simulation_id not in catalog_data:
+        raise SystemExit(
+            f"Simulation type {simulation_id!r} not found in {SIMULATION_CATALOG_PATH}"
+        )
+    if simulation_id not in live_stats_data:
+        raise SystemExit(
+            f"Simulation type {simulation_id!r} not found in {LIVE_STATS_CONFIG_PATH}"
+        )
+
+    family_catalog = cast(RawCatalogEntry, catalog_data[simulation_id])
+    family_live_stats = cast(dict[str, Any], live_stats_data[simulation_id])
+
+    return {
+        "parameters": cast(dict[str, RawParameterConfig], parameter_data[simulation_id]),
+        "correct_values": {
+            str(key): float(value)
+            for key, value in family_catalog.get("metadata", {})
+            .get("correctValues", {})
+            .items()
+        },
+        "live_stats": cast(
+            list[RawLiveStatConfig], family_live_stats.get("liveStats", [])
+        ),
+    }
+
+
+def load_yaml_file(path: Path) -> dict[str, Any]:
+    """Load one YAML file as a dictionary.
+
+    Args:
+        path: YAML file path.
+
+    Returns:
+        Parsed YAML mapping.
+    """
+    with path.open("r", encoding="utf-8") as handle:
+        data = yaml.safe_load(handle) or {}
+
+    if not isinstance(data, dict):
+        raise SystemExit(f"Expected a mapping in {path}")
+
+    return cast(dict[str, Any], data)
 
 
 def probe_duration_seconds(video_path: Path) -> float:
-    """Read the duration of an MP4 file using ffprobe.
+    """Read a video's duration using ``ffprobe``.
 
     Args:
         video_path: Path to the MP4 file.
 
     Returns:
-        Duration in seconds (non-negative).
+        Duration in seconds, clamped to be non-negative.
     """
     command = [
         "ffprobe",
@@ -113,36 +201,28 @@ def probe_duration_seconds(video_path: Path) -> float:
 
 
 def write_fake_csv(
-    sim_type: str,
-    config: dict[str, Any],
+    *,
+    simulation_id: str,
+    config: FamilyConfig,
     duration_seconds: float,
     output_path: Path,
     video_name: str,
 ) -> None:
-    """Write a deterministic fake CSV telemetry stream.
-
-    The generated stream contains:
-    - a `t` column with timestamps in seconds
-    - one column per YAML stat marked `live: true` (keyed by `live_key` or id)
+    """Write a deterministic fake telemetry CSV.
 
     Args:
-        sim_type: Simulation family id.
-        config: Simulation family config mapping from YAML.
+        simulation_id: Simulation family id.
+        config: Merged family config.
         duration_seconds: Video duration in seconds.
         output_path: Destination CSV path.
         video_name: Video filename used for deterministic seeding.
-
-    Returns:
-        None
     """
-    live_stats = [
-        stat for stat in config["metadata"].get("liveStats", []) if stat.get("live")
-    ]
+    live_stats = [stat for stat in config["live_stats"] if stat.get("live")]
     stream_keys = [stat.get("live_key") or stat["id"] for stat in live_stats]
     row_count = max(2, min(121, int(math.ceil(duration_seconds * 2)) + 1))
     times = [duration_seconds * i / (row_count - 1) for i in range(row_count)]
 
-    seed_source = f"{sim_type}:{video_name}:{duration_seconds:.3f}"
+    seed_source = f"{simulation_id}:{video_name}:{duration_seconds:.3f}"
     rng = random.Random(hashlib.sha256(seed_source.encode("utf-8")).hexdigest())
 
     output_path.parent.mkdir(parents=True, exist_ok=True)
@@ -150,19 +230,19 @@ def write_fake_csv(
         writer = csv.DictWriter(handle, fieldnames=["t", *stream_keys])
         writer.writeheader()
 
-        for index, timestamp in enumerate(times):
+        for row_index, timestamp in enumerate(times):
             progress = 0.0 if duration_seconds <= 0 else timestamp / duration_seconds
             row = {"t": f"{timestamp:.3f}"}
             for stat in live_stats:
                 stream_key = stat.get("live_key") or stat["id"]
                 row[stream_key] = format_series_value(
                     generate_series_value(
-                        sim_type=sim_type,
+                        simulation_id=simulation_id,
                         stat=stat,
                         config=config,
                         progress=progress,
                         rng=rng,
-                        row_index=index,
+                        row_index=row_index,
                     )
                 )
             writer.writerow(row)
@@ -170,22 +250,22 @@ def write_fake_csv(
 
 def generate_series_value(
     *,
-    sim_type: str,
-    stat: dict[str, Any],
-    config: dict[str, Any],
+    simulation_id: str,
+    stat: RawLiveStatConfig,
+    config: FamilyConfig,
     progress: float,
     rng: random.Random,
     row_index: int,
 ) -> float:
-    """Generate one numeric value for one stat at a given progress point.
+    """Generate one numeric value for one stat at a progress point.
 
     Args:
-        sim_type: Simulation family id.
-        stat: YAML stat config mapping.
-        config: Full simulation family config mapping.
-        progress: Normalized progress through the video (0..1).
-        rng: Random generator seeded for deterministic output.
-        row_index: Current row index in the output stream.
+        simulation_id: Simulation family id.
+        stat: Live-stat config row.
+        config: Merged family config.
+        progress: Normalized playback progress in the range ``[0, 1]``.
+        rng: Deterministically seeded random number generator.
+        row_index: Current output row index.
 
     Returns:
         Generated numeric value.
@@ -194,19 +274,19 @@ def generate_series_value(
     key = stat.get("live_key") or stat_id
     normalized_key = normalize_key(key)
     base_value = parse_float(stat.get("value"), default=0.0)
-    parameters = config.get("parameters", {})
-    correct_values = config.get("metadata", {}).get("correctValues", {})
+    parameters = config["parameters"]
+    correct_values = config["correct_values"]
 
     if normalized_key == "age":
-        max_age = 13.8 if sim_type == "cosmos" else 12.6
+        max_age = 13.8 if simulation_id == "cosmos" else 12.6
         return max_age * progress
 
     if normalized_key == "redshift":
-        start = 12.0 if sim_type == "cosmos" else 4.0
+        start = 12.0 if simulation_id == "cosmos" else 4.0
         return max(start * (1.0 - progress), 0.0)
 
-    if normalized_key == "size":
-        stellar_mass = parameters.get("stellar_mass", {}).get("default", 5.0)
+    if normalized_key == "stellar_size":
+        stellar_mass = correct_values.get("stellar_mass", 5.0)
         final_size = 8.0 + stellar_mass * 3.5
         eased = 1.0 - (1.0 - progress) ** 2
         return final_size * eased
@@ -230,8 +310,8 @@ def generate_series_value(
 
     if stat_id in parameters:
         parameter = parameters[stat_id]
-        start = float(parameter.get("default", base_value))
-        target = float(correct_values.get(stat_id, start))
+        start = midpoint(parameter)
+        target = correct_values.get(stat_id, start)
         wobble = (
             math.sin(progress * math.pi * (row_index % 5 + 1))
             * 0.04
@@ -246,39 +326,55 @@ def generate_series_value(
 
 
 def mean_normalized_distance(
-    parameters: dict[str, Any], correct_values: dict[str, Any]
+    parameters: dict[str, RawParameterConfig], correct_values: dict[str, float]
 ) -> float:
-    """Compute mean normalized distance between defaults and "correct" values.
+    """Compute mean normalized distance between parameter midpoints and targets.
 
     Args:
-        parameters: Mapping of parameter id -> parameter config.
-        correct_values: Mapping of parameter id -> correct value.
+        parameters: Mapping of parameter id to parameter schema.
+        correct_values: Mapping of parameter id to target value.
 
     Returns:
-        Mean normalized absolute distance in [0, 1] when ranges are well-formed.
+        Mean normalized absolute distance.
     """
     distances: list[float] = []
     for parameter_id, parameter in parameters.items():
-        default = float(parameter.get("default", 0.0))
-        correct = float(correct_values.get(parameter_id, default))
-        minimum = float(parameter.get("min", default))
-        maximum = float(parameter.get("max", default))
+        baseline = midpoint(parameter)
+        correct = float(correct_values.get(parameter_id, baseline))
+        minimum = float(parameter.get("min", baseline))
+        maximum = float(parameter.get("max", baseline))
         scale = max(maximum - minimum, 1e-9)
-        distances.append(abs(default - correct) / scale)
+        distances.append(abs(baseline - correct) / scale)
+
     if not distances:
         return 0.0
+
     return sum(distances) / len(distances)
 
 
-def parse_float(raw_value: Any, default: float) -> float:
-    """Parse an arbitrary value as float.
+def midpoint(parameter: RawParameterConfig) -> float:
+    """Return the midpoint fallback for one parameter schema.
 
     Args:
-        raw_value: Any raw value (string/number/etc.).
-        default: Default to return when parsing fails.
+        parameter: Parameter schema mapping.
 
     Returns:
-        Parsed float when possible, otherwise `default`.
+        Midpoint between ``min`` and ``max``.
+    """
+    minimum = float(parameter.get("min", 0.0))
+    maximum = float(parameter.get("max", minimum))
+    return minimum + (maximum - minimum) / 2.0
+
+
+def parse_float(raw_value: Any, default: float) -> float:
+    """Parse an arbitrary value as ``float``.
+
+    Args:
+        raw_value: Raw value from config or YAML.
+        default: Fallback value when parsing fails.
+
+    Returns:
+        Parsed float when possible, otherwise ``default``.
     """
     if raw_value is None:
         return default
@@ -295,18 +391,18 @@ def format_series_value(value: float) -> str:
         value: Numeric value.
 
     Returns:
-        Compact string representation.
+        Compact decimal string.
     """
     return f"{value:.6f}".rstrip("0").rstrip(".")
 
 
 def normalize_key(key: str) -> str:
-    """Normalize a stat key to a consistent snake_case-like identifier.
+    """Normalize a stat key to a stable identifier.
 
     Args:
-        key: Raw key (may include spaces/case).
+        key: Raw key, which may contain spaces or mixed case.
 
     Returns:
-        Normalized key.
+        Lowercase snake-case-like identifier.
     """
     return key.strip().lower().replace(" ", "_")

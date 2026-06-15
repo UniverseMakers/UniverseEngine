@@ -4,5 +4,10 @@
 from fake_stats_common import run
 
 
-if __name__ == "__main__":
+def main() -> None:
+    """Run the cosmos fake CSV generator."""
     run("cosmos")
+
+
+if __name__ == "__main__":
+    main()
