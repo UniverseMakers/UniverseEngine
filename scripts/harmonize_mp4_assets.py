@@ -108,6 +108,8 @@ class Summary:
     bytes_before: int = 0
     bytes_after: int = 0
     failures: list[str] = field(default_factory=list)
+    broken_files: list[str] = field(default_factory=list)
+    removed_run_dirs: list[str] = field(default_factory=list)
 
 
 def parse_args() -> CliOptions:
@@ -252,6 +254,21 @@ def _keep_walk_directory(path: Path, symlinks: list[Path]) -> bool:
     if is_excluded_directory(Path(path.name)):
         return False
     return True
+
+
+def infer_run_directory(assets_dir: Path, mp4_path: Path) -> Path:
+    """Return the run directory that owns *mp4_path*.
+
+    Current assets are typically laid out as ``<family>/<run>/animations/*.mp4``.
+    When an ``animations`` segment is present, the run directory is its parent.
+    Otherwise we conservatively treat the file's direct parent as the run.
+    """
+    relative_parts = mp4_path.relative_to(assets_dir).parts
+    if "animations" in relative_parts:
+        animations_index = relative_parts.index("animations")
+        if animations_index > 0:
+            return assets_dir.joinpath(*relative_parts[:animations_index])
+    return mp4_path.parent
 
 
 def probe_video(path: Path) -> VideoProbe:
@@ -613,6 +630,32 @@ def convert_file(path: Path, options: CliOptions) -> FileOutcome:
         )
 
 
+def remove_run_directories(
+    assets_dir: Path,
+    run_dirs: set[Path],
+    *,
+    dry_run: bool,
+) -> list[str]:
+    """Remove run directories that should be discarded."""
+    removed: list[str] = []
+
+    for run_dir in sorted(run_dirs):
+        display = str(run_dir)
+        try:
+            display = str(run_dir.relative_to(assets_dir))
+        except ValueError:
+            pass
+
+        if dry_run:
+            removed.append(f"[dry-run] {display}")
+            continue
+
+        shutil.rmtree(run_dir)
+        removed.append(display)
+
+    return removed
+
+
 def install_signal_handlers() -> None:
     """Set a cooperative stop flag when interrupted."""
     previous_handler = signal.getsignal(signal.SIGINT)
@@ -641,6 +684,11 @@ def main() -> None:
         print(f"[skip symlink] {symlink}")
 
     work_items: list[tuple[int, Path]] = []
+    run_dirs_by_file = {
+        path: infer_run_directory(options.assets_dir, path) for path in scan.files
+    }
+    all_run_dirs: set[Path] = set(run_dirs_by_file.values())
+    working_run_dirs: set[Path] = set()
 
     try:
         for index, path in enumerate(scan.files, start=1):
@@ -653,8 +701,11 @@ def main() -> None:
             except Exception as exc:
                 summary.failed += 1
                 summary.failures.append(f"{path}: {exc}")
+                summary.broken_files.append(f"{path}: {exc}")
                 print(f"{prefix} failed {path}: {exc}")
                 continue
+
+            working_run_dirs.add(run_dirs_by_file[path])
 
             if compliance.compliant and not options.force:
                 summary.compliant_skipped += 1
@@ -705,6 +756,7 @@ def main() -> None:
                     if outcome.failed:
                         summary.failed += 1
                         summary.failures.append(f"{path}: {outcome.message}")
+                        summary.broken_files.append(f"{path}: {outcome.message}")
                         print(f"{prefix} failed {path}: {outcome.message}")
                         continue
 
@@ -716,7 +768,16 @@ def main() -> None:
                         f"({format_percent_change(outcome.original_size, outcome.output_size)})"
                     )
 
-        summary.bytes_after = sum(path.stat().st_size for path in scan.files)
+        run_dirs_without_working_mp4s = all_run_dirs - working_run_dirs
+        if run_dirs_without_working_mp4s:
+            summary.removed_run_dirs = remove_run_directories(
+                options.assets_dir,
+                run_dirs_without_working_mp4s,
+                dry_run=options.dry_run or options.check,
+            )
+        summary.bytes_after = sum(
+            path.stat().st_size for path in scan.files if path.exists()
+        )
 
     except KeyboardInterrupt:
         STOP_EVENT.set()
@@ -734,6 +795,8 @@ def main() -> None:
     print(f"  Converted:            {summary.converted}")
     print(f"  Check non-compliant:  {summary.check_non_compliant}")
     print(f"  Failures:             {summary.failed}")
+    print(f"  Broken MP4s:          {len(summary.broken_files)}")
+    print(f"  Run dirs removed:     {len(summary.removed_run_dirs)}")
     print(f"  Total size before:    {format_size(summary.bytes_before)}")
     print(f"  Total size after:     {format_size(summary.bytes_after)}")
     print(
@@ -743,6 +806,14 @@ def main() -> None:
         print("  Failure details:")
         for failure in summary.failures:
             print(f"    - {failure}")
+    if summary.broken_files:
+        print("  Broken MP4 details:")
+        for broken_file in summary.broken_files:
+            print(f"    - {broken_file}")
+    if summary.removed_run_dirs:
+        print("  Removed run directories:")
+        for run_dir in summary.removed_run_dirs:
+            print(f"    - {run_dir}")
 
     if summary.failed:
         raise SystemExit(1)
