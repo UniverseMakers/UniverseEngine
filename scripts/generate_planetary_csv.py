@@ -22,6 +22,7 @@ import argparse
 import csv
 import glob
 import subprocess
+import shutil
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
@@ -63,6 +64,7 @@ def main() -> None:
 
     wrote = 0
     skipped = 0
+    removed = 0
 
     for timesteps_path in source_paths:
         run_id = timesteps_path.parent.name
@@ -75,7 +77,14 @@ def main() -> None:
 
         video_path = find_reference_video(run_dir)
         if video_path is None:
-            print(f"  [skip] {display_path(run_dir)} - no animation mp4 found")
+            if args.dry_run:
+                print(
+                    f"  [dry-run] would remove {display_path(run_dir)} - no animation mp4 found"
+                )
+            else:
+                shutil.rmtree(run_dir)
+                print(f"  removed {display_path(run_dir)} - no animation mp4 found")
+            removed += 1
             skipped += 1
             continue
 
@@ -93,7 +102,7 @@ def main() -> None:
             print(f"  wrote {display_path(output_path)}")
         wrote += 1
 
-    print(f"wrote={wrote} skipped={skipped}")
+    print(f"wrote={wrote} skipped={skipped} removed={removed}")
 
 
 def find_reference_video(run_dir: Path) -> Path | None:

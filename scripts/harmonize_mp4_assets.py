@@ -271,59 +271,6 @@ def infer_run_directory(assets_dir: Path, mp4_path: Path) -> Path:
     return mp4_path.parent
 
 
-def discover_run_directories(assets_dir: Path) -> set[Path]:
-    """Discover candidate run directories below *assets_dir*.
-
-    A run directory is any directory that either:
-    - directly contains run marker files such as ``parameters.yaml`` or
-      ``run_summary.yaml``
-    - contains an ``animations/`` subdirectory
-    - directly contains one or more MP4 files
-
-    This lets the harmonizer prune runs that already have no MP4s left, not
-    just runs that still showed up in the MP4 scan.
-    """
-    run_dirs: set[Path] = set()
-    marker_filenames = {
-        "parameters.yaml",
-        "parameters.yml",
-        "run_summary.yaml",
-        "run_summary.yml",
-        "live_data_table.csv",
-        "final_snapshot_summary.csv",
-    }
-
-    for root, dir_names, file_names in os.walk(
-        assets_dir, topdown=True, followlinks=False
-    ):
-        root_path = Path(root)
-        dir_names[:] = [
-            name
-            for name in sorted(dir_names)
-            if _keep_walk_directory(root_path / name, [])
-        ]
-
-        if root_path == assets_dir:
-            continue
-
-        relative_root = root_path.relative_to(assets_dir)
-        if is_excluded_directory(relative_root):
-            dir_names[:] = []
-            continue
-
-        file_set = set(file_names)
-        if "animations" in dir_names:
-            run_dirs.add(root_path)
-            continue
-        if any(name.lower().endswith(".mp4") for name in file_names):
-            run_dirs.add(root_path)
-            continue
-        if marker_filenames.intersection(file_set):
-            run_dirs.add(root_path)
-
-    return run_dirs
-
-
 def probe_video(path: Path) -> VideoProbe:
     """Collect the metadata required for compliance checks."""
     command = [
@@ -729,7 +676,6 @@ def main() -> None:
     install_signal_handlers()
 
     scan = discover_mp4_files(options.assets_dir)
-    discovered_run_dirs = discover_run_directories(options.assets_dir)
     summary = Summary(total_files=len(scan.files), symlinks_skipped=len(scan.symlinks))
 
     print(f"Scanning assets: {options.assets_dir}")
@@ -741,7 +687,7 @@ def main() -> None:
     run_dirs_by_file = {
         path: infer_run_directory(options.assets_dir, path) for path in scan.files
     }
-    all_run_dirs: set[Path] = set(run_dirs_by_file.values()) | discovered_run_dirs
+    all_run_dirs: set[Path] = set(run_dirs_by_file.values())
     working_run_dirs: set[Path] = set()
 
     try:
