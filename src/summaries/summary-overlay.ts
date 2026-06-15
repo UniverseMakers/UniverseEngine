@@ -305,6 +305,9 @@ function resolveScientificValue(
   const selectedParameter = simClass.parameters.find((parameter) => parameter.id === id);
 
   if (selectedParameter) {
+    // Intentional: the scientific bars score the user's chosen slider values,
+    // not the nearest precomputed run's exact parameters. The manifest match is
+    // only used to choose which video to play back.
     return values[id] ?? selectedParameter.defaultValue;
   }
 

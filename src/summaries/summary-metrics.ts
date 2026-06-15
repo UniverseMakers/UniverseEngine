@@ -21,7 +21,9 @@ export interface SummaryMetricValue {
  * selected parameters are from the parameter-space "correct" values defined in
  * the YAML config. Only entries whose ids match actual parameter ids contribute
  * to this score, which lets other scales use separate result-based targets in
- * the same metadata block for the summary bars.
+ * the same metadata block for the summary bars. This score is intentionally
+ * based on the user's guess, not the exact parameters of the nearest
+ * precomputed video chosen for playback.
  *
  * For resource metrics (carbon, compute, memory), we use real values from the
  * run metadata when available, or derive plausible-looking placeholder values

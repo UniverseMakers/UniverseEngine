@@ -27,7 +27,6 @@ import yaml
 REPO_ROOT = Path(__file__).resolve().parent.parent
 PUBLIC_ROOT = REPO_ROOT / "public"
 ASSET_ROOT = PUBLIC_ROOT / "assets"
-SIM_CONFIG_PATH = REPO_ROOT / "src" / "selection" / "simulation-catalog.yaml"
 LOCAL_MANIFEST_PATH = ASSET_ROOT / "local-manifest.json"
 ONLINE_MANIFEST_PATH = ASSET_ROOT / "run-manifest.json"
 R2_ENGINE_PREFIX = "engine"
@@ -57,7 +56,7 @@ _UPLOAD_SKIP_PATTERNS = (
 RUN_TOKEN_MAP: dict[str, dict[str, str]] = {
     "cosmos": {
         "Fb": "baryon_fraction",
-        "Ef": "black_hole_strength",
+        "AGN": "black_hole_strength",
         "G": "gravity_strength",
     },
 }
@@ -194,9 +193,8 @@ def _should_skip_file(path: Path) -> bool:
 def main() -> None:
     """Entry point: scan run directories and write the selected manifest."""
     args = parse_args()
-    sim_config = load_simulation_config()
     output_path = LOCAL_MANIFEST_PATH if args.local else ONLINE_MANIFEST_PATH
-    manifest = build_manifest(args, sim_config)
+    manifest = build_manifest(args)
 
     output_path.parent.mkdir(parents=True, exist_ok=True)
     output_path.write_text(
@@ -222,13 +220,12 @@ def build_path_builder(args: argparse.Namespace) -> Callable[[Path], str]:
 
 def build_manifest(
     args: argparse.Namespace,
-    sim_config: dict[str, Any],
 ) -> dict[str, object]:
     """Build the frontend run manifest from either local files or R2."""
     manifest: dict[str, object] = {"version": 1, "runs": []}
 
     if not args.local:
-        for entry in build_manifest_entries_from_r2(args, sim_config):
+        for entry in build_manifest_entries_from_r2(args):
             manifest["runs"].append(entry)  # type: ignore[union-attr]
         return manifest
 
@@ -241,31 +238,16 @@ def build_manifest(
         for run_dir in sorted(
             path for path in sim_root.iterdir() if path.is_dir()
         ):
-            entry = build_manifest_entry(
-                simulation_id, run_dir, sim_config, path_builder
-            )
+            entry = build_manifest_entry(simulation_id, run_dir, path_builder)
             if entry is not None:
                 manifest["runs"].append(entry)  # type: ignore[union-attr]
 
     return manifest
 
 
-def load_simulation_config() -> dict[str, Any]:
-    """Load the simulation configuration YAML.
-
-    Returns:
-        Parsed config dict, or an empty dict if the file is missing.
-    """
-    if not SIM_CONFIG_PATH.exists():
-        return {}
-    with SIM_CONFIG_PATH.open("r", encoding="utf-8") as handle:
-        return yaml.safe_load(handle)
-
-
 def build_manifest_entry(
     simulation_id: str,
     run_dir: Path,
-    sim_config: dict[str, Any],
     path_builder: Callable[[Path], str],
 ) -> dict[str, Any] | None:
     """Build a single manifest entry for one run directory.
@@ -304,16 +286,11 @@ def build_manifest_entry(
         "summaryPath": path_builder(run_summary_yaml),
         "defaultView": default_view,
         "views": view_paths,
-        "availableViews": sorted(view_paths.keys()),
-        "parameterDefaults": build_parameter_defaults(
-            simulation_id, sim_config
-        ),
     }
 
 
 def build_manifest_entries_from_r2(
     args: argparse.Namespace,
-    sim_config: dict[str, Any],
 ) -> list[dict[str, Any]]:
     """Build manifest entries by scanning object keys from an R2 bucket."""
     _ = args
@@ -345,7 +322,6 @@ def build_manifest_entries_from_r2(
                 simulation_id=simulation_id,
                 run_id=run_id,
                 object_keys=runs[run_id],
-                sim_config=sim_config,
                 public_base=public_base,
                 bucket=bucket,
                 s3=s3,
@@ -361,7 +337,6 @@ def build_manifest_entry_from_r2(
     simulation_id: str,
     run_id: str,
     object_keys: list[str],
-    sim_config: dict[str, Any],
     public_base: str,
     bucket: str,
     s3: Any,
@@ -401,28 +376,6 @@ def build_manifest_entry_from_r2(
         "summaryPath": to_public_object_url(public_base, summary_key),
         "defaultView": default_view,
         "views": view_paths,
-        "availableViews": sorted(view_paths.keys()),
-        "parameterDefaults": build_parameter_defaults(simulation_id, sim_config),
-    }
-
-
-def build_parameter_defaults(
-    simulation_id: str,
-    sim_config: dict[str, Any],
-) -> dict[str, float]:
-    """Extract default parameter values from the simulation config.
-
-    Args:
-        simulation_id: Simulation family name.
-        sim_config: Parsed simulation configuration.
-
-    Returns:
-        Mapping of parameter id -> default value.
-    """
-    parameter_config = sim_config.get(simulation_id, {}).get("parameters", {})
-    return {
-        parameter_id: float(config.get("default", 0))
-        for parameter_id, config in parameter_config.items()
     }
 
 

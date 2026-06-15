@@ -3,7 +3,7 @@
  *
  * The config is split across YAML files so concerns stay separate:
  * - `simulation-catalog.yaml`   Family metadata (labels, scoring)
- * - `parameter-info.yaml`       Parameter ranges, defaults, and descriptions
+ * - `parameter-info.yaml`       Parameter ranges and descriptions
  * - `../summaries/summary-stats-config.yaml`  Summary overlay stat config
  * - `../live-data/live-stats-config.yaml`     Live telemetry stat config
  */
@@ -102,7 +102,6 @@ interface RawParameterConfig {
   min: number;
   max: number;
   step?: number;
-  default?: number;
   description?: string;
   value_scale?: number;
   display_unit?: string;
@@ -164,8 +163,7 @@ export const SIMULATION_CLASSES: SimulationClass[] = Object.entries(catalog).map
       },
       parameters: Object.entries(rawParams).map(([parameterId, parameter]) => {
         const step = parameter.step ?? inferParameterStep(parameter.min, parameter.max);
-        const defaultValue =
-          parameter.default ?? entry.metadata.correctValues[parameterId] ?? midpoint(parameter.min, parameter.max);
+        const defaultValue = midpoint(parameter.min, parameter.max);
 
         return {
           id: parameterId,

@@ -29,7 +29,6 @@ interface RunManifestEntry {
   simulationId: string;
   runId: string;
   parameters?: Record<string, number>;
-  parameterDefaults?: Record<string, number>;
   liveDataPath: string;
   summaryPath: string;
   defaultView?: string;
@@ -275,10 +274,7 @@ function getEntryDistance(
 
   const total = params.reduce((sum, parameter) => {
     const selected = values[parameter.id] ?? parameter.defaultValue;
-    const candidate =
-      entry.parameters?.[parameter.id] ??
-      entry.parameterDefaults?.[parameter.id] ??
-      parameter.defaultValue;
+    const candidate = entry.parameters?.[parameter.id] ?? parameter.defaultValue;
     const range = Math.max(parameter.max - parameter.min, 1e-9);
 
     return sum + Math.abs(selected - candidate) / range;

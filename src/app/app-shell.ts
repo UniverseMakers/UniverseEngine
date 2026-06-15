@@ -688,6 +688,8 @@ export function createAppShell(app: HTMLElement): void {
     });
 
     // Query the manifest for the best-matching precomputed video asset.
+    // This only selects which video bundle to show; the user's chosen slider
+    // values remain the source of truth for scoring and answer-checking.
     const match = await manifestController.findNearestVideo(
       activeClass.id,
       activeClass.parameters,

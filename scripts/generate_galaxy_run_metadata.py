@@ -31,12 +31,6 @@ REPO_ROOT = Path(__file__).resolve().parent.parent
 DEFAULT_GALAXY_ROOT = REPO_ROOT / "public" / "assets" / "galaxy"
 SKIP_NAMES = frozenset({".DS_Store", "__pycache__", ".ipynb_checkpoints"})
 
-MILKY_WAY_REFERENCE = {
-    "stellar_mass": 6.1,
-    "black_hole_mass": 4.3,
-    "galaxy_age": 8.5,
-}
-
 CSV_COLUMNS = {
     "stellar_mass": "StellarMassWithinR200_Msun",
     "black_hole_mass": "BHSubgridMassWithinR200_Msun",
@@ -140,7 +134,6 @@ def process_run(run_dir: Path, *, dry_run: bool) -> None:
     summary_metrics = build_summary_metrics(last_row, parameters)
     payload = {
         **resource_metrics,
-        "summaryText": build_summary_text(parameters),
         "summaryMetrics": summary_metrics,
     }
 
@@ -259,18 +252,6 @@ def build_summary_metrics(
         ),
     }
     return metrics
-
-
-def build_summary_text(parameters: dict[str, float]) -> str:
-    return (
-        "This run ends with a stellar mass of "
-        f"{format_decimal(parameters['stellar_mass'])} x10^10 Msun, a central black hole mass of "
-        f"{format_decimal(parameters['black_hole_mass'])} x10^6 Msun, and a mass-weighted stellar age of "
-        f"{format_decimal(parameters['galaxy_age'])} Gyr. For comparison, the Milky Way is treated here as "
-        f"{format_decimal(MILKY_WAY_REFERENCE['stellar_mass'])} x10^10 Msun in stars, "
-        f"{format_decimal(MILKY_WAY_REFERENCE['black_hole_mass'])} x10^6 Msun for Sagittarius A*, and about "
-        f"{format_decimal(MILKY_WAY_REFERENCE['galaxy_age'])} Gyr old."
-    )
 
 
 def scaled_value(last_row: dict[str, str], column: str, divisor: float) -> float:
