@@ -47,7 +47,7 @@ Notes:
 Schema:
 
 - Must include a `t` column (seconds) to indicate the timestamp within the video of the entry.
-- Additional columns are arbitrary keys used by `live_key` / `id` from `src/data/simulations.yaml`.
+- Additional columns are arbitrary keys used by `live_key` / `id` from `src/live-data/live-stats-config.yaml`.
 
 Example:
 
@@ -66,12 +66,12 @@ Notes:
 
 ## How The UI Knows What To Display
 
-The simulation family catalog lives in `src/data/simulations.yaml`.
+The simulation family catalog lives in `src/selection/simulation-catalog.yaml`.
 
 Important fields:
 
-- `metadata.summaryStats`: controls which rows appear in the end-of-run summary.
-- `metadata.liveStats`: controls which rows appear in the live telemetry panel.
+- `summary-stats-config.yaml`: controls which rows appear in the end-of-run summary.
+- `live-stats-config.yaml`: controls which rows appear in the live telemetry panel.
 
 Per-stat fields used by the app:
 
