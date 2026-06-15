@@ -11,6 +11,7 @@ This script rewrites those legacy per-run files in-place.
 Usage::
 
     python3 scripts/translate_planetary_run_summaries.py
+    python3 scripts/translate_planetary_run_summaries.py /path/to/planetary-runs
     python3 scripts/translate_planetary_run_summaries.py --dry-run
 """
 
@@ -40,6 +41,13 @@ RESOURCE_IDS = frozenset(
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
+        "directory",
+        nargs="?",
+        type=Path,
+        default=PLANETARY_ROOT,
+        help="Directory containing per-run planetary subdirectories.",
+    )
+    parser.add_argument(
         "--dry-run",
         action="store_true",
         help="Report which files would be rewritten without modifying them.",
@@ -49,40 +57,41 @@ def parse_args() -> argparse.Namespace:
 
 def main() -> None:
     args = parse_args()
+    planetary_root = args.directory.expanduser().resolve()
 
-    if not PLANETARY_ROOT.is_dir():
-        raise SystemExit(f"ERROR: directory does not exist: {PLANETARY_ROOT}")
+    if not planetary_root.is_dir():
+        raise SystemExit(f"ERROR: directory does not exist: {planetary_root}")
 
     converted = 0
     skipped = 0
 
-    for run_dir in sorted(path for path in PLANETARY_ROOT.iterdir() if path.is_dir()):
+    for run_dir in sorted(path for path in planetary_root.iterdir() if path.is_dir()):
         summary_path = run_dir / "run_summary.yaml"
         if not summary_path.exists():
-            print(f"  [skip] {run_dir.relative_to(REPO_ROOT)} - missing run_summary.yaml")
+            print(f"  [skip] {display_path(run_dir)} - missing run_summary.yaml")
             skipped += 1
             continue
 
         payload = load_yaml(summary_path)
         if is_runtime_metadata(payload):
-            print(f"  [skip] {summary_path.relative_to(REPO_ROOT)} - already converted")
+            print(f"  [skip] {display_path(summary_path)} - already converted")
             skipped += 1
             continue
 
         translated = translate_legacy_summary(payload)
         if translated is None:
-            print(f"  [skip] {summary_path.relative_to(REPO_ROOT)} - unrecognised legacy format")
+            print(f"  [skip] {display_path(summary_path)} - unrecognised legacy format")
             skipped += 1
             continue
 
         if args.dry_run:
-            print(f"  [dry-run] would write {summary_path.relative_to(REPO_ROOT)}")
+            print(f"  [dry-run] would write {display_path(summary_path)}")
         else:
             summary_path.write_text(
                 yaml.safe_dump(translated, sort_keys=False),
                 encoding="utf-8",
             )
-            print(f"  wrote {summary_path.relative_to(REPO_ROOT)}")
+            print(f"  wrote {display_path(summary_path)}")
         converted += 1
 
     print(f"converted={converted} skipped={skipped}")
@@ -92,6 +101,13 @@ def load_yaml(path: Path) -> dict[str, Any]:
     with path.open("r", encoding="utf-8") as handle:
         raw = yaml.safe_load(handle) or {}
     return raw if isinstance(raw, dict) else {}
+
+
+def display_path(path: Path) -> str:
+    try:
+        return str(path.relative_to(REPO_ROOT))
+    except ValueError:
+        return str(path)
 
 
 def is_runtime_metadata(payload: dict[str, Any]) -> bool:
