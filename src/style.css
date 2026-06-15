@@ -1082,6 +1082,20 @@ button {
   gap: 1.5rem;
   width: 100%;
   flex: 0 0 auto;
+  align-items: stretch;
+}
+
+.summary-main-column {
+  flex: 4;
+  display: flex;
+  flex-direction: column;
+}
+
+.summary-side-column {
+  flex: 6;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
 }
 
 .sci-section__title {
@@ -1093,9 +1107,9 @@ button {
 }
 
 .sci-hero {
-  flex: 4;
   display: flex;
   flex-direction: column;
+  flex: 1 1 auto;
 }
 
 .sci-hero__score {
@@ -1143,14 +1157,20 @@ button {
 }
 
 .res-section {
-  flex: 6;
   display: flex;
   flex-direction: column;
 }
 
-.res-grid {
+.sim-stats-section {
+  display: flex;
+  flex-direction: column;
+}
+
+.metric-grid {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  width: min(100%, var(--summary-grid-max-width, 48rem));
+  margin: 0 auto;
+  grid-template-columns: repeat(var(--summary-grid-columns, 3), minmax(0, 1fr));
   gap: 0.75rem;
 }
 
@@ -1160,6 +1180,8 @@ button {
   justify-content: center;
   gap: 0.35rem;
   padding: 0.7rem 0.9rem;
+  min-width: 0;
+  overflow: hidden;
   border: 1px solid rgba(99, 196, 232, 0.3);
   border-radius: 4px;
   background: rgba(99, 196, 232, 0.03);
@@ -1169,6 +1191,9 @@ button {
   color: #6e8093;
   font-size: 0.66rem;
   letter-spacing: 0.14em;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .res-card__value {
@@ -1176,7 +1201,13 @@ button {
   font-family: var(--font-mono);
   font-weight: 700;
   font-size: 1.15rem;
-  white-space: nowrap;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+  white-space: pre-line;
+  line-height: 1.3;
+  word-break: break-word;
 }
 
 .sci-section {
@@ -2299,8 +2330,16 @@ button {
     gap: 1rem;
   }
 
-  .res-grid {
+  .summary-side-column {
+    gap: 1rem;
+  }
+
+  .res-section .metric-grid {
     grid-template-columns: 1fr;
+  }
+
+  .sim-stats-section .metric-grid--single-row {
+    grid-template-columns: repeat(var(--summary-grid-columns, 1), minmax(0, 1fr));
   }
 
   .overlay--summary .summary-overlay {

@@ -3,7 +3,7 @@
 
 Modes:
 
-* ``--local``: scan ``public/assets/<family>/`` and write
+* ``--local``: scan ``public/assets/<family>/`` (or ``--assets-dir``) and write
   ``public/assets/local-manifest.json``.
 * default: scan the actual R2 bucket contents below ``engine/`` and write
   ``public/assets/run-manifest.json``.
@@ -60,6 +60,10 @@ RUN_TOKEN_MAP: dict[str, dict[str, str]] = {
         "AGN": "black_hole_strength",
         "G": "gravity_strength",
     },
+}
+
+SUMMARY_PARAMETER_IDS: dict[str, tuple[str, ...]] = {
+    "galaxy": ("stellar_mass", "black_hole_mass", "galaxy_age"),
 }
 
 
@@ -216,6 +220,11 @@ def parse_args() -> argparse.Namespace:
         action="store_true",
         help="Generate a local manifest using public/assets-relative paths.",
     )
+    parser.add_argument(
+        "--assets-dir",
+        type=Path,
+        help="Override the local assets root to scan when using --local.",
+    )
     return parser.parse_args()
 
 
@@ -228,7 +237,10 @@ def build_path_builder(args: argparse.Namespace) -> Callable[[Path], str]:
     Returns:
         Callable converting concrete filesystem paths into manifest paths.
     """
-    _ = args
+    if args.local and args.assets_dir is not None:
+        assets_root = resolve_local_assets_root(args)
+        return lambda path: to_assets_relative_path(path, assets_root)
+
     return to_public_relative_path
 
 
@@ -243,9 +255,10 @@ def build_manifest(
             manifest["runs"].append(entry)  # type: ignore[union-attr]
         return manifest
 
+    assets_root = resolve_local_assets_root(args)
     path_builder = build_path_builder(args)
     for simulation_id in SIMULATION_DIRECTORIES:
-        sim_root = ASSET_ROOT / simulation_id
+        sim_root = assets_root / simulation_id
         if not sim_root.exists():
             continue
 
@@ -257,6 +270,18 @@ def build_manifest(
                 manifest["runs"].append(entry)  # type: ignore[union-attr]
 
     return manifest
+
+
+def resolve_local_assets_root(args: argparse.Namespace) -> Path:
+    """Return the local assets root used for ``--local`` manifest generation."""
+    if args.assets_dir is None:
+        return ASSET_ROOT
+
+    assets_root = args.assets_dir.expanduser().resolve()
+    if not assets_root.is_dir():
+        raise SystemExit(f"ERROR: assets directory does not exist: {assets_root}")
+
+    return assets_root
 
 
 def build_manifest_entry(
@@ -381,6 +406,7 @@ def build_manifest_entry_from_r2(
             simulation_id=simulation_id,
             run_id=run_id,
             parameter_key=parameter_key,
+            summary_key=summary_key,
             object_keys=object_keys,
             bucket=bucket,
             s3=s3,
@@ -410,6 +436,12 @@ def parse_run_parameters(
             raw: dict[str, Any] = yaml.safe_load(handle) or {}
         return {str(k): float(v) for k, v in raw.items()}
 
+    summary_params = _parse_run_parameters_from_summary_yaml(
+        simulation_id, run_dir / "run_summary.yaml"
+    )
+    if summary_params:
+        return summary_params
+
     return _parse_run_parameters_from_tokens(simulation_id, run_dir.name)
 
 
@@ -418,6 +450,7 @@ def parse_r2_run_parameters(
     simulation_id: str,
     run_id: str,
     parameter_key: str,
+    summary_key: str,
     object_keys: list[str],
     bucket: str,
     s3: Any,
@@ -432,7 +465,61 @@ def parse_r2_run_parameters(
         except Exception:
             pass
 
+    if summary_key in object_keys:
+        try:
+            response = s3.get_object(Bucket=bucket, Key=summary_key)
+            payload = response["Body"].read().decode("utf-8")
+            summary_params = _parse_run_parameters_from_summary_payload(
+                simulation_id, payload
+            )
+            if summary_params:
+                return summary_params
+        except Exception:
+            pass
+
     return _parse_run_parameters_from_tokens(simulation_id, run_id)
+
+
+def _parse_run_parameters_from_summary_yaml(
+    simulation_id: str, summary_path: Path
+) -> dict[str, float]:
+    """Recover parameters from a local ``run_summary.yaml`` when needed."""
+    if not summary_path.exists():
+        return {}
+
+    with summary_path.open("r", encoding="utf-8") as handle:
+        return _parse_run_parameters_from_summary_payload(
+            simulation_id, handle.read()
+        )
+
+
+def _parse_run_parameters_from_summary_payload(
+    simulation_id: str, payload: str
+) -> dict[str, float]:
+    """Recover parameters from a summary YAML payload's ``summaryMetrics``."""
+    parameter_ids = SUMMARY_PARAMETER_IDS.get(simulation_id, ())
+    if not parameter_ids:
+        return {}
+
+    raw: dict[str, Any] = yaml.safe_load(payload) or {}
+    summary_metrics = raw.get("summaryMetrics")
+    if not isinstance(summary_metrics, dict):
+        return {}
+
+    parsed: dict[str, float] = {}
+    for parameter_id in parameter_ids:
+        metric = summary_metrics.get(parameter_id)
+        if not isinstance(metric, dict):
+            continue
+        value = metric.get("value")
+        if value is None:
+            continue
+        try:
+            parsed[parameter_id] = float(value)
+        except (TypeError, ValueError):
+            continue
+
+    return parsed
 
 
 def _parse_run_parameters_from_tokens(
@@ -609,6 +696,11 @@ def to_public_relative_path(path: Path) -> str:
         POSIX-style relative path string.
     """
     return path.relative_to(PUBLIC_ROOT).as_posix()
+
+
+def to_assets_relative_path(path: Path, assets_root: Path) -> str:
+    """Convert a path under an assets root to ``assets/...`` form."""
+    return (Path("assets") / path.relative_to(assets_root)).as_posix()
 
 
 def normalize_key(label: str) -> str:

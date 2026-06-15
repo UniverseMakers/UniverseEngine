@@ -67,10 +67,9 @@ export function buildSummaryMetricMap(
   // Derive placeholder resource stats from the same distance measure for now.
   // These are replaced by real metadata values when the sidecar YAML is available.
   const carbonKg = (runMetadata?.carbonBurnt ?? 0.8 + meanDistance * 4.2).toFixed(2);
-  const smartphoneUnits = (runMetadata?.computeUsed ?? 18 + meanDistance * 46).toFixed(
-    1,
-  );
-  const memoryGb = (runMetadata?.memoryUsed ?? 12 + meanDistance * 84).toFixed(1);
+  const computeHours = runMetadata?.computeUsed ?? 18 + meanDistance * 46;
+  const memoryGb = runMetadata?.memoryUsed ?? 12 + meanDistance * 84;
+  const computeProfile = `${formatCompactNumber(computeHours, 1)} CPU-hrs\n${formatCompactNumber(memoryGb, 1)} GB`;
 
   // ── Step 5: Additional derived fields ────────────────────────────────────
   const parameterCount = String(simClass.parameters.length);
@@ -96,8 +95,8 @@ export function buildSummaryMetricMap(
     similarityScore: { label: 'Similarity Score', value: `${score}/100` },
     bestFitDelta: { label: 'Best-Fit Delta', value: bestFitDelta },
     carbonBurnt: { label: 'Carbon Burnt', value: carbonKg },
-    computeUsed: { label: 'Compute Used', value: smartphoneUnits },
-    memoryUsed: { label: 'Memory Used', value: memoryGb },
+    computeUsed: { label: 'Compute Used', value: computeProfile },
+    memoryUsed: { label: 'Memory Used', value: formatCompactNumber(memoryGb, 1) },
     particlesUpdated: {
       label: 'Particle updates',
       value: runMetadata ? formatCount(runMetadata.particlesUpdated) : '--',
@@ -145,6 +144,13 @@ function formatHoursFromSeconds(totalSeconds: number): string {
 
   return hours
     .toFixed(2)
+    .replace(/\.0+$|(?<=\..*?)0+$/g, '')
+    .replace(/\.$/, '');
+}
+
+function formatCompactNumber(value: number, digits: number): string {
+  return value
+    .toFixed(digits)
     .replace(/\.0+$|(?<=\..*?)0+$/g, '')
     .replace(/\.$/, '');
 }

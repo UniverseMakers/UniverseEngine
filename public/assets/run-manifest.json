@@ -4,7 +4,11 @@
     {
       "simulationId": "galaxy",
       "runId": "track2294",
-      "parameters": {},
+      "parameters": {
+        "stellar_mass": 16.55925399731,
+        "black_hole_mass": 222.82310411129998,
+        "galaxy_age": 7.565859378352999
+      },
       "liveDataPath": "https://pub-e00201311979473b8a30e279dcc56838.r2.dev/engine/galaxy/track2294/live_data_table.csv",
       "summaryPath": "https://pub-e00201311979473b8a30e279dcc56838.r2.dev/engine/galaxy/track2294/run_summary.yaml",
       "defaultView": "hst",
@@ -16,7 +20,11 @@
     {
       "simulationId": "galaxy",
       "runId": "track28",
-      "parameters": {},
+      "parameters": {
+        "stellar_mass": 0.3422621456805,
+        "black_hole_mass": 0.5030631875,
+        "galaxy_age": 6.098257668127
+      },
       "liveDataPath": "https://pub-e00201311979473b8a30e279dcc56838.r2.dev/engine/galaxy/track28/live_data_table.csv",
       "summaryPath": "https://pub-e00201311979473b8a30e279dcc56838.r2.dev/engine/galaxy/track28/run_summary.yaml",
       "defaultView": "hst",
@@ -28,7 +36,11 @@
     {
       "simulationId": "galaxy",
       "runId": "track28880",
-      "parameters": {},
+      "parameters": {
+        "stellar_mass": 0.7822538793922,
+        "black_hole_mass": 1.592636125,
+        "galaxy_age": 4.746638851772
+      },
       "liveDataPath": "https://pub-e00201311979473b8a30e279dcc56838.r2.dev/engine/galaxy/track28880/live_data_table.csv",
       "summaryPath": "https://pub-e00201311979473b8a30e279dcc56838.r2.dev/engine/galaxy/track28880/run_summary.yaml",
       "defaultView": "hst",
@@ -40,7 +52,11 @@
     {
       "simulationId": "galaxy",
       "runId": "track308",
-      "parameters": {},
+      "parameters": {
+        "stellar_mass": 18.51915182908,
+        "black_hole_mass": 224.1517661465,
+        "galaxy_age": 7.616466335687
+      },
       "liveDataPath": "https://pub-e00201311979473b8a30e279dcc56838.r2.dev/engine/galaxy/track308/live_data_table.csv",
       "summaryPath": "https://pub-e00201311979473b8a30e279dcc56838.r2.dev/engine/galaxy/track308/run_summary.yaml",
       "defaultView": "hst",
@@ -52,7 +68,11 @@
     {
       "simulationId": "galaxy",
       "runId": "track33088",
-      "parameters": {},
+      "parameters": {
+        "stellar_mass": 0.9100226905327999,
+        "black_hole_mass": 1.075454085938,
+        "galaxy_age": 5.296530752642
+      },
       "liveDataPath": "https://pub-e00201311979473b8a30e279dcc56838.r2.dev/engine/galaxy/track33088/live_data_table.csv",
       "summaryPath": "https://pub-e00201311979473b8a30e279dcc56838.r2.dev/engine/galaxy/track33088/run_summary.yaml",
       "defaultView": "hst",
@@ -64,7 +84,11 @@
     {
       "simulationId": "galaxy",
       "runId": "track4567",
-      "parameters": {},
+      "parameters": {
+        "stellar_mass": 1.236541276452,
+        "black_hole_mass": 0.3759935507812,
+        "galaxy_age": 8.179148597912
+      },
       "liveDataPath": "https://pub-e00201311979473b8a30e279dcc56838.r2.dev/engine/galaxy/track4567/live_data_table.csv",
       "summaryPath": "https://pub-e00201311979473b8a30e279dcc56838.r2.dev/engine/galaxy/track4567/run_summary.yaml",
       "defaultView": "hst",
@@ -76,7 +100,11 @@
     {
       "simulationId": "galaxy",
       "runId": "track6438",
-      "parameters": {},
+      "parameters": {
+        "stellar_mass": 4.49336483093,
+        "black_hole_mass": 41.08928286328,
+        "galaxy_age": 7.884714968388
+      },
       "liveDataPath": "https://pub-e00201311979473b8a30e279dcc56838.r2.dev/engine/galaxy/track6438/live_data_table.csv",
       "summaryPath": "https://pub-e00201311979473b8a30e279dcc56838.r2.dev/engine/galaxy/track6438/run_summary.yaml",
       "defaultView": "hst",
@@ -88,7 +116,11 @@
     {
       "simulationId": "galaxy",
       "runId": "track738",
-      "parameters": {},
+      "parameters": {
+        "stellar_mass": 6.475219283511,
+        "black_hole_mass": 82.50773259375,
+        "galaxy_age": 8.298225832913
+      },
       "liveDataPath": "https://pub-e00201311979473b8a30e279dcc56838.r2.dev/engine/galaxy/track738/live_data_table.csv",
       "summaryPath": "https://pub-e00201311979473b8a30e279dcc56838.r2.dev/engine/galaxy/track738/run_summary.yaml",
       "defaultView": "hst",

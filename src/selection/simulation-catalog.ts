@@ -47,6 +47,7 @@ export interface SimulationViewOption {
 export interface StatDisplayConfig {
   id: StatDisplayId;
   label?: string;
+  section?: string;
   value?: string;
   unit?: string;
   live?: boolean;
@@ -124,6 +125,7 @@ interface RawSimulationViewOption {
 interface RawStatDisplayConfig {
   id: StatDisplayId;
   label?: string;
+  section?: string;
   value?: string;
   unit?: string;
   live?: boolean;
@@ -197,6 +199,7 @@ function normalizeStatConfig(config: RawStatDisplayConfig): StatDisplayConfig {
   return {
     id: config.id,
     label: config.label,
+    section: config.section,
     value: config.value,
     unit: config.unit,
     live: config.live ?? false,

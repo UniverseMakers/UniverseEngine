@@ -42,6 +42,15 @@ interface ScientificBarDatum {
   detail: string;
 }
 
+interface SummarySectionConfig {
+  title: string;
+  className: string;
+  stats: StatDisplayConfig[];
+  maxColumns: number;
+  maxWidthRem: number;
+  singleRow?: boolean;
+}
+
 const MESSAGES: Record<string, Record<string, string>> = {
   'Moon mass': {
     greenLow:
@@ -510,14 +519,17 @@ export function createSummaryOverlay(
 
       const react = reaction(score);
       const topRow = document.createElement('div');
+      const mainColumn = document.createElement('div');
+      const rightColumn = document.createElement('div');
 
       topRow.className = 'sci-top';
+      mainColumn.className = 'summary-main-column';
+      rightColumn.className = 'summary-side-column';
 
       const hero = document.createElement('div');
 
       hero.className = 'sci-hero panel';
       hero.innerHTML = `
-        <p class="sci-section__title">Simulation complete</p>
         <div class="sci-hero__score">
           <span class="sci-hero__num">${score}</span><span class="sci-hero__outof">/100</span>
         </div>
@@ -526,38 +538,34 @@ export function createSummaryOverlay(
           <div class="sci-hero__gauge-fill" style="width:${score}%; background:${react.colour}; box-shadow:0 0 12px ${react.colour}"></div>
         </div>
       `;
-      topRow.appendChild(hero);
+      mainColumn.appendChild(hero);
 
       const resStats = stats.filter(
         (stat) =>
+          (stat.section ?? 'resources') === 'resources' &&
           !scientificBars.some((bar) => bar.id === String(stat.id)) &&
           stat.id !== 'similarityScore',
       );
+      const simulationStats = stats.filter(
+        (stat) => stat.section === 'simulationStats' && stat.id !== 'similarityScore',
+      );
 
       if (resStats.length > 0) {
-        const resSection = document.createElement('div');
+        rightColumn.appendChild(
+          buildMetricSection({
+            title: 'Resources Used',
+            className: 'res-section',
+            stats: resStats,
+            maxColumns: 3,
+            maxWidthRem: 48,
+          }, available),
+        );
+      }
 
-        resSection.className = 'res-section panel';
-        resSection.innerHTML = '<p class="sci-section__title">Resources used</p>';
+      topRow.appendChild(mainColumn);
 
-        const grid = document.createElement('div');
-
-        grid.className = 'res-grid';
-
-        for (const stat of resStats) {
-          const metric = selectMetric(stat, available);
-          const card = document.createElement('div');
-
-          card.className = 'res-card';
-          card.innerHTML = `
-            <span class="res-card__label">${metric.label}</span>
-            <span class="res-card__value">${metric.value}</span>
-          `;
-          grid.appendChild(card);
-        }
-
-        resSection.appendChild(grid);
-        topRow.appendChild(resSection);
+      if (rightColumn.childElementCount > 0) {
+        topRow.appendChild(rightColumn);
       }
 
       content.appendChild(topRow);
@@ -566,7 +574,7 @@ export function createSummaryOverlay(
         const sciSection = document.createElement('div');
 
         sciSection.className = 'sci-section panel';
-        sciSection.innerHTML = '<p class="sci-section__title">Scientific results</p>';
+        sciSection.innerHTML = '<p class="sci-section__title">Similarity Results</p>';
 
         const list = document.createElement('div');
 
@@ -605,8 +613,63 @@ export function createSummaryOverlay(
 
         content.appendChild(sciSection);
       }
+
+      if (simulationStats.length > 0) {
+        content.appendChild(
+          buildMetricSection({
+            title: 'Simulation Stats',
+            className: 'sim-stats-section',
+            stats: simulationStats,
+            maxColumns: simulationStats.length,
+            maxWidthRem: 999,
+            singleRow: true,
+          }, available),
+        );
+      }
     },
   };
+}
+
+function buildMetricSection(
+  config: SummarySectionConfig,
+  availableMetrics: Record<string, { label: string; value: string }>,
+): HTMLElement {
+  const section = document.createElement('div');
+
+  section.className = `${config.className} panel`;
+  section.innerHTML = `<p class="sci-section__title">${config.title}</p>`;
+
+  const grid = document.createElement('div');
+  const columnCount = config.singleRow
+    ? Math.max(1, config.stats.length)
+    : Math.max(1, Math.min(config.stats.length, config.maxColumns));
+
+  grid.className = 'metric-grid';
+  if (config.singleRow) {
+    grid.classList.add('metric-grid--single-row');
+  }
+  grid.style.setProperty('--summary-grid-columns', String(columnCount));
+  grid.style.setProperty('--summary-grid-max-width', `${config.maxWidthRem}rem`);
+
+  for (const stat of config.stats) {
+    const metric = selectMetric(stat, availableMetrics);
+    const card = document.createElement('div');
+    const label = document.createElement('span');
+    const value = document.createElement('span');
+
+    card.className = 'res-card';
+    label.className = 'res-card__label';
+    label.textContent = metric.label;
+    value.className = 'res-card__value';
+    value.textContent = metric.value;
+    card.appendChild(label);
+    card.appendChild(value);
+    grid.appendChild(card);
+  }
+
+  section.appendChild(grid);
+
+  return section;
 }
 
 /**

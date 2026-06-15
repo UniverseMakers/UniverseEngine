@@ -3,14 +3,24 @@
 # - ids can refer to built-in app metrics such as `runtime`
 # - ids can also refer to keys under the selected run's `run_summary.yaml`
 #   `summaryMetrics` map
+# - `section` controls which summary row a card appears in
+#   (`resources` or `simulationStats`)
 # - `display_format` can be `integer`, `float`, or `scientific`
 # - `precision` controls decimal places or scientific significant figures
 
 planetary:
   summaryStats:
     - id: runtime
+      section: resources
       value: '0.00'
       unit: hours
+    - id: carbonBurnt
+      section: resources
+      value: '0.00'
+      unit: kgCO2e
+    - id: computeUsed
+      section: resources
+      value: 0 CPU-hrs / 0 GB
     - id: similarityScore
       value: 100/100
     - id: moon_mass
@@ -28,62 +38,108 @@ planetary:
     - id: proto_earth_in_moon
       label: Proto-Earth in Moon
       value: '1.25'
-    - id: carbonBurnt
-      value: '0.00'
-      unit: kgCO2e
-    - id: computeUsed
-      value: '0.0'
-      unit: smartphones
-    - id: memoryUsed
-      value: '0.0'
-      unit: GB
-    - id: particlesUpdated
-      value: '0'
-      label: Particle updates
 
 galaxy:
   summaryStats:
     - id: runtime
+      section: resources
       value: '0.00'
       unit: hours
-    - id: similarityScore
-      value: 100/100
     - id: carbonBurnt
+      section: resources
       value: '0.00'
       unit: kgCO2e
     - id: computeUsed
-      value: '0.0'
-      unit: smartphones
-    - id: memoryUsed
-      value: '0.0'
-      unit: GB
-    - id: particlesUpdated
+      section: resources
+      value: 0 CPU-hrs / 0 GB
+    - id: similarityScore
+      value: 100/100
+    - id: stellar_mass_msun
+      section: simulationStats
+      label: Stellar mass
       value: '0'
-      label: Particle updates
+      unit: Msun
+      display_format: scientific
+      precision: 3
+    - id: stellar_size_kpc
+      section: simulationStats
+      label: Stellar size
+      value: '0'
+      unit: kpc
+      display_format: float
+      precision: 2
+    - id: gas_mass_msun
+      section: simulationStats
+      label: Gas mass
+      value: '0'
+      unit: Msun
+      display_format: scientific
+      precision: 3
+    - id: dark_matter_mass_msun
+      section: simulationStats
+      label: Dark matter mass
+      value: '0'
+      unit: Msun
+      display_format: scientific
+      precision: 3
+    - id: black_hole_mass_msun
+      section: simulationStats
+      label: Black hole mass
+      value: '0'
+      unit: Msun
+      display_format: scientific
+      precision: 3
+    - id: galaxy_age
+      section: simulationStats
+      label: Galaxy age
+      value: '0'
+      unit: Gyr
+      display_format: float
+      precision: 2
 
 cosmos:
   summaryStats:
     - id: runtime
+      section: resources
       value: '0.00'
       unit: hours
-    - id: similarityScore
-      value: 100/100
     - id: carbonBurnt
+      section: resources
       value: '0.00'
       unit: kgCO2e
       display_format: float
       precision: 2
     - id: computeUsed
-      value: '0.0'
-      unit: smartphones
-      display_format: float
-      precision: 1
-    - id: memoryUsed
-      value: '0.0'
-      unit: GB
-      display_format: float
-      precision: 1
-    - id: particlesUpdated
+      section: resources
+      value: 0 CPU-hrs / 0 GB
+    - id: similarityScore
+      value: 100/100
+    - id: stellar_mass_msun
+      section: simulationStats
+      label: Stellar mass formed
       value: '0'
-      label: Particle updates
+      unit: Msun
+      display_format: scientific
+      precision: 3
+    - id: gas_fraction
+      section: simulationStats
+      label: Gas fraction
+      value: '0'
+      display_format: float
+      precision: 3
+    - id: stellar_fraction
+      section: simulationStats
+      label: Stellar fraction
+      value: '0'
+      display_format: float
+      precision: 3
+    - id: number_of_black_holes
+      section: simulationStats
+      label: Black holes formed
+      value: '0'
+      display_format: integer
+    - id: particlesUpdated
+      section: simulationStats
+      label: Particles updated
+      value: '0'
       display_format: integer
