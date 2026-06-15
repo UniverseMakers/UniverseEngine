@@ -37,3 +37,4 @@ test_*.csv
 
 # Ignore all videos we don't want to track them
 **/*.mp4
+public/assests/*.mp4
