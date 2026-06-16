@@ -18,6 +18,7 @@ export interface VideoMatch {
   summaryUrl: string;
   views?: Record<string, string>;
   viewId?: string;
+  runId?: string;
 }
 
 interface RunManifest {
@@ -248,6 +249,7 @@ async function findManifestBackedRun(
     liveDataUrl: withBaseUrl(bestEntry.liveDataPath),
     summaryUrl: withBaseUrl(bestEntry.summaryPath),
     viewId,
+    runId: bestEntry.runId,
     views: Object.fromEntries(
       Object.entries(bestEntry.views).map(([key, path]) => [key, withBaseUrl(path)]),
     ),

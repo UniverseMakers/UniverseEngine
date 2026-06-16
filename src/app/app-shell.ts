@@ -46,6 +46,7 @@ import {
   type AdvancedSettings,
 } from '../shared/advanced-settings.ts';
 import { logInfo, logWarn } from '../shared/logger.ts';
+import { trackRunSelection } from '../shared/track-run.ts';
 
 type AppMode = 'entry' | 'config' | 'initializing' | 'display';
 
@@ -703,6 +704,14 @@ export function createAppShell(app: HTMLElement): void {
     activeRunMatch = match;
     // Resolve which view (dark matter, gas density, etc.) to show first.
     const selectedViewId = resolveSelectedViewId(activeClass, match);
+    // Fire-and-forget tracking — never blocks playback.
+
+    trackRunSelection({
+      simulationId: activeClass.id,
+      parameters: values,
+      manifestSource: manifestController.getSource(),
+      matchedRunId: match.runId,
+    });
     const selectedViewUrl = getViewUrl(match, selectedViewId) ?? match.url;
     const alternateViewUrls = Object.entries(match.views ?? {})
       .filter(([viewId]) => viewId !== selectedViewId)

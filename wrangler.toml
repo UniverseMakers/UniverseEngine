@@ -1,0 +1,26 @@
+name = "universe-engine"
+main = "workers/api.ts"
+compatibility_date = "2025-06-16"
+compatibility_flags = ["nodejs_compat"]
+
+[[d1_databases]]
+binding = "DB"
+database_name = "universe-engine-db"
+database_id = "0aebd7a0-0552-4a20-b37d-e9e114dd0308"
+
+[env.production]
+# Set `database_id` below once you create the production D1 database:
+# database_id = ""
+
+[[env.production.d1_databases]]
+binding = "DB"
+database_name = "universe-engine-db"
+database_id = ""
+
+# ── Routing ─────────────────────────────────────────────────────────────────
+# The Worker only serves /api/track-run
+# Leave routes empty to deploy to a workers.dev subdomain.
+# Example custom domain route:
+# [[env.production.routes]]
+# pattern = "api.universemakers.org/*"
+# zone_id = "YOUR_ZONE_ID"

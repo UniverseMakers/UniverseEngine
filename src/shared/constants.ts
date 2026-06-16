@@ -27,3 +27,12 @@ export const SUMMARY_OVERLAY = {
 /** Bucket-hosted online manifest URL used by online mode. */
 export const ONLINE_MANIFEST_URL =
   'https://pub-e00201311979473b8a30e279dcc56838.r2.dev/engine/run-manifest.json';
+
+/**
+ * API endpoint for run-selection tracking.
+ *
+ * Set to your deployed Worker URL.  Leave empty to disable tracking.
+ * For local development, this will typically be:
+ *   http://localhost:8787/api/track-run
+ */
+export const TRACKING_API_URL = 'https://universe-engine.universe-engine.workers.dev/api/track-run';

@@ -31,6 +31,10 @@ __pycache__/
 # Local tracking
 PROGRESS.md
 
+# Wrangler / Cloudflare Workers
+.wrangler/
+worker-configuration.d.ts
+
 # Local test artifacts
 test*.mp4
 test_*.csv
