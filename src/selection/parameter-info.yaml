@@ -14,28 +14,22 @@ planetary:
     label: Impactor Mass
     description: Mass of the body colliding with the proto-Earth. Determines the mass of the debris disk and the resulting moon mass.
     unit: M⊕
-    min: 0.01
-    max: 10
-    match_min: 0.05
-    match_max: 0.35
+    min: 0.05
+    max: 0.35
     step: 0.01
   impactor_velocity:
     label: Impactor Velocity
     description: Relative velocity at which the impactor strikes the proto-Earth. Higher velocities produce more energetic collisions and hotter debris disks.
     unit: km/s
     min: 1
-    max: 50
-    match_min: 1
-    match_max: 3
-    step: 0.5
+    max: 3
+    step: 0.1
   impactor_angle:
     label: Impactor Angle
     description: Impact angle relative to the proto-Earth surface. Oblique impacts can produce different disk geometries than head-on collisions.
     unit: °
     min: 0
-    max: 90
-    match_min: 0
-    match_max: 60
+    max: 60
     step: 1
 
 galaxy:
