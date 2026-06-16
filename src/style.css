@@ -2394,11 +2394,27 @@ button {
   }
 
   .res-section .metric-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.5rem;
   }
 
   .sim-stats-section .metric-grid--single-row {
-    grid-template-columns: repeat(var(--summary-grid-columns, 1), minmax(0, 1fr));
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.5rem;
+  }
+
+  .res-card {
+    gap: 0.25rem;
+    padding: 0.55rem 0.7rem;
+  }
+
+  .res-card__label {
+    font-size: 0.56rem;
+    letter-spacing: 0.1em;
+  }
+
+  .res-card__value {
+    font-size: 0.82rem;
   }
 
   .overlay--summary .summary-overlay {
