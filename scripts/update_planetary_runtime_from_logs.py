@@ -13,7 +13,10 @@ Defaults are set for the current COSMA layout but can be overridden.
 from __future__ import annotations
 
 import argparse
+from concurrent.futures import ThreadPoolExecutor, as_completed
+from collections import deque
 import glob
+import os
 import re
 from pathlib import Path
 from typing import Any
@@ -24,6 +27,7 @@ REPO_ROOT = Path(__file__).resolve().parent.parent
 DEFAULT_SOURCE_GLOB = "/cosma5/data/dp004/vreke/swift/rssse/pE*/job_*.txt"
 DEFAULT_LOGS_DIR = Path("/cosma5/data/dp004/vreke/swift/rssse/outs_and_errs")
 DEFAULT_ASSETS_DIR = REPO_ROOT / "public" / "assets" / "planetary"
+DEFAULT_TAIL_LINES = 8
 
 ELAPSED_TOKEN_RE = re.compile(
     r"^(?:(?P<days>\d+)-)?(?P<hours>\d+):(?P<minutes>\d{2}):(?P<seconds>\d{2})$"
@@ -54,6 +58,18 @@ def parse_args() -> argparse.Namespace:
         action="store_true",
         help="Report changes without writing summary files.",
     )
+    parser.add_argument(
+        "--jobs",
+        type=int,
+        default=max(1, min(8, os.cpu_count() or 1)),
+        help="Maximum concurrent run updates (default: min(8, CPU count)).",
+    )
+    parser.add_argument(
+        "--tail-lines",
+        type=int,
+        default=DEFAULT_TAIL_LINES,
+        help="Number of lines to read from the end of each log file (default: 8).",
+    )
     return parser.parse_args()
 
 
@@ -69,54 +85,84 @@ def main() -> None:
         raise SystemExit(f"ERROR: assets directory does not exist: {assets_dir}")
     if not job_files:
         raise SystemExit(f"ERROR: no job files matched: {args.source_glob}")
+    if args.jobs <= 0:
+        raise SystemExit("ERROR: --jobs must be a positive integer")
+    if args.tail_lines <= 0:
+        raise SystemExit("ERROR: --tail-lines must be a positive integer")
 
     updated = 0
     skipped = 0
 
-    for job_file in job_files:
-        run_id = job_file.parent.name
-        summary_path = assets_dir / run_id / "run_summary.yaml"
+    with ThreadPoolExecutor(max_workers=args.jobs) as executor:
+        futures = {
+            executor.submit(
+                process_job_file,
+                job_file,
+                logs_dir=logs_dir,
+                assets_dir=assets_dir,
+                dry_run=args.dry_run,
+                tail_lines=args.tail_lines,
+            ): job_file
+            for job_file in job_files
+        }
 
-        if not summary_path.is_file():
-            print(f"  [skip] {display_path(summary_path)} - missing run_summary.yaml")
-            skipped += 1
-            continue
-
-        job_ids = parse_job_ids(job_file)
-        if not job_ids:
-            print(f"  [skip] {display_path(job_file)} - no job ids found")
-            skipped += 1
-            continue
-
-        elapsed_seconds = 0
-        try:
-            for job_id in job_ids:
-                elapsed_seconds += load_job_elapsed_seconds(logs_dir, job_id)
-        except RuntimeError as exc:
-            print(f"  [skip] {display_path(job_file)} - {exc}")
-            skipped += 1
-            continue
-
-        payload = load_yaml(summary_path)
-        payload["wallclockSeconds"] = elapsed_seconds
-
-        if args.dry_run:
-            print(
-                f"  [dry-run] would update {display_path(summary_path)} "
-                f"wallclockSeconds={elapsed_seconds}"
-            )
-        else:
-            summary_path.write_text(
-                yaml.safe_dump(payload, sort_keys=False),
-                encoding="utf-8",
-            )
-            print(
-                f"  wrote {display_path(summary_path)} "
-                f"wallclockSeconds={elapsed_seconds}"
-            )
-        updated += 1
+        for future in as_completed(futures):
+            status, message = future.result()
+            print(message)
+            if status == "updated":
+                updated += 1
+            else:
+                skipped += 1
 
     print(f"updated={updated} skipped={skipped}")
+
+
+def process_job_file(
+    job_file: Path,
+    *,
+    logs_dir: Path,
+    assets_dir: Path,
+    dry_run: bool,
+    tail_lines: int,
+) -> tuple[str, str]:
+    run_id = job_file.parent.name
+    summary_path = assets_dir / run_id / "run_summary.yaml"
+
+    if not summary_path.is_file():
+        return "skipped", f"  [skip] {display_path(summary_path)} - missing run_summary.yaml"
+
+    job_ids = parse_job_ids(job_file)
+    if not job_ids:
+        return "skipped", f"  [skip] {display_path(job_file)} - no job ids found"
+
+    elapsed_seconds = 0
+    try:
+        for job_id in job_ids:
+            elapsed_seconds += load_job_elapsed_seconds(
+                logs_dir,
+                job_id,
+                tail_lines=tail_lines,
+            )
+    except RuntimeError as exc:
+        return "skipped", f"  [skip] {display_path(job_file)} - {exc}"
+
+    payload = load_yaml(summary_path)
+    payload["wallclockSeconds"] = elapsed_seconds
+
+    if dry_run:
+        return (
+            "updated",
+            f"  [dry-run] would update {display_path(summary_path)} wallclockSeconds={elapsed_seconds}",
+        )
+
+    summary_path.write_text(
+        yaml.safe_dump(payload, sort_keys=False),
+        encoding="utf-8",
+    )
+    return (
+        "updated",
+        f"  wrote {display_path(summary_path)} wallclockSeconds={elapsed_seconds}",
+    )
 
 
 def parse_job_ids(job_file: Path) -> list[str]:
@@ -134,21 +180,20 @@ def parse_job_ids(job_file: Path) -> list[str]:
     return job_ids
 
 
-def load_job_elapsed_seconds(logs_dir: Path, job_id: str) -> int:
+def load_job_elapsed_seconds(logs_dir: Path, job_id: str, *, tail_lines: int) -> int:
     log_path = logs_dir / f"swift_{job_id}.out"
     if not log_path.is_file():
         raise RuntimeError(f"missing log file {display_path(log_path)}")
 
-    elapsed_token = extract_elapsed_token(log_path, job_id)
+    elapsed_token = extract_elapsed_token(log_path, job_id, tail_lines=tail_lines)
     if elapsed_token is None:
         raise RuntimeError(f"could not extract elapsed time from {display_path(log_path)}")
 
     return parse_elapsed_seconds(elapsed_token)
 
 
-def extract_elapsed_token(log_path: Path, job_id: str) -> str | None:
-    with log_path.open("r", encoding="utf-8", errors="replace") as handle:
-        lines = handle.readlines()
+def extract_elapsed_token(log_path: Path, job_id: str, *, tail_lines: int) -> str | None:
+    lines = read_log_tail_lines(log_path, tail_lines)
 
     for raw_line in reversed(lines):
         line = raw_line.strip()
@@ -167,6 +212,11 @@ def extract_elapsed_token(log_path: Path, job_id: str) -> str | None:
             return candidate
 
     return None
+
+
+def read_log_tail_lines(log_path: Path, tail_lines: int) -> list[str]:
+    with log_path.open("r", encoding="utf-8", errors="replace") as handle:
+        return list(deque(handle, maxlen=tail_lines))
 
 
 def parse_elapsed_seconds(value: str) -> int:
