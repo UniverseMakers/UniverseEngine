@@ -948,14 +948,15 @@ button {
   flex-direction: column;
   width: min(85rem, calc(100vw - 6rem));
   max-width: calc(100vw - 6rem);
-  height: min(50rem, calc(100vh - 5.5rem));
+  height: auto;
   max-height: calc(100vh - 5.5rem);
   padding: 1.25rem 2rem;
   border: 1px solid var(--line-strong);
   border-radius: 0;
   box-sizing: border-box;
   overflow: hidden;
-  justify-content: space-between;
+  justify-content: flex-start;
+  gap: 0.75rem;
   margin: 0 auto;
   background:
     radial-gradient(1200px 600px at 70% -10%, rgba(91, 200, 232, 0.1), transparent 60%),
@@ -1018,8 +1019,12 @@ button {
   display: flex;
   flex-direction: column;
   gap: 1.25rem;
-  flex: 1;
+  flex: 0 1 auto;
   min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding-right: 0.25rem;
+  overscroll-behavior: contain;
 }
 
 .summary-overlay__actions {
@@ -1211,24 +1216,24 @@ button {
 }
 
 .sci-section {
-  flex: 1;
+  flex: 0 0 auto;
   display: flex;
   flex-direction: column;
   min-height: 0;
 }
 
 .sci-bars {
-  flex: 1;
-  min-height: 0;
+  flex: 0 0 auto;
+  min-height: max-content;
   display: flex;
   flex-direction: column;
-  justify-content: space-around;
-  gap: 0.6rem;
+  justify-content: flex-start;
+  gap: 0.9rem;
 }
 
 .sci-bar {
   display: grid;
-  grid-template-columns: 13rem 1fr 9rem;
+  grid-template-columns: minmax(10rem, 13rem) minmax(0, 1fr) minmax(8rem, 9rem);
   align-items: center;
   gap: 1.5rem;
   cursor: pointer;
@@ -1351,6 +1356,26 @@ button {
   color: #6e8093;
   font-size: 0.66rem;
   letter-spacing: 0.16em;
+}
+
+@media (max-height: 56rem) {
+  .summary-overlay {
+    max-height: calc(100vh - 3rem);
+    padding: 1rem 1.5rem;
+    gap: 0.5rem;
+  }
+
+  .summary-overlay__content {
+    gap: 1rem;
+  }
+
+  .summary-overlay__actions {
+    margin-top: 0;
+  }
+
+  .sci-top {
+    gap: 1rem;
+  }
 }
 
 .sci-scale__perfect {
@@ -2575,9 +2600,28 @@ button {
   }
 
   .display-chrome__left-center {
-    top: 4.25rem;
+    top: calc(5rem + env(safe-area-inset-top));
     left: 0.75rem;
     transform: none;
+  }
+
+  .view-switcher {
+    gap: 0.35rem;
+    padding: 0.35rem;
+  }
+
+  .view-switcher__button {
+    min-width: 7.25rem;
+    gap: 0.55rem;
+    padding: 0.5rem 0.7rem;
+    font-size: 0.58rem;
+    letter-spacing: 0.14em;
+  }
+
+  .view-switcher__icon {
+    width: 1.1rem;
+    height: 1.1rem;
+    flex-basis: 1.1rem;
   }
 
   .display-chrome__center-status {
@@ -2592,20 +2636,35 @@ button {
   }
 
   .data-panel {
-    width: 14rem;
+    width: 13.5rem;
     min-width: 0;
     max-width: calc(100vw - 1.5rem);
-    padding: 0.9rem 1rem;
+    padding: 0.75rem 0.85rem;
   }
 
   /* Keep the HUD compact: show a few rows and allow vertical scroll for more. */
   .data-panel__metrics {
-    max-height: 8.8rem;
+    gap: 0.65rem;
+    max-height: min(13rem, calc(100dvh - 9.5rem));
     overflow: auto;
     -webkit-overflow-scrolling: touch;
     overscroll-behavior: contain;
     touch-action: pan-y;
     padding-right: 0.25rem;
+  }
+
+  .data-panel__metric {
+    column-gap: 0.7rem;
+    padding-bottom: 0.65rem;
+  }
+
+  .data-panel__metric-label {
+    font-size: 0.58rem;
+    letter-spacing: 0.14em;
+  }
+
+  .data-panel__metric-value {
+    font-size: 0.72rem;
   }
 
   .display-chrome__bottom {
@@ -2658,6 +2717,16 @@ button {
 
   .terminal__cursor {
     padding: 0 1rem 1rem;
+  }
+}
+
+@media (max-width: 720px) and (orientation: portrait) {
+  .display-chrome__left-center {
+    top: calc(5.5rem + env(safe-area-inset-top));
+  }
+
+  .data-panel__metrics {
+    max-height: min(14.5rem, calc(100dvh - 10rem));
   }
 }
 
