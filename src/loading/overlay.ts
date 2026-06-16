@@ -32,6 +32,7 @@ export interface LoadingOverlayController {
  */
 export function createLoadingOverlay(container: HTMLElement): LoadingOverlayController {
   const { TYPING_MS_PER_CHAR, FINAL_PAUSE_MS } = INITIALIZATION;
+  const FAST_FORWARD_TYPING_MS_PER_CHAR = 1.5;
 
   // Full-screen shell that blocks interaction while the faux boot sequence is
   // printing. CSS handles the visual treatment; this module handles sequencing.
@@ -62,13 +63,28 @@ export function createLoadingOverlay(container: HTMLElement): LoadingOverlayCont
 
   log.className = 'terminal__log';
 
+  const fastForwardButton = document.createElement('button');
+
+  fastForwardButton.className = 'terminal__fast-forward';
+  fastForwardButton.type = 'button';
+  fastForwardButton.textContent = 'Fast Forward';
+  fastForwardButton.setAttribute('aria-pressed', 'false');
+
   terminal.appendChild(header);
   terminal.appendChild(log);
+  terminal.appendChild(fastForwardButton);
   overlay.appendChild(terminal);
   container.appendChild(overlay);
 
   let timers: number[] = [];
   let sequenceToken = 0;
+  let isFastForwarding = false;
+
+  fastForwardButton.addEventListener('click', () => {
+    isFastForwarding = !isFastForwarding;
+    fastForwardButton.classList.toggle('is-active', isFastForwarding);
+    fastForwardButton.setAttribute('aria-pressed', String(isFastForwarding));
+  });
 
   function clearTimers() {
     for (const timer of timers) {
@@ -95,6 +111,10 @@ export function createLoadingOverlay(container: HTMLElement): LoadingOverlayCont
     });
   }
 
+  function getTypingDelayMs(): number {
+    return isFastForwarding ? FAST_FORWARD_TYPING_MS_PER_CHAR : TYPING_MS_PER_CHAR;
+  }
+
 
   async function typeLine(line: string, token: number): Promise<void> {
     // Each line gets its own cursor so the typing effect feels like a real shell
@@ -119,7 +139,7 @@ export function createLoadingOverlay(container: HTMLElement): LoadingOverlayCont
       // of the visible line while text streams in.
       row.insertBefore(document.createTextNode(character), cursor);
       log.scrollTop = log.scrollHeight;
-      await wait(TYPING_MS_PER_CHAR, token);
+      await wait(getTypingDelayMs(), token);
     }
 
     cursor.remove();
@@ -140,6 +160,9 @@ export function createLoadingOverlay(container: HTMLElement): LoadingOverlayCont
       clearTimers();
       sequenceToken += 1;
       const token = sequenceToken;
+      isFastForwarding = false;
+      fastForwardButton.classList.remove('is-active');
+      fastForwardButton.setAttribute('aria-pressed', 'false');
 
       log.innerHTML = '';
       overlay.hidden = false;
@@ -198,6 +221,9 @@ export function createLoadingOverlay(container: HTMLElement): LoadingOverlayCont
     hide() {
       clearTimers();
       sequenceToken += 1;
+      isFastForwarding = false;
+      fastForwardButton.classList.remove('is-active');
+      fastForwardButton.setAttribute('aria-pressed', 'false');
       overlay.hidden = true;
       overlay.classList.add('is-hidden');
       log.innerHTML = '';
