@@ -42,6 +42,16 @@ NODE_MEMORY_GB = 1540.0
 COSMA7_NODE_POWER_KW = 0.175
 FACILITY_OVERHEAD_MULTIPLIER = 489.0 / 341.0
 NORTH_EAST_GRID_CARBON_KG_PER_KWH = 43.1 / 1000.0
+RESOURCE_IDS = frozenset(
+    {
+        "runtime",
+        "carbonBurnt",
+        "computeUsed",
+        "memoryUsed",
+        "particlesUpdated",
+        "similarityScore",
+    }
+)
 
 ELAPSED_TOKEN_RE = re.compile(
     r"^(?:(?P<days>\d+)-)?(?P<hours>\d+):(?P<minutes>\d{2}):(?P<seconds>\d{2})$"
@@ -160,14 +170,20 @@ def process_job_file(
     except RuntimeError as exc:
         return "skipped", f"  [skip] {display_path(job_file)} - {exc}"
 
-    payload = load_yaml(summary_path)
-    payload["wallclockSeconds"] = elapsed_seconds
-    payload["computeUsed"] = round(elapsed_seconds * THREADS_PER_RUN / 3600.0, 2)
-    payload["memoryUsed"] = round(NODE_MEMORY_GB * THREADS_PER_RUN / NODE_CORES, 2)
-    payload["carbonBurnt"] = round(
-        payload["computeUsed"] * carbon_kg_per_core_hour(),
-        4,
-    )
+    existing_payload = load_yaml(summary_path)
+    particles_updated = extract_particles_updated(existing_payload)
+    summary_metrics = extract_summary_metrics(existing_payload)
+    compute_used = round(elapsed_seconds * THREADS_PER_RUN / 3600.0, 2)
+    memory_used = round(NODE_MEMORY_GB * THREADS_PER_RUN / NODE_CORES, 2)
+    carbon_burnt = round(compute_used * carbon_kg_per_core_hour(), 4)
+    payload = {
+        "wallclockSeconds": elapsed_seconds,
+        "computeUsed": compute_used,
+        "memoryUsed": memory_used,
+        "carbonBurnt": carbon_burnt,
+        "particlesUpdated": particles_updated,
+        "summaryMetrics": summary_metrics,
+    }
 
     if dry_run:
         return (
@@ -175,9 +191,10 @@ def process_job_file(
             (
                 f"  [dry-run] would update {display_path(summary_path)} "
                 f"wallclockSeconds={elapsed_seconds} "
-                f"computeUsed={payload['computeUsed']} "
-                f"memoryUsed={payload['memoryUsed']} "
-                f"carbonBurnt={payload['carbonBurnt']}"
+                f"computeUsed={compute_used} "
+                f"memoryUsed={memory_used} "
+                f"carbonBurnt={carbon_burnt} "
+                f"particlesUpdated={particles_updated}"
             ),
         )
 
@@ -190,11 +207,79 @@ def process_job_file(
         (
             f"  wrote {display_path(summary_path)} "
             f"wallclockSeconds={elapsed_seconds} "
-            f"computeUsed={payload['computeUsed']} "
-            f"memoryUsed={payload['memoryUsed']} "
-            f"carbonBurnt={payload['carbonBurnt']}"
+            f"computeUsed={compute_used} "
+            f"memoryUsed={memory_used} "
+            f"carbonBurnt={carbon_burnt} "
+            f"particlesUpdated={particles_updated}"
         ),
     )
+
+
+def extract_particles_updated(payload: dict[str, Any]) -> int:
+    if "particlesUpdated" in payload:
+        return to_int(payload.get("particlesUpdated"))
+
+    legacy_stats = extract_legacy_summary_stats(payload)
+    return to_int(legacy_stats.get("particlesUpdated", {}).get("value"))
+
+
+def extract_summary_metrics(payload: dict[str, Any]) -> dict[str, dict[str, str]]:
+    raw_metrics = payload.get("summaryMetrics")
+    if isinstance(raw_metrics, dict):
+        normalized: dict[str, dict[str, str]] = {}
+        for key, metric in raw_metrics.items():
+            if not isinstance(metric, dict):
+                continue
+            value = metric.get("value")
+            if value is None:
+                continue
+            normalized[str(key)] = {
+                "label": str(metric.get("label") or key),
+                "value": str(value),
+            }
+        if normalized:
+            return normalized
+
+    legacy_stats = extract_legacy_summary_stats(payload)
+    summary_metrics: dict[str, dict[str, str]] = {}
+    for stat_id, stat in legacy_stats.items():
+        if stat_id in RESOURCE_IDS:
+            continue
+        value = stat.get("value")
+        if value is None:
+            continue
+        summary_metrics[stat_id] = {
+            "label": str(stat.get("label") or stat_id),
+            "value": str(value),
+        }
+    return summary_metrics
+
+
+def extract_legacy_summary_stats(payload: dict[str, Any]) -> dict[str, dict[str, Any]]:
+    summary_stats = payload.get("summaryStats")
+    if isinstance(summary_stats, list):
+        return index_summary_stats(summary_stats)
+
+    for value in payload.values():
+        if not isinstance(value, dict):
+            continue
+        summary_stats = value.get("summaryStats")
+        if isinstance(summary_stats, list):
+            return index_summary_stats(summary_stats)
+
+    return {}
+
+
+def index_summary_stats(summary_stats: list[Any]) -> dict[str, dict[str, Any]]:
+    indexed: dict[str, dict[str, Any]] = {}
+    for item in summary_stats:
+        if not isinstance(item, dict):
+            continue
+        stat_id = item.get("id")
+        if not isinstance(stat_id, str) or not stat_id:
+            continue
+        indexed[stat_id] = item
+    return indexed
 
 
 def carbon_kg_per_core_hour() -> float:
@@ -277,6 +362,13 @@ def parse_elapsed_seconds(value: str) -> int:
     seconds = int(match.group("seconds"))
 
     return (((days * 24) + hours) * 60 + minutes) * 60 + seconds
+
+
+def to_int(value: Any) -> int:
+    try:
+        return int(round(float(value)))
+    except (TypeError, ValueError):
+        return 0
 
 
 def load_yaml(path: Path) -> dict[str, Any]:
