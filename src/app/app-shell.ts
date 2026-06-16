@@ -930,11 +930,12 @@ export function createAppShell(app: HTMLElement): void {
     setElementVisibility(displayChrome, showDisplay);
     setElementVisibility(swiftLogo, nextMode === 'display');
 
-    // Burger menu: visible on landing page and display, hidden during loading
-    // and config (config already hides it via the CSS mode selector).
+    // Burger menu: visible on landing page, parameter selection, and display
+    // unless the experience is locked to a single theme. Hidden during loading.
     setElementVisibility(
       topLeft,
-      (nextMode === 'entry' && !advancedSettings.lockedScaleId) || nextMode === 'display',
+      !advancedSettings.lockedScaleId &&
+        (nextMode === 'entry' || nextMode === 'config' || nextMode === 'display'),
     );
 
     // Entry overlay: shown only in entry mode, hidden everywhere else.

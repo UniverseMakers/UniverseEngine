@@ -1357,7 +1357,7 @@ button {
   letter-spacing: 0.16em;
 }
 
-@media (max-height: 56rem) {
+@media (height <= 56rem) {
   .summary-overlay {
     max-height: calc(100vh - 3rem);
     padding: 1rem 1.5rem;
@@ -2194,7 +2194,7 @@ button {
 /* Responsive Layout                                                           */
 /* -------------------------------------------------------------------------- */
 
-@media (max-width: 1024px) {
+@media (width <= 1024px) {
   .display-chrome__top-left {
     top: 1rem;
     left: 1rem;
@@ -2323,7 +2323,7 @@ button {
   }
 }
 
-@media (max-width: 720px) {
+@media (width <= 720px) {
   /* Prevent the page scroll indicator from bleeding through the full-screen summary. */
   html:has(.overlay--summary.is-visible),
   body:has(.overlay--summary.is-visible) {
@@ -2761,7 +2761,7 @@ button {
   }
 }
 
-@media (max-width: 720px) and (orientation: portrait) {
+@media (width <= 720px) and (orientation: portrait) {
   .display-chrome__left-center {
     top: calc(5.5rem + env(safe-area-inset-top));
   }

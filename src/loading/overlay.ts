@@ -32,7 +32,7 @@ export interface LoadingOverlayController {
  */
 export function createLoadingOverlay(container: HTMLElement): LoadingOverlayController {
   const { TYPING_MS_PER_CHAR, FINAL_PAUSE_MS } = INITIALIZATION;
-  const FAST_FORWARD_TYPING_MS_PER_CHAR = 1.5;
+  const FAST_FORWARD_TYPING_MS_PER_CHAR = 0;
 
   // Full-screen shell that blocks interaction while the faux boot sequence is
   // printing. CSS handles the visual treatment; this module handles sequencing.
@@ -67,7 +67,8 @@ export function createLoadingOverlay(container: HTMLElement): LoadingOverlayCont
 
   fastForwardButton.className = 'terminal__fast-forward';
   fastForwardButton.type = 'button';
-  fastForwardButton.textContent = 'Fast Forward';
+  fastForwardButton.textContent = '>>';
+  fastForwardButton.setAttribute('aria-label', 'Fast forward terminal output');
   fastForwardButton.setAttribute('aria-pressed', 'false');
 
   terminal.appendChild(header);
@@ -80,10 +81,36 @@ export function createLoadingOverlay(container: HTMLElement): LoadingOverlayCont
   let sequenceToken = 0;
   let isFastForwarding = false;
 
-  fastForwardButton.addEventListener('click', () => {
-    isFastForwarding = !isFastForwarding;
+  function setFastForwarding(active: boolean): void {
+    isFastForwarding = active;
     fastForwardButton.classList.toggle('is-active', isFastForwarding);
     fastForwardButton.setAttribute('aria-pressed', String(isFastForwarding));
+  }
+
+  fastForwardButton.addEventListener('pointerdown', () => {
+    setFastForwarding(true);
+  });
+  fastForwardButton.addEventListener('pointerup', () => {
+    setFastForwarding(false);
+  });
+  fastForwardButton.addEventListener('pointerleave', () => {
+    setFastForwarding(false);
+  });
+  fastForwardButton.addEventListener('pointercancel', () => {
+    setFastForwarding(false);
+  });
+  fastForwardButton.addEventListener('blur', () => {
+    setFastForwarding(false);
+  });
+  fastForwardButton.addEventListener('keydown', (event) => {
+    if (event.key === ' ' || event.key === 'Enter') {
+      setFastForwarding(true);
+    }
+  });
+  fastForwardButton.addEventListener('keyup', (event) => {
+    if (event.key === ' ' || event.key === 'Enter') {
+      setFastForwarding(false);
+    }
   });
 
   function clearTimers() {
@@ -160,9 +187,7 @@ export function createLoadingOverlay(container: HTMLElement): LoadingOverlayCont
       clearTimers();
       sequenceToken += 1;
       const token = sequenceToken;
-      isFastForwarding = false;
-      fastForwardButton.classList.remove('is-active');
-      fastForwardButton.setAttribute('aria-pressed', 'false');
+      setFastForwarding(false);
 
       log.innerHTML = '';
       overlay.hidden = false;
@@ -221,9 +246,7 @@ export function createLoadingOverlay(container: HTMLElement): LoadingOverlayCont
     hide() {
       clearTimers();
       sequenceToken += 1;
-      isFastForwarding = false;
-      fastForwardButton.classList.remove('is-active');
-      fastForwardButton.setAttribute('aria-pressed', 'false');
+      setFastForwarding(false);
       overlay.hidden = true;
       overlay.classList.add('is-hidden');
       log.innerHTML = '';
