@@ -25,7 +25,7 @@ REPO_ROOT = Path(__file__).resolve().parent.parent
 EXCLUDED_DIRECTORY_NAMES = frozenset({"dist", ".git", "__pycache__"})
 MAX_WIDTH = 1920
 MAX_HEIGHT = 1080
-GOP_DURATION_SECONDS = 0.5
+GOP_DURATION_SECONDS = 0.6
 STOP_EVENT = threading.Event()
 TEMP_PATHS: set[Path] = set()
 TEMP_PATHS_LOCK = threading.Lock()
@@ -37,6 +37,7 @@ class CliOptions:
 
     assets_dir: Path
     fps: int
+    gop_duration_seconds: float
     crf: int
     preset: str
     jobs: int
@@ -127,10 +128,19 @@ def parse_args() -> CliOptions:
         help="Output constant frame rate in frames per second (default: 30).",
     )
     parser.add_argument(
+        "--gop-duration",
+        type=float,
+        default=GOP_DURATION_SECONDS,
+        help=(
+            "Target closed-GOP duration in seconds for scrub responsiveness "
+            f"(default: {GOP_DURATION_SECONDS})."
+        ),
+    )
+    parser.add_argument(
         "--crf",
         type=int,
-        default=20,
-        help="CRF quality value passed to libx264 (default: 20).",
+        default=23,
+        help="CRF quality value passed to libx264 (default: 23).",
     )
     parser.add_argument(
         "--preset",
@@ -165,6 +175,8 @@ def parse_args() -> CliOptions:
         raise SystemExit(f"Assets directory does not exist: {assets_dir}")
     if args.fps <= 0:
         raise SystemExit("--fps must be a positive integer")
+    if args.gop_duration <= 0:
+        raise SystemExit("--gop-duration must be a positive number")
     if args.jobs <= 0:
         raise SystemExit("--jobs must be a positive integer")
     if args.crf < 0:
@@ -173,6 +185,7 @@ def parse_args() -> CliOptions:
     return CliOptions(
         assets_dir=assets_dir,
         fps=args.fps,
+        gop_duration_seconds=args.gop_duration,
         crf=args.crf,
         preset=args.preset,
         jobs=args.jobs,
@@ -190,11 +203,13 @@ def ensure_dependencies() -> None:
         raise SystemExit(f"Required tool(s) not found in PATH: {joined}")
 
 
-def calculate_gop_frames(fps: int) -> int:
-    """Return the GOP size, in frames, for a fixed 0.5-second closed GOP."""
+def calculate_gop_frames(fps: int, gop_duration_seconds: float) -> int:
+    """Return the GOP size, in frames, for a fixed closed GOP duration."""
     if fps <= 0:
         raise ValueError("fps must be positive")
-    return max(1, round(fps * GOP_DURATION_SECONDS))
+    if gop_duration_seconds <= 0:
+        raise ValueError("gop_duration_seconds must be positive")
+    return max(1, round(fps * gop_duration_seconds))
 
 
 def duration_tolerance_seconds(fps: int) -> float:
@@ -392,19 +407,27 @@ def get_max_keyframe_gap_seconds(path: Path) -> float:
     return max_gap
 
 
-def check_compliance(path: Path, fps: int) -> ComplianceResult:
+def check_compliance(
+    path: Path, fps: int, gop_duration_seconds: float
+) -> ComplianceResult:
     """Validate one MP4 against the requested target profile."""
     probe = probe_video(path)
-    issues = get_probe_issues(probe, fps=fps)
+    issues = get_probe_issues(
+        probe,
+        fps=fps,
+        gop_duration_seconds=gop_duration_seconds,
+    )
     return ComplianceResult(compliant=not issues, issues=issues, probe=probe)
 
 
-def get_probe_issues(probe: VideoProbe, fps: int) -> list[str]:
+def get_probe_issues(
+    probe: VideoProbe, fps: int, gop_duration_seconds: float
+) -> list[str]:
     """Return a list of compliance issues for *probe*."""
     issues: list[str] = []
     expected_fps = float(fps)
     measured_fps = parse_frame_rate(probe.avg_frame_rate)
-    max_keyframe_gap = GOP_DURATION_SECONDS + keyframe_gap_tolerance_seconds(fps)
+    max_keyframe_gap = gop_duration_seconds + keyframe_gap_tolerance_seconds(fps)
 
     if probe.codec_name != "h264":
         issues.append(f"codec={probe.codec_name}")
@@ -433,11 +456,12 @@ def build_ffmpeg_command(
     output_path: Path,
     *,
     fps: int,
+    gop_duration_seconds: float,
     crf: int,
     preset: str,
 ) -> list[str]:
     """Build the ffmpeg argv list for one output conversion."""
-    gop_frames = calculate_gop_frames(fps)
+    gop_frames = calculate_gop_frames(fps, gop_duration_seconds)
     scale_filter = (
         f"scale=w='min(iw,{MAX_WIDTH})':h='min(ih,{MAX_HEIGHT})':"
         "force_original_aspect_ratio=decrease:force_divisible_by=2"
@@ -488,9 +512,14 @@ def validate_output(
     output_path: Path,
     *,
     fps: int,
+    gop_duration_seconds: float,
 ) -> ComplianceResult:
     """Validate the converted output, including duration preservation."""
-    result = check_compliance(output_path, fps=fps)
+    result = check_compliance(
+        output_path,
+        fps=fps,
+        gop_duration_seconds=gop_duration_seconds,
+    )
     duration_delta = abs(result.probe.duration_seconds - source_probe.duration_seconds)
     if duration_delta > duration_tolerance_seconds(fps):
         issues = list(result.issues)
@@ -593,12 +622,18 @@ def convert_file(path: Path, options: CliOptions) -> FileOutcome:
             path,
             temp_path,
             fps=options.fps,
+            gop_duration_seconds=options.gop_duration_seconds,
             crf=options.crf,
             preset=options.preset,
         )
         run_ffmpeg(command)
 
-        validation = validate_output(source_probe, temp_path, fps=options.fps)
+        validation = validate_output(
+            source_probe,
+            temp_path,
+            fps=options.fps,
+            gop_duration_seconds=options.gop_duration_seconds,
+        )
         if not validation.compliant:
             raise RuntimeError("; ".join(validation.issues))
 
@@ -697,7 +732,11 @@ def main() -> None:
 
             prefix = f"[{index}/{len(scan.files)}]"
             try:
-                compliance = check_compliance(path, fps=options.fps)
+                compliance = check_compliance(
+                    path,
+                    fps=options.fps,
+                    gop_duration_seconds=options.gop_duration_seconds,
+                )
             except Exception as exc:
                 summary.failed += 1
                 summary.failures.append(f"{path}: {exc}")
