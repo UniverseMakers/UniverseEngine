@@ -8,6 +8,14 @@ those elapsed durations, convert the total to seconds, and write that value into
 the corresponding asset run's ``run_summary.yaml`` as ``wallclockSeconds``.
 
 Defaults are set for the current COSMA layout but can be overridden.
+
+Derived resource metrics:
+
+* ``wallclockSeconds``: summed elapsed time across all restart jobs
+* ``computeUsed``: core-hours assuming 16 threads per run
+* ``memoryUsed``: proportional node memory assuming a 256-core node with 1.54 TB RAM
+* ``carbonBurnt``: approximate kgCO2e derived from core-hours using COSMA support's
+  cosma7 power figure plus a facility-overhead uplift
 """
 
 from __future__ import annotations
@@ -28,6 +36,12 @@ DEFAULT_SOURCE_GLOB = "/cosma5/data/dp004/vreke/swift/rssse/pE*/job_*.txt"
 DEFAULT_LOGS_DIR = Path("/cosma5/data/dp004/vreke/swift/rssse/outs_and_errs")
 DEFAULT_ASSETS_DIR = REPO_ROOT / "public" / "assets" / "planetary"
 DEFAULT_TAIL_LINES = 8
+THREADS_PER_RUN = 16
+NODE_CORES = 256
+NODE_MEMORY_GB = 1540.0
+COSMA7_NODE_POWER_KW = 0.175
+FACILITY_OVERHEAD_MULTIPLIER = 489.0 / 341.0
+NORTH_EAST_GRID_CARBON_KG_PER_KWH = 43.1 / 1000.0
 
 ELAPSED_TOKEN_RE = re.compile(
     r"^(?:(?P<days>\d+)-)?(?P<hours>\d+):(?P<minutes>\d{2}):(?P<seconds>\d{2})$"
@@ -148,11 +162,23 @@ def process_job_file(
 
     payload = load_yaml(summary_path)
     payload["wallclockSeconds"] = elapsed_seconds
+    payload["computeUsed"] = round(elapsed_seconds * THREADS_PER_RUN / 3600.0, 2)
+    payload["memoryUsed"] = round(NODE_MEMORY_GB * THREADS_PER_RUN / NODE_CORES, 2)
+    payload["carbonBurnt"] = round(
+        payload["computeUsed"] * carbon_kg_per_core_hour(),
+        4,
+    )
 
     if dry_run:
         return (
             "updated",
-            f"  [dry-run] would update {display_path(summary_path)} wallclockSeconds={elapsed_seconds}",
+            (
+                f"  [dry-run] would update {display_path(summary_path)} "
+                f"wallclockSeconds={elapsed_seconds} "
+                f"computeUsed={payload['computeUsed']} "
+                f"memoryUsed={payload['memoryUsed']} "
+                f"carbonBurnt={payload['carbonBurnt']}"
+            ),
         )
 
     summary_path.write_text(
@@ -161,8 +187,29 @@ def process_job_file(
     )
     return (
         "updated",
-        f"  wrote {display_path(summary_path)} wallclockSeconds={elapsed_seconds}",
+        (
+            f"  wrote {display_path(summary_path)} "
+            f"wallclockSeconds={elapsed_seconds} "
+            f"computeUsed={payload['computeUsed']} "
+            f"memoryUsed={payload['memoryUsed']} "
+            f"carbonBurnt={payload['carbonBurnt']}"
+        ),
     )
+
+
+def carbon_kg_per_core_hour() -> float:
+    """Approximate kgCO2e emitted per core-hour on cosma7.
+
+    Derived from the email figures:
+
+    - 175 W/node on cosma7 for compute nodes
+    - uplift by 489/341 to include approximate cooling/network/storage overheads
+    - 43.1 gCO2/kWh average North East grid intensity
+
+    The result is applied to core-hours, assuming a 256-core node.
+    """
+    effective_node_power_kw = COSMA7_NODE_POWER_KW * FACILITY_OVERHEAD_MULTIPLIER
+    return effective_node_power_kw * NORTH_EAST_GRID_CARBON_KG_PER_KWH / NODE_CORES
 
 
 def parse_job_ids(job_file: Path) -> list[str]:
