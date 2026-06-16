@@ -562,7 +562,6 @@ export function createAppShell(app: HTMLElement): void {
    */
   function openConfigPanel(view: OverlayPanelView): void {
     if (view === 'parameters') {
-      randomizeActiveValues();
       overlayPanel.setSimulation(activeClass, getActiveValues());
     }
 
@@ -587,7 +586,6 @@ export function createAppShell(app: HTMLElement): void {
     }
 
     // Otherwise keep showing the parameter view so the user can start a run.
-    randomizeActiveValues();
     overlayPanel.setSimulation(activeClass, getActiveValues());
     overlayPanel.setView('parameters');
   }
@@ -600,7 +598,6 @@ export function createAppShell(app: HTMLElement): void {
   function handleCloseConfig(): void {
     summaryOverlay.hide();
     if (!hasCompletedInitialization && advancedSettings.lockedScaleId) {
-      randomizeActiveValues();
       overlayPanel.setSimulation(activeClass, getActiveValues());
       overlayPanel.setView('parameters');
 
@@ -1131,10 +1128,6 @@ export function createAppShell(app: HTMLElement): void {
         randomizeParameterValue(parameter),
       ]),
     );
-  }
-
-  function randomizeActiveValues(): void {
-    valuesByClass[activeClass.id] = createRandomizedValues(activeClass);
   }
 
   /**
