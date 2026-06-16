@@ -32,7 +32,6 @@ export interface LoadingOverlayController {
  */
 export function createLoadingOverlay(container: HTMLElement): LoadingOverlayController {
   const { TYPING_MS_PER_CHAR, FINAL_PAUSE_MS } = INITIALIZATION;
-  const FAST_FORWARD_TYPING_MS_PER_CHAR = 0;
 
   // Full-screen shell that blocks interaction while the faux boot sequence is
   // printing. CSS handles the visual treatment; this module handles sequencing.
@@ -131,15 +130,11 @@ export function createLoadingOverlay(container: HTMLElement): LoadingOverlayCont
             resolve();
           }
         },
-        Math.max(0, ms),
+        isFastForwarding ? 0 : Math.max(0, ms),
       );
 
       timers.push(timer);
     });
-  }
-
-  function getTypingDelayMs(): number {
-    return isFastForwarding ? FAST_FORWARD_TYPING_MS_PER_CHAR : TYPING_MS_PER_CHAR;
   }
 
 
@@ -155,18 +150,20 @@ export function createLoadingOverlay(container: HTMLElement): LoadingOverlayCont
     row.appendChild(cursor);
     log.appendChild(row);
 
-    for (let index = 0; index < line.length; index += 1) {
+    const batchSize = isFastForwarding ? 2 : 1;
+
+    for (let index = 0; index < line.length; index += batchSize) {
       if (token !== sequenceToken) {
         return;
       }
 
-      const character = line[index];
+      const chunk = line.slice(index, index + batchSize);
 
       // Insert before the cursor so the block character always stays at the end
       // of the visible line while text streams in.
-      row.insertBefore(document.createTextNode(character), cursor);
+      row.insertBefore(document.createTextNode(chunk), cursor);
       log.scrollTop = log.scrollHeight;
-      await wait(getTypingDelayMs(), token);
+      await wait(TYPING_MS_PER_CHAR, token);
     }
 
     cursor.remove();
