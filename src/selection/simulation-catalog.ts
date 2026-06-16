@@ -21,6 +21,8 @@ export interface SimParameter {
   unit: string;
   min: number;
   max: number;
+  matchMin?: number;
+  matchMax?: number;
   step: number;
   /** Internal midpoint fallback used when no explicit value is available. */
   fallbackValue: number;
@@ -103,6 +105,8 @@ interface RawParameterConfig {
   unit?: string;
   min: number;
   max: number;
+  match_min?: number;
+  match_max?: number;
   step?: number;
   description?: string;
   value_scale?: number;
@@ -177,6 +181,8 @@ export const SIMULATION_CLASSES: SimulationClass[] = Object.entries(catalog).map
           unit: parameter.unit ?? '',
           min: parameter.min,
           max: parameter.max,
+          matchMin: parameter.match_min,
+          matchMax: parameter.match_max,
           step,
           fallbackValue,
           description: parameter.description,

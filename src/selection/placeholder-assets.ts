@@ -277,7 +277,9 @@ function getEntryDistance(
   const total = params.reduce((sum, parameter) => {
     const selected = values[parameter.id] ?? parameter.fallbackValue;
     const candidate = entry.parameters?.[parameter.id] ?? parameter.fallbackValue;
-    const range = Math.max(parameter.max - parameter.min, 1e-9);
+    const matchMin = parameter.matchMin ?? parameter.min;
+    const matchMax = parameter.matchMax ?? parameter.max;
+    const range = Math.max(matchMax - matchMin, 1e-9);
 
     return sum + Math.abs(selected - candidate) / range;
   }, 0);
