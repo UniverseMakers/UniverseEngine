@@ -540,8 +540,7 @@ button {
   display: none;
 }
 
-/* Burger menu is redundant while the config overlay or loading screen is open. */
-#app[data-mode='config'] .display-chrome__top-left,
+/* Burger menu stays available in config mode, but stays hidden while loading. */
 #app[data-mode='initializing'] .display-chrome__top-left {
   display: none;
 }

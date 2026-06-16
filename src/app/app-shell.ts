@@ -366,7 +366,9 @@ export function createAppShell(app: HTMLElement): void {
   // Mount the end-of-run summary overlay that appears when a video finishes.
   const summaryOverlay = createSummaryOverlay(overlayLayer, {
     onReplay: handleReplay,
-    onNew: () => openConfigPanel('parameters'),
+    onParameters: () => openConfigPanel('parameters'),
+    onHome: handleHome,
+    showHome: !advancedSettings.lockedScaleId,
   });
 
   // When playback ends, remember that state and show the summary overlay.
@@ -1322,6 +1324,7 @@ export function createAppShell(app: HTMLElement): void {
       void manifestController.preloadActiveManifest();
     }
     displayMenu.setHomeVisible(!advancedSettings.lockedScaleId);
+    summaryOverlay.setHomeVisible(!advancedSettings.lockedScaleId);
     entryOverlay.setSimulationClasses(availableSimulationClasses);
     overlayPanel.setAdvancedSettings(advancedSettings);
     logInfo('Advanced settings updated', advancedSettings);

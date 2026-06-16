@@ -22,6 +22,7 @@ import { formatNumericString, withUnit } from '../shared/format.ts';
 export interface SummaryOverlayController {
   show: () => void;
   hide: () => void;
+  setHomeVisible: (visible: boolean) => void;
   update: (
     simClass: SimulationClass,
     values: Record<string, number>,
@@ -32,7 +33,9 @@ export interface SummaryOverlayController {
 
 interface SummaryOverlayOptions {
   onReplay: () => void;
-  onNew: () => void;
+  onParameters: () => void;
+  onHome: () => void;
+  showHome: boolean;
 }
 
 interface ScientificBarDatum {
@@ -406,16 +409,24 @@ export function createSummaryOverlay(
   replayButton.textContent = 'Replay';
 
   const newButton = document.createElement('button');
+  const homeButton = document.createElement('button');
 
   newButton.className = 'summary-overlay__button';
   newButton.type = 'button';
-  newButton.textContent = 'New';
+  newButton.textContent = 'New Parameters';
+
+  homeButton.className = 'summary-overlay__button';
+  homeButton.type = 'button';
+  homeButton.textContent = 'Home';
+  homeButton.hidden = !options.showHome;
 
   replayButton.addEventListener('click', options.onReplay);
-  newButton.addEventListener('click', options.onNew);
+  newButton.addEventListener('click', options.onParameters);
+  homeButton.addEventListener('click', options.onHome);
 
   actions.appendChild(replayButton);
   actions.appendChild(newButton);
+  actions.appendChild(homeButton);
 
   panel.appendChild(content);
   panel.appendChild(actions);
@@ -487,6 +498,10 @@ export function createSummaryOverlay(
         overlay.classList.add('is-hidden');
         hideTimer = undefined;
       }, SUMMARY_OVERLAY.HIDE_AFTER_MS);
+    },
+
+    setHomeVisible(visible) {
+      homeButton.hidden = !visible;
     },
 
     update(
