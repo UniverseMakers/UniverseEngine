@@ -288,6 +288,7 @@ button {
 .display-chrome__top-left,
 .display-chrome__left-center,
 .display-chrome__top-right,
+.display-chrome__top-center,
 .display-chrome__center-status,
 .display-chrome__bottom {
   position: absolute;
@@ -315,12 +316,35 @@ button {
   pointer-events: auto;
 }
 
+.display-chrome__top-center {
+  top: 1.25rem;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 2;
+  pointer-events: none;
+}
+
 .display-chrome__bottom {
   right: 2.5rem;
   bottom: 1.5rem;
   left: 2.5rem;
   z-index: 2;
   pointer-events: auto;
+}
+
+.viewport-title {
+  padding: 0.4rem 1.2rem;
+  border: 1px solid var(--line-strong);
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  color: var(--accent);
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  font-weight: 500;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  white-space: nowrap;
 }
 
 /* ── Burger Menu ──────────────────────────────────────────────────────────── */
@@ -440,6 +464,7 @@ button {
 .display-chrome__left-center .view-switcher,
 .display-chrome__left-center .view-switcher__button,
 .display-chrome__left-center .view-switcher__label,
+.display-chrome__left-center .view-switcher__info,
 .display-chrome__bottom {
   transition:
     opacity 0.28s ease,
@@ -474,10 +499,19 @@ button {
 }
 
 .display-chrome__left-center.side-collapsed .view-switcher__button {
+  flex: 0 0 auto;
   min-width: auto;
   padding: 0.6rem;
   justify-content: center;
   gap: 0;
+}
+
+.display-chrome__left-center.side-collapsed .view-switcher__info {
+  max-width: 0;
+  flex-basis: 0;
+  opacity: 0;
+  pointer-events: none;
+  overflow: hidden;
 }
 
 .display-chrome__left-center.side-collapsed .view-switcher__icon {
@@ -496,10 +530,18 @@ button {
 }
 
 .display-chrome__left-center:not(.side-collapsed) .view-switcher__button {
+  flex: 1;
   min-width: 9.35rem;
   padding: 0.66rem 0.99rem;
   justify-content: flex-start;
   gap: 0.77rem;
+}
+
+.display-chrome__left-center:not(.side-collapsed) .view-switcher__info {
+  max-width: 2.5rem;
+  flex-basis: auto;
+  opacity: 0.55;
+  pointer-events: auto;
 }
 
 .display-chrome__bottom.side-collapsed {
@@ -530,10 +572,18 @@ button {
   }
 
   .display-chrome__left-center.side-collapsed:hover .view-switcher__button {
+    flex: 1;
     min-width: 9.35rem;
     padding: 0.66rem 0.99rem;
     justify-content: flex-start;
     gap: 0.77rem;
+  }
+
+  .display-chrome__left-center.side-collapsed:hover .view-switcher__info {
+    max-width: 2.5rem;
+    flex-basis: auto;
+    opacity: 0.55;
+    pointer-events: auto;
   }
 }
 
@@ -579,7 +629,15 @@ button {
   box-shadow: var(--shadow-ambient);
 }
 
+.view-switcher__row {
+  display: flex;
+  flex-direction: row;
+  align-items: stretch;
+  gap: 0.45rem;
+}
+
 .view-switcher__button {
+  flex: 1;
   min-width: 9.35rem;
   display: flex;
   align-items: center;
@@ -617,6 +675,35 @@ button {
 
 .view-switcher__label {
   display: inline-block;
+}
+
+.view-switcher__info {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  aspect-ratio: 1;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  opacity: 0.55;
+  transition:
+    opacity 0.16s ease,
+    color 0.16s ease,
+    background 0.16s ease;
+}
+
+.view-switcher__info svg {
+  width: 1.72rem;
+  height: 1.72rem;
+}
+
+.view-switcher__info:hover {
+  opacity: 1;
+  color: var(--accent);
+  background: var(--accent-ghost);
 }
 
 .view-switcher__button:hover {
@@ -833,6 +920,82 @@ button {
 .timeline__speed-option.is-active {
   background: var(--accent-soft);
   color: var(--accent);
+}
+
+/* ── View Info Overlay ────────────────────────────────────────────────────── */
+
+.view-info-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 12;
+  display: grid;
+  place-items: center;
+  background: rgba(0, 0, 0, 0.72);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+}
+
+.view-info-overlay.is-visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.view-info-overlay__card {
+  position: relative;
+  width: min(32rem, calc(100vw - 2rem));
+  padding: 2rem;
+  border: 1px solid var(--line-strong);
+  background: var(--surface-lowest);
+  box-shadow: var(--shadow-ambient);
+}
+
+.view-info-overlay__title {
+  margin: 0 0 1rem;
+  padding-right: 2rem;
+  color: var(--accent);
+  font-family: var(--font-mono);
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.view-info-overlay__text {
+  margin: 0 0 1.8rem;
+  color: var(--text-secondary);
+  font-family: var(--font-mono);
+  font-size: 0.82rem;
+  line-height: 1.55;
+}
+
+.view-info-overlay__close {
+  position: absolute;
+  top: 1.2rem;
+  right: 1.2rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  font-size: 1.3rem;
+  line-height: 1;
+  cursor: pointer;
+  transition:
+    color 0.16s ease,
+    background 0.16s ease;
+}
+
+.view-info-overlay__close:hover {
+  color: var(--accent);
+  background: var(--accent-ghost);
 }
 
 /* -------------------------------------------------------------------------- */
@@ -2620,11 +2783,21 @@ button {
   }
 
   .view-switcher__button {
+    flex: 1;
     min-width: 7.98rem;
     gap: 0.6rem;
     padding: 0.55rem 0.77rem;
     font-size: 0.64rem;
     letter-spacing: 0.14em;
+  }
+
+  .view-switcher__info {
+    max-width: 2.2rem;
+  }
+
+  .view-switcher__info svg {
+    width: 1.44rem;
+    height: 1.44rem;
   }
 
   .view-switcher__icon {

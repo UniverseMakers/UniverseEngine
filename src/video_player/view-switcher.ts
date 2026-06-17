@@ -17,6 +17,7 @@ export interface ViewSwitcherController {
 
 interface ViewSwitcherOptions {
   onSelect: (viewId: string) => void;
+  onInfo: (viewId: string, label: string, description: string) => void;
 }
 
 /**
@@ -53,6 +54,10 @@ export function createViewSwitcher(
       root.classList.remove('is-hidden');
 
       for (const view of viewOptions) {
+        const row = document.createElement('div');
+
+        row.className = 'view-switcher__row';
+
         const button = document.createElement('button');
 
         button.className = 'view-switcher__button';
@@ -81,7 +86,23 @@ export function createViewSwitcher(
         label.textContent = view.label ?? view.id;
         button.appendChild(label);
         button.addEventListener('click', () => options.onSelect(view.id));
-        root.appendChild(button);
+        row.appendChild(button);
+
+        if (view.description) {
+          const infoBtn = document.createElement('button');
+
+          infoBtn.className = 'view-switcher__info';
+          infoBtn.type = 'button';
+          infoBtn.setAttribute('aria-label', `Info about ${view.label ?? view.id}`);
+          infoBtn.appendChild(createInfoIcon());
+          infoBtn.addEventListener('click', (event) => {
+            event.stopPropagation();
+            options.onInfo(view.id, view.label ?? view.id, view.description ?? '');
+          });
+          row.appendChild(infoBtn);
+        }
+
+        root.appendChild(row);
       }
     },
     hide() {
@@ -165,4 +186,12 @@ function createSvg(content: string): SVGSVGElement {
   template.innerHTML = content;
 
   return template;
+}
+
+function createInfoIcon(): SVGSVGElement {
+  return createSvg(`
+    <circle cx="12" cy="12" r="10"></circle>
+    <path d="M12 16.5v-6"></path>
+    <circle cx="12" cy="8.5" r="1.1" fill="currentColor" stroke="none"></circle>
+  `);
 }

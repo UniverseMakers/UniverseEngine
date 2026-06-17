@@ -44,6 +44,7 @@ export interface SimulationViewOption {
   id: string;
   label?: string;
   icon?: string;
+  description?: string;
 }
 
 export interface StatDisplayConfig {
@@ -130,6 +131,7 @@ interface RawSimulationViewOption {
   id: string;
   label?: string;
   icon?: string;
+  description?: string;
 }
 
 interface RawStatDisplayConfig {
@@ -210,6 +212,7 @@ export const SIMULATION_CLASSES: SimulationClass[] = Object.entries(catalog).map
         id: view.id,
         label: view.label,
         icon: view.icon,
+        description: view.description,
       })),
     };
   },

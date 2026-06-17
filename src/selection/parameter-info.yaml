@@ -83,11 +83,11 @@ cosmos:
   gravity_strength:
     label: Gravity
     description: The strength of gravity, as described by Newton's gravitational constant G. Varying G changes the rate at which matter collapses into cosmic structures like dark matter halos and the cosmic web.
-    unit: m^3 kg^-1 s^-2
+    # unit: m^3 kg^-1 s^-2
     min: 0.01
     max: 10
     step: 0.01
-    value_scale: 6.6743e-11
-    display_format: scientific
-    display_significant_figures: 3
+    # value_scale: 6.6743e-11
+    # display_format: scientific
+    display_significant_figures: 2
     log_scale: true

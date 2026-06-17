@@ -260,7 +260,45 @@ export function createAppShell(app: HTMLElement): void {
     onSelect(viewId) {
       handleViewSelection(viewId);
     },
+    onInfo(_viewId, label, description) {
+      infoOverlayTitle.textContent = label;
+      infoOverlayText.textContent = description;
+      infoOverlay.classList.add('is-visible');
+    },
   });
+
+  const infoOverlay = document.createElement('div');
+
+  infoOverlay.className = 'view-info-overlay';
+  infoOverlay.innerHTML = `
+    <div class="view-info-overlay__card">
+      <button class="view-info-overlay__close" type="button" aria-label="Close">&times;</button>
+      <h3 class="view-info-overlay__title"></h3>
+      <p class="view-info-overlay__text"></p>
+    </div>
+  `;
+  app.appendChild(infoOverlay);
+
+  const infoOverlayTitle = infoOverlay.querySelector('.view-info-overlay__title')!;
+  const infoOverlayText = infoOverlay.querySelector('.view-info-overlay__text')!;
+  const infoOverlayClose = infoOverlay.querySelector('.view-info-overlay__close')!;
+
+  infoOverlay.addEventListener('click', (event) => {
+    if (event.target === infoOverlay) {
+      infoOverlay.classList.remove('is-visible');
+    }
+  });
+
+  infoOverlayClose.addEventListener('click', () => {
+    infoOverlay.classList.remove('is-visible');
+  });
+
+  // Viewport title — shows the current tab name centered at the top of the
+  // video area when multiple views are available.
+  const viewportTitle = document.createElement('div');
+
+  viewportTitle.className = 'display-chrome__top-center is-hidden';
+  displayChrome.appendChild(viewportTitle);
 
   // Mount the compact top-right telemetry panel (the HUD with live stats).
   const dataPanelHost = document.createElement('div');
@@ -576,7 +614,12 @@ export function createAppShell(app: HTMLElement): void {
     switch (event.key) {
       case 'Escape':
         event.preventDefault();
-        handleHome();
+        if (infoOverlay.classList.contains('is-visible')) {
+          infoOverlay.classList.remove('is-visible');
+        } else {
+          handleHome();
+        }
+
         break;
 
       case ' ':
@@ -1193,14 +1236,22 @@ export function createAppShell(app: HTMLElement): void {
 
     if (configuredViews.length <= 1) {
       viewSwitcher.hide();
+      viewportTitle.classList.add('is-hidden');
 
       return;
     }
 
-    viewSwitcher.update(
-      configuredViews,
-      selectedId ?? resolveSelectedViewId(activeClass, activeRunMatch),
-    );
+    const resolvedId = selectedId ?? resolveSelectedViewId(activeClass, activeRunMatch);
+    const activeView = configuredViews.find((v) => v.id === resolvedId);
+
+    viewSwitcher.update(configuredViews, resolvedId);
+
+    if (activeView) {
+      viewportTitle.classList.remove('is-hidden');
+      viewportTitle.innerHTML = `<span class="viewport-title">${activeView.label ?? activeView.id}</span>`;
+    } else {
+      viewportTitle.classList.add('is-hidden');
+    }
   }
 
   /**
@@ -1278,6 +1329,7 @@ export function createAppShell(app: HTMLElement): void {
       autoplay: shouldAutoplay,
     });
     refreshViewSwitcher(viewId);
+    infoOverlay.classList.remove('is-visible');
     updateSynthesizerLogo();
   }
 
