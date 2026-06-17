@@ -109,20 +109,27 @@ export function createParameterEditor(
 
     slider.className = 'param__slider';
     slider.type = 'range';
-    slider.min = String(param.min);
-    slider.max = String(param.max);
-    slider.step = String(param.step);
-    slider.value = String(values[param.id] ?? param.fallbackValue);
+
+    const sliderMin = param.logScale ? Math.log10(param.min) : param.min;
+    const sliderMax = param.logScale ? Math.log10(param.max) : param.max;
+    const rawValue = values[param.id] ?? param.fallbackValue;
+
+    slider.min = String(sliderMin);
+    slider.max = String(sliderMax);
+    slider.step = param.logScale ? '0.001' : String(param.step);
+    slider.value = String(
+      param.logScale ? Math.log10(Math.max(rawValue, Number.MIN_VALUE)) : rawValue,
+    );
     slider.setAttribute('aria-label', param.label);
 
-    function sync(value: number): void {
-      // One helper keeps the slider thumb, CSS fill, readout text, and outward
-      // change notification moving together from the same source of truth.
+    function sync(raw: number): void {
+      const value = param.logScale ? 10 ** raw : raw;
+
       values[param.id] = value;
-      slider.value = String(value);
+      slider.value = String(raw);
       slider.style.setProperty(
         '--fill',
-        `${calculateFill(value, param.min, param.max)}%`,
+        `${calculateFill(raw, sliderMin, sliderMax)}%`,
       );
       readout.textContent = withUnit(
         formatParameterValue(value, param.step, {
@@ -141,12 +148,16 @@ export function createParameterEditor(
 
     // Prime the slider fill/readout before the row is attached so there is no
     // visible snap from default browser state to our styled state.
+    const initialSliderVal = param.logScale
+      ? Math.log10(Math.max(rawValue, Number.MIN_VALUE))
+      : rawValue;
+
     slider.style.setProperty(
       '--fill',
-      `${calculateFill(values[param.id] ?? param.fallbackValue, param.min, param.max)}%`,
+      `${calculateFill(initialSliderVal, sliderMin, sliderMax)}%`,
     );
     readout.textContent = withUnit(
-      formatParameterValue(values[param.id] ?? param.fallbackValue, param.step, {
+      formatParameterValue(rawValue, param.step, {
         scale: param.valueScale,
         format: param.displayFormat,
         significantFigures: param.displaySignificantFigures,

@@ -69,6 +69,7 @@ export function createLoadingOverlay(container: HTMLElement): LoadingOverlayCont
   fastForwardButton.textContent = '>>';
   fastForwardButton.setAttribute('aria-label', 'Fast forward terminal output');
   fastForwardButton.setAttribute('aria-pressed', 'false');
+  fastForwardButton.hidden = true;
 
   terminal.appendChild(header);
   terminal.appendChild(log);
@@ -86,30 +87,8 @@ export function createLoadingOverlay(container: HTMLElement): LoadingOverlayCont
     fastForwardButton.setAttribute('aria-pressed', String(isFastForwarding));
   }
 
-  fastForwardButton.addEventListener('pointerdown', () => {
-    setFastForwarding(true);
-  });
-  fastForwardButton.addEventListener('pointerup', () => {
-    setFastForwarding(false);
-  });
-  fastForwardButton.addEventListener('pointerleave', () => {
-    setFastForwarding(false);
-  });
-  fastForwardButton.addEventListener('pointercancel', () => {
-    setFastForwarding(false);
-  });
-  fastForwardButton.addEventListener('blur', () => {
-    setFastForwarding(false);
-  });
-  fastForwardButton.addEventListener('keydown', (event) => {
-    if (event.key === ' ' || event.key === 'Enter') {
-      setFastForwarding(true);
-    }
-  });
-  fastForwardButton.addEventListener('keyup', (event) => {
-    if (event.key === ' ' || event.key === 'Enter') {
-      setFastForwarding(false);
-    }
+  fastForwardButton.addEventListener('click', () => {
+    setFastForwarding(!isFastForwarding);
   });
 
   function clearTimers() {
@@ -184,13 +163,19 @@ export function createLoadingOverlay(container: HTMLElement): LoadingOverlayCont
       clearTimers();
       sequenceToken += 1;
       const token = sequenceToken;
-      setFastForwarding(false);
+        setFastForwarding(false);
+        overlay.hidden = false;
+        overlay.classList.remove('is-hidden');
+        fastForwardButton.hidden = true;
 
-      log.innerHTML = '';
-      overlay.hidden = false;
-      overlay.classList.remove('is-hidden');
+        // Reveal the fast-forward button as soon as the video loads.
+        if (ready) {
+          void ready.then(() => {
+            fastForwardButton.hidden = false;
+          });
+        }
 
-      for (const [index, line] of lines.entries()) {
+        for (const [index, line] of lines.entries()) {
         if (token !== sequenceToken) {
           return;
         }
@@ -244,6 +229,7 @@ export function createLoadingOverlay(container: HTMLElement): LoadingOverlayCont
       clearTimers();
       sequenceToken += 1;
       setFastForwarding(false);
+      fastForwardButton.hidden = true;
       overlay.hidden = true;
       overlay.classList.add('is-hidden');
       log.innerHTML = '';

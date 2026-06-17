@@ -1272,6 +1272,14 @@ export function createAppShell(app: HTMLElement): void {
   function randomizeParameterValue(
     parameter: SimulationClass['parameters'][number],
   ): number {
+    if (parameter.logScale) {
+      const logMin = Math.log10(parameter.min);
+      const logMax = Math.log10(parameter.max);
+      const logValue = logMin + Math.random() * (logMax - logMin);
+
+      return 10 ** logValue;
+    }
+
     // Figure out how many discrete steps the slider has.
     const steps = Math.max(
       0,

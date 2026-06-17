@@ -29,6 +29,8 @@ export interface SimParameter {
   displayUnit?: string;
   displayFormat?: 'fixed' | 'scientific';
   displaySignificantFigures?: number;
+  /** When true the slider thumb moves on a log10 scale. */
+  logScale?: boolean;
 }
 
 export interface SimulationMetadata {
@@ -110,6 +112,7 @@ interface RawParameterConfig {
   display_unit?: string;
   display_format?: 'fixed' | 'scientific';
   display_significant_figures?: number;
+  log_scale?: boolean;
 }
 
 interface RawStatsConfig {
@@ -183,7 +186,9 @@ export const SIMULATION_CLASSES: SimulationClass[] = Object.entries(catalog).map
         // Parameters no longer carry authored defaults in YAML. We keep one
         // internal midpoint fallback so partially populated value maps still
         // render and match runs deterministically.
-        const fallbackValue = midpoint(parameter.min, parameter.max);
+        const fallbackValue = parameter.log_scale
+          ? Math.sqrt(parameter.min * parameter.max)
+          : midpoint(parameter.min, parameter.max);
 
         return {
           id: parameterId,
@@ -198,6 +203,7 @@ export const SIMULATION_CLASSES: SimulationClass[] = Object.entries(catalog).map
           displayUnit: parameter.display_unit,
           displayFormat: parameter.display_format,
           displaySignificantFigures: parameter.display_significant_figures,
+          logScale: parameter.log_scale,
         };
       }),
       views: (entry.views ?? []).map((view) => ({
