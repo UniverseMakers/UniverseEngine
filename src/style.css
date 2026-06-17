@@ -36,7 +36,7 @@ button {
 :root,
 [data-theme='tron'] {
   --font-display: 'Space Grotesk', sans-serif;
-  --font-body: 'Inter', sans-serif;
+  --font-body: 'JetBrains Mono', monospace;
   --font-mono: 'JetBrains Mono', monospace;
   --bg-base: #05070a;
   --surface-lowest: #0a0d11;
