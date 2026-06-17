@@ -27,7 +27,7 @@ export interface SimParameter {
   description?: string;
   valueScale?: number;
   displayUnit?: string;
-  displayFormat?: 'fixed' | 'scientific';
+  displayFormat?: 'fixed' | 'scientific' | 'compact';
   displaySignificantFigures?: number;
   /** When true the slider thumb moves on a log10 scale. */
   logScale?: boolean;
@@ -111,7 +111,7 @@ interface RawParameterConfig {
   description?: string;
   value_scale?: number;
   display_unit?: string;
-  display_format?: 'fixed' | 'scientific';
+  display_format?: 'fixed' | 'scientific' | 'compact';
   display_significant_figures?: number;
   log_scale?: boolean;
 }

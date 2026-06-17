@@ -55,10 +55,12 @@ galaxy:
     display_significant_figures: 3
   galaxy_age:
     label: Galaxy Age
-    description: Mass-weighted stellar age of the galaxy in the final snapshot. The available runs cluster around 5-8 Gyr, but the slider extends to the age of an old Milky Way-like system for comparison.
-    unit: Gyr
+    description: Mass-weighted stellar age of the galaxy in the final snapshot. The available runs cluster around 5-8 B yrs, but the slider extends to the age of an old Milky Way-like system for comparison.
+    unit: yrs
     min: 4
     max: 13.8
+    value_scale: 1.0e9
+    display_format: compact
 
 cosmos:
   baryon_fraction:

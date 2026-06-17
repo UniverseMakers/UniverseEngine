@@ -90,7 +90,7 @@ galaxy:
     - id: galaxy_age
       label: Galaxy age
       value: '0'
-      unit: yr
+      unit: yrs
       display_format: float
       precision: 2
       value_scale: 1.0e9

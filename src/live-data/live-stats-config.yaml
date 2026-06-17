@@ -48,10 +48,11 @@ galaxy:
       live_key: Redshift
     - id: cosmic_time
       value: 0.0
-      unit: Gyr
+      unit: yrs
       label: Universe Age
       live: true
       live_key: CosmicTime_Gyr
+      value_scale: 1.0e9
     - id: stellar_mass
       value: '0'
       unit: Msun
@@ -78,20 +79,18 @@ galaxy:
       live_key: StarFormationRateWithinR200_Msun_per_yr
     - id: galaxy_age
       value: 0.0
-      unit: Gyr
+      unit: yrs
       label: Mass-Weighted Age
       live: true
       live_key: StellarMassWeightedAge_yr
-      value_scale: 1.0e-9
 
 cosmos:
   liveStats:
     - id: age
       value: 0.0
-      unit: Gyr
+      unit: yrs
       live: true
       live_key: age_years
-      value_scale: 1.0e-9
       label: Universe Age
     - id: redshift
       value: 0.0

@@ -45,7 +45,7 @@ galaxy:
     correctValues:
       stellar_mass: 6.1 # in units of 1e10 Msun
       black_hole_mass: 4.3 # in units of 1e6 Msun
-      galaxy_age: 8.5 # in Gyr; approximate Milky Way mass-weighted stellar age
+      galaxy_age: 8.5 # in B yrs; approximate Milky Way mass-weighted stellar age
 
 cosmos:
   label: Cosmos

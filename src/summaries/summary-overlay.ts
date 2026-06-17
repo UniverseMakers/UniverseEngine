@@ -604,13 +604,7 @@ export function createSummaryOverlay(
           const rawValue = values[param.id] ?? param.fallbackValue;
           const scale = param.valueScale ?? 1;
           let displayValue = rawValue * scale;
-          let displayUnit = param.displayUnit ?? param.unit;
-
-          // Convert ages from Gyr to years for compact formatting.
-          if (param.unit === 'Gyr') {
-            displayValue *= 1e9;
-            displayUnit = 'yr';
-          }
+          const displayUnit = param.displayUnit ?? param.unit;
 
           const card = document.createElement('div');
           const label = document.createElement('span');
