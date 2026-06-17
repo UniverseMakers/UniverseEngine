@@ -211,6 +211,20 @@ export function createAppShell(app: HTMLElement): void {
   `;
   app.appendChild(swiftLogo);
 
+  // Synthesizer logo – shown only for the galaxy family's HST tab.
+  const synthLogo = document.createElement('div');
+
+  synthLogo.className = 'synth-logo is-hidden';
+  synthLogo.innerHTML = `
+    <img
+      class="synth-logo__image"
+      src="${withBaseUrl('assets/credits/synthesizer_banner.webp')}"
+      alt="Synthesizer"
+      decoding="async"
+    />
+  `;
+  app.appendChild(synthLogo);
+
   // Build the burger-menu host in the upper-left corner of the app.
   // Mounted outside displayChrome so it is available on the landing page too.
   const topLeft = document.createElement('div');
@@ -572,12 +586,16 @@ export function createAppShell(app: HTMLElement): void {
 
       case 'ArrowLeft':
         event.preventDefault();
+        expandOne(timelineHost);
+        scheduleCollapseOne(timelineHost);
         scrubDirection = -1;
         startScrubbing();
         break;
 
       case 'ArrowRight':
         event.preventDefault();
+        expandOne(timelineHost);
+        scheduleCollapseOne(timelineHost);
         scrubDirection = 1;
         startScrubbing();
         break;
@@ -585,6 +603,8 @@ export function createAppShell(app: HTMLElement): void {
       case 'ArrowUp':
       case 'ArrowDown': {
         event.preventDefault();
+        expandOne(leftCenter);
+        scheduleCollapseOne(leftCenter);
         // Only switch views when multiple visualizations are available.
         if (!activeRunMatch?.views || Object.keys(activeRunMatch.views).length <= 1) break;
 
@@ -640,6 +660,7 @@ export function createAppShell(app: HTMLElement): void {
     timeline.setPosition(0);
     refreshDisplayData();
     refreshViewSwitcher();
+    updateSynthesizerLogo();
   }
 
   /**
@@ -1121,6 +1142,17 @@ export function createAppShell(app: HTMLElement): void {
     if (nextMode !== 'initializing') {
       loadingOverlay.hide();
     }
+
+    updateSynthesizerLogo();
+  }
+
+  function updateSynthesizerLogo(): void {
+    const isDisplay = app.dataset.mode === 'display';
+    const isGalaxy = activeClass.id === 'galaxy';
+    const resolvedViewId = resolveSelectedViewId(activeClass, activeRunMatch);
+    const isHst = resolvedViewId === 'hst';
+
+    setElementVisibility(synthLogo, isDisplay && isGalaxy && isHst);
   }
 
   /**
@@ -1246,6 +1278,7 @@ export function createAppShell(app: HTMLElement): void {
       autoplay: shouldAutoplay,
     });
     refreshViewSwitcher(viewId);
+    updateSynthesizerLogo();
   }
 
   /**
