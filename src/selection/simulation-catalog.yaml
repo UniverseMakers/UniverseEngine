@@ -35,11 +35,11 @@ galaxy:
     - id: hst
       label: Hubble Space Telescope
       icon: hubble-space-telescope
-      description: See your galaxy as the Hubble Space Telescope would — a luminous swirl of billions of stars. Brighter regions trace where the most stars were born.
+      description: See your galaxy as the Hubble Space Telescope would — a luminous swirl of billions of stars. Brighter regions trace where the most stars were born while dark lanes mark the dust (complex molecules and tiny grains) that blocks starlight.
     - id: sph_plus_hst
       label: Large Scale Structure
       icon: large-scale-structure
-      description: Zoom out to see the grand architecture of your galaxy — vast streams of gas, sprawling spiral arms, and the hidden skeleton of dark matter that holds everything together.
+      description: Zoom out to see the grand architecture of your galaxy — vast streams of gas funnelling in to sustain the galaxy's star formation along the hidden skeleton of dark matter that holds everything together.
   metadata:
     distinctSimulations: 20488
     correctValues:
@@ -54,19 +54,19 @@ cosmos:
     - id: gas_density
       label: Gas Density
       icon: gas-density
-      description: A map of the cosmic web — the largest structures in the Universe. Bright knots are galaxy clusters; wispy threads are filaments of gas stretching between them; dark empty patches are vast cosmic voids.
+      description: The density of gas in the Universe. A gas collapses onto the cosmic wev — the largest structures in the Universe. Bright knots are galaxy clusters and groups, the wispy threads are filaments of gas stretching between them, and the dark empty patches are vast cosmic voids separating them.
     - id: gas_temperature
       label: Gas Temperature
       icon: gas-temperature
-      description: Colours reveal temperature — from searing-hot gas around galaxy clusters (millions of degrees) down to the cool, gentle filaments where new galaxies may one day form.
+      description: The temperature of the gas in the Universe. As gas collapses onto the cosmic web, it heats up but also cools as it radiates energy away. This cooling is imperitive for the formation of galaxies and stars, which can only form in cold, dense gas. However, once stars form they begin to heat the surrounding gas suppresing local star formation while supermassive black holes super heats gas as it falls into the black hole and ejects energy back into the surrounding gas on the largest scales. These are the massive bubbles seen in the gas temperature view.
     - id: dark_matter_density
       label: Dark Matter
       icon: dark-matter
-      description: The invisible scaffolding of the cosmos. Dark matter outweighs ordinary matter five to one — you can't see it, but without it, galaxies like ours would never have formed.
+      description: The invisible scaffolding of the cosmos. Dark matter outweighs ordinary matter five to one in our Universe — you can't see it, but without it, galaxies like ours would never have formed.
     - id: gas_metallicity_plus_stellar_density
       label: Metals + Stars
       icon: metals-stars
-      description: Where stars live and die. This view combines the light of stars with the heavy elements they forge — oxygen, carbon, iron — sprayed back into space by supernova explosions to seed the next generation.
+      description: Where stars live and die. This view combines the light of stars with the heavy elements they forge — oxygen, carbon, iron — sprayed back into space by supernova explosions to seed the next generation of stars.
   metadata:
     distinctSimulations: 8192
     correctValues:

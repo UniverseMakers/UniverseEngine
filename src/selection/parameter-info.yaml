@@ -12,21 +12,21 @@
 planetary:
   impactor_mass:
     label: Impactor Mass
-    description: Mass of the body colliding with the proto-Earth. Determines the mass of the debris disk and the resulting moon mass.
+    description: How big was the object that smashed into the young Earth? A larger impactor creates a bigger debris cloud — and a bigger Moon.
     unit: M⊕
     min: 0.05
     max: 0.35
     step: 0.01
   impactor_velocity:
     label: Impactor Velocity
-    description: Relative velocity at which the impactor strikes the proto-Earth. Higher velocities produce more energetic collisions and hotter debris disks.
+    description: How fast was the impactor travelling when it hit? Faster collisions are more violent, spraying hotter debris into orbit around the early Earth.
     unit: km/s
     min: 1
     max: 3
     step: 0.1
   impactor_angle:
     label: Impactor Angle
-    description: Impact angle relative to the proto-Earth surface. Oblique impacts can produce different disk geometries than head-on collisions.
+    description: Did the impactor strike head-on or glance off at an angle? A direct hit throws material straight up, while a sideswipe can spin the debris into a wider, thinner disc.
     unit: °
     min: 0
     max: 60
@@ -35,7 +35,7 @@ planetary:
 galaxy:
   stellar_mass:
     label: Stellar Mass
-    description: Total stellar mass measured within R200 in the final snapshot. Across the current galaxy runs this spans dwarf-like systems up to massive Milky Way-scale galaxies.
+    description: How many stars did your galaxy make? This ranges from tiny dwarf galaxies with barely any stars up to enormous systems twice the size of the Milky Way.
     unit: '×10¹⁰ M☉'
     min: 0.1
     max: 20
@@ -45,7 +45,7 @@ galaxy:
     display_significant_figures: 3
   black_hole_mass:
     label: Black Hole Mass
-    description: Central black hole mass measured within R200 in the final snapshot. The current galaxy runs cover small seeds through to very massive supermassive black holes.
+    description: How heavy is the monster at the centre? Every large galaxy harbours a supermassive black hole — this slider controls how big yours grew over cosmic time.
     unit: '×10⁶ M☉'
     min: 0.1
     max: 250
@@ -55,7 +55,7 @@ galaxy:
     display_significant_figures: 3
   galaxy_age:
     label: Galaxy Age
-    description: Mass-weighted stellar age of the galaxy in the final snapshot. The available runs cluster around 5-8 B yrs, but the slider extends to the age of an old Milky Way-like system for comparison.
+    description: How old are the stars in your galaxy? Older galaxies look redder and smoother, having had time to settle. Younger ones are bluer, brighter, and more chaotic.
     unit: yrs
     min: 4
     max: 13.8
@@ -65,7 +65,7 @@ galaxy:
 cosmos:
   baryon_fraction:
     label: Baryon Fraction
-    description: The fraction of matter that is ordinary (visible/baryonic) versus dark matter. This controls the amount of gas available in the Universe for star and galaxy formation. One of the main goals in cosmological simulations is testing fundamental cosmological parameters such as this fraction.
+    description: How much of the Universe is made of ordinary stuff — the atoms that form stars, planets, and you? Turn this up and there's more gas to make galaxies; turn it down and dark matter dominates.
     unit: ''
     min: 0.10
     max: 4
@@ -73,7 +73,7 @@ cosmos:
     value_scale: 0.159
   black_hole_strength:
     label: Black Hole Strength
-    description: The temperature of gas escaping from a black hole. As gas falls in towards a black hole, it becomes superheated and forms an "accretion disc" around the black hole. This superheated plasma wants to escape and does so either as heat dumped into the environment or "jets" blasted out from the poles. Astrophysicists call this "feedback" but exactly how strong this feedback is, and the manner in which it leaves the black hole is up for debate.
+    description: How powerfully do black holes push back? As gas spirals inward it heats to millions of degrees. Some of that energy blasts back out as fierce winds or jets, shutting down star formation across entire galaxies.
     unit: 'K'
     min: 0.01
     max: 50.0
@@ -84,7 +84,7 @@ cosmos:
     log_scale: true
   gravity_strength:
     label: Gravity
-    description: The strength of gravity, as described by Newton's gravitational constant G. Varying G changes the rate at which matter collapses into cosmic structures like dark matter halos and the cosmic web.
+    description: What if gravity were stronger — or weaker? Turn it up and the cosmic web forms faster, pulling galaxies into tighter clumps. Turn it down and the Universe stays smoother and emptier for longer.
     # unit: m^3 kg^-1 s^-2
     min: 0.01
     max: 10
