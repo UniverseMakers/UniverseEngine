@@ -1,0 +1,89 @@
+# Target messages for scientific bar detail popups, shown when a bar is tapped.
+# Each section is a simulation family (theme).
+# Each entry maps situation keys (greenLow, greenHigh, amberLow, amberHigh,
+# redLow, redHigh) to descriptive message text.
+# Planetary entries are keyed by bar label; galaxy and cosmos entries are
+# keyed by parameter id.
+
+planetary:
+  Moon mass:
+    greenLow: Spot on. Your Moon came out just a fraction lighter than the real one — well within range.
+    greenHigh: Spot on. Your Moon came out just a fraction heavier than the real one — well within range.
+    amberLow: A bit light. Slightly too little material made it into orbit, so this Moon is a touch small.
+    amberHigh: A bit heavy. Slightly too much material made it into orbit, so this Moon is a touch large.
+    redLow: Far too light. Barely any material reached orbit — this Moon would be much smaller than the real one.
+    redHigh: Far too heavy. So much material was flung into orbit that this Moon would dwarf the real one.
+  Earth mass:
+    greenLow: Spot on. The Earth ended up a fraction lighter than today's — well within range.
+    greenHigh: Spot on. The Earth ended up a fraction heavier than today's — well within range.
+    amberLow: A bit light. A little too much was lost in the collision, leaving Earth slightly underweight.
+    amberHigh: A bit heavy. A little too much material was kept, leaving Earth slightly overweight.
+    redLow: Far too light. This impact stripped away too much — the Earth would never end up this small.
+    redHigh: Far too heavy. Almost nothing was lost, so the Earth ends up far more massive than it really is.
+  Spin of Earth-Moon system:
+    greenLow: Spot on. The system spins just slightly slower than the real one — well within range.
+    greenHigh: Spot on. The system spins just slightly faster than the real one — well within range.
+    amberLow: A bit slow. The early day would have been a little longer than it should have been.
+    amberHigh: A bit fast. The early day would have been a little shorter than it should have been.
+    redLow: Far too slow. This impact gave the system hardly any spin — nothing like the fast-spinning early Earth-Moon.
+    redHigh: Far too fast. This impact gave the system huge spin — the early day would have been extremely short.
+  Moon iron:
+    greenLow: Spot on — just a hair below the real Moon's iron, which is famously tiny.
+    greenHigh: Spot on — just a hair above the real Moon's iron, which is famously tiny.
+    amberLow: A little under. Even less iron than the real Moon, which already has very little.
+    amberHigh: A little over. Somewhat more iron than the real Moon, which is unusually iron-poor.
+    redLow: Far too little — almost no iron at all, well below even the real Moon's tiny amount.
+    redHigh: Far too much iron. The real Moon is strange because it has almost none — a high-iron Moon looks nothing like ours.
+  Proto-Earth in Moon:
+    greenLow: Spot on — just below the expected share of material from the original Earth.
+    greenHigh: Spot on — just above the expected share of material from the original Earth.
+    amberLow: A bit low. Slightly less of this Moon comes from the original Earth than models expect.
+    amberHigh: A bit high. Slightly more of this Moon comes from the original Earth than models expect.
+    redLow: Far too low. Almost none of this Moon came from the original Earth — it is mostly impactor material.
+    redHigh: Far too high. This Moon is made almost entirely of original-Earth material, more than models suggest.
+
+galaxy:
+  stellar_mass:
+    greenLow: Very close. Your galaxy built just a fraction fewer stars than the Milky Way.
+    greenHigh: Very close. Your galaxy built just a fraction more stars than the Milky Way.
+    amberLow: A bit low. Your galaxy made fewer stars than the Milky Way, so it would look smaller and dimmer in the sky.
+    amberHigh: A bit high. Your galaxy made more stars than the Milky Way, so it would be a brighter, busier place.
+    redLow: Far too low. This galaxy is a shadow of the Milky Way — far fewer stars than the real thing.
+    redHigh: Far too high. This galaxy is absolutely bursting with stars, far more than the Milky Way.
+  black_hole_mass:
+    greenLow: Very close. The black hole at the centre is just a fraction lighter than the one in the Milky Way.
+    greenHigh: Very close. The black hole at the centre is just a fraction heavier than the one in the Milky Way.
+    amberLow: A bit low. Your central black hole is smaller than the Milky Way's — it's still hungry.
+    amberHigh: A bit high. Your central black hole is bigger than the Milky Way's — it's been feasting.
+    redLow: Far too low. The supermassive black hole at your galaxy's heart is surprisingly small.
+    redHigh: Far too high. The central black hole is enormous — far larger than the Milky Way's Sagittarius A*.
+  galaxy_age:
+    greenLow: Very close. The stars in your galaxy are just a touch younger, on average, than the Milky Way's.
+    greenHigh: Very close. The stars in your galaxy are just a touch older, on average, than the Milky Way's.
+    amberLow: A bit young. Most of the stars in your galaxy formed later than in the Milky Way.
+    amberHigh: A bit old. Most of the stars in your galaxy formed earlier than in the Milky Way.
+    redLow: Far too young. Your galaxy is dominated by freshly-minted stars — it's practically a newborn.
+    redHigh: Far too old. Your galaxy is full of ancient stars that formed very early on.
+
+cosmos:
+  baryon_fraction:
+    greenLow: Very close. You picked just a fraction less ordinary matter than our own universe — barely any difference.
+    greenHigh: Very close. You picked just a fraction more ordinary matter than our own universe — barely any difference.
+    amberLow: A bit low. With less ordinary matter, there's less raw material around to build stars and galaxies.
+    amberHigh: A bit high. With more ordinary matter, there's extra gas floating around to feed star formation.
+    redLow: Far too low. There's so little ordinary matter that your universe would struggle to build anything at all.
+    redHigh: Far too high. There's so much ordinary matter that your universe would look completely different to the one we see.
+  black_hole_strength:
+    greenLow: Very close. The push from black holes is just a shade gentler than in our universe.
+    greenHigh: Very close. The push from black holes is just a shade fiercer than in our universe.
+    amberLow: A bit weak. Your black holes are too gentle, letting galaxies hold onto more gas and keep forming stars.
+    amberHigh: A bit strong. Your black holes blast out too much energy, making it harder for galaxies to hold onto their gas.
+    redLow: Far too weak. Black holes barely push back, so galaxy growth would run unchecked.
+    redHigh: Far too strong. Black holes are blasting energy everywhere, dramatically shutting down galaxy growth.
+  gravity_strength:
+    greenLow: Very close. Gravity is a whisker weaker than in our universe, so things take slightly longer to come together.
+    greenHigh: Very close. Gravity is a whisker stronger than in our universe, so things come together slightly faster.
+    amberLow: A bit weak. Weaker gravity means it takes longer for stars and galaxies to start forming.
+    amberHigh: A bit strong. Stronger gravity causes matter to clump together more quickly than normal.
+    redLow: Far too weak. Gravity is so feeble that your universe would take ages to build anything interesting.
+    redHigh: Far too high. Gravity is overwhelming — matter collapses far too fast for the usual cosmic timeline.

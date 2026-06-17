@@ -45,7 +45,8 @@ export function buildSummaryMetricMap(
     .filter((parameter) => simClass.metadata.correctValues[parameter.id] !== undefined)
     .map((parameter) => {
       const value = values[parameter.id] ?? parameter.fallbackValue;
-      const correctValue = simClass.metadata.correctValues[parameter.id] ?? parameter.fallbackValue;
+      const correctValue =
+        simClass.metadata.correctValues[parameter.id] ?? parameter.fallbackValue;
 
       return (
         Math.abs(value - correctValue) / Math.max(parameter.max - parameter.min, 1e-9)

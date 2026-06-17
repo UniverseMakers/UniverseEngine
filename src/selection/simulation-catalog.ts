@@ -50,6 +50,7 @@ export interface StatDisplayConfig {
   section?: string;
   value?: string;
   unit?: string;
+  description?: string;
   live?: boolean;
   liveKey?: string;
   fromVideo?: boolean;
@@ -128,6 +129,7 @@ interface RawStatDisplayConfig {
   section?: string;
   value?: string;
   unit?: string;
+  description?: string;
   live?: boolean;
   live_key?: string;
   from_video?: boolean;
@@ -144,7 +146,10 @@ interface RawStatDisplayConfig {
 type FamilyId = string;
 
 const catalog = parse(catalogRaw) as Record<FamilyId, RawCatalogEntry>;
-const paramsByFamily = parse(paramsRaw) as Record<FamilyId, Record<string, RawParameterConfig>>;
+const paramsByFamily = parse(paramsRaw) as Record<
+  FamilyId,
+  Record<string, RawParameterConfig>
+>;
 const summaryStatsByFamily = parse(summaryStatsRaw) as Record<FamilyId, RawStatsConfig>;
 const liveStatsByFamily = parse(liveStatsRaw) as Record<FamilyId, RawStatsConfig>;
 
@@ -202,6 +207,7 @@ function normalizeStatConfig(config: RawStatDisplayConfig): StatDisplayConfig {
     section: config.section,
     value: config.value,
     unit: config.unit,
+    description: config.description,
     live: config.live ?? false,
     liveKey: config.live_key,
     fromVideo: config.from_video ?? false,

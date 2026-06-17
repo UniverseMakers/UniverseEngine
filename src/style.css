@@ -1214,6 +1214,17 @@ button {
   word-break: break-word;
 }
 
+.res-card--has-info {
+  cursor: pointer;
+  border-radius: 4px;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.res-card--has-info:hover {
+  background: rgba(99, 196, 232, 0.07);
+  border-color: rgba(99, 196, 232, 0.5);
+}
+
 .sci-section {
   flex: 0 0 auto;
   display: flex;

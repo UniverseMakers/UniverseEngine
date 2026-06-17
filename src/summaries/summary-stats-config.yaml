@@ -7,6 +7,7 @@
 #   (`resources` or `simulationStats`)
 # - `display_format` can be `integer`, `float`, or `scientific`
 # - `precision` controls decimal places or scientific significant figures
+# - `description` provides explanatory text shown in a tap-to-open overlay
 
 planetary:
   summaryStats:
@@ -14,30 +15,38 @@ planetary:
       section: resources
       value: '0.00'
       unit: hours
+      description: How long the simulation took to run. Think of it like the render time for a CGI movie.
     - id: carbonBurnt
       section: resources
       value: '0.00'
       unit: kgCO2e
+      description: The carbon cost of running this simulation. Roughly the same as the emissions from a short-haul flight.
     - id: computeUsed
       section: resources
       value: 0 CPU-hrs / 0 GB
+      description: How much computer muscle the simulation needed to crunch all that physics.
     - id: similarityScore
       value: 100/100
     - id: moon_mass
       label: Moon mass
       value: '1.05'
+      description: How close you got to making the real Moon. Too small and the tides would be weak — too big and the night sky would be terrifying.
     - id: earth_mass
       label: Earth mass
       value: '1.55'
+      description: How close your Earth ended up to the one we actually live on.
     - id: spin
       label: Spin of Earth-Moon system
       value: '0.30'
+      description: How fast the Earth-Moon pair is spinning. This sets the length of a day — faster spin means shorter days.
     - id: moon_iron
       label: Moon iron
       value: '0.70'
+      description: How iron-poor your Moon turned out. The real Moon has surprisingly little iron in it — a clue about how it was born.
     - id: proto_earth_in_moon
       label: Proto-Earth in Moon
       value: '1.25'
+      description: How much of your Moon came from the early Earth versus the rogue object that smashed into it.
 
 galaxy:
   summaryStats:
@@ -45,13 +54,16 @@ galaxy:
       section: resources
       value: '0.00'
       unit: hours
+      description: How long the simulation took to run. Think of it like the render time for a CGI movie.
     - id: carbonBurnt
       section: resources
       value: '0.00'
       unit: kgCO2e
+      description: The carbon cost of running this simulation. Roughly the same as the emissions from a short-haul flight.
     - id: computeUsed
       section: resources
       value: 0 CPU-hrs / 0 GB
+      description: How much computer muscle the simulation needed to crunch all that physics.
     - id: similarityScore
       value: 100/100
     - id: stellar_mass_msun
@@ -61,6 +73,7 @@ galaxy:
       unit: Msun
       display_format: scientific
       precision: 3
+      description: How many stars your galaxy managed to make. Each solar mass is the weight of our own Sun.
     - id: stellar_size_kpc
       section: simulationStats
       label: Stellar size
@@ -68,6 +81,7 @@ galaxy:
       unit: kpc
       display_format: float
       precision: 2
+      description: The size of your galaxy's star-lit disc from one edge to the other.
     - id: gas_mass_msun
       section: simulationStats
       label: Gas mass
@@ -75,6 +89,7 @@ galaxy:
       unit: Msun
       display_format: scientific
       precision: 3
+      description: How much loose gas is still drifting around, waiting to one day form new stars.
     - id: dark_matter_mass_msun
       section: simulationStats
       label: Dark matter mass
@@ -82,6 +97,7 @@ galaxy:
       unit: Msun
       display_format: scientific
       precision: 3
+      description: The invisible scaffolding holding your galaxy together. You can't see it, but it's heavy.
     - id: black_hole_mass_msun
       section: simulationStats
       label: Black hole mass
@@ -89,6 +105,7 @@ galaxy:
       unit: Msun
       display_format: scientific
       precision: 3
+      description: The monster at the centre — how massive your galaxy's central black hole grew.
     - id: galaxy_age
       section: simulationStats
       label: Galaxy age
@@ -96,6 +113,7 @@ galaxy:
       unit: Gyr
       display_format: float
       precision: 2
+      description: The average age of all the stars in your galaxy. Older means it formed its stars a long time ago.
 
 cosmos:
   summaryStats:
@@ -103,15 +121,18 @@ cosmos:
       section: resources
       value: '0.00'
       unit: hours
+      description: How long the simulation took to run. Think of it like the render time for a CGI movie.
     - id: carbonBurnt
       section: resources
       value: '0.00'
       unit: kgCO2e
       display_format: float
       precision: 2
+      description: The carbon cost of running this simulation. Roughly the same as the emissions from a short-haul flight.
     - id: computeUsed
       section: resources
       value: 0 CPU-hrs / 0 GB
+      description: How much computer muscle the simulation needed to crunch all that physics.
     - id: similarityScore
       value: 100/100
     - id: stellar_mass_msun
@@ -121,25 +142,30 @@ cosmos:
       unit: Msun
       display_format: scientific
       precision: 3
+      description: How much star-stuff your universe managed to cook up across all of cosmic history.
     - id: gas_fraction
       section: simulationStats
       label: Gas fraction
       value: '0'
       display_format: float
       precision: 3
+      description: How much of your universe's ordinary matter is still raw gas that hasn't yet turned into stars.
     - id: stellar_fraction
       section: simulationStats
       label: Stellar fraction
       value: '0'
       display_format: float
       precision: 3
+      description: How much of your universe's ordinary matter has already been forged into stars.
     - id: number_of_black_holes
       section: simulationStats
       label: Black holes formed
       value: '0'
       display_format: integer
+      description: How many black holes popped into existence over the course of your universe.
     - id: particlesUpdated
       section: simulationStats
       label: Particles updated
       value: '0'
       display_format: integer
+      description: The sheer number of moving pieces the simulation had to keep track of every single frame.

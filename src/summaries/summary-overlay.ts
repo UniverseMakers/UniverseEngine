@@ -18,6 +18,8 @@ import { buildSummaryMetricMap } from './summary-metrics.ts';
 import type { VideoRunMetadata } from '../selection/video-run-metadata.ts';
 import { SUMMARY_OVERLAY } from '../shared/constants.ts';
 import { formatNumericString, withUnit } from '../shared/format.ts';
+import { parse } from 'yaml';
+import targetMessagesRaw from './summary-target-messages.yaml?raw';
 
 export interface SummaryOverlayController {
   show: () => void;
@@ -54,165 +56,21 @@ interface SummarySectionConfig {
   singleRow?: boolean;
 }
 
-const MESSAGES: Record<string, Record<string, string>> = {
-  'Moon mass': {
-    greenLow:
-      'Spot on. Your Moon came out just a fraction lighter than the real one - well within range.',
-    greenHigh:
-      'Spot on. Your Moon came out just a fraction heavier than the real one - well within range.',
-    amberLow:
-      'A bit light. Slightly too little material made it into orbit, so this Moon is a touch small.',
-    amberHigh:
-      'A bit heavy. Slightly too much material made it into orbit, so this Moon is a touch large.',
-    redLow:
-      'Far too light. Barely any material reached orbit - this Moon would be much smaller than the real one.',
-    redHigh:
-      'Far too heavy. So much material was flung into orbit that this Moon would dwarf the real one.',
-  },
-  'Earth mass': {
-    greenLow:
-      "Spot on. The Earth ended up a fraction lighter than today's - well within range.",
-    greenHigh:
-      "Spot on. The Earth ended up a fraction heavier than today's - well within range.",
-    amberLow:
-      'A bit light. A little too much was lost in the collision, leaving Earth slightly underweight.',
-    amberHigh:
-      'A bit heavy. A little too much material was kept, leaving Earth slightly overweight.',
-    redLow:
-      'Far too light. This impact stripped away too much - the Earth would never end up this small.',
-    redHigh:
-      'Far too heavy. Almost nothing was lost, so the Earth ends up far more massive than it really is.',
-  },
-  'Spin of Earth-Moon system': {
-    greenLow:
-      'Spot on. The system spins just slightly slower than the real one - well within range.',
-    greenHigh:
-      'Spot on. The system spins just slightly faster than the real one - well within range.',
-    amberLow:
-      'A bit slow. The early day would have been a little longer than it should have been.',
-    amberHigh:
-      'A bit fast. The early day would have been a little shorter than it should have been.',
-    redLow:
-      'Far too slow. This impact gave the system hardly any spin - nothing like the fast-spinning early Earth-Moon.',
-    redHigh:
-      'Far too fast. This impact gave the system huge spin - the early day would have been extremely short.',
-  },
-  'Moon iron': {
-    greenLow:
-      "Spot on - just a hair below the real Moon's iron, which is famously tiny.",
-    greenHigh:
-      "Spot on - just a hair above the real Moon's iron, which is famously tiny.",
-    amberLow:
-      'A little under. Even less iron than the real Moon, which already has very little.',
-    amberHigh:
-      'A little over. Somewhat more iron than the real Moon, which is unusually iron-poor.',
-    redLow:
-      "Far too little - almost no iron at all, well below even the real Moon's tiny amount.",
-    redHigh:
-      'Far too much iron. The real Moon is strange because it has almost none - a high-iron Moon looks nothing like ours.',
-  },
-  'Proto-Earth in Moon': {
-    greenLow:
-      'Spot on - just below the expected share of original-Earth material in the Moon.',
-    greenHigh:
-      'Spot on - just above the expected share of original-Earth material in the Moon.',
-    amberLow:
-      'A bit low. Slightly less of this Moon comes from the original Earth than models expect.',
-    amberHigh:
-      'A bit high. Slightly more of this Moon comes from the original Earth than models expect.',
-    redLow:
-      'Far too low. Almost none of this Moon came from the original Earth - it is mostly impactor material.',
-    redHigh:
-      'Far too high. This Moon is made almost entirely of original-Earth material, more than models suggest.',
-  },
-};
+const TARGET_MESSAGES: Record<string, Record<string, string>> = (() => {
+  const raw = parse(targetMessagesRaw) as Record<
+    string,
+    Record<string, Record<string, string>>
+  >;
+  const flat: Record<string, Record<string, string>> = {};
 
-const TARGET_MESSAGES: Record<string, Record<string, string>> = {
-  stellar_mass: {
-    greenLow:
-      'Very close. This galaxy ends up just a little less massive in stars than the Milky Way.',
-    greenHigh:
-      'Very close. This galaxy ends up just a little more massive in stars than the Milky Way.',
-    amberLow:
-      'A bit low. This galaxy built less stellar mass than the Milky Way, so it would look more like a smaller disc system.',
-    amberHigh:
-      'A bit high. This galaxy built more stellar mass than the Milky Way, so it would be a noticeably heavier stellar system.',
-    redLow:
-      'Far too low. This galaxy is much less stellar-massive than the Milky Way.',
-    redHigh:
-      'Far too high. This galaxy is much more stellar-massive than the Milky Way.',
-  },
-  black_hole_mass: {
-    greenLow:
-      'Very close. The central black hole is just a little lighter than Sagittarius A* in the Milky Way.',
-    greenHigh:
-      'Very close. The central black hole is just a little heavier than Sagittarius A* in the Milky Way.',
-    amberLow:
-      'A bit low. The central black hole is smaller than the Milky Way\'s Sagittarius A*.',
-    amberHigh:
-      'A bit high. The central black hole is larger than the Milky Way\'s Sagittarius A*.',
-    redLow:
-      'Far too low. The central black hole is much smaller than Sagittarius A* in the Milky Way.',
-    redHigh:
-      'Far too high. The central black hole is much larger than Sagittarius A* in the Milky Way.',
-  },
-  galaxy_age: {
-    greenLow:
-      'Very close. The galaxy\'s mass-weighted stellar age is just a little younger than the Milky Way\'s.',
-    greenHigh:
-      'Very close. The galaxy\'s mass-weighted stellar age is just a little older than the Milky Way\'s.',
-    amberLow:
-      'A bit low. The stars in this galaxy are younger on average than the Milky Way\'s stellar population.',
-    amberHigh:
-      'A bit high. The stars in this galaxy are older on average than the Milky Way\'s stellar population.',
-    redLow:
-      'Far too low. This galaxy\'s stellar population is much younger, on average, than the Milky Way\'s.',
-    redHigh:
-      'Far too high. This galaxy\'s stellar population is much older, on average, than the Milky Way\'s.',
-  },
-  baryon_fraction: {
-    greenLow:
-      'Very close. You chose a little less ordinary matter than the reference universe, so there is slightly less gas available to build stars and galaxies.',
-    greenHigh:
-      'Very close. You chose a little more ordinary matter than the reference universe, so there is slightly more gas available to build stars and galaxies.',
-    amberLow:
-      'A bit low. With less ordinary matter, the universe has less raw material for stars, galaxies, and the visible cosmic web.',
-    amberHigh:
-      'A bit high. With more ordinary matter, the universe has extra gas to feed stars and galaxies compared with the reference case.',
-    redLow:
-      'Far too low. There is much too little ordinary matter, so the visible universe would struggle to build the rich structures we expect.',
-    redHigh:
-      'Far too high. There is much more ordinary matter than in the reference universe, so cosmic structure would grow with a very different balance of gas and dark matter.',
-  },
-  black_hole_strength: {
-    greenLow:
-      'Very close. Black hole feedback is a touch gentler than the reference case, so galaxies would keep slightly more of their gas.',
-    greenHigh:
-      'Very close. Black hole feedback is a touch stronger than the reference case, so galaxies would lose slightly more gas and heat a little more strongly.',
-    amberLow:
-      'A bit low. Weak black hole feedback means galaxies keep too much gas, making it easier for them to continue forming stars.',
-    amberHigh:
-      'A bit high. Strong black hole feedback pushes out and heats too much gas, making it harder for galaxies to keep forming stars.',
-    redLow:
-      'Far too low. Black holes are not energetic enough here, so feedback would fail to regulate galaxy growth in the usual way.',
-    redHigh:
-      'Far too high. Black holes are blasting far too much energy into their surroundings, which would dramatically suppress galaxy growth.',
-  },
-  gravity_strength: {
-    greenLow:
-      'Very close. Gravity is just a little weaker than the reference universe, so structure would collapse slightly more slowly.',
-    greenHigh:
-      'Very close. Gravity is just a little stronger than the reference universe, so structure would collapse slightly more quickly.',
-    amberLow:
-      'A bit low. Weaker gravity slows the formation of halos, filaments, and galaxies across the cosmic web.',
-    amberHigh:
-      'A bit high. Stronger gravity speeds up collapse, making cosmic structure grow faster than in the reference case.',
-    redLow:
-      'Far too low. Gravity is too weak for the universe to assemble structure on the usual timetable, so the cosmic web would develop very differently.',
-    redHigh:
-      'Far too high. Gravity is too strong, so matter collapses too aggressively and the universe would form structure much faster than expected.',
-  },
-};
+  for (const family of Object.values(raw)) {
+    for (const [key, messages] of Object.entries(family)) {
+      flat[key] = messages;
+    }
+  }
+
+  return flat;
+})();
 
 const GREEN = '#4CD98A';
 const AMBER = '#E8951C';
@@ -256,7 +114,7 @@ function reaction(p: number): { word: string; colour: string } {
 function detailFor(name: string, v: number): string {
   const s = situation(v);
 
-  return MESSAGES[name]?.[s] ?? '';
+  return TARGET_MESSAGES[name]?.[s] ?? '';
 }
 
 function detailForTarget(id: string, label: string, value: number): string {
@@ -296,7 +154,8 @@ function buildScientificBars(
       const normalizedValue = resolved / Math.max(correctValue, 1e-9);
       const label = resolveScientificLabel(id, simClass, runMetadata);
       const detail =
-        detailFor(label, normalizedValue) || detailForTarget(id, label, normalizedValue);
+        detailFor(label, normalizedValue) ||
+        detailForTarget(id, label, normalizedValue);
 
       return {
         id,
@@ -314,7 +173,9 @@ function resolveScientificValue(
   values: Record<string, number>,
   runMetadata: VideoRunMetadata | null | undefined,
 ): number | null {
-  const selectedParameter = simClass.parameters.find((parameter) => parameter.id === id);
+  const selectedParameter = simClass.parameters.find(
+    (parameter) => parameter.id === id,
+  );
 
   if (selectedParameter) {
     // Intentional: the scientific bars score the user's chosen slider values,
@@ -457,7 +318,15 @@ export function createSummaryOverlay(
     modalTitle.textContent = bar.label;
     modalVerdict.textContent = vd.word;
     modalVerdict.style.color = vd.colour;
+    modalVerdict.hidden = false;
     modalBody.textContent = bar.detail;
+    modal.classList.remove('is-hidden');
+  }
+
+  function openCardModal(title: string, description: string): void {
+    modalTitle.textContent = title;
+    modalVerdict.hidden = true;
+    modalBody.textContent = description;
     modal.classList.remove('is-hidden');
   }
 
@@ -471,6 +340,56 @@ export function createSummaryOverlay(
       closeModal();
     }
   });
+
+  function buildMetricSection(
+    config: SummarySectionConfig,
+    availableMetrics: Record<string, { label: string; value: string }>,
+  ): HTMLElement {
+    const section = document.createElement('div');
+
+    section.className = `${config.className} panel`;
+    section.innerHTML = `<p class="sci-section__title">${config.title}</p>`;
+
+    const grid = document.createElement('div');
+    const columnCount = config.singleRow
+      ? Math.max(1, config.stats.length)
+      : Math.max(1, Math.min(config.stats.length, config.maxColumns));
+
+    grid.className = 'metric-grid';
+    if (config.singleRow) {
+      grid.classList.add('metric-grid--single-row');
+    }
+    grid.style.setProperty('--summary-grid-columns', String(columnCount));
+    grid.style.setProperty('--summary-grid-max-width', `${config.maxWidthRem}rem`);
+
+    for (const stat of config.stats) {
+      const metric = selectMetric(stat, availableMetrics);
+      const card = document.createElement('div');
+      const label = document.createElement('span');
+      const value = document.createElement('span');
+
+      card.className = 'res-card';
+      label.className = 'res-card__label';
+      label.textContent = metric.label;
+      value.className = 'res-card__value';
+      value.textContent = metric.value;
+      card.appendChild(label);
+      card.appendChild(value);
+
+      if (stat.description) {
+        card.classList.add('res-card--has-info');
+        card.addEventListener('click', () => {
+          openCardModal(metric.label, stat.description!);
+        });
+      }
+
+      grid.appendChild(card);
+    }
+
+    section.appendChild(grid);
+
+    return section;
+  }
 
   return {
     show() {
@@ -567,13 +486,16 @@ export function createSummaryOverlay(
 
       if (resStats.length > 0) {
         rightColumn.appendChild(
-          buildMetricSection({
-            title: 'Resources Used',
-            className: 'res-section',
-            stats: resStats,
-            maxColumns: 3,
-            maxWidthRem: 48,
-          }, available),
+          buildMetricSection(
+            {
+              title: 'Resources Used',
+              className: 'res-section',
+              stats: resStats,
+              maxColumns: 3,
+              maxWidthRem: 48,
+            },
+            available,
+          ),
         );
       }
 
@@ -631,60 +553,21 @@ export function createSummaryOverlay(
 
       if (simulationStats.length > 0) {
         content.appendChild(
-          buildMetricSection({
-            title: 'Simulation Stats',
-            className: 'sim-stats-section',
-            stats: simulationStats,
-            maxColumns: simulationStats.length,
-            maxWidthRem: 999,
-            singleRow: true,
-          }, available),
+          buildMetricSection(
+            {
+              title: 'Simulation Stats',
+              className: 'sim-stats-section',
+              stats: simulationStats,
+              maxColumns: simulationStats.length,
+              maxWidthRem: 999,
+              singleRow: true,
+            },
+            available,
+          ),
         );
       }
     },
   };
-}
-
-function buildMetricSection(
-  config: SummarySectionConfig,
-  availableMetrics: Record<string, { label: string; value: string }>,
-): HTMLElement {
-  const section = document.createElement('div');
-
-  section.className = `${config.className} panel`;
-  section.innerHTML = `<p class="sci-section__title">${config.title}</p>`;
-
-  const grid = document.createElement('div');
-  const columnCount = config.singleRow
-    ? Math.max(1, config.stats.length)
-    : Math.max(1, Math.min(config.stats.length, config.maxColumns));
-
-  grid.className = 'metric-grid';
-  if (config.singleRow) {
-    grid.classList.add('metric-grid--single-row');
-  }
-  grid.style.setProperty('--summary-grid-columns', String(columnCount));
-  grid.style.setProperty('--summary-grid-max-width', `${config.maxWidthRem}rem`);
-
-  for (const stat of config.stats) {
-    const metric = selectMetric(stat, availableMetrics);
-    const card = document.createElement('div');
-    const label = document.createElement('span');
-    const value = document.createElement('span');
-
-    card.className = 'res-card';
-    label.className = 'res-card__label';
-    label.textContent = metric.label;
-    value.className = 'res-card__value';
-    value.textContent = metric.value;
-    card.appendChild(label);
-    card.appendChild(value);
-    grid.appendChild(card);
-  }
-
-  section.appendChild(grid);
-
-  return section;
 }
 
 /**
