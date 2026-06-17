@@ -109,6 +109,9 @@ export interface ViewportController {
 
   /** Return a pre-fetched blob URL if one was primed by prewarmSources. */
   getPrewarmedBlobUrl: (src: string) => string | null;
+
+  /** Capture the current video frame as a data URL, or null if unavailable. */
+  captureFrame: () => string | null;
 }
 
 export interface ViewportSourceOptions {
@@ -155,6 +158,7 @@ export function createViewport(
   const prewarmedVideos = new Map<string, HTMLVideoElement>();
   const prewarmedBlobUrls = new Map<string, string>();
   let ownedObjectUrl: string | null = null;
+  let lastFrameDataUrl: string | null = null;
 
   video.addEventListener('play', () => playStateCallback?.(false));
   video.addEventListener('pause', () => playStateCallback?.(true));
@@ -163,6 +167,8 @@ export function createViewport(
   // Convert native video time updates into normalized 0..1 progress so the
   // rest of the app never needs to think about seconds vs duration.
   video.addEventListener('timeupdate', () => {
+    storeCurrentFrame();
+
     if (
       !timeUpdateCallback ||
       !Number.isFinite(video.duration) ||
@@ -307,10 +313,13 @@ export function createViewport(
         cleanup();
         resolve();
       };
-      const handleTimeout = window.setTimeout(() => {
-        cleanup();
-        resolve();
-      }, Math.max(0, timeoutMs));
+      const handleTimeout = window.setTimeout(
+        () => {
+          cleanup();
+          resolve();
+        },
+        Math.max(0, timeoutMs),
+      );
 
       function cleanup() {
         window.clearTimeout(handleTimeout);
@@ -336,10 +345,13 @@ export function createViewport(
         cleanup();
         resolve();
       };
-      const handleTimeout = window.setTimeout(() => {
-        cleanup();
-        resolve();
-      }, Math.max(0, timeoutMs));
+      const handleTimeout = window.setTimeout(
+        () => {
+          cleanup();
+          resolve();
+        },
+        Math.max(0, timeoutMs),
+      );
 
       function cleanup() {
         window.clearTimeout(handleTimeout);
@@ -351,7 +363,7 @@ export function createViewport(
       video.addEventListener('progress', handleProgress);
       video.addEventListener('canplay', handleProgress);
       video.addEventListener('loadeddata', handleProgress);
-      handleProgress()
+      handleProgress();
     });
   }
 
@@ -391,7 +403,9 @@ export function createViewport(
   // detached media elements so the next run starts from a clean state.
 
   function prewarmSources(sources: string[]): void {
-    const wanted = new Set(sources.filter(Boolean).filter((src) => src !== video.currentSrc));
+    const wanted = new Set(
+      sources.filter(Boolean).filter((src) => src !== video.currentSrc),
+    );
 
     for (const [src, prewarmedVideo] of prewarmedVideos.entries()) {
       if (wanted.has(src)) {
@@ -472,6 +486,34 @@ export function createViewport(
     return prewarmedBlobUrls.get(src) ?? null;
   }
 
+  function storeCurrentFrame(): void {
+    if (video.readyState < 2 || video.videoWidth === 0 || video.videoHeight === 0) {
+      return;
+    }
+
+    const canvas = document.createElement('canvas');
+
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+
+    const ctx = canvas.getContext('2d');
+
+    if (!ctx) {
+      return;
+    }
+
+    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+    lastFrameDataUrl = canvas.toDataURL('image/jpeg', 0.85);
+  }
+
+  function captureFrame(): string | null {
+    if (!lastFrameDataUrl) {
+      storeCurrentFrame();
+    }
+
+    return lastFrameDataUrl;
+  }
+
   function onTimeUpdate(callback: (fraction: number) => void): void {
     timeUpdateCallback = callback;
   }
@@ -514,5 +556,6 @@ export function createViewport(
     prewarmSources,
     clearPrewarmedSources,
     getPrewarmedBlobUrl,
+    captureFrame,
   };
 }

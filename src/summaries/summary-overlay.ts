@@ -17,7 +17,7 @@ import type {
 import { buildSummaryMetricMap } from './summary-metrics.ts';
 import type { VideoRunMetadata } from '../selection/video-run-metadata.ts';
 import { SUMMARY_OVERLAY } from '../shared/constants.ts';
-import { formatNumericString, withUnit } from '../shared/format.ts';
+import { formatCompactNumber, formatNumericString, withUnit } from '../shared/format.ts';
 import { parse } from 'yaml';
 import targetMessagesRaw from './summary-target-messages.yaml?raw';
 
@@ -30,6 +30,7 @@ export interface SummaryOverlayController {
     values: Record<string, number>,
     videoDurationSeconds: number,
     runMetadata?: VideoRunMetadata | null,
+    thumbnail?: string | null,
   ) => void;
 }
 
@@ -44,6 +45,8 @@ interface ScientificBarDatum {
   id: string;
   label: string;
   value: number;
+  rawValue: number;
+  unit?: string;
   detail: string;
 }
 
@@ -153,6 +156,7 @@ function buildScientificBars(
 
       const normalizedValue = resolved / Math.max(correctValue, 1e-9);
       const label = resolveScientificLabel(id, simClass, runMetadata);
+      const unit = resolveScientificUnit(id, simClass);
       const detail =
         detailFor(label, normalizedValue) ||
         detailForTarget(id, label, normalizedValue);
@@ -161,10 +165,12 @@ function buildScientificBars(
         id,
         label,
         value: normalizedValue,
+        rawValue: resolved,
+        unit,
         detail,
       };
     })
-    .filter((bar): bar is ScientificBarDatum => bar !== null);
+    .filter((bar) => bar !== null) as ScientificBarDatum[];
 }
 
 function resolveScientificValue(
@@ -213,6 +219,16 @@ function resolveScientificLabel(
     simClass.metadata.summaryStats.find((stat) => stat.id === id)?.label ??
     runMetadata?.summaryMetrics[id]?.label ??
     id
+  );
+}
+
+function resolveScientificUnit(
+  id: string,
+  simClass: SimulationClass,
+): string | undefined {
+  return (
+    simClass.parameters.find((parameter) => parameter.id === id)?.unit ??
+    simClass.metadata.summaryStats.find((stat) => stat.id === id)?.unit
   );
 }
 
@@ -391,6 +407,41 @@ export function createSummaryOverlay(
     return section;
   }
 
+  function buildSimStatsFromBars(bars: ScientificBarDatum[]): HTMLElement {
+    const section = document.createElement('div');
+
+    section.className = 'res-section panel';
+    section.innerHTML = '<p class="sci-section__title">Simulation Stats</p>';
+
+    const grid = document.createElement('div');
+
+    grid.className = 'metric-grid';
+    grid.style.setProperty('--summary-grid-columns', String(Math.max(1, bars.length)));
+    grid.style.setProperty('--summary-grid-max-width', '48rem');
+
+    for (const bar of bars) {
+      const card = document.createElement('div');
+      const label = document.createElement('span');
+      const value = document.createElement('span');
+
+      card.className = 'res-card res-card--has-info';
+      label.className = 'res-card__label';
+      label.textContent = bar.label;
+      value.className = 'res-card__value';
+      value.textContent = Number.isFinite(bar.rawValue)
+        ? withUnit(Number(bar.rawValue.toPrecision(4)).toString(), bar.unit)
+        : '--';
+      card.appendChild(label);
+      card.appendChild(value);
+      card.addEventListener('click', () => openCardModal(bar.label, bar.detail));
+      grid.appendChild(card);
+    }
+
+    section.appendChild(grid);
+
+    return section;
+  }
+
   return {
     show() {
       if (hideTimer) {
@@ -428,6 +479,7 @@ export function createSummaryOverlay(
       values: Record<string, number>,
       videoDurationSeconds: number,
       runMetadata?: VideoRunMetadata | null,
+      thumbnail?: string | null,
     ) {
       content.innerHTML = '';
       closeModal();
@@ -463,15 +515,22 @@ export function createSummaryOverlay(
       const hero = document.createElement('div');
 
       hero.className = 'sci-hero panel';
-      hero.innerHTML = `
-        <div class="sci-hero__score">
-          <span class="sci-hero__num">${score}</span><span class="sci-hero__outof">/100</span>
-        </div>
-        <div class="sci-hero__reaction" style="color:${react.colour}">${react.word}</div>
-        <div class="sci-hero__gauge">
-          <div class="sci-hero__gauge-fill" style="width:${score}%; background:${react.colour}; box-shadow:0 0 12px ${react.colour}"></div>
-        </div>
-      `;
+
+      if (thumbnail) {
+        hero.classList.add('sci-hero--thumbnail');
+        hero.innerHTML = `<img class="sci-hero__thumbnail" src="${thumbnail}" alt="Final frame of simulation" />`;
+      } else {
+        hero.innerHTML = `
+          <div class="sci-hero__score">
+            <span class="sci-hero__num">${score}</span><span class="sci-hero__outof">/100</span>
+          </div>
+          <div class="sci-hero__reaction" style="color:${react.colour}">${react.word}</div>
+          <div class="sci-hero__gauge">
+            <div class="sci-hero__gauge-fill" style="width:${score}%; background:${react.colour}; box-shadow:0 0 12px ${react.colour}"></div>
+          </div>
+        `;
+      }
+
       mainColumn.appendChild(hero);
 
       const resStats = stats.filter(
@@ -497,6 +556,24 @@ export function createSummaryOverlay(
             available,
           ),
         );
+      }
+
+      if (simulationStats.length > 0) {
+        rightColumn.appendChild(
+          buildMetricSection(
+            {
+              title: 'Simulation Stats',
+              className: 'res-section',
+              stats: simulationStats,
+              maxColumns: simulationStats.length,
+              maxWidthRem: 48,
+              singleRow: true,
+            },
+            available,
+          ),
+        );
+      } else if (scientificBars.length > 0) {
+        rightColumn.appendChild(buildSimStatsFromBars(scientificBars));
       }
 
       topRow.appendChild(mainColumn);
@@ -540,22 +617,6 @@ export function createSummaryOverlay(
         sciSection.appendChild(list);
         content.appendChild(sciSection);
       }
-
-      if (simulationStats.length > 0) {
-        content.appendChild(
-          buildMetricSection(
-            {
-              title: 'Simulation Stats',
-              className: 'sim-stats-section',
-              stats: simulationStats,
-              maxColumns: simulationStats.length,
-              maxWidthRem: 999,
-              singleRow: true,
-            },
-            available,
-          ),
-        );
-      }
     },
   };
 }
@@ -585,13 +646,22 @@ function formatSummaryValue(value: string, stat: StatDisplayConfig): string {
     return value;
   }
 
-  if (!stat.displayFormat && stat.valueScale === undefined && !stat.integer) {
+  const numeric = Number(value);
+
+  if (!Number.isFinite(numeric)) {
     return value;
   }
 
-  return formatNumericString(value, {
-    scale: stat.valueScale,
-    mode: stat.displayFormat ?? (stat.integer ? 'integer' : 'float'),
-    precision: stat.precision,
-  });
+  if (stat.displayFormat === 'scientific') {
+    return formatNumericString(value, {
+      scale: stat.valueScale,
+      mode: 'scientific',
+      precision: stat.precision,
+    });
+  }
+
+  const scale = stat.valueScale ?? 1;
+  const scaled = numeric * scale;
+
+  return formatCompactNumber(scaled);
 }

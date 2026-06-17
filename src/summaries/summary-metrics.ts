@@ -127,9 +127,7 @@ export function buildSummaryMetricMap(
  * @returns Human-friendly integer-ish string.
  */
 function formatCount(value: number): string {
-  const rounded = Math.max(0, Math.round(value));
-
-  return rounded.toLocaleString(undefined);
+  return String(Math.max(0, value));
 }
 
 /**

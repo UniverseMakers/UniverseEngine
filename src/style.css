@@ -1159,6 +1159,19 @@ button {
   transition: width 0.9s ease;
 }
 
+.sci-hero--thumbnail {
+  justify-content: flex-start;
+  overflow: hidden;
+}
+
+.sci-hero__thumbnail {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 3px;
+  border: 1px solid rgba(99, 196, 232, 0.25);
+}
+
 .res-section {
   display: flex;
   flex-direction: column;
@@ -1194,9 +1207,8 @@ button {
   color: #6e8093;
   font-size: 0.66rem;
   letter-spacing: 0.14em;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  line-height: 1.35;
+  word-break: break-word;
 }
 
 .res-card__value {

@@ -7,7 +7,10 @@
  * orchestration, and domain logic are separated more clearly.
  */
 
-import { SIMULATION_CLASSES, type SimulationClass } from '../selection/simulation-catalog.ts';
+import {
+  SIMULATION_CLASSES,
+  type SimulationClass,
+} from '../selection/simulation-catalog.ts';
 import { applyTheme, getInitialTheme, type ThemeId } from '../selection/theme.ts';
 import { createViewport } from '../video_player/viewport.ts';
 import { createTimeline } from '../video_player/timeline.ts';
@@ -149,7 +152,10 @@ export function createAppShell(app: HTMLElement): void {
   // Persist parameter values per simulation family so users can switch between
   // families without losing their slider positions.
   const valuesByClass = Object.fromEntries(
-    SIMULATION_CLASSES.map((simClass) => [simClass.id, createRandomizedValues(simClass)]),
+    SIMULATION_CLASSES.map((simClass) => [
+      simClass.id,
+      createRandomizedValues(simClass),
+    ]),
   ) as Record<string, Record<string, number>>;
 
   // ── UI Assembly ──────────────────────────────────────────────────────────
@@ -375,20 +381,26 @@ export function createAppShell(app: HTMLElement): void {
   // When playback ends, remember that state and show the summary overlay.
   viewport.onEnded(() => {
     hasCompletedPlayback = true;
+    const thumbnail = viewport.captureFrame();
     summaryOverlay.update(
       activeClass,
       getActiveValues(),
       viewport.getDurationSeconds(),
       activeRunMetadata,
+      thumbnail,
     );
     summaryOverlay.show();
   });
 
   // Mount the first-load entry overlay — the very first thing the user sees.
-  const entryOverlay = createEntryOverlay(overlayLayer, availableSimulationClasses, (simClass) => {
-    handleClassChange(simClass);
-    openConfigPanel('parameters');
-  });
+  const entryOverlay = createEntryOverlay(
+    overlayLayer,
+    availableSimulationClasses,
+    (simClass) => {
+      handleClassChange(simClass);
+      openConfigPanel('parameters');
+    },
+  );
 
   // Mount the main selection overlay — parameters, settings, credits, etc.
   const overlayPanel = createOverlayPanel(overlayLayer, {
@@ -790,7 +802,9 @@ export function createAppShell(app: HTMLElement): void {
    * is treated as a simple CORS request and consistently returns the headers
    * we need.
    */
-  async function prepareActiveVideoSource(videoUrl: string): Promise<PreparedVideoSource> {
+  async function prepareActiveVideoSource(
+    videoUrl: string,
+  ): Promise<PreparedVideoSource> {
     const contentLength = await probeContentLength(videoUrl);
 
     if (
@@ -823,9 +837,12 @@ export function createAppShell(app: HTMLElement): void {
           shouldWaitForBuffer: false,
         };
       } catch (error) {
-        logWarn(`Full-fetch FAILED; falling back to progressive: ${error instanceof Error ? error.message : String(error)}`, {
-          videoUrl,
-        });
+        logWarn(
+          `Full-fetch FAILED; falling back to progressive: ${error instanceof Error ? error.message : String(error)}`,
+          {
+            videoUrl,
+          },
+        );
       }
     }
 
@@ -864,13 +881,17 @@ export function createAppShell(app: HTMLElement): void {
         contentRange: rangeResponse.headers.get('Content-Range'),
       });
 
-      const contentLength = parseContentLength(rangeResponse.headers.get('Content-Length'));
+      const contentLength = parseContentLength(
+        rangeResponse.headers.get('Content-Length'),
+      );
 
       if (contentLength !== null) {
         return contentLength;
       }
 
-      const sizeFromRange = parseContentRangeTotal(rangeResponse.headers.get('Content-Range'));
+      const sizeFromRange = parseContentRangeTotal(
+        rangeResponse.headers.get('Content-Range'),
+      );
       if (sizeFromRange !== null) {
         return sizeFromRange;
       }
@@ -968,11 +989,13 @@ export function createAppShell(app: HTMLElement): void {
     if (nextMode !== 'display') {
       summaryOverlay.hide();
     } else if (hasCompletedPlayback) {
+      const thumbnail = viewport.captureFrame();
       summaryOverlay.update(
         activeClass,
         getActiveValues(),
         viewport.getDurationSeconds(),
         activeRunMetadata,
+        thumbnail,
       );
       summaryOverlay.show();
     }

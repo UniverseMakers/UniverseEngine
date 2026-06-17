@@ -117,6 +117,12 @@ interface RawStatsConfig {
   liveStats: RawStatDisplayConfig[];
 }
 
+interface RawSummaryConfig {
+  resources?: RawStatDisplayConfig[];
+  simulationStats?: RawStatDisplayConfig[];
+  similarityScore?: { value: string };
+}
+
 interface RawSimulationViewOption {
   id: string;
   label?: string;
@@ -150,12 +156,15 @@ const paramsByFamily = parse(paramsRaw) as Record<
   FamilyId,
   Record<string, RawParameterConfig>
 >;
-const summaryStatsByFamily = parse(summaryStatsRaw) as Record<FamilyId, RawStatsConfig>;
+const summaryStatsByFamily = parse(summaryStatsRaw) as Record<
+  FamilyId,
+  RawSummaryConfig
+>;
 const liveStatsByFamily = parse(liveStatsRaw) as Record<FamilyId, RawStatsConfig>;
 
 export const SIMULATION_CLASSES: SimulationClass[] = Object.entries(catalog).map(
   ([id, entry]) => {
-    const summaryStats = summaryStatsByFamily[id]?.summaryStats ?? [];
+    const summaryStats = flattenSummaryConfig(summaryStatsByFamily[id]);
     const liveStats = liveStatsByFamily[id]?.liveStats ?? [];
     const rawParams = paramsByFamily[id] ?? {};
 
@@ -199,6 +208,35 @@ export const SIMULATION_CLASSES: SimulationClass[] = Object.entries(catalog).map
     };
   },
 );
+
+function flattenSummaryConfig(
+  config: RawSummaryConfig | undefined,
+): StatDisplayConfig[] {
+  if (!config) {
+    return [];
+  }
+
+  const stats: StatDisplayConfig[] = [];
+
+  for (const stat of config.resources ?? []) {
+    stats.push(normalizeStatConfig({ ...stat, section: 'resources' }));
+  }
+
+  for (const stat of config.simulationStats ?? []) {
+    stats.push(normalizeStatConfig({ ...stat, section: 'simulationStats' }));
+  }
+
+  if (config.similarityScore) {
+    stats.push(
+      normalizeStatConfig({
+        id: 'similarityScore',
+        value: config.similarityScore.value,
+      }),
+    );
+  }
+
+  return stats;
+}
 
 function normalizeStatConfig(config: RawStatDisplayConfig): StatDisplayConfig {
   return {
