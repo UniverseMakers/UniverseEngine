@@ -11,10 +11,10 @@ import { INITIALIZATION } from '../shared/constants.ts';
 
 /** Terminal-style loading overlay shown between config and display mode.
  *
- * The overlay types a script of terminal lines and, if a `ready` promise is
- * supplied, stays visible with a progress animation until that promise
- * resolves.  This lets the app hide the full active-video download and
- * progressive buffer build-up behind the terminal without risking a "frozen"
+ * The overlay randomly picks and types lines from a pool. It stays visible for
+ * at least `MIN_TERMINAL_TIME_MS` and, if a `ready` promise is supplied,
+ * continues printing random lines until that promise resolves. This lets the
+ * app hide video downloads behind the terminal without risking a "frozen"
  * screen when the network is slow. */
 export interface LoadingOverlayController {
   /** Start streaming terminal lines and call `onComplete` when the overlay
@@ -31,7 +31,7 @@ export interface LoadingOverlayController {
  * @returns Controller for showing/hiding the boot sequence.
  */
 export function createLoadingOverlay(container: HTMLElement): LoadingOverlayController {
-  const { TYPING_MS_PER_CHAR, FINAL_PAUSE_MS } = INITIALIZATION;
+  const { TYPING_MS_PER_CHAR, MIN_TERMINAL_TIME_MS, FINAL_PAUSE_MS } = INITIALIZATION;
 
   // Full-screen shell that blocks interaction while the faux boot sequence is
   // printing. CSS handles the visual treatment; this module handles sequencing.
@@ -62,34 +62,13 @@ export function createLoadingOverlay(container: HTMLElement): LoadingOverlayCont
 
   log.className = 'terminal__log';
 
-  const fastForwardButton = document.createElement('button');
-
-  fastForwardButton.className = 'terminal__fast-forward';
-  fastForwardButton.type = 'button';
-  fastForwardButton.textContent = '>>';
-  fastForwardButton.setAttribute('aria-label', 'Fast forward terminal output');
-  fastForwardButton.setAttribute('aria-pressed', 'false');
-  fastForwardButton.hidden = true;
-
   terminal.appendChild(header);
   terminal.appendChild(log);
-  terminal.appendChild(fastForwardButton);
   overlay.appendChild(terminal);
   container.appendChild(overlay);
 
   let timers: number[] = [];
   let sequenceToken = 0;
-  let isFastForwarding = false;
-
-  function setFastForwarding(active: boolean): void {
-    isFastForwarding = active;
-    fastForwardButton.classList.toggle('is-active', isFastForwarding);
-    fastForwardButton.setAttribute('aria-pressed', String(isFastForwarding));
-  }
-
-  fastForwardButton.addEventListener('click', () => {
-    setFastForwarding(!isFastForwarding);
-  });
 
   function clearTimers() {
     for (const timer of timers) {
@@ -109,7 +88,7 @@ export function createLoadingOverlay(container: HTMLElement): LoadingOverlayCont
             resolve();
           }
         },
-        isFastForwarding ? 0 : Math.max(0, ms),
+        Math.max(0, ms),
       );
 
       timers.push(timer);
@@ -129,14 +108,12 @@ export function createLoadingOverlay(container: HTMLElement): LoadingOverlayCont
     row.appendChild(cursor);
     log.appendChild(row);
 
-    const batchSize = isFastForwarding ? 2 : 1;
-
-    for (let index = 0; index < line.length; index += batchSize) {
+    for (let index = 0; index < line.length; index += 1) {
       if (token !== sequenceToken) {
         return;
       }
 
-      const chunk = line.slice(index, index + batchSize);
+      const chunk = line[index];
 
       // Insert before the cursor so the block character always stays at the end
       // of the visible line while text streams in.
@@ -163,73 +140,66 @@ export function createLoadingOverlay(container: HTMLElement): LoadingOverlayCont
       clearTimers();
       sequenceToken += 1;
       const token = sequenceToken;
-        setFastForwarding(false);
-        overlay.hidden = false;
-        overlay.classList.remove('is-hidden');
-        fastForwardButton.hidden = true;
 
-        // Reveal the fast-forward button as soon as the video loads.
-        if (ready) {
-          void ready.then(() => {
-            fastForwardButton.hidden = false;
-          });
-        }
+      overlay.hidden = false;
+      overlay.classList.remove('is-hidden');
 
-        for (const [index, line] of lines.entries()) {
-        if (token !== sequenceToken) {
-          return;
-        }
+      const startTime = performance.now();
+      let videoLoaded = !ready;
+      let unused = [...lines];
 
-        // Prefix with a synthetic timestamp so even static YAML lines feel like
-        // a coherent boot log rather than unrelated status messages.
-        const stampedLine = `${formatTimestamp(index)} ${line.text}`;
-
-        await typeLine(stampedLine, token);
-      }
-
-      // When the caller supplies a `ready` promise the terminal stays visible
-      // with a syncing animation rather than showing a frozen screen.
       if (ready) {
-        const syncingRow = document.createElement('div');
+        void ready.then(() => {
+          videoLoaded = true;
+        });
+      }
 
-        syncingRow.className = 'terminal__line terminal__line--syncing';
-        syncingRow.textContent = `${formatTimestamp(lines.length)} STARTING SIMULATION`;
-        log.appendChild(syncingRow);
+      let lineIndex = 0;
 
-        let dotCount = 0;
-        const dotInterval = window.setInterval(() => {
-          dotCount = (dotCount + 1) % 4;
-          const dots = '.'.repeat(dotCount);
-
-          syncingRow.textContent = `${formatTimestamp(lines.length)} STARTING SIMULATION${dots}`;
-          log.scrollTop = log.scrollHeight;
-        }, 400);
-
-        timers.push(dotInterval);
-
-        try {
-          await ready;
-        } catch {
-          // The ready promise rejected — carry on.
+      // Type random lines from the pool until the minimum time has elapsed AND
+      // the video is loaded. If the video loads early we still honour the
+      // minimum to avoid a jarring flash; if it loads late the terminal keeps
+      // streaming new lines so the screen never feels frozen.
+      while (token === sequenceToken) {
+        if (unused.length === 0) {
+          unused = [...lines];
         }
 
-        window.clearInterval(dotInterval);
-        syncingRow.textContent = `${formatTimestamp(lines.length)} STARTING SIMULATION...`;
-        log.scrollTop = log.scrollHeight;
+        const pickIndex = Math.floor(Math.random() * unused.length);
+        const [line] = unused.splice(pickIndex, 1);
+
+        const stampedLine = `${formatTimestamp(lineIndex)} ${line.text}`;
+
+        lineIndex += 1;
+        await typeLine(stampedLine, token);
+
+        if (token !== sequenceToken) return;
+
+        const elapsed = performance.now() - startTime;
+
+        if (elapsed >= MIN_TERMINAL_TIME_MS && videoLoaded) {
+          break;
+        }
       }
+
+      if (token !== sequenceToken) return;
+
+      const syncingRow = document.createElement('div');
+
+      syncingRow.className = 'terminal__line terminal__line--syncing';
+      syncingRow.textContent = `${formatTimestamp(lineIndex)} STARTING SIMULATION...`;
+      log.appendChild(syncingRow);
+      log.scrollTop = log.scrollHeight;
+
+      await wait(FINAL_PAUSE_MS, token);
 
       if (token === sequenceToken) {
-        // Hold briefly so the user perceives completion before the app swaps
-        // into display mode.
-        await wait(FINAL_PAUSE_MS, token);
         onComplete();
       }
     },
     hide() {
       clearTimers();
       sequenceToken += 1;
-      setFastForwarding(false);
-      fastForwardButton.hidden = true;
       overlay.hidden = true;
       overlay.classList.add('is-hidden');
       log.innerHTML = '';

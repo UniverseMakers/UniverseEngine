@@ -229,6 +229,7 @@ export function createViewport(
 
       const resumeMuted = video.muted;
       const seekFraction = options.seekFraction;
+
       releaseOwnedObjectUrl();
       ownedObjectUrl = options.ownedObjectUrl ? src : null;
 
@@ -332,6 +333,7 @@ export function createViewport(
 
   function waitForBufferedAhead(minSeconds: number, timeoutMs = 8000): Promise<void> {
     const target = Math.max(0, minSeconds);
+
     if (target === 0 || hasBufferedAhead(target)) {
       return Promise.resolve();
     }

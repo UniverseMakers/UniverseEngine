@@ -2077,39 +2077,6 @@ button {
   opacity: 0.65;
 }
 
-.terminal__fast-forward {
-  position: absolute;
-  right: 1rem;
-  bottom: 0.9rem;
-  z-index: 1;
-  padding: 0.35rem 0.6rem;
-  border: 1px solid rgba(85, 215, 255, 0.24);
-  background: rgba(6, 9, 12, 0.72);
-  color: rgba(85, 215, 255, 0.68);
-  font-family: var(--font-mono);
-  font-size: 0.62rem;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  transition:
-    color 0.16s ease,
-    border-color 0.16s ease,
-    background 0.16s ease,
-    opacity 0.16s ease;
-}
-
-.terminal__fast-forward:hover,
-.terminal__fast-forward:focus-visible,
-.terminal__fast-forward.is-active {
-  border-color: var(--line-strong);
-  background: rgba(20, 34, 42, 0.78);
-  color: var(--accent);
-}
-
-.terminal__fast-forward:focus-visible {
-  outline: 1px solid var(--line-strong);
-  outline-offset: 2px;
-}
-
 /* -------------------------------------------------------------------------- */
 /* Theme-Specific Surface Overrides                                            */
 /* -------------------------------------------------------------------------- */
@@ -2781,12 +2748,8 @@ button {
     padding: 0 1rem 1rem;
   }
 
-  .terminal__fast-forward {
-    right: 0.9rem;
-    bottom: 0.8rem;
-    font-size: 0.58rem;
-  }
 }
+
 
 @media (width <= 720px) and (orientation: portrait) {
   .display-chrome__left-center {

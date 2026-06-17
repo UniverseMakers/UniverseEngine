@@ -108,6 +108,7 @@ export function createAppShell(app: HTMLElement): void {
   let advancedSettings = loadAdvancedSettings(scaleIds);
   let availableSimulationClasses = getSelectableSimulationClasses(advancedSettings);
   const manifestController = createManifestController(advancedSettings.manifestSource);
+
   if (advancedSettings.manifestSource === 'online') {
     void manifestController.preloadActiveManifest();
   }
@@ -382,6 +383,7 @@ export function createAppShell(app: HTMLElement): void {
   viewport.onEnded(() => {
     hasCompletedPlayback = true;
     const thumbnail = viewport.captureFrame();
+
     summaryOverlay.update(
       activeClass,
       getActiveValues(),
@@ -495,6 +497,7 @@ export function createAppShell(app: HTMLElement): void {
       if (el.classList.contains('side-collapsed')) {
         expandOne(el);
         scheduleCollapseOne(el);
+
         return;
       }
 
@@ -532,14 +535,18 @@ export function createAppShell(app: HTMLElement): void {
     const stepFraction = () => {
       if (scrubDirection === 0) {
         stopScrubbing();
+
         return;
       }
+
       const secs = 12 * (1 / 60);
       const frac = secs / Math.max(viewport.getDurationSeconds(), 1);
+
       scrubFraction = Math.max(0, Math.min(1, scrubFraction + scrubDirection * frac));
       viewport.seekToFraction(scrubFraction);
       scrubRaf = requestAnimationFrame(stepFraction);
     };
+
     scrubRaf = requestAnimationFrame(stepFraction);
   };
 
@@ -584,6 +591,7 @@ export function createAppShell(app: HTMLElement): void {
         const configuredViews = activeClass.views.filter(
           (v) => activeRunMatch?.views?.[v.id] !== undefined,
         );
+
         if (configuredViews.length <= 1) break;
 
         const currentId =
@@ -791,6 +799,7 @@ export function createAppShell(app: HTMLElement): void {
    */
   async function handleRun(): Promise<void> {
     const values = getActiveValues();
+
     logInfo('Run requested', {
       simClassId: activeClass.id,
       values,
@@ -836,6 +845,7 @@ export function createAppShell(app: HTMLElement): void {
     // local Blob; views that do not simply fall through to the
     // progressive path — the user is never blocked on them.
     const preparedSourcePromise = prepareActiveVideoSource(selectedViewUrl);
+
     viewport.prewarmSources(alternateViewUrls);
 
     const videoReady = (async (): Promise<void> => {
@@ -986,6 +996,7 @@ export function createAppShell(app: HTMLElement): void {
       const sizeFromRange = parseContentRangeTotal(
         rangeResponse.headers.get('Content-Range'),
       );
+
       if (sizeFromRange !== null) {
         return sizeFromRange;
       }
@@ -996,6 +1007,7 @@ export function createAppShell(app: HTMLElement): void {
         videoUrl,
         error: error instanceof Error ? error.message : String(error),
       });
+
       return null;
     }
   }
@@ -1084,6 +1096,7 @@ export function createAppShell(app: HTMLElement): void {
       summaryOverlay.hide();
     } else if (hasCompletedPlayback) {
       const thumbnail = viewport.captureFrame();
+
       summaryOverlay.update(
         activeClass,
         getActiveValues(),
@@ -1458,6 +1471,7 @@ export function createAppShell(app: HTMLElement): void {
     if (advancedSettings.manifestSource === 'online') {
       void manifestController.preloadActiveManifest();
     }
+
     displayMenu.setHomeVisible(!advancedSettings.lockedScaleId);
     summaryOverlay.setHomeVisible(!advancedSettings.lockedScaleId);
     entryOverlay.setSimulationClasses(availableSimulationClasses);

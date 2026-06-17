@@ -9,9 +9,11 @@
 /** Initialization/boot-sequence tuning. */
 export const INITIALIZATION = {
   /** Constant terminal typing speed (milliseconds per character). */
-  TYPING_MS_PER_CHAR: 8.5,
+  TYPING_MS_PER_CHAR: 3.5,
+  /** Minimum time the terminal stays visible before transitioning out. */
+  MIN_TERMINAL_TIME_MS: 3000,
   /** Final pause after the last line has finished typing. */
-  FINAL_PAUSE_MS: 1000,
+  FINAL_PAUSE_MS: 500,
 } as const;
 
 /** End-of-run summary overlay transition tuning. */

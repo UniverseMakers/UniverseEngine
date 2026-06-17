@@ -67,6 +67,7 @@ export function createManifestController(
       if (nextSource === 'online') {
         manifestPromises.delete('online');
       }
+
       source = nextSource;
       logInfo('Manifest source updated', { source: nextSource });
     },

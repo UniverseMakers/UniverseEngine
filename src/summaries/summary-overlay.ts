@@ -375,6 +375,7 @@ export function createSummaryOverlay(
     if (config.singleRow) {
       grid.classList.add('metric-grid--single-row');
     }
+
     grid.style.setProperty('--summary-grid-columns', String(columnCount));
     grid.style.setProperty('--summary-grid-max-width', `${config.maxWidthRem}rem`);
 
@@ -622,6 +623,7 @@ export function createSummaryOverlay(
               openCardModal(param.label, param.description!),
             );
           }
+
           label.className = 'res-card__label';
           label.textContent = param.label;
           value.className = 'res-card__value';
@@ -632,6 +634,7 @@ export function createSummaryOverlay(
                   precision: param.displaySignificantFigures ?? 3,
                 })
               : formatCompactNumber(displayValue);
+
           value.textContent = withUnit(formatted, displayUnit);
           card.appendChild(label);
           card.appendChild(value);
