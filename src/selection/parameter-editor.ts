@@ -1,7 +1,8 @@
 /**
- * Parameter editor — slider-based controls for the selection overlay.
+ * Parameter editor — card-based controls for the selection overlay.
  *
- * Renders one range input per parameter and reports value updates back up.
+ * Renders one res-card per parameter with a slider, value readout, and
+ * a click-to-reveal centred description modal.
  */
 
 import type { SimulationClass, SimParameter } from './simulation-catalog.ts';
@@ -33,9 +34,6 @@ export function createParameterEditor(
   initialValues: Record<string, number>,
   onChange: (values: Record<string, number>) => void,
 ): ParameterEditorController {
-  // Single root node so the whole editor can be rebuilt whenever the active
-  // simulation family changes. The parameter count is small, so full re-render
-  // is simpler than diffing individual slider rows.
   const root = document.createElement('div');
 
   root.className = 'parameter-editor';
@@ -48,14 +46,10 @@ export function createParameterEditor(
     simClass: SimulationClass,
     nextValues?: Record<string, number>,
   ): void {
-    // Swap the active class and either keep caller-provided values or fall back
-    // to that class's fallback values when no explicit value map was supplied.
     currentClass = simClass;
     values = nextValues ? { ...nextValues } : createFallbackValues(simClass);
     root.innerHTML = '';
 
-    // The heading gives the slider bank some context whenever the user switches
-    // between planetary / galaxy / cosmos presets.
     const heading = document.createElement('div');
 
     heading.className = 'parameter-editor__heading';
@@ -65,49 +59,80 @@ export function createParameterEditor(
     `;
     root.appendChild(heading);
 
-    // Every parameter becomes one self-contained slider row.
+    const modal = document.createElement('div');
+
+    modal.className = 'param-info-modal is-hidden';
+    modal.innerHTML = `
+      <div class="sci-modal__card">
+        <button class="sci-modal__close" type="button" aria-label="Close">\u2715</button>
+        <div class="sci-modal__title"></div>
+        <div class="sci-modal__body"></div>
+      </div>
+    `;
+    root.appendChild(modal);
+
+    const modalTitle = modal.querySelector('.sci-modal__title') as HTMLElement;
+    const modalBody = modal.querySelector('.sci-modal__body') as HTMLElement;
+    const modalClose = modal.querySelector('.sci-modal__close') as HTMLElement;
+
+    function openModal(title: string, description: string): void {
+      modalTitle.textContent = title;
+      modalBody.textContent = description;
+      modal.classList.remove('is-hidden');
+    }
+
+    function closeModal(): void {
+      modal.classList.add('is-hidden');
+    }
+
+    modalClose.addEventListener('click', closeModal);
+    modal.addEventListener('click', (event) => {
+      if (event.target === modal) {
+        closeModal();
+      }
+    });
+
     const list = document.createElement('div');
 
     list.className = 'parameter-editor__list';
 
     for (const parameter of simClass.parameters) {
-      list.appendChild(createParamControl(parameter));
+      list.appendChild(createParamControl(parameter, openModal));
     }
 
     root.appendChild(list);
     emitChange();
   }
 
-  function createParamControl(param: SimParameter): HTMLElement {
-    // Each parameter row owns its label, range readout, current value, and the
-    // slider itself so the structure stays easy to scan in the DOM.
-    const wrapper = document.createElement('section');
+  function createParamControl(
+    param: SimParameter,
+    openModal: (title: string, description: string) => void,
+  ): HTMLElement {
+    const card = document.createElement('div');
 
-    wrapper.className = 'param';
+    card.className = 'res-card param-card';
 
-    const labelRow = document.createElement('div');
+    const header = document.createElement('div');
 
-    labelRow.className = 'param__label';
+    header.className = 'param-card__header';
+
+    const name = document.createElement('span');
+
+    name.className = 'res-card__label';
+    name.textContent = param.label;
+
     const displayUnit = param.displayUnit ?? param.unit;
+    const range = document.createElement('span');
 
-    const name = document.createElement('div');
+    range.className = 'param-card__range';
+    range.textContent = `${withUnit(formatParameterValue(param.min, param.step, { scale: param.valueScale, format: param.displayFormat, significantFigures: param.displaySignificantFigures }), displayUnit)} \u2013 ${withUnit(formatParameterValue(param.max, param.step, { scale: param.valueScale, format: param.displayFormat, significantFigures: param.displaySignificantFigures }), displayUnit)}`;
 
-    name.innerHTML = `
-      <span class="param__name">${param.label}</span>
-      <span class="param__range">${withUnit(formatParameterValue(param.min, param.step, { scale: param.valueScale, format: param.displayFormat, significantFigures: param.displaySignificantFigures }), displayUnit)} - ${withUnit(formatParameterValue(param.max, param.step, { scale: param.valueScale, format: param.displayFormat, significantFigures: param.displaySignificantFigures }), displayUnit)}</span>
-    `;
-
-    const readout = document.createElement('div');
-
-    readout.className = 'param__readout';
-
-    const controls = document.createElement('div');
-
-    controls.className = 'param__controls';
+    header.appendChild(name);
+    header.appendChild(range);
 
     const slider = document.createElement('input');
 
-    slider.className = 'param__slider';
+    slider.className = 'param-card__slider';
     slider.type = 'range';
 
     const sliderMin = param.logScale ? Math.log10(param.min) : param.min;
@@ -121,6 +146,10 @@ export function createParameterEditor(
       param.logScale ? Math.log10(Math.max(rawValue, Number.MIN_VALUE)) : rawValue,
     );
     slider.setAttribute('aria-label', param.label);
+
+    const readout = document.createElement('span');
+
+    readout.className = 'res-card__value';
 
     function sync(raw: number): void {
       const value = param.logScale ? 10 ** raw : raw;
@@ -146,8 +175,8 @@ export function createParameterEditor(
       sync(parseFloat(slider.value));
     });
 
-    // Prime the slider fill/readout before the row is attached so there is no
-    // visible snap from default browser state to our styled state.
+    slider.addEventListener('click', (e) => e.stopPropagation());
+
     const initialSliderVal = param.logScale
       ? Math.log10(Math.max(rawValue, Number.MIN_VALUE))
       : rawValue;
@@ -165,40 +194,30 @@ export function createParameterEditor(
       displayUnit,
     );
 
-    labelRow.appendChild(name);
-    labelRow.appendChild(readout);
-
     if (param.description) {
-      name.classList.add('param__name--has-info');
-      name.setAttribute('title', param.description);
+      card.classList.add('res-card--has-info');
+      card.setAttribute('title', param.description);
 
-      const popover = document.createElement('div');
+      const infoBtn = document.createElement('span');
 
-      popover.className = 'param__popover';
-      popover.textContent = param.description;
-      wrapper.appendChild(popover);
+      infoBtn.className = 'param-card__info-btn';
+      infoBtn.setAttribute('aria-label', 'Parameter description');
+      infoBtn.textContent = '\u24D8';
+      header.appendChild(infoBtn);
 
-      name.addEventListener('click', () => {
-        wrapper.classList.toggle('param--info-open');
-      });
-
-      document.addEventListener('click', (event) => {
-        if (!wrapper.contains(event.target as Node)) {
-          wrapper.classList.remove('param--info-open');
-        }
+      card.addEventListener('click', () => {
+        openModal(param.label, param.description!);
       });
     }
 
-    controls.appendChild(slider);
-    wrapper.appendChild(labelRow);
-    wrapper.appendChild(controls);
+    card.appendChild(header);
+    card.appendChild(slider);
+    card.appendChild(readout);
 
-    return wrapper;
+    return card;
   }
 
   function emitChange(): void {
-    // Emit a copy so consumers cannot accidentally mutate the editor's internal
-    // state object behind its back.
     onChange({ ...values });
   }
 
@@ -218,7 +237,6 @@ export function createParameterEditor(
 }
 
 function createFallbackValues(simClass: SimulationClass): Record<string, number> {
-  // These values are only used when the caller did not supply a real value map.
   return Object.fromEntries(
     simClass.parameters.map((parameter) => [parameter.id, parameter.fallbackValue]),
   );
