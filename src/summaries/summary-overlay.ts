@@ -526,9 +526,7 @@ export function createSummaryOverlay(
           row.innerHTML = `
             <div class="sci-bar__name">${bar.label}</div>
             <div class="sci-track">
-              <div class="sci-perfect"></div>
               <div class="sci-pointer" style="left:${pos(bar.value)}%">
-                <div class="sci-pointer__head"></div>
                 <div class="sci-pointer__needle"></div>
                 <div class="sci-pointer__node"></div>
               </div>
@@ -540,14 +538,6 @@ export function createSummaryOverlay(
         }
 
         sciSection.appendChild(list);
-
-        const scale = document.createElement('div');
-
-        scale.className = 'sci-scale';
-        scale.innerHTML =
-          '<span>too low</span><span class="sci-scale__perfect">perfect</span><span>too high</span>';
-        sciSection.appendChild(scale);
-
         content.appendChild(sciSection);
       }
 
