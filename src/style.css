@@ -1228,7 +1228,9 @@ button {
 .res-card--has-info {
   cursor: pointer;
   border-radius: 4px;
-  transition: background 0.15s ease, border-color 0.15s ease;
+  transition:
+    background 0.15s ease,
+    border-color 0.15s ease;
 }
 
 .res-card--has-info:hover {
@@ -1265,6 +1267,52 @@ button {
 
 .sci-bar:hover {
   background: rgba(91, 200, 232, 0.06);
+}
+
+.sci-bottom-row {
+  display: flex;
+  gap: 1.5rem;
+  align-items: stretch;
+  flex: 1 1 auto;
+}
+
+.param-section {
+  flex: 0 0 auto;
+  min-width: 12rem;
+  max-width: 18rem;
+}
+
+.param-section .sci-section__title {
+  flex: 0 0 auto;
+}
+
+.param-cards {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  flex: 1 1 auto;
+  justify-content: space-evenly;
+}
+
+.param-cards .res-card {
+  padding: 0.4rem 0.6rem;
+}
+
+.param-cards .res-card__label {
+  font-size: 0.62rem;
+}
+
+.param-cards .res-card__value {
+  font-size: 0.95rem;
+}
+
+.sci-bottom-row > .sci-section {
+  flex: 1 1 auto;
+}
+
+.sci-bottom-row .sci-bars {
+  flex: 1 1 auto;
+  justify-content: space-evenly;
 }
 
 .sci-bar__name {
@@ -1349,6 +1397,39 @@ button {
   }
 }
 
+.sci-modal {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+  background: rgba(3, 6, 11, 0.72);
+}
+
+.sci-modal__card {
+  position: relative;
+  width: min(50rem, calc(100vw - 3rem));
+  padding: 1.8rem 2rem;
+  border: 1px solid rgba(99, 196, 232, 0.3);
+  border-radius: 6px;
+  background: #0c131d;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+}
+
+.sci-modal__close {
+  position: absolute;
+  top: 0.8rem;
+  right: 1rem;
+  border: none;
+  background: none;
+  color: #6e8093;
+  font-family: var(--font-mono);
+  font-size: 1.1rem;
+  cursor: pointer;
+}
+
 .sci-modal__title {
   font-family: var(--font-display, var(--font-mono));
   font-size: 1.4rem;
@@ -1369,6 +1450,12 @@ button {
   color: #c5d2dd;
   line-height: 1.55;
   font-family: var(--font-body);
+}
+
+#app:has(.overlay--summary.is-visible) .display-chrome__top-right,
+#app:has(.overlay--summary.is-visible) .display-chrome__left-center,
+#app:has(.overlay--summary.is-visible) .display-chrome__bottom {
+  display: none;
 }
 
 /* -------------------------------------------------------------------------- */

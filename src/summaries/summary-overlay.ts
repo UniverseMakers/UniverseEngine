@@ -585,10 +585,66 @@ export function createSummaryOverlay(
       content.appendChild(topRow);
 
       if (scientificBars.length > 0) {
+        const bottomRow = document.createElement('div');
+
+        bottomRow.className = 'sci-bottom-row';
+
+        const paramSection = document.createElement('div');
+
+        paramSection.className = 'sci-section panel param-section';
+        paramSection.innerHTML =
+          '<p class="sci-section__title">Input Parameters</p>';
+
+        const paramCards = document.createElement('div');
+
+        paramCards.className = 'param-cards';
+
+        for (const param of simClass.parameters) {
+          const rawValue = values[param.id] ?? param.fallbackValue;
+          const scale = param.valueScale ?? 1;
+          let displayValue = rawValue * scale;
+          let displayUnit = param.displayUnit ?? param.unit;
+
+          // Convert ages from Gyr to years for compact formatting.
+          if (param.unit === 'Gyr') {
+            displayValue *= 1e9;
+            displayUnit = 'yr';
+          }
+
+          const card = document.createElement('div');
+          const label = document.createElement('span');
+          const value = document.createElement('span');
+
+          card.className = 'res-card';
+          if (param.description) {
+            card.classList.add('res-card--has-info');
+            card.addEventListener('click', () =>
+              openCardModal(param.label, param.description!),
+            );
+          }
+          label.className = 'res-card__label';
+          label.textContent = param.label;
+          value.className = 'res-card__value';
+          const formatted =
+            param.displayFormat === 'scientific'
+              ? formatNumericString(String(displayValue), {
+                  mode: 'scientific',
+                  precision: param.displaySignificantFigures ?? 3,
+                })
+              : formatCompactNumber(displayValue);
+          value.textContent = withUnit(formatted, displayUnit);
+          card.appendChild(label);
+          card.appendChild(value);
+          paramCards.appendChild(card);
+        }
+
+        paramSection.appendChild(paramCards);
+
         const sciSection = document.createElement('div');
 
         sciSection.className = 'sci-section panel';
-        sciSection.innerHTML = '<p class="sci-section__title">Similarity Results</p>';
+        sciSection.innerHTML =
+          '<p class="sci-section__title">Similarity Results</p>';
 
         const list = document.createElement('div');
 
@@ -615,7 +671,9 @@ export function createSummaryOverlay(
         }
 
         sciSection.appendChild(list);
-        content.appendChild(sciSection);
+        bottomRow.appendChild(paramSection);
+        bottomRow.appendChild(sciSection);
+        content.appendChild(bottomRow);
       }
     },
   };
