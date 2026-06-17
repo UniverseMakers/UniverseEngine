@@ -277,7 +277,7 @@ export function createAppShell(app: HTMLElement): void {
     const parsed = raw ? Number(raw) : NaN;
 
     // Only accept known rates so hand-edited storage doesn't break the dropdown.
-    return [0.25, 0.5, 1].includes(parsed) ? parsed : 1;
+    return [0.25, 0.5, 1, 2].includes(parsed) ? parsed : 1;
   };
 
   const persistPlaybackSpeed = (rate: number) => {

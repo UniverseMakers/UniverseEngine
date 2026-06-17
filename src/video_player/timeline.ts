@@ -39,7 +39,7 @@ interface TimelineOptions {
   initialSpeed?: number;
 }
 
-const SPEED_OPTIONS = [0.25, 0.5, 1] as const;
+const SPEED_OPTIONS = [0.25, 0.5, 1, 2] as const;
 
 /**
  * Create and mount the timeline control bar.
