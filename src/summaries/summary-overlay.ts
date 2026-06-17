@@ -283,7 +283,7 @@ export function createSummaryOverlay(
 
   replayButton.className = 'summary-overlay__button summary-overlay__button--primary';
   replayButton.type = 'button';
-  replayButton.textContent = 'Replay';
+  replayButton.textContent = 'Continue Exploring';
 
   const newButton = document.createElement('button');
   const homeButton = document.createElement('button');
