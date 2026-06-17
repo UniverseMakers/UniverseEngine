@@ -87,14 +87,6 @@ galaxy:
       display_format: scientific
       precision: 3
       description: The monster at the centre — how massive your galaxy's central black hole grew.
-    - id: galaxy_age
-      label: Galaxy age
-      value: '0'
-      unit: yrs
-      display_format: float
-      precision: 2
-      value_scale: 1.0e9
-      description: The average age of all the stars in your galaxy. Older means it formed its stars a long time ago.
   similarityScore:
     value: 100/100
 
