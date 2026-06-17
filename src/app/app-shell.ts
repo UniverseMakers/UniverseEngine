@@ -513,6 +513,100 @@ export function createAppShell(app: HTMLElement): void {
   bindCollapsibleChrome(leftCenter, { toggleOnClick: true });
   bindCollapsibleChrome(timelineHost, { toggleOnClick: false });
 
+  // ── Keyboard controls ──────────────────────────────────────────────────
+  let scrubDirection = 0;
+  let scrubRaf: number | null = null;
+  let scrubFraction = 0;
+
+  const stopScrubbing = () => {
+    if (scrubRaf !== null) {
+      cancelAnimationFrame(scrubRaf);
+      scrubRaf = null;
+    }
+  };
+
+  const startScrubbing = () => {
+    if (scrubRaf !== null) return;
+    scrubFraction = viewport.getPlaybackFraction();
+
+    const stepFraction = () => {
+      if (scrubDirection === 0) {
+        stopScrubbing();
+        return;
+      }
+      const secs = 12 * (1 / 60);
+      const frac = secs / Math.max(viewport.getDurationSeconds(), 1);
+      scrubFraction = Math.max(0, Math.min(1, scrubFraction + scrubDirection * frac));
+      viewport.seekToFraction(scrubFraction);
+      scrubRaf = requestAnimationFrame(stepFraction);
+    };
+    scrubRaf = requestAnimationFrame(stepFraction);
+  };
+
+  document.addEventListener('keydown', (event) => {
+    // Only respond during display mode; bail if typing in an input.
+    if (app.dataset.mode !== 'display') return;
+    if (
+      event.target instanceof HTMLInputElement ||
+      event.target instanceof HTMLTextAreaElement
+    )
+      return;
+
+    switch (event.key) {
+      case 'Escape':
+        event.preventDefault();
+        handleHome();
+        break;
+
+      case ' ':
+        event.preventDefault();
+        handleTogglePlay();
+        break;
+
+      case 'ArrowLeft':
+        event.preventDefault();
+        scrubDirection = -1;
+        startScrubbing();
+        break;
+
+      case 'ArrowRight':
+        event.preventDefault();
+        scrubDirection = 1;
+        startScrubbing();
+        break;
+
+      case 'ArrowUp':
+      case 'ArrowDown': {
+        event.preventDefault();
+        // Only switch views when multiple visualizations are available.
+        if (!activeRunMatch?.views || Object.keys(activeRunMatch.views).length <= 1) break;
+
+        const configuredViews = activeClass.views.filter(
+          (v) => activeRunMatch?.views?.[v.id] !== undefined,
+        );
+        if (configuredViews.length <= 1) break;
+
+        const currentId =
+          activeRunMatch.viewId ?? resolveSelectedViewId(activeClass, activeRunMatch);
+        const currentIndex = configuredViews.findIndex((v) => v.id === currentId);
+        const nextIndex =
+          event.key === 'ArrowUp'
+            ? (currentIndex - 1 + configuredViews.length) % configuredViews.length
+            : (currentIndex + 1) % configuredViews.length;
+
+        handleViewSelection(configuredViews[nextIndex].id);
+        break;
+      }
+    }
+  });
+
+  document.addEventListener('keyup', (event) => {
+    if (event.key === 'ArrowLeft' || event.key === 'ArrowRight') {
+      scrubDirection = 0;
+      stopScrubbing();
+    }
+  });
+
   // Start in entry mode with the media hidden and paused unless the app has
   // been locked to a single scale, in which case we open directly to config.
   viewport.hideMedia();
