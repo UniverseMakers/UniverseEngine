@@ -44,6 +44,7 @@ class CliOptions:
     dry_run: bool
     check: bool
     force: bool
+    runtime: float | None
 
 
 @dataclass(frozen=True)
@@ -168,6 +169,16 @@ def parse_args() -> CliOptions:
         action="store_true",
         help="Re-encode files even when they already satisfy the target profile.",
     )
+    parser.add_argument(
+        "--runtime",
+        type=float,
+        default=None,
+        help=(
+            "Target runtime in seconds. Stretches or squashes the video to "
+            "match this duration by adjusting playback speed (setpts filter). "
+            "Source duration is preserved when omitted."
+        ),
+    )
     args = parser.parse_args()
 
     assets_dir = args.assets_dir.expanduser().resolve()
@@ -181,6 +192,8 @@ def parse_args() -> CliOptions:
         raise SystemExit("--jobs must be a positive integer")
     if args.crf < 0:
         raise SystemExit("--crf must be non-negative")
+    if args.runtime is not None and args.runtime <= 0:
+        raise SystemExit("--runtime must be a positive number")
 
     return CliOptions(
         assets_dir=assets_dir,
@@ -192,6 +205,7 @@ def parse_args() -> CliOptions:
         dry_run=args.dry_run,
         check=args.check,
         force=args.force,
+        runtime=args.runtime,
     )
 
 
@@ -459,6 +473,8 @@ def build_ffmpeg_command(
     gop_duration_seconds: float,
     crf: int,
     preset: str,
+    runtime: float | None = None,
+    source_duration_seconds: float = 0.0,
 ) -> list[str]:
     """Build the ffmpeg argv list for one output conversion."""
     gop_frames = calculate_gop_frames(fps, gop_duration_seconds)
@@ -466,6 +482,9 @@ def build_ffmpeg_command(
         f"scale=w='min(iw,{MAX_WIDTH})':h='min(ih,{MAX_HEIGHT})':"
         "force_original_aspect_ratio=decrease:force_divisible_by=2"
     )
+    if runtime is not None and source_duration_seconds > 0:
+        setpts_factor = runtime / source_duration_seconds
+        scale_filter += f",setpts={setpts_factor}*PTS"
     return [
         "ffmpeg",
         "-y",
@@ -513,6 +532,7 @@ def validate_output(
     *,
     fps: int,
     gop_duration_seconds: float,
+    runtime: float | None = None,
 ) -> ComplianceResult:
     """Validate the converted output, including duration preservation."""
     result = check_compliance(
@@ -520,7 +540,10 @@ def validate_output(
         fps=fps,
         gop_duration_seconds=gop_duration_seconds,
     )
-    duration_delta = abs(result.probe.duration_seconds - source_probe.duration_seconds)
+    expected_duration = (
+        runtime if runtime is not None else source_probe.duration_seconds
+    )
+    duration_delta = abs(result.probe.duration_seconds - expected_duration)
     if duration_delta > duration_tolerance_seconds(fps):
         issues = list(result.issues)
         issues.append(
@@ -625,6 +648,8 @@ def convert_file(path: Path, options: CliOptions) -> FileOutcome:
             gop_duration_seconds=options.gop_duration_seconds,
             crf=options.crf,
             preset=options.preset,
+            runtime=options.runtime,
+            source_duration_seconds=source_probe.duration_seconds,
         )
         run_ffmpeg(command)
 
@@ -633,6 +658,7 @@ def convert_file(path: Path, options: CliOptions) -> FileOutcome:
             temp_path,
             fps=options.fps,
             gop_duration_seconds=options.gop_duration_seconds,
+            runtime=options.runtime,
         )
         if not validation.compliant:
             raise RuntimeError("; ".join(validation.issues))
