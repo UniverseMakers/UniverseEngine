@@ -224,8 +224,8 @@ def load_timesteps_resource_metrics(timesteps_path: Path) -> dict[str, Any] | No
 
             try:
                 total_g_updates += int(fields[7])
-                total_wallclock_ms += float(fields[11])
-                total_dead_ms += float(fields[13])
+                total_wallclock_ms += float(fields[12])
+                total_dead_ms += float(fields[14])
             except ValueError:
                 continue
 
@@ -235,7 +235,7 @@ def load_timesteps_resource_metrics(timesteps_path: Path) -> dict[str, Any] | No
     wallclock_seconds = (total_wallclock_ms + total_dead_ms) / 1000.0
     compute_used = round(wallclock_seconds * threads / 3600.0, 2)
     memory_used = round(NODE_MEMORY_GB * threads / NODE_CORES, 2)
-    carbon_burnt = round(compute_used * carbon_kg_per_core_hour(), 4)
+    carbon_burnt = round(compute_used * carbon_kg_per_core_hour(), 6)
 
     return {
         "wallclockSeconds": int(round(wallclock_seconds)),

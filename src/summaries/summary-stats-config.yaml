@@ -20,10 +20,14 @@ planetary:
     - id: runtime
       value: '0.00'
       unit: hours
+      display_format: float
+      precision: 2
       description: How long the simulation took to run. Think of it like the render time for a CGI movie.
     - id: carbonBurnt
       value: '0.00'
-      unit: kgCO2e
+      unit: kg CO2
+      display_format: float
+      precision: 2
       description: The carbon cost of running this simulation. Roughly the same as the emissions from a short-haul flight.
     - id: computeUsed
       value: 0 CPU-hrs / 0 GB
@@ -32,22 +36,34 @@ planetary:
     - id: moon_mass
       label: Moon mass
       value: '1.05'
+      unit: M⊕
+      display_format: float
+      precision: 2
       description: How close you got to making the real Moon. Too small and the tides would be weak — too big and the night sky would be terrifying.
     - id: earth_mass
       label: Earth mass
       value: '1.55'
+      unit: M⊕
+      display_format: float
+      precision: 2
       description: How close your Earth ended up to the one we actually live on.
     - id: spin
       label: System spin
       value: '0.30'
+      display_format: float
+      precision: 3
       description: How fast the Earth-Moon pair is spinning. This sets the length of a day — faster spin means shorter days.
     - id: moon_iron
       label: Moon iron
       value: '0.70'
+      display_format: float
+      precision: 2
       description: How iron-poor your Moon turned out. The real Moon has surprisingly little iron in it — a clue about how it was born.
     - id: proto_earth_in_moon
       label: Earth in Moon
       value: '1.25'
+      display_format: float
+      precision: 2
       description: How much of your Moon came from the early Earth versus the rogue object that smashed into it.
   similarityScore:
     value: 100/100
@@ -57,10 +73,12 @@ galaxy:
     - id: runtime
       value: '0.00'
       unit: hours
+      display_format: float
+      precision: 2
       description: How long the simulation took to run. Think of it like the render time for a CGI movie.
     - id: carbonBurnt
       value: '0.00'
-      unit: kgCO2e
+      unit: kg CO2
       description: The carbon cost of running this simulation. Roughly the same as the emissions from a short-haul flight.
     - id: computeUsed
       value: 0 CPU-hrs / 0 GB
@@ -95,10 +113,12 @@ cosmos:
     - id: runtime
       value: '0.00'
       unit: hours
+      display_format: float
+      precision: 2
       description: How long the simulation took to run. Think of it like the render time for a CGI movie.
     - id: carbonBurnt
       value: '0.00'
-      unit: kgCO2e
+      unit: kg CO2
       display_format: float
       precision: 2
       description: The carbon cost of running this simulation. Roughly the same as the emissions from a short-haul flight.

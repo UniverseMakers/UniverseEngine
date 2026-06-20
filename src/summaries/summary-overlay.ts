@@ -710,12 +710,53 @@ function selectMetric(
 ): { label: string; value: string } {
   const metric = availableMetrics[stat.id] ?? { label: stat.id, value: '--' };
   const resolvedValue = metric.value !== '--' ? metric.value : (stat.value ?? '--');
+  const formattedCarbon = formatCarbonMetric(resolvedValue, stat);
+
+  if (formattedCarbon) {
+    return {
+      label: stat.label ?? metric.label,
+      value: formattedCarbon,
+    };
+  }
+
   const formattedValue = formatSummaryValue(resolvedValue, stat);
 
   return {
     label: stat.label ?? metric.label,
     value: withUnit(formattedValue, stat.unit),
   };
+}
+
+function formatCarbonMetric(value: string, stat: StatDisplayConfig): string | null {
+  if (stat.id !== 'carbonBurnt' || value === '--') {
+    return null;
+  }
+
+  const numeric = Number(value);
+
+  if (!Number.isFinite(numeric)) {
+    return withUnit(value, stat.unit);
+  }
+
+  if (Math.abs(numeric) < 1) {
+    return withUnit(
+      formatNumericString(value, {
+        scale: (stat.valueScale ?? 1) * 1000,
+        mode: 'float',
+        precision: 1,
+      }),
+      'g CO2',
+    );
+  }
+
+  return withUnit(
+    formatNumericString(value, {
+      scale: stat.valueScale,
+      mode: 'float',
+      precision: stat.precision ?? 2,
+    }),
+    stat.unit,
+  );
 }
 
 /**
@@ -726,18 +767,25 @@ function formatSummaryValue(value: string, stat: StatDisplayConfig): string {
     return value;
   }
 
+  if (stat.displayFormat === 'scientific' || stat.displayFormat === 'float') {
+    return formatNumericString(value, {
+      scale: stat.valueScale,
+      mode: stat.displayFormat,
+      precision: stat.precision,
+    });
+  }
+
+  if (stat.displayFormat === 'integer') {
+    return formatNumericString(value, {
+      scale: stat.valueScale,
+      mode: 'integer',
+    });
+  }
+
   const numeric = Number(value);
 
   if (!Number.isFinite(numeric)) {
     return value;
-  }
-
-  if (stat.displayFormat === 'scientific') {
-    return formatNumericString(value, {
-      scale: stat.valueScale,
-      mode: 'scientific',
-      precision: stat.precision,
-    });
   }
 
   const scale = stat.valueScale ?? 1;
