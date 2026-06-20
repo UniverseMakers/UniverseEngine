@@ -1,12 +1,9 @@
 #!/usr/bin/env python3
-"""Generate planetary ``live_data_table.csv`` files from SWIFT timesteps.
+"""Generate planetary ``live_data_table.csv`` files from local SWIFT timesteps.
 
-By default this scans SWIFT run directories matching:
-
-    /cosma5/data/dp004/vreke/swift/rssse/pE*/timesteps.txt
-
-Each matching run is mapped to a local asset directory under
-``public/assets/planetary/<run-id>/`` and written as ``live_data_table.csv``.
+Each planetary asset run directory is expected to contain a local
+``timesteps.txt`` alongside ``parameters.yaml`` and ``run_summary.yaml``. This
+script reads those local timestep files and writes ``live_data_table.csv``.
 
 The generated CSV contains:
 
@@ -20,23 +17,20 @@ from __future__ import annotations
 
 import argparse
 import csv
-import glob
 import subprocess
-import shutil
 from pathlib import Path
+
+from planetary_assets import (
+    find_reference_planetary_video,
+    list_planetary_run_dirs_with_videos,
+)
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 DEFAULT_ASSETS_DIR = REPO_ROOT / "public" / "assets" / "planetary"
-DEFAULT_SOURCE_GLOB = "/cosma5/data/dp004/vreke/swift/rssse/pE*/timesteps.txt"
 
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument(
-        "--source-glob",
-        default=DEFAULT_SOURCE_GLOB,
-        help="Glob pattern used to find source timesteps.txt files.",
-    )
     parser.add_argument(
         "--assets-dir",
         type=Path,
@@ -58,33 +52,23 @@ def main() -> None:
     if not assets_dir.is_dir():
         raise SystemExit(f"ERROR: assets directory does not exist: {assets_dir}")
 
-    source_paths = sorted(Path(path).resolve() for path in glob.glob(args.source_glob))
-    if not source_paths:
-        raise SystemExit(f"ERROR: no timestep files matched: {args.source_glob}")
+    run_dirs = list_planetary_run_dirs_with_videos(assets_dir)
+    if not run_dirs:
+        raise SystemExit(f"ERROR: no planetary asset runs with videos found in: {assets_dir}")
 
     wrote = 0
     skipped = 0
-    removed = 0
 
-    for timesteps_path in source_paths:
-        run_id = timesteps_path.parent.name
-        run_dir = assets_dir / run_id
-
-        if not run_dir.is_dir():
-            print(f"  [skip] {display_path(timesteps_path)} - no matching asset run")
+    for run_dir in run_dirs:
+        timesteps_path = run_dir / "timesteps.txt"
+        if not timesteps_path.is_file():
+            print(f"  [skip] {display_path(run_dir)} - missing timesteps.txt")
             skipped += 1
             continue
 
-        video_path = find_reference_video(run_dir)
+        video_path = find_reference_planetary_video(run_dir)
         if video_path is None:
-            if args.dry_run:
-                print(
-                    f"  [dry-run] would remove {display_path(run_dir)} - no animation mp4 found"
-                )
-            else:
-                shutil.rmtree(run_dir)
-                print(f"  removed {display_path(run_dir)} - no animation mp4 found")
-            removed += 1
+            print(f"  [skip] {display_path(run_dir)} - no animation video found")
             skipped += 1
             continue
 
@@ -102,13 +86,7 @@ def main() -> None:
             print(f"  wrote {display_path(output_path)}")
         wrote += 1
 
-    print(f"wrote={wrote} skipped={skipped} removed={removed}")
-
-
-def find_reference_video(run_dir: Path) -> Path | None:
-    animations_dir = run_dir / "animations"
-    videos = sorted(animations_dir.glob("*.mp4")) if animations_dir.is_dir() else []
-    return videos[0] if videos else None
+    print(f"wrote={wrote} skipped={skipped}")
 
 
 def build_rows(timesteps_path: Path, video_duration_seconds: float) -> list[dict[str, str]]:

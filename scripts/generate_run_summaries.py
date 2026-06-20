@@ -23,6 +23,8 @@ from pathlib import Path
 
 import yaml
 
+from planetary_assets import find_reference_planetary_video
+
 REPO_ROOT = Path(__file__).resolve().parent.parent
 ASSET_ROOT = REPO_ROOT / "public" / "assets"
 
@@ -219,10 +221,15 @@ def main() -> None:
 
     for theme, run_dirs in runs.items():
         for run_dir in run_dirs:
-            animations_dir = run_dir / "animations"
-            videos = (
-                sorted(animations_dir.glob("*.mp4")) if animations_dir.exists() else []
-            )
+            if theme == "planetary":
+                reference_video = find_reference_planetary_video(run_dir)
+                videos = [reference_video] if reference_video is not None else []
+            else:
+                animations_dir = run_dir / "animations"
+                videos = (
+                    sorted(animations_dir.glob("*.mp4")) if animations_dir.exists() else []
+                )
+
             if not videos:
                 print(f"  [skip] {run_dir.relative_to(ASSET_ROOT)} — no videos")
                 continue

@@ -1,8 +1,10 @@
 #!/usr/bin/env python3
 """Update planetary run summary runtimes from SWIFT restart logs.
 
-Each source run directory contains a ``job_*.txt`` file listing the SLURM job ids
-used for that run across restarts. For every job id we read the matching
+The script iterates over local planetary asset run directories that already have
+videos, then looks up matching SWIFT job files in a source root. Each source run
+directory contains one or more ``job_*.txt`` files listing the SLURM job ids used
+for that run across restarts. For every job id we read the matching
 ``swift_<jobid>.out`` log, extract the final summary-table ``Elapsed`` value, sum
 those elapsed durations, convert the total to seconds, and write that value into
 the corresponding asset run's ``run_summary.yaml`` as ``wallclockSeconds``.
@@ -23,7 +25,6 @@ from __future__ import annotations
 import argparse
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from collections import deque
-import glob
 import os
 import re
 from pathlib import Path
@@ -31,8 +32,10 @@ from typing import Any
 
 import yaml
 
+from planetary_assets import list_planetary_run_dirs_with_videos
+
 REPO_ROOT = Path(__file__).resolve().parent.parent
-DEFAULT_SOURCE_GLOB = "/cosma5/data/dp004/vreke/swift/rssse/pE*/job_*.txt"
+DEFAULT_SOURCE_ROOT = Path("/cosma5/data/dp004/vreke/swift/rssse")
 DEFAULT_LOGS_DIR = Path("/cosma5/data/dp004/vreke/swift/rssse/outs_and_errs")
 DEFAULT_ASSETS_DIR = REPO_ROOT / "public" / "assets" / "planetary"
 DEFAULT_TAIL_LINES = 8
@@ -61,9 +64,10 @@ ELAPSED_TOKEN_RE = re.compile(
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
-        "--source-glob",
-        default=DEFAULT_SOURCE_GLOB,
-        help="Glob pattern for source run job files.",
+        "--source-root",
+        type=Path,
+        default=DEFAULT_SOURCE_ROOT,
+        help="Directory containing per-run SWIFT source directories.",
     )
     parser.add_argument(
         "--logs-dir",
@@ -99,16 +103,19 @@ def parse_args() -> argparse.Namespace:
 
 def main() -> None:
     args = parse_args()
+    source_root = args.source_root.expanduser().resolve()
     logs_dir = args.logs_dir.expanduser().resolve()
     assets_dir = args.assets_dir.expanduser().resolve()
-    job_files = sorted(Path(path).resolve() for path in glob.glob(args.source_glob))
+    run_dirs = list_planetary_run_dirs_with_videos(assets_dir)
 
+    if not source_root.is_dir():
+        raise SystemExit(f"ERROR: source root does not exist: {source_root}")
     if not logs_dir.is_dir():
         raise SystemExit(f"ERROR: logs directory does not exist: {logs_dir}")
     if not assets_dir.is_dir():
         raise SystemExit(f"ERROR: assets directory does not exist: {assets_dir}")
-    if not job_files:
-        raise SystemExit(f"ERROR: no job files matched: {args.source_glob}")
+    if not run_dirs:
+        raise SystemExit(f"ERROR: no planetary asset runs with videos found in: {assets_dir}")
     if args.jobs <= 0:
         raise SystemExit("ERROR: --jobs must be a positive integer")
     if args.tail_lines <= 0:
@@ -121,13 +128,13 @@ def main() -> None:
         futures = {
             executor.submit(
                 process_job_file,
-                job_file,
+                run_dir,
+                source_root=source_root,
                 logs_dir=logs_dir,
-                assets_dir=assets_dir,
                 dry_run=args.dry_run,
                 tail_lines=args.tail_lines,
-            ): job_file
-            for job_file in job_files
+            ): run_dir
+            for run_dir in run_dirs
         }
 
         for future in as_completed(futures):
@@ -142,22 +149,26 @@ def main() -> None:
 
 
 def process_job_file(
-    job_file: Path,
+    run_dir: Path,
     *,
+    source_root: Path,
     logs_dir: Path,
-    assets_dir: Path,
     dry_run: bool,
     tail_lines: int,
 ) -> tuple[str, str]:
-    run_id = job_file.parent.name
-    summary_path = assets_dir / run_id / "run_summary.yaml"
+    source_run_dir = source_root / run_dir.name
+    summary_path = run_dir / "run_summary.yaml"
 
     if not summary_path.is_file():
         return "skipped", f"  [skip] {display_path(summary_path)} - missing run_summary.yaml"
 
-    job_ids = parse_job_ids(job_file)
+    job_files = sorted(source_run_dir.glob("job_*.txt")) if source_run_dir.is_dir() else []
+    if not job_files:
+        return "skipped", f"  [skip] {display_path(run_dir)} - no matching job_*.txt files"
+
+    job_ids = parse_job_ids(job_files)
     if not job_ids:
-        return "skipped", f"  [skip] {display_path(job_file)} - no job ids found"
+        return "skipped", f"  [skip] {display_path(source_run_dir)} - no job ids found"
 
     elapsed_seconds = 0
     try:
@@ -168,7 +179,7 @@ def process_job_file(
                 tail_lines=tail_lines,
             )
     except RuntimeError as exc:
-        return "skipped", f"  [skip] {display_path(job_file)} - {exc}"
+        return "skipped", f"  [skip] {display_path(source_run_dir)} - {exc}"
 
     existing_payload = load_yaml(summary_path)
     particles_updated = extract_particles_updated(existing_payload)
@@ -297,17 +308,18 @@ def carbon_kg_per_core_hour() -> float:
     return effective_node_power_kw * NORTH_EAST_GRID_CARBON_KG_PER_KWH / NODE_CORES
 
 
-def parse_job_ids(job_file: Path) -> list[str]:
+def parse_job_ids(job_files: list[Path]) -> list[str]:
     job_ids: list[str] = []
 
-    with job_file.open("r", encoding="utf-8") as handle:
-        for raw_line in handle:
-            line = raw_line.strip()
-            if not line:
-                continue
-            job_id = line.split()[0]
-            if job_id.isdigit():
-                job_ids.append(job_id)
+    for job_file in job_files:
+        with job_file.open("r", encoding="utf-8") as handle:
+            for raw_line in handle:
+                line = raw_line.strip()
+                if not line:
+                    continue
+                job_id = line.split()[0]
+                if job_id.isdigit():
+                    job_ids.append(job_id)
 
     return job_ids
 
