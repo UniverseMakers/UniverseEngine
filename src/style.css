@@ -1182,6 +1182,23 @@ button {
   text-transform: uppercase;
 }
 
+.summary-overlay__header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.summary-overlay__title {
+  margin: 0;
+  color: #e9f1f7;
+  font-family: var(--font-mono);
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+}
+
 .summary-overlay__content {
   display: flex;
   flex-direction: column;
@@ -1192,6 +1209,16 @@ button {
   overflow-x: hidden;
   padding-right: 0.25rem;
   overscroll-behavior: contain;
+}
+
+.summary-overlay__hint {
+  margin: 0;
+  color: #6e8093;
+  font-family: var(--font-mono);
+  font-size: 0.64rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  text-align: right;
 }
 
 .summary-overlay__actions {
@@ -1276,6 +1303,28 @@ button {
   font-size: 0.72rem;
   font-weight: 700;
   letter-spacing: 0.24em;
+}
+
+.sci-section__header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 0.85rem;
+}
+
+.sci-section__header .sci-section__title {
+  margin: 0;
+}
+
+.sci-section__hint {
+  margin: 0;
+  color: #6e8093;
+  font-family: var(--font-mono);
+  font-size: 0.64rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  text-align: right;
 }
 
 .sci-hero {
@@ -1555,6 +1604,10 @@ button {
 
   .summary-overlay__content {
     gap: 1rem;
+  }
+
+  .summary-overlay__header {
+    align-items: center;
   }
 
   .summary-overlay__actions {
@@ -2513,6 +2566,26 @@ button {
     -webkit-overflow-scrolling: touch;
     overscroll-behavior: contain;
     padding-right: 0.25rem;
+  }
+
+  .summary-overlay__hint {
+    text-align: left;
+  }
+
+  .summary-overlay__header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.35rem;
+  }
+
+  .sci-section__header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.35rem;
+  }
+
+  .sci-section__hint {
+    text-align: left;
   }
 
   .sci-top {

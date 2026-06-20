@@ -271,9 +271,24 @@ export function createSummaryOverlay(
 
   panel.className = 'summary-overlay';
 
+  const header = document.createElement('div');
   const content = document.createElement('div');
 
+  header.className = 'summary-overlay__header';
   content.className = 'summary-overlay__content';
+
+  const title = document.createElement('p');
+
+  title.className = 'summary-overlay__title';
+  title.textContent = 'Run Summary';
+
+  const panelHint = document.createElement('p');
+
+  panelHint.className = 'summary-overlay__hint';
+  panelHint.textContent = 'Select any card for more details';
+
+  header.appendChild(title);
+  header.appendChild(panelHint);
 
   const actions = document.createElement('div');
 
@@ -305,6 +320,7 @@ export function createSummaryOverlay(
   actions.appendChild(newButton);
   actions.appendChild(homeButton);
 
+  panel.appendChild(header);
   panel.appendChild(content);
   panel.appendChild(actions);
   overlay.appendChild(panel);
@@ -638,10 +654,18 @@ export function createSummaryOverlay(
         paramSection.appendChild(paramCards);
 
         const sciSection = document.createElement('div');
+        const sciHeader = document.createElement('div');
+        const sciTitle = document.createElement('p');
+        const sciHint = document.createElement('p');
 
         sciSection.className = 'sci-section panel';
-        sciSection.innerHTML =
-          '<p class="sci-section__title">Similarity Results</p>';
+        sciHeader.className = 'sci-section__header';
+        sciTitle.className = 'sci-section__title';
+        sciTitle.textContent = 'Similarity Results';
+        sciHint.className = 'sci-section__hint';
+        sciHint.textContent = 'Select any bar for details';
+        sciHeader.appendChild(sciTitle);
+        sciHeader.appendChild(sciHint);
 
         const list = document.createElement('div');
 
@@ -667,6 +691,7 @@ export function createSummaryOverlay(
           list.appendChild(row);
         }
 
+        sciSection.appendChild(sciHeader);
         sciSection.appendChild(list);
         bottomRow.appendChild(paramSection);
         bottomRow.appendChild(sciSection);
