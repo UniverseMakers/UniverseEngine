@@ -46,6 +46,7 @@ export function saveAdvancedSettings(
     STORAGE_KEY,
     JSON.stringify({
       lockedScaleId: normalized.lockedScaleId,
+      manifestSource: normalized.manifestSource,
       verboseLogging: normalized.verboseLogging,
       hiddenScaleIds: normalized.hiddenScaleIds,
     }),

@@ -42,6 +42,7 @@ import {
 } from '../live-data/csv.ts';
 import { countDecimals } from '../shared/format.ts';
 import { withBaseUrl } from '../shared/urls.ts';
+import { INITIALIZATION } from '../shared/constants.ts';
 import {
   getVisibleScaleIds,
   loadAdvancedSettings,
@@ -86,6 +87,7 @@ const ACTIVE_VIDEO_FULL_FETCH_MAX_BYTES = 50 * 1024 * 1024;
 const ACTIVE_VIDEO_BUFFER_SECONDS = 8;
 const ACTIVE_VIDEO_BUFFER_WAIT_MS = 6000;
 const ACTIVE_VIDEO_LOADED_DATA_WAIT_MS = 8000;
+const LOCAL_MANIFEST_MIN_TERMINAL_TIME_MAX_MS = 5000;
 
 /** Maps each cosmic scale to its default visual theme. */
 const SCALE_TO_THEME: Record<string, ThemeId> = {
@@ -936,7 +938,9 @@ export function createAppShell(app: HTMLElement): void {
     })();
 
     const loadingFinished = new Promise<void>((resolve) => {
-      loadingOverlay.show(getInitializationLines(activeClass), resolve, videoReady);
+      loadingOverlay.show(getInitializationLines(activeClass), resolve, videoReady, {
+        minTerminalTimeMs: getLoadingOverlayMinimumMs(),
+      });
     });
 
     await loadingFinished;
@@ -1544,6 +1548,24 @@ export function createAppShell(app: HTMLElement): void {
     }
 
     return SIMULATION_CLASSES.find((simClass) => simClass.id === simClassId) ?? null;
+  }
+
+  function getLoadingOverlayMinimumMs(): number {
+    if (manifestController.getSource() !== 'local') {
+      return INITIALIZATION.MIN_TERMINAL_TIME_MS;
+    }
+
+    return randomIntInclusive(
+      INITIALIZATION.MIN_TERMINAL_TIME_MS,
+      LOCAL_MANIFEST_MIN_TERMINAL_TIME_MAX_MS,
+    );
+  }
+
+  function randomIntInclusive(min: number, max: number): number {
+    const lower = Math.ceil(Math.min(min, max));
+    const upper = Math.floor(Math.max(min, max));
+
+    return Math.floor(Math.random() * (upper - lower + 1)) + lower;
   }
 
   function applyAdvancedSettings(nextAdvancedSettings: AdvancedSettings): void {

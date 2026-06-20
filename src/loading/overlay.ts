@@ -12,14 +12,19 @@ import { INITIALIZATION } from '../shared/constants.ts';
 /** Terminal-style loading overlay shown between config and display mode.
  *
  * The overlay randomly picks and types lines from a pool. It stays visible for
- * at least `MIN_TERMINAL_TIME_MS` and, if a `ready` promise is supplied,
+ * at least its configured minimum duration and, if a `ready` promise is supplied,
  * continues printing random lines until that promise resolves. This lets the
  * app hide video downloads behind the terminal without risking a "frozen"
  * screen when the network is slow. */
 export interface LoadingOverlayController {
   /** Start streaming terminal lines and call `onComplete` when the overlay
    *  has been shown for long enough AND `ready` (if supplied) has resolved. */
-  show: (lines: InitializationLine[], onComplete: () => void, ready?: Promise<void>) => void;
+  show: (
+    lines: InitializationLine[],
+    onComplete: () => void,
+    ready?: Promise<void>,
+    options?: { minTerminalTimeMs?: number },
+  ) => void;
   /** Immediately hide the overlay and clear any queued timers. */
   hide: () => void;
 }
@@ -135,7 +140,12 @@ export function createLoadingOverlay(container: HTMLElement): LoadingOverlayCont
   }
 
   return {
-    async show(lines: InitializationLine[], onComplete: () => void, ready?: Promise<void>) {
+    async show(
+      lines: InitializationLine[],
+      onComplete: () => void,
+      ready?: Promise<void>,
+      options?: { minTerminalTimeMs?: number },
+    ) {
       // Starting a new show() always invalidates any prior sequence first.
       clearTimers();
       sequenceToken += 1;
@@ -145,6 +155,7 @@ export function createLoadingOverlay(container: HTMLElement): LoadingOverlayCont
       overlay.classList.remove('is-hidden');
 
       const startTime = performance.now();
+      const minTerminalTimeMs = options?.minTerminalTimeMs ?? MIN_TERMINAL_TIME_MS;
       let videoLoaded = !ready;
       let unused = [...lines];
 
@@ -177,7 +188,7 @@ export function createLoadingOverlay(container: HTMLElement): LoadingOverlayCont
 
         const elapsed = performance.now() - startTime;
 
-        if (elapsed >= MIN_TERMINAL_TIME_MS && videoLoaded) {
+        if (elapsed >= minTerminalTimeMs && videoLoaded) {
           break;
         }
       }
