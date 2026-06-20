@@ -1,12 +1,15 @@
 #!/usr/bin/env python3
-"""Translate legacy planetary run summaries into runtime metadata YAML.
+"""Translate planetary run summaries into runtime metadata YAML.
 
 Legacy planetary assets currently ship a config-shaped ``run_summary.yaml`` that
 looks like the authored contents of ``src/summaries/summary-stats-config.yaml``.
 The frontend instead expects each run directory to contain a runtime metadata
 payload with resource totals plus an optional ``summaryMetrics`` mapping.
 
-This script rewrites those legacy per-run files in-place.
+This script rewrites per-run files in-place.
+
+When a local ``timesteps.txt`` is present, resource totals are derived from its
+per-step wall-clock table instead of the legacy summary config values.
 
 Usage::
 
@@ -25,6 +28,12 @@ import yaml
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 PLANETARY_ROOT = REPO_ROOT / "public" / "assets" / "planetary"
+DEFAULT_THREADS_PER_RUN = 16
+NODE_CORES = 256
+NODE_MEMORY_GB = 1540.0
+COSMA7_NODE_POWER_KW = 0.175
+FACILITY_OVERHEAD_MULTIPLIER = 489.0 / 341.0
+NORTH_EAST_GRID_CARBON_KG_PER_KWH = 43.1 / 1000.0
 
 RESOURCE_IDS = frozenset(
     {
@@ -73,12 +82,7 @@ def main() -> None:
             continue
 
         payload = load_yaml(summary_path)
-        if is_runtime_metadata(payload):
-            print(f"  [skip] {display_path(summary_path)} - already converted")
-            skipped += 1
-            continue
-
-        translated = translate_legacy_summary(payload)
+        translated = translate_summary(payload, run_dir / "timesteps.txt")
         if translated is None:
             print(f"  [skip] {display_path(summary_path)} - unrecognised legacy format")
             skipped += 1
@@ -121,15 +125,39 @@ def is_runtime_metadata(payload: dict[str, Any]) -> bool:
     return required_keys.issubset(payload.keys())
 
 
-def translate_legacy_summary(payload: dict[str, Any]) -> dict[str, Any] | None:
-    stats = extract_legacy_summary_stats(payload)
-    if not stats:
+def translate_summary(payload: dict[str, Any], timesteps_path: Path) -> dict[str, Any] | None:
+    summary_metrics = extract_summary_metrics(payload)
+    if not summary_metrics:
         return None
 
-    runtime_value = stats.get("runtime", {}).get("value")
-    runtime_unit = stats.get("runtime", {}).get("unit")
-    wallclock_seconds = to_seconds(runtime_value, runtime_unit)
+    resource_metrics = load_timesteps_resource_metrics(timesteps_path)
+    if resource_metrics is None:
+        resource_metrics = extract_resource_metrics_from_summary(payload)
 
+    return {
+        **resource_metrics,
+        "summaryMetrics": summary_metrics,
+    }
+
+
+def extract_summary_metrics(payload: dict[str, Any]) -> dict[str, dict[str, str]]:
+    runtime_metrics = payload.get("summaryMetrics")
+    if isinstance(runtime_metrics, dict):
+        normalized: dict[str, dict[str, str]] = {}
+        for key, metric in runtime_metrics.items():
+            if not isinstance(metric, dict):
+                continue
+            value = metric.get("value")
+            if value is None:
+                continue
+            normalized[str(key)] = {
+                "label": str(metric.get("label") or key),
+                "value": str(value),
+            }
+        if normalized:
+            return normalized
+
+    stats = extract_legacy_summary_stats(payload)
     summary_metrics: dict[str, dict[str, str]] = {}
     for stat_id, stat in stats.items():
         if stat_id in RESOURCE_IDS:
@@ -145,13 +173,76 @@ def translate_legacy_summary(payload: dict[str, Any]) -> dict[str, Any] | None:
             "value": str(value),
         }
 
+    return summary_metrics
+
+
+def extract_resource_metrics_from_summary(payload: dict[str, Any]) -> dict[str, Any]:
+    if is_runtime_metadata(payload):
+        return {
+            "wallclockSeconds": to_int(payload.get("wallclockSeconds")),
+            "computeUsed": to_float(payload.get("computeUsed")),
+            "memoryUsed": to_float(payload.get("memoryUsed")),
+            "carbonBurnt": to_float(payload.get("carbonBurnt")),
+            "particlesUpdated": to_int(payload.get("particlesUpdated")),
+        }
+
+    stats = extract_legacy_summary_stats(payload)
+    runtime_value = stats.get("runtime", {}).get("value")
+    runtime_unit = stats.get("runtime", {}).get("unit")
     return {
-        "wallclockSeconds": wallclock_seconds,
+        "wallclockSeconds": to_seconds(runtime_value, runtime_unit),
         "computeUsed": to_float(stats.get("computeUsed", {}).get("value")),
         "memoryUsed": to_float(stats.get("memoryUsed", {}).get("value")),
         "carbonBurnt": to_float(stats.get("carbonBurnt", {}).get("value")),
         "particlesUpdated": to_int(stats.get("particlesUpdated", {}).get("value")),
-        "summaryMetrics": summary_metrics,
+    }
+
+
+def load_timesteps_resource_metrics(timesteps_path: Path) -> dict[str, Any] | None:
+    if not timesteps_path.is_file():
+        return None
+
+    total_wallclock_ms = 0.0
+    total_dead_ms = 0.0
+    total_g_updates = 0
+    threads = DEFAULT_THREADS_PER_RUN
+
+    with timesteps_path.open("r", encoding="utf-8") as handle:
+        for raw_line in handle:
+            line = raw_line.strip()
+            if not line:
+                continue
+            if line.startswith("# Number of threads:"):
+                threads = max(1, to_int(line.split(":", 1)[1].strip()))
+                continue
+            if line.startswith("#"):
+                continue
+
+            fields = line.split()
+            if len(fields) < 14:
+                continue
+
+            try:
+                total_g_updates += int(fields[7])
+                total_wallclock_ms += float(fields[11])
+                total_dead_ms += float(fields[13])
+            except ValueError:
+                continue
+
+    if total_wallclock_ms <= 0 and total_dead_ms <= 0:
+        return None
+
+    wallclock_seconds = (total_wallclock_ms + total_dead_ms) / 1000.0
+    compute_used = round(wallclock_seconds * threads / 3600.0, 2)
+    memory_used = round(NODE_MEMORY_GB * threads / NODE_CORES, 2)
+    carbon_burnt = round(compute_used * carbon_kg_per_core_hour(), 4)
+
+    return {
+        "wallclockSeconds": int(round(wallclock_seconds)),
+        "computeUsed": compute_used,
+        "memoryUsed": memory_used,
+        "carbonBurnt": carbon_burnt,
+        "particlesUpdated": total_g_updates,
     }
 
 
@@ -208,6 +299,11 @@ def to_float(value: Any) -> float:
 
 def to_int(value: Any) -> int:
     return int(round(to_float(value)))
+
+
+def carbon_kg_per_core_hour() -> float:
+    effective_node_power_kw = COSMA7_NODE_POWER_KW * FACILITY_OVERHEAD_MULTIPLIER
+    return effective_node_power_kw * NORTH_EAST_GRID_CARBON_KG_PER_KWH / NODE_CORES
 
 
 if __name__ == "__main__":
