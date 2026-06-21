@@ -88,6 +88,8 @@ const ACTIVE_VIDEO_BUFFER_SECONDS = 8;
 const ACTIVE_VIDEO_BUFFER_WAIT_MS = 6000;
 const ACTIVE_VIDEO_LOADED_DATA_WAIT_MS = 8000;
 const LOCAL_MANIFEST_MIN_TERMINAL_TIME_MAX_MS = 5000;
+const ALTERNATE_PREWARM_RESUME_DELAY_MS = 1200;
+const SCRUB_HUD_UPDATE_INTERVAL_MS = 100;
 
 /** Maps each cosmic scale to its default visual theme. */
 const SCALE_TO_THEME: Record<string, ThemeId> = {
@@ -351,14 +353,16 @@ export function createAppShell(app: HTMLElement): void {
   displayChrome.appendChild(timelineHost);
   const timeline = createTimeline(timelineHost, {
     onChange(position) {
-      viewport.seekToFraction(position);
+      scheduleViewportSeek(position);
     },
     onTogglePlay: handleTogglePlay,
     onSpeedChange: handleSpeedChange,
     onScrubStart() {
+      handleScrubStart();
       stopScrubberLoop();
     },
     onScrubEnd() {
+      handleScrubEnd();
       if (!viewport.isPaused()) {
         startScrubberLoop();
       }
@@ -374,6 +378,11 @@ export function createAppShell(app: HTMLElement): void {
   // drive the slider smoothly. Instead, we poll the video's current time on
   // every animation frame while playback is active, giving a 60-fps visual.
   let scrubberRafId: number | null = null;
+  let pendingSeekFraction: number | null = null;
+  let scheduledSeekRafId: number | null = null;
+  let isPointerScrubbing = false;
+  let alternatePrewarmResumeTimer: number | null = null;
+  let lastScrubHudUpdateAt = 0;
 
   function startScrubberLoop() {
     if (scrubberRafId !== null) return;
@@ -400,14 +409,118 @@ export function createAppShell(app: HTMLElement): void {
     }
   }
 
+  function scheduleViewportSeek(fraction: number): void {
+    pendingSeekFraction = fraction;
+
+    if (scheduledSeekRafId !== null) {
+      return;
+    }
+
+    scheduledSeekRafId = requestAnimationFrame(() => {
+      scheduledSeekRafId = null;
+
+      if (pendingSeekFraction === null) {
+        return;
+      }
+
+      const fractionToSeek = pendingSeekFraction;
+
+      pendingSeekFraction = null;
+      viewport.seekToFraction(fractionToSeek);
+    });
+  }
+
+  function flushScheduledViewportSeek(): void {
+    if (pendingSeekFraction === null) {
+      return;
+    }
+
+    if (scheduledSeekRafId !== null) {
+      cancelAnimationFrame(scheduledSeekRafId);
+      scheduledSeekRafId = null;
+    }
+
+    const fractionToSeek = pendingSeekFraction;
+
+    pendingSeekFraction = null;
+    viewport.seekToFraction(fractionToSeek);
+  }
+
+  function clearAlternatePrewarmResumeTimer(): void {
+    if (alternatePrewarmResumeTimer !== null) {
+      window.clearTimeout(alternatePrewarmResumeTimer);
+      alternatePrewarmResumeTimer = null;
+    }
+  }
+
+  function getAlternateViewUrls(): string[] {
+    if (!activeRunMatch?.views) {
+      return [];
+    }
+
+    const selectedViewId = resolveSelectedViewId(activeClass, activeRunMatch);
+
+    return Object.entries(activeRunMatch.views)
+      .filter(([viewId]) => viewId !== selectedViewId)
+      .map(([, url]) => url)
+      .filter(Boolean);
+  }
+
+  function suspendAlternatePrewarming(): void {
+    clearAlternatePrewarmResumeTimer();
+    viewport.suspendPrewarming();
+  }
+
+  function scheduleAlternatePrewarmingResume(
+    delayMs = ALTERNATE_PREWARM_RESUME_DELAY_MS,
+  ): void {
+    clearAlternatePrewarmResumeTimer();
+
+    if (isPointerScrubbing || viewport.isPaused()) {
+      return;
+    }
+
+    alternatePrewarmResumeTimer = window.setTimeout(
+      () => {
+        alternatePrewarmResumeTimer = null;
+
+        if (isPointerScrubbing || viewport.isPaused()) {
+          return;
+        }
+
+        viewport.resumePrewarming();
+        viewport.prewarmSources(getAlternateViewUrls());
+      },
+      Math.max(0, delayMs),
+    );
+  }
+
+  function handleScrubStart(): void {
+    isPointerScrubbing = true;
+    lastScrubHudUpdateAt = 0;
+    suspendAlternatePrewarming();
+  }
+
+  function handleScrubEnd(): void {
+    isPointerScrubbing = false;
+    lastScrubHudUpdateAt = 0;
+    flushScheduledViewportSeek();
+    lastPlaybackSeconds =
+      viewport.getPlaybackFraction() * viewport.getDurationSeconds();
+    refreshDisplayData(lastPlaybackSeconds);
+    scheduleAlternatePrewarmingResume();
+  }
+
   // Keep the timeline button in sync and start/stop the smooth scrubber loop.
   viewport.onPlayStateChange((isPaused) => {
     timeline.setPlaying(!isPaused);
 
     if (isPaused) {
       stopScrubberLoop();
+      suspendAlternatePrewarming();
     } else {
       startScrubberLoop();
+      scheduleAlternatePrewarmingResume(0);
     }
   });
 
@@ -415,6 +528,17 @@ export function createAppShell(app: HTMLElement): void {
   // (~4 Hz) is perfectly adequate for live-stat counters and telemetry.
   viewport.onTimeUpdate((position) => {
     lastPlaybackSeconds = position * viewport.getDurationSeconds();
+
+    if (isPointerScrubbing) {
+      const now = performance.now();
+
+      if (now - lastScrubHudUpdateAt < SCRUB_HUD_UPDATE_INTERVAL_MS) {
+        return;
+      }
+
+      lastScrubHudUpdateAt = now;
+    }
+
     refreshDisplayData(lastPlaybackSeconds);
   });
 
@@ -651,7 +775,8 @@ export function createAppShell(app: HTMLElement): void {
         expandOne(leftCenter);
         scheduleCollapseOne(leftCenter);
         // Only switch views when multiple visualizations are available.
-        if (!activeRunMatch?.views || Object.keys(activeRunMatch.views).length <= 1) break;
+        if (!activeRunMatch?.views || Object.keys(activeRunMatch.views).length <= 1)
+          break;
 
         const configuredViews = activeClass.views.filter(
           (v) => activeRunMatch?.views?.[v.id] !== undefined,
@@ -854,12 +979,9 @@ export function createAppShell(app: HTMLElement): void {
    *
    * The flow: find the nearest matching video in the manifest → load its live
    * stats and metadata → start full-fetching the active video AND prewarming
-   * alternate views, all behind the terminal boot sequence.  The loading
-   * overlay stays visible with a "STARTING SIMULATION..." animation until
-   * the active video is truly ready.  Everything that can be preloaded has
-   * the entire terminal window to do so.  Views that fail to finish in time
-   * simply fall back to progressive playback — the user never waits for
-   * them.
+   * alternate views, all behind the terminal boot sequence. During active
+   * scrubbing we temporarily suspend that background work, then resume it once
+   * playback has settled again.
    *
    * @returns void
    */
@@ -905,13 +1027,12 @@ export function createAppShell(app: HTMLElement): void {
     refreshViewSwitcher(selectedViewId);
     setMode('initializing');
 
-    // Start both the active video and alternate views downloading
-    // immediately so that the entire loading-terminal window is used
-    // for pre-warming.  Views that complete their full fetch get a
-    // local Blob; views that do not simply fall through to the
-    // progressive path — the user is never blocked on them.
+    // Start both the active video and alternate views downloading during the
+    // loading-terminal window. Later, active scrubbing can temporarily suspend
+    // alternate warming so the visible view keeps maximum responsiveness.
     const preparedSourcePromise = prepareActiveVideoSource(selectedViewUrl);
 
+    viewport.resumePrewarming();
     viewport.prewarmSources(alternateViewUrls);
 
     const videoReady = (async (): Promise<void> => {
@@ -1270,6 +1391,15 @@ export function createAppShell(app: HTMLElement): void {
     activeRunMetadata = null;
     activeRunMatch = null;
     lastPlaybackSeconds = 0;
+    isPointerScrubbing = false;
+    pendingSeekFraction = null;
+    clearAlternatePrewarmResumeTimer();
+
+    if (scheduledSeekRafId !== null) {
+      cancelAnimationFrame(scheduledSeekRafId);
+      scheduledSeekRafId = null;
+    }
+
     summaryOverlay.hide();
     viewSwitcher.hide();
     viewport.pause();
@@ -1332,6 +1462,15 @@ export function createAppShell(app: HTMLElement): void {
       seekFraction,
       autoplay: shouldAutoplay,
     });
+
+    viewport.prewarmSources(getAlternateViewUrls());
+
+    if (shouldAutoplay && !isPointerScrubbing) {
+      scheduleAlternatePrewarmingResume();
+    } else {
+      suspendAlternatePrewarming();
+    }
+
     refreshViewSwitcher(viewId);
     infoOverlay.classList.remove('is-visible');
     updateSynthesizerLogo();

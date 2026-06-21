@@ -104,6 +104,12 @@ export interface ViewportController {
    *  regardless of which strategy finishes first. */
   prewarmSources: (sources: string[]) => void;
 
+  /** Pause alternate-view prewarming without discarding finished blob caches. */
+  suspendPrewarming: () => void;
+
+  /** Resume alternate-view prewarming for the most recently requested sources. */
+  resumePrewarming: () => void;
+
   /** Drop any prewarmed video elements for the previous run. */
   clearPrewarmedSources: () => void;
 
@@ -155,10 +161,15 @@ export function createViewport(
   let timeUpdateCallback: ((fraction: number) => void) | undefined;
   let endedCallback: (() => void) | undefined;
   let playStateCallback: ((isPaused: boolean) => void) | undefined;
+  let wantedPrewarmSources = new Set<string>();
+  let prewarmingSuspended = false;
   const prewarmedVideos = new Map<string, HTMLVideoElement>();
   const prewarmedBlobUrls = new Map<string, string>();
+  const prewarmFetchControllers = new Map<string, AbortController>();
   let ownedObjectUrl: string | null = null;
   let lastFrameDataUrl: string | null = null;
+  const frameCaptureCanvas = document.createElement('canvas');
+  const frameCaptureContext = frameCaptureCanvas.getContext('2d');
 
   video.addEventListener('play', () => playStateCallback?.(false));
   video.addEventListener('pause', () => playStateCallback?.(true));
@@ -167,8 +178,6 @@ export function createViewport(
   // Convert native video time updates into normalized 0..1 progress so the
   // rest of the app never needs to think about seconds vs duration.
   video.addEventListener('timeupdate', () => {
-    storeCurrentFrame();
-
     if (
       !timeUpdateCallback ||
       !Number.isFinite(video.duration) ||
@@ -231,6 +240,7 @@ export function createViewport(
       const seekFraction = options.seekFraction;
 
       releaseOwnedObjectUrl();
+      lastFrameDataUrl = null;
       ownedObjectUrl = options.ownedObjectUrl ? src : null;
 
       // Replace the source and wait for media data before seeking/autoplaying.
@@ -405,12 +415,35 @@ export function createViewport(
   // detached media elements so the next run starts from a clean state.
 
   function prewarmSources(sources: string[]): void {
-    const wanted = new Set(
+    wantedPrewarmSources = new Set(
       sources.filter(Boolean).filter((src) => src !== video.currentSrc),
     );
 
+    if (!prewarmingSuspended) {
+      syncPrewarmedSources();
+    }
+  }
+
+  function suspendPrewarming(): void {
+    prewarmingSuspended = true;
+    stopDetachedPrewarmedVideos();
+    abortPrewarmFetches();
+  }
+
+  function resumePrewarming(): void {
+    if (!prewarmingSuspended) {
+      syncPrewarmedSources();
+
+      return;
+    }
+
+    prewarmingSuspended = false;
+    syncPrewarmedSources();
+  }
+
+  function syncPrewarmedSources(): void {
     for (const [src, prewarmedVideo] of prewarmedVideos.entries()) {
-      if (wanted.has(src)) {
+      if (wantedPrewarmSources.has(src)) {
         continue;
       }
 
@@ -419,63 +452,101 @@ export function createViewport(
       prewarmedVideos.delete(src);
     }
 
-    for (const src of wanted) {
-      if (prewarmedVideos.has(src)) {
+    for (const [src, controller] of prewarmFetchControllers.entries()) {
+      if (wantedPrewarmSources.has(src)) {
         continue;
       }
 
-      const prewarmedVideo = document.createElement('video');
-
-      prewarmedVideo.preload = 'auto';
-      prewarmedVideo.muted = true;
-      prewarmedVideo.playsInline = true;
-      prewarmedVideo.src = src;
-      prewarmedVideo.load();
-      prewarmedVideos.set(src, prewarmedVideo);
+      controller.abort();
+      prewarmFetchControllers.delete(src);
     }
 
-    // In parallel with media-element preloading, attempt full background
-    // fetches for each wanted source so that tab switches can use a local
-    // blob URL with zero network lag.
-    for (const src of wanted) {
-      if (prewarmedBlobUrls.has(src)) {
+    for (const src of wantedPrewarmSources) {
+      if (!prewarmedVideos.has(src)) {
+        const prewarmedVideo = document.createElement('video');
+
+        prewarmedVideo.preload = 'auto';
+        prewarmedVideo.muted = true;
+        prewarmedVideo.playsInline = true;
+        prewarmedVideo.src = src;
+        prewarmedVideo.load();
+        prewarmedVideos.set(src, prewarmedVideo);
+      }
+
+      if (prewarmedBlobUrls.has(src) || prewarmFetchControllers.has(src)) {
         continue;
       }
 
-      // Append a cache-busting query parameter so that Cloudflare's edge
-      // cache serves a fresh response with CORS headers.  Without a custom
-      // domain the dashboard cache-purge controls are unavailable.
-      const cacheBustedUrl = `${src}?_=${Date.now()}`;
-
-      void fetch(cacheBustedUrl)
-        .then(async (response) => {
-          if (!response.ok) {
-            return;
-          }
-
-          const blob = await response.blob();
-
-          prewarmedBlobUrls.set(src, URL.createObjectURL(blob));
-        })
-        .catch(() => {
-          // Background fetch failed — either CORS headers are still
-          // propagating through Cloudflare's cache or the preflight
-          // was rejected.  The <video>-element preload and the
-          // progressive path will handle this view.
-        });
+      startPrewarmBlobFetch(src);
     }
   }
 
-  function clearPrewarmedSources(): void {
-    // Reset detached <video> elements and revoke every background Blob URL
-    // so the next run starts with a clean prewarm cache and no leaked Blob
-    // references.
+  function stopDetachedPrewarmedVideos(): void {
     for (const prewarmedVideo of prewarmedVideos.values()) {
       prewarmedVideo.removeAttribute('src');
       prewarmedVideo.load();
     }
 
     prewarmedVideos.clear();
+  }
+
+  function abortPrewarmFetches(): void {
+    for (const controller of prewarmFetchControllers.values()) {
+      controller.abort();
+    }
+
+    prewarmFetchControllers.clear();
+  }
+
+  function startPrewarmBlobFetch(src: string): void {
+    const controller = new AbortController();
+
+    prewarmFetchControllers.set(src, controller);
+
+    // Append a cache-busting query parameter so that Cloudflare's edge
+    // cache serves a fresh response with CORS headers.  Without a custom
+    // domain the dashboard cache-purge controls are unavailable.
+    const cacheBustedUrl = `${src}?_=${Date.now()}`;
+
+    void fetch(cacheBustedUrl, { signal: controller.signal })
+      .then(async (response) => {
+        if (!response.ok) {
+          return;
+        }
+
+        const blob = await response.blob();
+
+        if (!wantedPrewarmSources.has(src)) {
+          return;
+        }
+
+        prewarmedBlobUrls.set(src, URL.createObjectURL(blob));
+      })
+      .catch((error) => {
+        if (error instanceof DOMException && error.name === 'AbortError') {
+          return;
+        }
+
+        // Background fetch failed — either CORS headers are still
+        // propagating through Cloudflare's cache or the preflight
+        // was rejected.  The <video>-element preload and the
+        // progressive path will handle this view.
+      })
+      .finally(() => {
+        if (prewarmFetchControllers.get(src) === controller) {
+          prewarmFetchControllers.delete(src);
+        }
+      });
+  }
+
+  function clearPrewarmedSources(): void {
+    // Reset detached <video> elements and revoke every background Blob URL
+    // so the next run starts with a clean prewarm cache and no leaked Blob
+    // references.
+    wantedPrewarmSources.clear();
+    prewarmingSuspended = false;
+    stopDetachedPrewarmedVideos();
+    abortPrewarmFetches();
 
     for (const blobUrl of prewarmedBlobUrls.values()) {
       URL.revokeObjectURL(blobUrl);
@@ -489,23 +560,25 @@ export function createViewport(
   }
 
   function storeCurrentFrame(): void {
-    if (video.readyState < 2 || video.videoWidth === 0 || video.videoHeight === 0) {
+    if (
+      !frameCaptureContext ||
+      video.readyState < 2 ||
+      video.videoWidth === 0 ||
+      video.videoHeight === 0
+    ) {
       return;
     }
 
-    const canvas = document.createElement('canvas');
-
-    canvas.width = video.videoWidth;
-    canvas.height = video.videoHeight;
-
-    const ctx = canvas.getContext('2d');
-
-    if (!ctx) {
-      return;
-    }
-
-    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-    lastFrameDataUrl = canvas.toDataURL('image/jpeg', 0.85);
+    frameCaptureCanvas.width = video.videoWidth;
+    frameCaptureCanvas.height = video.videoHeight;
+    frameCaptureContext.drawImage(
+      video,
+      0,
+      0,
+      frameCaptureCanvas.width,
+      frameCaptureCanvas.height,
+    );
+    lastFrameDataUrl = frameCaptureCanvas.toDataURL('image/jpeg', 0.85);
   }
 
   function captureFrame(): string | null {
@@ -556,6 +629,8 @@ export function createViewport(
     },
     getElement: () => viewport,
     prewarmSources,
+    suspendPrewarming,
+    resumePrewarming,
     clearPrewarmedSources,
     getPrewarmedBlobUrl,
     captureFrame,

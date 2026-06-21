@@ -78,23 +78,34 @@ export function sampleLiveStats(
     return { ...lastFrame.values };
   }
 
-  // Walk through frames to find the pair (start, end) that brackets our time.
-  for (let index = 0; index < frames.length - 1; index += 1) {
-    const start = frames[index];
-    const end = frames[index + 1];
+  const upperIndex = findFirstFrameIndexAfterTime(frames, timeSeconds);
+  const start = frames[Math.max(0, upperIndex - 1)];
+  const end = frames[Math.min(frames.length - 1, upperIndex)];
 
-    if (timeSeconds < start.t || timeSeconds > end.t) {
-      continue;
+  // Compute the interpolation fraction and lerp between the two frames.
+  const fraction = (timeSeconds - start.t) / Math.max(end.t - start.t, 1e-9);
+
+  return interpolateFrameValues(start.values, end.values, fraction);
+}
+
+function findFirstFrameIndexAfterTime(
+  frames: LiveStatsFrame[],
+  timeSeconds: number,
+): number {
+  let low = 1;
+  let high = frames.length - 1;
+
+  while (low < high) {
+    const middle = Math.floor((low + high) / 2);
+
+    if (frames[middle].t <= timeSeconds) {
+      low = middle + 1;
+    } else {
+      high = middle;
     }
-
-    // Compute the interpolation fraction and lerp between the two frames.
-    const fraction = (timeSeconds - start.t) / Math.max(end.t - start.t, 1e-9);
-
-    return interpolateFrameValues(start.values, end.values, fraction);
   }
 
-  // Safety net — should not normally be reached.
-  return { ...lastFrame.values };
+  return low;
 }
 
 /**
