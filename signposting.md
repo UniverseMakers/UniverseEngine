@@ -60,7 +60,7 @@ Rendered by:
 
 Notes:
 
-- If a result/stat id matches data coming from a run sidecar YAML, the live value can override the fallback `value`, but the authored `description` still comes from this file.
+- If a result or stat uses data from a run's `run_summary.yaml`, that real value can replace the fallback `value`, but the explanatory `description` still comes from this file.
 - Section titles such as `Resources Used`, `Simulation Stats`, `Input Parameters`, and `Similarity Results` are currently hardcoded in `src/summaries/summary-overlay.ts` rather than YAML-backed.
 
 ### `src/summaries/summary-target-messages.yaml`
@@ -115,7 +115,7 @@ Rendered by:
 
 ### `public/assets/**/run_summary.yaml`
 
-These are per-run sidecar files.
+These are per-run summary files.
 
 - `summaryMetrics.*.label` controls the label for a metric coming from the selected run.
 - `summaryMetrics.*.value` controls its displayed value.
@@ -159,4 +159,4 @@ If you want to update a specific kind of text quickly:
 - Loading terminal lines: `src/loading/*.yaml`
 - HUD row labels: `src/live-data/live-stats-config.yaml`
 - Credits wording: `src/data/credits.yaml`
-- Per-run metric labels coming from asset sidecars: `public/assets/**/run_summary.yaml`
+- Per-run metric labels coming from `run_summary.yaml` files: `public/assets/**/run_summary.yaml`
