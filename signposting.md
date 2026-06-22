@@ -1,4 +1,4 @@
-# Signposting For App Behavior and Copy
+# Signposting For App Behaviour and Copy
 
 This document explains where the app's editable user-facing text lives, what each file is responsible for, and how those files connect to the UI.
 
@@ -150,7 +150,6 @@ Connected files:
 
 These are the per-run summary files that sit alongside individual simulation assets.
 
-
 - `summaryMetrics.*.label` controls the label for a metric coming from the selected run.
 - `summaryMetrics.*.value` controls its displayed value.
 - `src/selection/video-run-metadata.ts` loads the chosen run's `run_summary.yaml`.
@@ -169,21 +168,21 @@ Notes:
 
 ## Related YAML Files That Support The Same UI
 
-| File pattern                       | Purpose                                                                                      |
-| ---------------------------------- | -------------------------------------------------------------------------------------------- |
+| File pattern                       | Purpose                                                                                                                                                                       |
+| ---------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `public/assets/**/parameters.yaml` | Per-run parameter values used alongside `run_summary.yaml`. These feed selected-run metadata and summary comparisons, but they are numeric data rather than descriptive copy. |
-| `public/assets/*_test.yaml`        | Test/sample YAML assets rather than authored production copy. |
+| `public/assets/*_test.yaml`        | Test/sample YAML assets rather than authored production copy.                                                                                                                 |
 
 ## Important Non-YAML Exceptions
 
 The following user-facing text is editable, but it currently lives directly in TypeScript rather than YAML. These are easy to confuse with the YAML-driven parts of the app because they sit in the same UI surfaces.
 
-| UI surface                                                                | File                               |
-| ------------------------------------------------------------------------- | ---------------------------------- |
-| Entry overlay scale descriptions (`Smash together proto-planets...`, etc.) | `src/entry/entry-overlay.ts` |
-| Entry overlay "About this experience" modal copy | `src/entry/entry-overlay.ts` |
-| Some end-of-run summary overlay hints and section titles | `src/summaries/summary-overlay.ts` |
-| Display overlay view-info modal shell text | `src/app/app-shell.ts` |
+| UI surface                                                                 | File                               |
+| -------------------------------------------------------------------------- | ---------------------------------- |
+| Entry overlay scale descriptions (`Smash together proto-planets...`, etc.) | `src/entry/entry-overlay.ts`       |
+| Entry overlay "About this experience" modal copy                           | `src/entry/entry-overlay.ts`       |
+| Some end-of-run summary overlay hints and section titles                   | `src/summaries/summary-overlay.ts` |
+| Display overlay view-info modal shell text                                 | `src/app/app-shell.ts`             |
 
 ## Quick Lookup By UI Surface
 
