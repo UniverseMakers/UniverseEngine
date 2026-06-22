@@ -229,6 +229,14 @@ export function createAppShell(app: HTMLElement): void {
   `;
   app.appendChild(synthLogo);
 
+  const partnerLogo = document.createElement('img');
+
+  partnerLogo.className = 'app-partner-logo';
+  partnerLogo.src = withBaseUrl('assets/dirac-hpc-white.webp');
+  partnerLogo.alt = 'DIRAC HPC';
+  partnerLogo.decoding = 'async';
+  app.appendChild(partnerLogo);
+
   // Build the burger-menu host in the upper-left corner of the app.
   // Mounted outside displayChrome so it is available on the landing page too.
   const topLeft = document.createElement('div');

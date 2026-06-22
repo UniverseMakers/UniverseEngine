@@ -18,7 +18,7 @@
 
 planetary:
   label: Planetary
-  placeholderImage: assets/planet_example.webp
+  placeholderImage: assets/planetary-parameter-overlay.webp
   parameterSubtitle: Adjust proto-planet impact parameters and hunt for the initial state that produced our Earth-Moon system.
   metadata:
     distinctSimulations: 384

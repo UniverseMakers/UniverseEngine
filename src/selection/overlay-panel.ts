@@ -64,6 +64,7 @@ export function createOverlayPanel(
   const media = document.createElement('div');
 
   media.className = 'config-overlay__media';
+  media.dataset.simClass = options.simClass.id;
   const mediaImage = document.createElement('img');
 
   mediaImage.className = 'config-overlay__media-image';
@@ -540,6 +541,7 @@ export function createOverlayPanel(
     },
     setSimulation(simClass: SimulationClass, values: Record<string, number>) {
       options.simClass = simClass;
+      media.dataset.simClass = simClass.id;
       parameterEditor.setSimClass(simClass, values);
       mediaImage.src = simClass.placeholderImage;
       mediaImage.alt = `${simClass.label} preview`;
