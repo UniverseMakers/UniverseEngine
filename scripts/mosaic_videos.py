@@ -1,9 +1,11 @@
 #!/usr/bin/env python3
 """Create a randomly sampled video mosaic with ``ffmpeg``.
 
-The script selects enough MP4 files to fill an ``rows x cols`` grid, loops each
-input indefinitely, scales and crops each tile to fit, and renders a single
-1080p mosaic video.
+The script discovers all MP4 files nested under a directory at any depth,
+randomly selects (with repetition) enough to fill an ``rows x cols`` grid, loops
+each input indefinitely, scales and crops each tile to fit, and renders a
+single 1080p mosaic video. With repetition, the grid can be filled even when
+fewer unique videos exist than tiles.
 """
 
 import argparse
@@ -83,12 +85,10 @@ def main() -> None:
     files = sorted(args.directory.rglob("*.mp4"))
     tile_count = args.rows * args.cols
 
-    if len(files) < tile_count:
-        raise RuntimeError(
-            f"Need at least {tile_count} MP4 files, but found {len(files)}."
-        )
+    if not files:
+        raise RuntimeError(f"No MP4 files found under {args.directory}.")
 
-    selected = random.sample(files, tile_count)
+    selected = random.choices(files, k=tile_count)
 
     output_width = 1920
     output_height = 1080
