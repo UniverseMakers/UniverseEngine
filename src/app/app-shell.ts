@@ -1253,7 +1253,7 @@ export function createAppShell(app: HTMLElement): void {
     const showDisplay = nextMode === 'display' || nextMode === 'config';
 
     setElementVisibility(displayChrome, showDisplay);
-    setElementVisibility(swiftLogo, nextMode === 'display');
+    setElementVisibility(swiftLogo, nextMode === 'display' || nextMode === 'entry');
 
     // Burger menu: visible on landing page, parameter selection, and display
     // unless the experience is locked to a single theme. Hidden during loading.
@@ -1315,6 +1315,12 @@ export function createAppShell(app: HTMLElement): void {
   }
 
   function updateSynthesizerLogo(): void {
+    if (app.dataset.mode === 'entry') {
+      setElementVisibility(synthLogo, true);
+
+      return;
+    }
+
     const isDisplay = app.dataset.mode === 'display';
     const isGalaxy = activeClass.id === 'galaxy';
     const resolvedViewId = resolveSelectedViewId(activeClass, activeRunMatch);

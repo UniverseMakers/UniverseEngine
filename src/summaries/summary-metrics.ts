@@ -37,16 +37,38 @@ export function buildSummaryMetricMap(
   videoDurationSeconds: number,
   runMetadata?: VideoRunMetadata | null,
 ): Record<string, SummaryMetricValue> {
+  const resultTargets = Object.fromEntries(
+    simClass.metadata.results.map((result) => [result.id, result.target]),
+  ) as Record<string, number>;
+  const resultValues = simClass.metadata.results
+    .map((result) => {
+      const resolved = resolveResultValue(simClass, values, runMetadata, result.id);
+
+      if (resolved === null) {
+        return null;
+      }
+
+      return {
+        id: result.id,
+        value: resolved,
+        target: result.target,
+      };
+    })
+    .filter((result) => result !== null) as Array<{
+    id: string;
+    value: number;
+    target: number;
+  }>;
+
   // ── Step 1: Per-parameter distance ─────────────────────────────────────
   // Measure how far the selected parameters are from the configured "correct"
   // values. Each parameter is normalized to its own range so different scales
   // contribute equally to the final score.
   const normalizedDistances = simClass.parameters
-    .filter((parameter) => simClass.metadata.correctValues[parameter.id] !== undefined)
+    .filter((parameter) => resultTargets[parameter.id] !== undefined)
     .map((parameter) => {
       const value = values[parameter.id] ?? parameter.fallbackValue;
-      const correctValue =
-        simClass.metadata.correctValues[parameter.id] ?? parameter.fallbackValue;
+      const correctValue = resultTargets[parameter.id] ?? parameter.fallbackValue;
 
       return (
         Math.abs(value - correctValue) / Math.max(parameter.max - parameter.min, 1e-9)
@@ -62,7 +84,7 @@ export function buildSummaryMetricMap(
   // ── Step 3: Similarity score ────────────────────────────────────────────
   // Invert the distance into a 0-100 score where 100 = perfect match.
   // A mean distance of 0 → score 100; mean distance of 1 → score 0.
-  const score = Math.max(0, Math.round((1 - meanDistance) * 100));
+  const score = computeOutcomeScore(resultValues);
 
   // ── Step 4: Resource stats ──────────────────────────────────────────────
   // Derive placeholder resource stats from the same distance measure for now.
@@ -80,6 +102,15 @@ export function buildSummaryMetricMap(
   const runtimeHours = formatHoursFromSeconds(
     runMetadata?.wallclockSeconds ?? videoDurationSeconds,
   );
+  const moonIronPercent = formatPercent(
+    computeTargetMatchPercent(resolveResultValue(simClass, values, runMetadata, 'moon_iron')),
+  );
+  const protoEarthInMoonPercent = formatPercent(
+    computeTargetMatchPercent(
+      resolveResultValue(simClass, values, runMetadata, 'proto_earth_in_moon'),
+    ),
+  );
+  const scenarioLikelihood = scorePlanetaryScenario(simClass.id, values);
 
   // ── Step 6: Assemble the final metric dictionary ─────────────────────────
   // The summary overlay will filter and order these using its own YAML config.
@@ -101,6 +132,18 @@ export function buildSummaryMetricMap(
     particlesUpdated: {
       label: 'Particle updates',
       value: runMetadata ? formatCount(runMetadata.particlesUpdated) : '--',
+    },
+    moon_iron_percent: {
+      label: 'Iron in Moon',
+      value: moonIronPercent,
+    },
+    proto_earth_in_moon_percent: {
+      label: 'Proto-Earth in Moon',
+      value: protoEarthInMoonPercent,
+    },
+    scenario_likelihood: {
+      label: 'Scenario likelihood',
+      value: scenarioLikelihood,
     },
     audioTrack: { label: 'Audio Track', value: audioTrack },
     terminalLines: { label: 'Terminal Lines', value: terminalLines },
@@ -152,4 +195,89 @@ function formatCompactNumber(value: number, digits: number): string {
     .toFixed(digits)
     .replace(/\.0+$|(?<=\..*?)0+$/g, '')
     .replace(/\.$/, '');
+}
+
+function resolveResultValue(
+  simClass: SimulationClass,
+  values: Record<string, number>,
+  runMetadata: VideoRunMetadata | null | undefined,
+  id: string,
+): number | null {
+  const selectedParameter = simClass.parameters.find(
+    (parameter) => parameter.id === id,
+  );
+
+  if (selectedParameter) {
+    return values[id] ?? selectedParameter.fallbackValue;
+  }
+
+  const parameterValue = runMetadata?.parameterValues[id];
+
+  if (typeof parameterValue === 'number' && Number.isFinite(parameterValue)) {
+    return parameterValue;
+  }
+
+  const value = runMetadata?.summaryMetrics[id]?.value;
+
+  if (value === undefined) {
+    return null;
+  }
+
+  const numeric = Number(value);
+
+  return Number.isFinite(numeric) ? numeric : null;
+}
+
+function formatPercent(value: number | null): string {
+  if (value === null) {
+    return '--';
+  }
+
+  return value.toFixed(1);
+}
+
+function computeTargetMatchPercent(value: number | null): number | null {
+  if (value === null) {
+    return null;
+  }
+
+  return Math.max(0, (1 - Math.abs(value - 1)) * 100);
+}
+
+function computeOutcomeScore(
+  results: Array<{ id: string; value: number; target: number }>,
+): number {
+  if (results.length === 0) {
+    return 0;
+  }
+
+  const total = results.reduce(
+    (sum, result) =>
+      sum + Math.max(0, 1 - Math.abs(result.value / Math.max(result.target, 1e-9) - 1)),
+    0,
+  );
+
+  return Math.round((total / results.length) * 100);
+}
+
+function scorePlanetaryScenario(
+  simulationId: string,
+  values: Record<string, number>,
+): string {
+  if (simulationId !== 'planetary') {
+    return '--';
+  }
+
+  const impactorVelocity = values.impactor_velocity;
+  const impactorAngle = values.impactor_angle;
+
+  if (!Number.isFinite(impactorVelocity) || !Number.isFinite(impactorAngle)) {
+    return '--';
+  }
+
+  const velocityPenalty = Math.abs(impactorVelocity - 15) * 6;
+  const anglePenalty = Math.abs(impactorAngle - 45) * 1.6;
+  const score = Math.max(0, Math.round(100 - velocityPenalty - anglePenalty));
+
+  return String(score);
 }

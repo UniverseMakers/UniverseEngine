@@ -36,8 +36,13 @@ export interface SimParameter {
 export interface SimulationMetadata {
   distinctSimulations: number;
   correctValues: Record<string, number>;
+  results: ResultDisplayConfig[];
   summaryStats: StatDisplayConfig[];
   liveStats: StatDisplayConfig[];
+}
+
+export interface ResultDisplayConfig extends StatDisplayConfig {
+  target: number;
 }
 
 export interface SimulationViewOption {
@@ -123,8 +128,13 @@ interface RawStatsConfig {
 
 interface RawSummaryConfig {
   resources?: RawStatDisplayConfig[];
+  results?: RawResultDisplayConfig[];
   simulationStats?: RawStatDisplayConfig[];
   similarityScore?: { value: string };
+}
+
+interface RawResultDisplayConfig extends RawStatDisplayConfig {
+  target: number;
 }
 
 interface RawSimulationViewOption {
@@ -170,6 +180,7 @@ const liveStatsByFamily = parse(liveStatsRaw) as Record<FamilyId, RawStatsConfig
 export const SIMULATION_CLASSES: SimulationClass[] = Object.entries(catalog).map(
   ([id, entry]) => {
     const summaryStats = flattenSummaryConfig(summaryStatsByFamily[id]);
+    const results = (summaryStatsByFamily[id]?.results ?? []).map(normalizeResultConfig);
     const liveStats = liveStatsByFamily[id]?.liveStats ?? [];
     const rawParams = paramsByFamily[id] ?? {};
 
@@ -180,6 +191,7 @@ export const SIMULATION_CLASSES: SimulationClass[] = Object.entries(catalog).map
       metadata: {
         distinctSimulations: entry.metadata.distinctSimulations,
         correctValues: entry.metadata.correctValues,
+        results,
         summaryStats: summaryStats.map(normalizeStatConfig),
         liveStats: liveStats.map(normalizeStatConfig),
       },
@@ -220,28 +232,26 @@ export const SIMULATION_CLASSES: SimulationClass[] = Object.entries(catalog).map
 
 function flattenSummaryConfig(
   config: RawSummaryConfig | undefined,
-): StatDisplayConfig[] {
+): RawStatDisplayConfig[] {
   if (!config) {
     return [];
   }
 
-  const stats: StatDisplayConfig[] = [];
+  const stats: RawStatDisplayConfig[] = [];
 
   for (const stat of config.resources ?? []) {
-    stats.push(normalizeStatConfig({ ...stat, section: 'resources' }));
+    stats.push({ ...stat, section: 'resources' });
   }
 
   for (const stat of config.simulationStats ?? []) {
-    stats.push(normalizeStatConfig({ ...stat, section: 'simulationStats' }));
+    stats.push({ ...stat, section: 'simulationStats' });
   }
 
   if (config.similarityScore) {
-    stats.push(
-      normalizeStatConfig({
-        id: 'similarityScore',
-        value: config.similarityScore.value,
-      }),
-    );
+    stats.push({
+      id: 'similarityScore',
+      value: config.similarityScore.value,
+    });
   }
 
   return stats;
@@ -264,6 +274,13 @@ function normalizeStatConfig(config: RawStatDisplayConfig): StatDisplayConfig {
     valueScale: config.value_scale,
     displayFormat: config.display_format,
     precision: config.precision,
+  };
+}
+
+function normalizeResultConfig(config: RawResultDisplayConfig): ResultDisplayConfig {
+  return {
+    ...normalizeStatConfig(config),
+    target: config.target,
   };
 }
 

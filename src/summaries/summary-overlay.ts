@@ -11,13 +11,19 @@
  */
 
 import type {
+  ResultDisplayConfig,
   SimulationClass,
   StatDisplayConfig,
 } from '../selection/simulation-catalog.ts';
 import { buildSummaryMetricMap } from './summary-metrics.ts';
 import type { VideoRunMetadata } from '../selection/video-run-metadata.ts';
 import { SUMMARY_OVERLAY } from '../shared/constants.ts';
-import { formatCompactNumber, formatNumericString, withUnit } from '../shared/format.ts';
+import {
+  formatCompactNumber,
+  formatNumericString,
+  formatParameterValue,
+  withUnit,
+} from '../shared/format.ts';
 import { parse } from 'yaml';
 import targetMessagesRaw from './summary-target-messages.yaml?raw';
 
@@ -46,7 +52,7 @@ interface ScientificBarDatum {
   label: string;
   value: number;
   rawValue: number;
-  unit?: string;
+  formattedValue: string;
   detail: string;
 }
 
@@ -114,15 +120,9 @@ function reaction(p: number): { word: string; colour: string } {
   return { word: 'Way off - try again', colour: RED };
 }
 
-function detailFor(name: string, v: number): string {
-  const s = situation(v);
-
-  return TARGET_MESSAGES[name]?.[s] ?? '';
-}
-
 function detailForTarget(id: string, label: string, value: number): string {
   const s = situation(value);
-  const message = TARGET_MESSAGES[id]?.[s];
+  const message = TARGET_MESSAGES[id]?.[s] ?? TARGET_MESSAGES[label]?.[s];
 
   if (message) {
     return message;
@@ -146,27 +146,25 @@ function buildScientificBars(
   values: Record<string, number>,
   runMetadata: VideoRunMetadata | null | undefined,
 ): ScientificBarDatum[] {
-  return Object.entries(simClass.metadata.correctValues)
-    .map(([id, correctValue]) => {
-      const resolved = resolveScientificValue(id, simClass, values, runMetadata);
+  return simClass.metadata.results
+    .map((result) => {
+      const resolved = resolveScientificValue(result, simClass, values, runMetadata);
 
       if (resolved === null) {
         return null;
       }
 
-      const normalizedValue = resolved / Math.max(correctValue, 1e-9);
-      const label = resolveScientificLabel(id, simClass, runMetadata);
-      const unit = resolveScientificUnit(id, simClass);
-      const detail =
-        detailFor(label, normalizedValue) ||
-        detailForTarget(id, label, normalizedValue);
+      const normalizedValue = resolved / Math.max(result.target, 1e-9);
+      const label = resolveScientificLabel(result, simClass, runMetadata);
+      const detail = detailForTarget(result.id, label, normalizedValue);
+      const formattedValue = withUnit(formatSummaryValue(String(resolved), result), result.unit);
 
       return {
-        id,
+        id: result.id,
         label,
         value: normalizedValue,
         rawValue: resolved,
-        unit,
+        formattedValue,
         detail,
       };
     })
@@ -174,11 +172,12 @@ function buildScientificBars(
 }
 
 function resolveScientificValue(
-  id: string,
+  result: ResultDisplayConfig,
   simClass: SimulationClass,
   values: Record<string, number>,
   runMetadata: VideoRunMetadata | null | undefined,
 ): number | null {
+  const id = result.id;
   const selectedParameter = simClass.parameters.find(
     (parameter) => parameter.id === id,
   );
@@ -203,32 +202,24 @@ function resolveScientificValue(
   }
 
   const configuredFallback = parseNumeric(
-    simClass.metadata.summaryStats.find((stat) => stat.id === id)?.value,
+    result.value,
   );
 
   return configuredFallback;
 }
 
 function resolveScientificLabel(
-  id: string,
+  result: ResultDisplayConfig,
   simClass: SimulationClass,
   runMetadata: VideoRunMetadata | null | undefined,
 ): string {
+  const id = result.id;
+
   return (
+    result.label ??
     simClass.parameters.find((parameter) => parameter.id === id)?.label ??
-    simClass.metadata.summaryStats.find((stat) => stat.id === id)?.label ??
     runMetadata?.summaryMetrics[id]?.label ??
     id
-  );
-}
-
-function resolveScientificUnit(
-  id: string,
-  simClass: SimulationClass,
-): string | undefined {
-  return (
-    simClass.parameters.find((parameter) => parameter.id === id)?.unit ??
-    simClass.metadata.summaryStats.find((stat) => stat.id === id)?.unit
   );
 }
 
@@ -424,41 +415,6 @@ export function createSummaryOverlay(
     return section;
   }
 
-  function buildSimStatsFromBars(bars: ScientificBarDatum[]): HTMLElement {
-    const section = document.createElement('div');
-
-    section.className = 'res-section panel';
-    section.innerHTML = '<p class="sci-section__title">Simulation Stats</p>';
-
-    const grid = document.createElement('div');
-
-    grid.className = 'metric-grid';
-    grid.style.setProperty('--summary-grid-columns', String(Math.max(1, bars.length)));
-    grid.style.setProperty('--summary-grid-max-width', '48rem');
-
-    for (const bar of bars) {
-      const card = document.createElement('div');
-      const label = document.createElement('span');
-      const value = document.createElement('span');
-
-      card.className = 'res-card res-card--has-info';
-      label.className = 'res-card__label';
-      label.textContent = bar.label;
-      value.className = 'res-card__value';
-      value.textContent = Number.isFinite(bar.rawValue)
-        ? withUnit(Number(bar.rawValue.toPrecision(4)).toString(), bar.unit)
-        : '--';
-      card.appendChild(label);
-      card.appendChild(value);
-      card.addEventListener('click', () => openCardModal(bar.label, bar.detail));
-      grid.appendChild(card);
-    }
-
-    section.appendChild(grid);
-
-    return section;
-  }
-
   return {
     show() {
       if (hideTimer) {
@@ -509,6 +465,7 @@ export function createSummaryOverlay(
       );
       const stats = simClass.metadata.summaryStats;
       const scientificBars = buildScientificBars(simClass, values, runMetadata);
+      const resultIds = new Set(scientificBars.map((bar) => bar.id));
 
       let score: number;
 
@@ -557,7 +514,9 @@ export function createSummaryOverlay(
           stat.id !== 'similarityScore',
       );
       const simulationStats = stats.filter(
-        (stat) => stat.section === 'simulationStats' && stat.id !== 'similarityScore',
+        (stat) =>
+          stat.section === 'simulationStats' &&
+          !resultIds.has(String(stat.id)),
       );
 
       if (resStats.length > 0) {
@@ -589,8 +548,6 @@ export function createSummaryOverlay(
             available,
           ),
         );
-      } else if (scientificBars.length > 0) {
-        rightColumn.appendChild(buildSimStatsFromBars(scientificBars));
       }
 
       topRow.appendChild(mainColumn);
@@ -618,8 +575,6 @@ export function createSummaryOverlay(
 
         for (const param of simClass.parameters) {
           const rawValue = values[param.id] ?? param.fallbackValue;
-          const scale = param.valueScale ?? 1;
-          let displayValue = rawValue * scale;
           const displayUnit = param.displayUnit ?? param.unit;
 
           const card = document.createElement('div');
@@ -637,13 +592,11 @@ export function createSummaryOverlay(
           label.className = 'res-card__label';
           label.textContent = param.label;
           value.className = 'res-card__value';
-          const formatted =
-            param.displayFormat === 'scientific'
-              ? formatNumericString(String(displayValue), {
-                  mode: 'scientific',
-                  precision: param.displaySignificantFigures ?? 3,
-                })
-              : formatCompactNumber(displayValue);
+          const formatted = formatParameterValue(rawValue, param.step, {
+            scale: param.valueScale,
+            format: param.displayFormat,
+            significantFigures: param.displaySignificantFigures,
+          });
 
           value.textContent = withUnit(formatted, displayUnit);
           card.appendChild(label);
@@ -672,8 +625,6 @@ export function createSummaryOverlay(
         list.className = 'sci-bars';
 
         for (const bar of scientificBars) {
-          const vd = verdict(bar.value);
-
           const row = document.createElement('div');
 
           row.className = 'sci-bar';
@@ -685,7 +636,7 @@ export function createSummaryOverlay(
                 <div class="sci-pointer__node"></div>
               </div>
             </div>
-            <div class="sci-bar__verdict" style="color:${vd.colour}">${vd.word}</div>
+            <div class="sci-bar__value">${bar.formattedValue}</div>
           `;
           row.addEventListener('click', () => openModal(bar));
           list.appendChild(row);

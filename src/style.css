@@ -1023,8 +1023,8 @@ button {
 .entry-overlay {
   position: relative;
   z-index: 1;
-  width: min(46.2rem, calc(100vw - 2rem));
-  padding: 2rem;
+  width: min(62rem, calc(100vw - 2rem));
+  padding: 2.5rem;
   border: 1px solid var(--line-strong);
   border-radius: 0;
   background: rgba(8, 11, 16, 0.94);
@@ -1035,8 +1035,8 @@ button {
 
 .entry-overlay__banner-frame {
   position: relative;
-  margin: -2rem -2rem 1.5rem;
-  height: 9.25rem;
+  margin: -2.5rem -2.5rem 1.75rem;
+  height: 11rem;
   overflow: hidden;
   border-bottom: 1px solid var(--line-strong);
   background: #000;
@@ -1076,37 +1076,56 @@ button {
   margin: 0;
   color: var(--accent);
   font-family: var(--font-display);
-  font-size: clamp(2rem, 4vw, 3rem);
+  font-size: clamp(2.2rem, 4vw, 3.35rem);
   letter-spacing: 0.08em;
   text-transform: uppercase;
 }
 
 .entry-overlay__actions {
   display: grid;
-  gap: 0.8rem;
+  gap: 1rem;
 }
 
 .entry-overlay__button {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: start;
+  gap: 1.5rem;
   width: 100%;
-  padding: 1rem 1.1rem;
+  padding: 1.2rem 1.3rem;
   border: 1px solid var(--line-strong);
   border-radius: 0;
   background: rgba(255, 255, 255, 0.03);
   color: var(--text-primary);
+  text-align: left;
+  transition:
+    background 0.18s ease,
+    border-color 0.18s ease,
+    transform 0.18s ease,
+    color 0.18s ease;
 }
 
 .entry-overlay__button:hover {
   background: rgba(34, 211, 238, 0.1);
   color: var(--accent);
+  transform: translateY(-1px);
 }
 
 .entry-overlay__button-label {
-  font-size: 0.92rem;
+  font-size: 1rem;
   letter-spacing: 0.18em;
+  justify-self: start;
+  align-self: start;
+}
+
+.entry-overlay__button-description {
+  color: var(--text-secondary);
+  font-family: var(--font-body);
+  font-size: 0.95rem;
+  line-height: 1.6;
+  text-transform: none;
+  text-align: right;
+  justify-self: end;
 }
 
 .summary-overlay {
@@ -1176,7 +1195,6 @@ button {
 .summary-overlay__button,
 .res-card__label,
 .sci-section__title,
-.sci-bar__verdict,
 .sci-modal__verdict {
   font-family: var(--font-mono);
   text-transform: uppercase;
@@ -1474,7 +1492,7 @@ button {
 
 .sci-bar {
   display: grid;
-  grid-template-columns: minmax(10rem, 13rem) minmax(0, 1fr) minmax(8rem, 9rem);
+  grid-template-columns: minmax(10rem, 13rem) minmax(0, 1fr) minmax(9rem, 11rem);
   align-items: center;
   gap: 1.5rem;
   cursor: pointer;
@@ -1540,11 +1558,12 @@ button {
   color: #e9f1f7;
 }
 
-.sci-bar__verdict {
+.sci-bar__value {
   font-weight: 700;
-  letter-spacing: 0.05em;
   font-size: 0.8rem;
   text-align: right;
+  color: #e9f1f7;
+  font-variant-numeric: tabular-nums;
 }
 
 .sci-track {
@@ -2538,6 +2557,16 @@ button {
     height: 8.5rem;
   }
 
+  .entry-overlay__button {
+    grid-template-columns: 1fr;
+    gap: 0.8rem;
+  }
+
+  .entry-overlay__button-description {
+    text-align: left;
+    justify-self: start;
+  }
+
   /* Avoid subpixel clipping by stretching the full-screen summary layout. */
   .overlay--summary {
     place-items: stretch;
@@ -2639,7 +2668,7 @@ button {
     padding: 0.4rem 0;
   }
 
-  .sci-bar__verdict {
+  .sci-bar__value {
     text-align: left;
   }
 
@@ -2997,7 +3026,7 @@ button {
   position: fixed;
   right: 1.5rem;
   bottom: 1.5rem;
-  z-index: 3;
+  z-index: 4;
   display: flex;
   align-items: flex-end;
   opacity: 0.7;
@@ -3021,7 +3050,7 @@ button {
   position: fixed;
   left: 1.5rem;
   bottom: calc(1.5rem + 1.75vh);
-  z-index: 3;
+  z-index: 4;
   display: flex;
   align-items: flex-end;
   opacity: 0.7;
