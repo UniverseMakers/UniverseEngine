@@ -175,6 +175,7 @@ export function createParameterEditor(
       sync(parseFloat(slider.value));
     });
 
+    slider.addEventListener('pointerdown', (e) => e.stopPropagation());
     slider.addEventListener('click', (e) => e.stopPropagation());
 
     const initialSliderVal = param.logScale

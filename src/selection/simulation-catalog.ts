@@ -90,6 +90,7 @@ export interface SimulationClass {
   id: string;
   label: string;
   placeholderImage: string;
+  parameterSubtitle?: string;
   metadata: SimulationMetadata;
   parameters: SimParameter[];
   views: SimulationViewOption[];
@@ -100,6 +101,7 @@ export interface SimulationClass {
 interface RawCatalogEntry {
   label: string;
   placeholderImage: string;
+  parameterSubtitle?: string;
   metadata: {
     distinctSimulations: number;
     correctValues: Record<string, number>;
@@ -188,6 +190,7 @@ export const SIMULATION_CLASSES: SimulationClass[] = Object.entries(catalog).map
       id,
       label: entry.label,
       placeholderImage: withBaseUrl(entry.placeholderImage),
+      parameterSubtitle: entry.parameterSubtitle,
       metadata: {
         distinctSimulations: entry.metadata.distinctSimulations,
         correctValues: entry.metadata.correctValues,

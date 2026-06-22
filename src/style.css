@@ -1093,7 +1093,7 @@ button {
 .entry-overlay__button {
   display: grid;
   grid-template-columns: minmax(11rem, auto) minmax(0, 1fr);
-  align-items: start;
+  align-items: center;
   gap: 2rem;
   width: 100%;
   min-height: 5.75rem;
@@ -1120,8 +1120,6 @@ button {
   font-size: 1rem;
   letter-spacing: 0.18em;
   justify-self: start;
-  align-self: start;
-  padding-top: 0.12rem;
 }
 
 .entry-overlay__button-description {
@@ -1806,28 +1804,33 @@ button {
 .config-overlay__header,
 .config-overlay__footer {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
   gap: 1rem;
 }
 
 .config-overlay__title-block {
-  display: none;
-}
-
-.config-overlay__section-indicator {
-  min-width: 8.5rem;
-  color: var(--accent);
-  font-family: var(--font-mono);
-  font-size: 0.7rem;
-  letter-spacing: 0.28em;
-  text-transform: uppercase;
+  display: grid;
+  gap: 0.35rem;
+  flex: 1;
+  min-width: 0;
 }
 
 .config-overlay__title {
   color: var(--text-primary);
   font-size: 1.4rem;
-  letter-spacing: 0.1em;
+  line-height: 1.1;
+  letter-spacing: 0.08em;
+}
+
+.config-overlay__subtitle {
+  margin: 0;
+  color: var(--text-secondary);
+  font-family: var(--font-mono);
+  font-size: 0.76rem;
+  line-height: 1.65;
+  letter-spacing: 0.04em;
+  max-width: 36rem;
 }
 
 .config-overlay__eyebrow,
@@ -1934,10 +1937,11 @@ button {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 1.1rem;
-  height: 1.1rem;
+  width: 1.7rem;
+  height: 1.7rem;
   font-family: var(--font-mono);
-  font-size: 0.72rem;
+  font-size: 1.2rem;
+  line-height: 1;
   color: #4b5f72;
   border-radius: 50%;
   transition: color 0.15s ease;
@@ -1957,29 +1961,30 @@ button {
   width: 100%;
   appearance: none;
   background: transparent;
-  min-height: 1.5rem;
+  min-height: 2rem;
+  touch-action: pan-y;
 }
 
 .param-card__slider::-webkit-slider-runnable-track {
-  height: 2px;
+  height: 4px;
   background: rgba(255, 255, 255, 0.16);
 }
 
 .param-card__slider::-moz-range-track {
-  height: 2px;
+  height: 4px;
   background: rgba(255, 255, 255, 0.16);
 }
 
 .param-card__slider::-moz-range-progress {
-  height: 2px;
+  height: 4px;
   background: var(--accent);
 }
 
 .param-card__slider::-webkit-slider-thumb {
   appearance: none;
-  margin-top: -6px;
-  width: 15px;
-  height: 15px;
+  margin-top: -7px;
+  width: 18px;
+  height: 18px;
   border-radius: 50%;
   background: #fff;
   border: none;
@@ -1987,8 +1992,8 @@ button {
 }
 
 .param-card__slider::-moz-range-thumb {
-  width: 15px;
-  height: 15px;
+  width: 18px;
+  height: 18px;
   border-radius: 50%;
   background: #fff;
   border: none;
@@ -2729,13 +2734,6 @@ button {
     text-align: left;
   }
 
-  .config-overlay__section-indicator {
-    min-width: 0;
-    font-size: 1.15rem;
-    letter-spacing: 0.18em;
-    color: var(--accent);
-  }
-
   /* Mobile header: keep the close button in the top-right. */
   .config-overlay__header {
     display: grid;
@@ -2753,9 +2751,17 @@ button {
     align-self: start;
   }
 
-  .config-overlay__section-indicator {
+  .config-overlay__title-block {
     grid-column: 1;
     grid-row: 1;
+  }
+
+  .config-overlay__title {
+    font-size: 1.15rem;
+  }
+
+  .config-overlay__subtitle {
+    font-size: 0.72rem;
   }
 
   .config-overlay__controls {
@@ -2833,19 +2839,19 @@ button {
   }
 
   .param-card__slider {
-    min-height: 2.4rem;
+    min-height: 2.7rem;
   }
 
   .param-card__slider::-webkit-slider-thumb {
-    margin-top: -8px;
-    width: 18px;
-    height: 18px;
+    margin-top: -9px;
+    width: 20px;
+    height: 20px;
     box-shadow: none;
   }
 
   .param-card__slider::-moz-range-thumb {
-    width: 18px;
-    height: 18px;
+    width: 20px;
+    height: 20px;
     box-shadow: none;
   }
 
