@@ -14,6 +14,9 @@
 - text: Dr Will Roper (University of Sussex / University of Oxford)
   url: https://willjroper.github.io/
 
+- text: With thanks to the Universe Makers Team
+  url: https://universe-makers.github.io/about.html
+
 - text: Simulations
   header: true
 
@@ -23,11 +26,11 @@
 - text: Forward modelling done with Synthesizer
   url: https://synthesizer-project.github.io/synthesizer/#
 
-- text: "Moon formation simulations by Jacob Kegerreis, Callum Mosley, Ella Buxton, Vince Eke"
+- text: 'Moon formation simulations by Jacob Kegerreis, Callum Mosley, Ella Buxton, Vince Eke'
 
-- text: "Galaxy formation simulations by Kyle Oman, Diego Dado, Isabel Santos, James Trayford, Owen Jessop, Will Roper, + The COLIBRE Team"
+- text: 'Galaxy formation simulations by Kyle Oman, Diego Dado, Isabel Santos, James Trayford, Owen Jessop, Will Roper, + The COLIBRE Team'
 
-- text: "Large scale structure simulations by Will Roper, Daniele Sorini, Isabel Santos, Owen Jessop, Sarah Johnston, + The FLAMINGO Team"
+- text: 'Large scale structure simulations by Will Roper, Daniele Sorini, Isabel Santos, Owen Jessop, Sarah Johnston, + The FLAMINGO Team'
 
 - text: Supercomputer
   header: true
@@ -59,17 +62,22 @@
 - text: Image Credits
   header: true
 
-- text: "Milky Way: ESO / S. Brunier"
+- text: 'Milky Way: ESO / S. Brunier'
   url: https://www.eso.org/
 
-- text: "COLIBRE: The COLIBRE Team (Schaye et al. 2026)"
+- text: 'COLIBRE: The COLIBRE Team (Schaye et al. 2026)'
   url: https://colibre.strw.leidenuniv.nl/team.html
 
-- text: "FLAMINGO: The FLAMINGO Team (Schaye et al. 2023)"
+- text: 'FLAMINGO: The FLAMINGO Team (Schaye et al. 2023)'
   url: https://flamingo.strw.leidenuniv.nl/team.html
 
-- text: "Moon Formation: Jacob Kegerreis & NASA"
+- text: 'Moon Formation: Jacob Kegerreis & NASA'
   url: https://www.nasa.gov/solar-system/collision-may-have-formed-the-moon-in-mere-hours-simulations-reveal/#:~:text=%E2%80%9CThis%20opens%20up%20a%20whole,in%20The%20Astrophysical%20Journal%20Letters.
+
+- text: Funding
+  header: true
+
+- text: We would like to thank the Ogden Trust, the Royal Society, and Durham University for their generous funding that made this project possible.
 
 - text: Licensing
   header: true
