@@ -39,9 +39,15 @@ export function buildSummaryMetricMap(
   videoDurationSeconds: number,
   runMetadata?: VideoRunMetadata | null,
 ): Record<string, SummaryMetricValue> {
+  // Extract the configured result targets up front so the later distance pass can
+  // quickly decide which slider parameters participate in score calculation.
   const resultTargets = Object.fromEntries(
     simClass.metadata.results.map((result) => [result.id, result.target]),
   ) as Record<string, number>;
+
+  // Resolve all configured result metrics into comparable numeric triples. These
+  // can come from player input, saved run parameters, or summary sidecar values
+  // depending on what the current family authored as its result set.
   const resultValues = simClass.metadata.results
     .map((result) => {
       const resolved = resolveResultValue(simClass, values, runMetadata, result.id);
@@ -97,6 +103,8 @@ export function buildSummaryMetricMap(
   const computeProfile = `${formatCompactNumber(computeHours, 1)} CPU-hrs\n${formatCompactNumber(memoryGb, 1)} GB`;
 
   // ── Step 5: Additional derived fields ────────────────────────────────────
+  // These additional fields feed summary cards that are useful for public-facing
+  // interpretation even though they are not direct components of the numeric fit.
   const parameterCount = String(simClass.parameters.length);
   const bestFitDelta = `${(meanDistance * 100).toFixed(1)}%`;
   const terminalLines = String(simClass.parameters.length + 6);
@@ -172,6 +180,8 @@ export function buildSummaryMetricMap(
  * @returns Human-friendly integer-ish string.
  */
 function formatCount(value: number): string {
+  // Keep this intentionally plain for now. Some summary rows want the raw count
+  // semantics rather than compact suffixes such as `1.2M`.
   return String(Math.max(0, value));
 }
 
@@ -192,6 +202,13 @@ function formatHoursFromSeconds(totalSeconds: number): string {
     .replace(/\.$/, '');
 }
 
+/**
+ * Trim a numeric value to a small fixed precision without adding suffixes.
+ *
+ * Despite the name, this helper is local to summary-metrics and is only used to
+ * keep generated resource values tidy inside multiline strings such as the
+ * compute-profile card.
+ */
 function formatCompactNumber(value: number, digits: number): string {
   return value
     .toFixed(digits)
@@ -225,6 +242,8 @@ function resolveResultValue(
   const parameterValue = runMetadata?.parameterValues[id];
 
   if (typeof parameterValue === 'number' && Number.isFinite(parameterValue)) {
+    // When a result metric is not a direct slider, the saved run sidecar can
+    // still expose the exact number that should be compared against the target.
     return parameterValue;
   }
 
@@ -247,6 +266,8 @@ function formatPercent(value: number | null): string {
     return '--';
   }
 
+  // One decimal is enough to show relative closeness without pretending that the
+  // heuristic is more precise than it really is.
   return value.toFixed(1);
 }
 
@@ -274,6 +295,9 @@ function computeOutcomeScore(
     return 0;
   }
 
+  // Each result contributes a linear closeness score in [0, 1]. We average the
+  // contributions so families with more result metrics are not automatically
+  // favored or punished compared with smaller authored result sets.
   const total = results.reduce(
     (sum, result) =>
       sum + Math.max(0, 1 - Math.abs(result.value / Math.max(result.target, 1e-9) - 1)),
@@ -304,6 +328,9 @@ function scorePlanetaryScenario(
     return '--';
   }
 
+  // The heuristic is intentionally legible: velocity deviations dominate more
+  // than angle deviations, reflecting that large speed changes quickly move the
+  // run away from the broad "canonical" giant-impact regime.
   const velocityPenalty = Math.abs(impactorVelocity - 15) * 6;
   const anglePenalty = Math.abs(impactorAngle - 45) * 1.6;
   const score = Math.max(0, Math.round(100 - velocityPenalty - anglePenalty));

@@ -673,6 +673,9 @@ export function createAppShell(app: HTMLElement): void {
   ) => {
     const isCollapsible = options.isCollapsible ?? (() => true);
 
+    // The same behavior powers three different chrome elements, so we make the
+    // collapsible-ness itself injectable. That lets entry mode keep the burger
+    // permanently expanded without duplicating the rest of the hover/focus logic.
     el.addEventListener('mouseenter', () => expandOne(el));
     el.addEventListener('mouseleave', () => {
       if (!isCollapsible()) {
@@ -717,8 +720,12 @@ export function createAppShell(app: HTMLElement): void {
     });
 
     if (isCollapsible()) {
+      // Non-entry chrome starts compact so the viewport stays visually quiet
+      // until the visitor intentionally interacts with that control.
       collapseOneNow(el);
     } else {
+      // Entry mode is the exception: the landing page should advertise the menu
+      // rather than hide it behind a shrunk affordance.
       expandOne(el);
     }
   };
@@ -1300,6 +1307,9 @@ export function createAppShell(app: HTMLElement): void {
     );
 
     if (nextMode === 'entry') {
+      // Reassert the expanded state every time we return home. This prevents the
+      // burger from carrying a previously collapsed display/config state back
+      // into the landing page.
       expandOne(topLeft);
     } else {
       collapseOneNow(topLeft);

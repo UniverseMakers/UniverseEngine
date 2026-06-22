@@ -46,30 +46,53 @@ export interface SummaryOverlayController {
 }
 
 interface SummaryOverlayOptions {
+  /** Resume the current run from the summary state. */
   onReplay: () => void;
+  /** Return to parameter editing for the active scale. */
   onParameters: () => void;
+  /** Navigate back to the landing page when available. */
   onHome: () => void;
+  /** Whether the Home action should be rendered at all. */
   showHome: boolean;
 }
 
 interface ScientificBarDatum {
+  /** Stable result identifier used for matching and deduplication. */
   id: string;
+  /** Human-readable result label. */
   label: string;
+  /** Value normalized against the configured target. */
   value: number;
+  /** Unscaled numeric value before normalization. */
   rawValue: number;
+  /** Final display string shown beside the bar. */
   formattedValue: string;
+  /** Explanatory copy shown in the detail modal. */
   detail: string;
 }
 
 interface SummarySectionConfig {
+  /** Visible section heading. */
   title: string;
+  /** CSS hook for section-specific styling. */
   className: string;
+  /** Ordered stat list from YAML. */
   stats: StatDisplayConfig[];
+  /** Maximum number of columns to use before wrapping. */
   maxColumns: number;
+  /** Width cap passed through to CSS custom properties. */
   maxWidthRem: number;
+  /** Force all cards onto one row when true. */
   singleRow?: boolean;
 }
 
+/**
+ * Flatten the authored per-family target-message YAML into a simple lookup map.
+ *
+ * The source file groups messages by family and then by metric. The overlay only
+ * needs metric-id -> state-key -> message at render time, so we normalize once at
+ * module load rather than repeating that shape conversion on every summary update.
+ */
 const TARGET_MESSAGES: Record<string, Record<string, string>> = (() => {
   const raw = parse(targetMessagesRaw) as Record<
     string,
@@ -93,6 +116,14 @@ const GREEN_BAND = 0.2;
 const AMBER_BAND = 0.5;
 const MAX = 2.0;
 
+/**
+ * Convert a normalized ratio into the short verdict chip shown in the modal.
+ *
+ * The ratio convention throughout this file is:
+ * - `1.0` means exactly on target
+ * - `< 1.0` means below target
+ * - `> 1.0` means above target
+ */
 function verdict(v: number): { word: string; colour: string } {
   const d = Math.abs(v - 1);
 
@@ -302,6 +333,17 @@ export function createSummaryOverlay(
   container: HTMLElement,
   options: SummaryOverlayOptions,
 ): SummaryOverlayController {
+  /**
+   * Build and manage the end-of-run overlay.
+   *
+   * The controller is long-lived: we mount the shell once, keep references to
+   * the reusable modal/actions/header nodes, and let `update()` rebuild only the
+   * changing summary content for the currently active run.
+   */
+
+  // The summary is mounted once and then incrementally shown/hidden across the
+  // app lifetime. That avoids recreating a large DOM subtree every time a run
+  // finishes while still letting `update()` rebuild the content area itself.
   const overlay = document.createElement('section');
 
   overlay.className = 'overlay overlay--summary';
@@ -368,6 +410,9 @@ export function createSummaryOverlay(
   panel.appendChild(actions);
   overlay.appendChild(panel);
 
+  // Small shared modal for detail copy. We keep it inside the summary overlay
+  // rather than as a global app-level layer so its lifetime stays coupled to
+  // summary rendering only.
   const modal = document.createElement('div');
 
   modal.className = 'sci-modal is-hidden';
@@ -392,6 +437,9 @@ export function createSummaryOverlay(
   function openModal(bar: ScientificBarDatum): void {
     const vd = verdict(bar.value);
 
+    // Bar detail modals show both qualitative verdict and authored explanatory
+    // text. The explanatory body is already resolved before this function runs,
+    // so the modal renderer itself stays intentionally dumb.
     modalTitle.textContent = bar.label;
     modalVerdict.textContent = vd.word;
     modalVerdict.style.color = vd.colour;
@@ -401,6 +449,8 @@ export function createSummaryOverlay(
   }
 
   function openCardModal(title: string, description: string): void {
+    // Cards only need a title + body, so we hide the verdict row that is used
+    // by scientific/result bars.
     modalTitle.textContent = title;
     modalVerdict.hidden = true;
     modalBody.textContent = description;
@@ -422,6 +472,8 @@ export function createSummaryOverlay(
     config: SummarySectionConfig,
     availableMetrics: Record<string, { label: string; value: string }>,
   ): HTMLElement {
+    // Sections are pure renderers over already-resolved metric data. The YAML
+    // decides grouping/order; this helper only turns that config into a card grid.
     const section = document.createElement('div');
 
     section.className = `${config.className} panel`;
@@ -458,6 +510,9 @@ export function createSummaryOverlay(
       card.appendChild(value);
 
       if (stat.description) {
+        // Descriptions are attached at the config layer, not to the resolved
+        // metric values. That keeps explanatory copy stable even when the value
+        // came from fallback defaults or per-run YAML.
         card.classList.add('res-card--has-info');
         card.addEventListener('click', () => {
           openCardModal(metric.label, stat.description!);
@@ -513,6 +568,9 @@ export function createSummaryOverlay(
       runMetadata?: VideoRunMetadata | null,
       thumbnail?: string | null,
     ) {
+      // The summary content is intentionally treated as ephemeral view state.
+      // Clearing and rebuilding it from current inputs avoids stale DOM when the
+      // user reruns a scale, changes themes, or resumes from the summary screen.
       content.innerHTML = '';
       closeModal();
 
@@ -529,6 +587,8 @@ export function createSummaryOverlay(
       const scientificBars = buildScientificBars(simClass, values, runMetadata);
       const resultIds = new Set(scientificBars.map((bar) => bar.id));
 
+      // Families with authored result targets get the richer bar-driven score.
+      // Families without those targets fall back to the generic similarity card.
       let score: number;
 
       if (scientificBars.length > 0) {
@@ -574,6 +634,8 @@ export function createSummaryOverlay(
 
       mainColumn.appendChild(hero);
 
+      // Split the YAML-configured stats into the two upper-right card groups.
+      // We also strip out anything already visualized more prominently elsewhere.
       const resStats = stats.filter(
         (stat) =>
           (stat.section ?? 'resources') === 'resources' &&
@@ -629,6 +691,9 @@ export function createSummaryOverlay(
       content.appendChild(topRow);
 
       if (scientificBars.length > 0) {
+        // The lower half of the overlay only exists for families with authored
+        // result targets. It pairs the player's chosen inputs with the resulting
+        // comparison bars so visitors can connect cause (inputs) to effect (fit).
         const bottomRow = document.createElement('div');
 
         bottomRow.className = 'sci-bottom-row';
@@ -644,6 +709,9 @@ export function createSummaryOverlay(
         paramCards.className = 'param-cards';
 
         for (const param of simClass.parameters) {
+          // Every parameter card is rebuilt from the current value map so the
+          // summary remains faithful to what the user actually selected, even if
+          // the chosen playback asset came from a nearest-neighbor manifest match.
           const rawValue = values[param.id] ?? param.fallbackValue;
           const displayUnit = param.displayUnit ?? param.unit;
 
@@ -739,6 +807,10 @@ function selectMetric(
   stat: StatDisplayConfig,
   availableMetrics: Record<string, { label: string; value: string }>,
 ): { label: string; value: string } {
+  // Resolution precedence here is deliberate:
+  // 1. A concrete generated/sidecar metric value, if available.
+  // 2. The YAML-authored fallback `value`, if the metric is absent.
+  // 3. A final `--` placeholder when neither exists.
   const metric = availableMetrics[stat.id] ?? { label: stat.id, value: '--' };
   const resolvedValue = metric.value !== '--' ? metric.value : (stat.value ?? '--');
   const formattedCarbon = formatCarbonMetric(resolvedValue, stat);
@@ -773,6 +845,8 @@ function formatCarbonMetric(value: string, stat: StatDisplayConfig): string | nu
   }
 
   if (Math.abs(numeric) < 1) {
+    // Carbon is the only resource metric where sub-unit values read more clearly
+    // in a smaller unit. `0.2 kg CO2` is less public-friendly than `200 g CO2`.
     return withUnit(
       formatNumericString(value, {
         scale: (stat.valueScale ?? 1) * 1000,
@@ -809,6 +883,9 @@ function formatSummaryValue(value: string, stat: StatDisplayConfig): string {
     stat.displayFormat === 'compact' ||
     stat.displayFormat === 'float'
   ) {
+    // `scientific` is intentionally treated like compact public formatting now.
+    // The config name remains accepted so older YAML does not need to be edited
+    // in lockstep with every formatter change.
     return formatNumericString(value, {
       scale: stat.valueScale,
       mode: stat.displayFormat,

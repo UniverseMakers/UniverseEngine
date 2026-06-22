@@ -16,50 +16,6 @@ const SCALE_DESCRIPTIONS: Record<string, string> = {
   galaxy: 'Explore the boundless diversity of galaxies in the Universe',
 };
 
-const ENTRY_INFO_BODY = `
-  <div class="entry-info-modal__section">
-    <h3 class="entry-info-modal__heading">What is it?</h3>
-    <p class="entry-info-modal__copy">
-      Universe Engine is an interactive simulation gallery. Each theme lets you
-      step into a different scale of computational science and explore how changing
-      a few core inputs reshapes the outcome.
-    </p>
-  </div>
-  <div class="entry-info-modal__section">
-    <h3 class="entry-info-modal__heading">What can you do?</h3>
-    <p class="entry-info-modal__copy">
-      Pick a theme, tune the parameters, run the simulation, and compare your
-      choices against the real scientific targets and resource costs behind the scenes.
-    </p>
-  </div>
-  <div class="entry-info-modal__section">
-    <h3 class="entry-info-modal__heading">What should you take away?</h3>
-    <div class="entry-info-modal__theme-list">
-      <div class="entry-info-modal__theme">
-        <p class="entry-info-modal__theme-title">Planetary</p>
-        <p class="entry-info-modal__copy">
-          Small changes in collision angle, speed, and mass can completely change
-          how a Moon-forming impact unfolds.
-        </p>
-      </div>
-      <div class="entry-info-modal__theme">
-        <p class="entry-info-modal__theme-title">Galaxy</p>
-        <p class="entry-info-modal__copy">
-          Galaxies are shaped by long feedback loops between stars, gas, and black holes,
-          not by any one ingredient in isolation.
-        </p>
-      </div>
-      <div class="entry-info-modal__theme">
-        <p class="entry-info-modal__theme-title">Cosmos</p>
-        <p class="entry-info-modal__copy">
-          Even the largest structures in the Universe depend sensitively on the
-          underlying physical rules we often take for granted.
-        </p>
-      </div>
-    </div>
-  </div>
-`;
-
 export interface EntryOverlayController {
   /** Reveal the overlay. */
   show: () => void;
@@ -143,10 +99,70 @@ export function createEntryOverlay(
   infoButton.appendChild(createInfoIcon());
   infoModal.className = 'sci-modal is-hidden';
   infoModal.innerHTML = `
-    <div class="sci-modal__card entry-info-modal">
-      <button class="sci-modal__close" type="button" aria-label="Close">&#10005;</button>
-      <div class="sci-modal__title">About This Experience</div>
-      <div class="sci-modal__body">${ENTRY_INFO_BODY}</div>
+    <div class="entry-info-modal">
+      <div class="entry-info-modal__shell">
+        <div class="entry-info-modal__media">
+          <img
+            class="entry-info-modal__image"
+            src="${bannerSrc}"
+            alt="Universe Engine preview"
+            width="1600"
+            height="381"
+            decoding="async"
+          />
+          <div class="entry-info-modal__media-copy">
+            <p class="entry-info-modal__eyebrow">Universe Engine</p>
+            <h2 class="entry-info-modal__headline">Explore Simulation At Human Scale</h2>
+          </div>
+        </div>
+        <div class="entry-info-modal__content">
+          <button class="entry-info-modal__close" type="button" aria-label="Close">×</button>
+          <div class="entry-info-modal__header">
+            <p class="entry-info-modal__eyebrow">About</p>
+            <h2 class="entry-info-modal__title">What Is This Experience?</h2>
+            <p class="entry-info-modal__subtitle">
+              Universe Engine turns large scientific simulations into an interactive public-facing
+              experience: choose a scale, change the inputs, and see how those decisions reshape
+              the final outcome.
+            </p>
+          </div>
+          <div class="entry-info-modal__body">
+            <section class="entry-info-modal__section">
+              <h3 class="entry-info-modal__section-title">What can you do?</h3>
+              <p class="entry-info-modal__copy">
+                Pick a theme, tune a small set of meaningful parameters, run the simulation, and
+                compare your choices with the scientific targets, outputs, and computational cost.
+              </p>
+            </section>
+            <section class="entry-info-modal__section">
+              <h3 class="entry-info-modal__section-title">What should you take away?</h3>
+              <div class="entry-info-modal__theme-list">
+                <div class="entry-info-modal__theme">
+                  <p class="entry-info-modal__theme-title">Planetary</p>
+                  <p class="entry-info-modal__copy">
+                    Small shifts in angle, speed, and mass can completely change how a Moon-forming
+                    impact unfolds.
+                  </p>
+                </div>
+                <div class="entry-info-modal__theme">
+                  <p class="entry-info-modal__theme-title">Galaxy</p>
+                  <p class="entry-info-modal__copy">
+                    Galaxies emerge from long feedback loops between stars, gas, and black holes,
+                    not from any single parameter in isolation.
+                  </p>
+                </div>
+                <div class="entry-info-modal__theme">
+                  <p class="entry-info-modal__theme-title">Cosmos</p>
+                  <p class="entry-info-modal__copy">
+                    Even the largest structures in the Universe depend sensitively on the basic
+                    physical laws underpinning everything from the Big Bang to the present day.
+                  </p>
+                </div>
+              </div>
+            </section>
+          </div>
+        </div>
+      </div>
     </div>
   `;
 
@@ -156,7 +172,9 @@ export function createEntryOverlay(
   overlay.appendChild(infoModal);
   container.appendChild(overlay);
 
-  const infoModalClose = infoModal.querySelector('.sci-modal__close') as HTMLButtonElement;
+  const infoModalClose = infoModal.querySelector(
+    '.entry-info-modal__close',
+  ) as HTMLButtonElement;
 
   function openInfoModal(): void {
     infoModal.classList.remove('is-hidden');
