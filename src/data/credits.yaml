@@ -8,13 +8,13 @@
 #     - `url` (optional):   a URL that makes the entry a clickable link
 #     - `header` (optional): when true renders as a section heading
 
-- text: App Author
+- text: App Authors
   header: true
 
-- text: Dr Will Roper (University of Sussex / University of Oxford)
+- text: Lead Developer - Dr Will Roper (University of Sussex / University of Oxford)
   url: https://willjroper.github.io/
 
-- text: With thanks to the Universe Makers Team
+- text: The Universe Makers Team
   url: https://universe-makers.github.io/about.html
 
 - text: Simulations
