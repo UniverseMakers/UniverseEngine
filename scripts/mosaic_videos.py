@@ -6,6 +6,9 @@ randomly selects (with repetition) enough to fill an ``rows x cols`` grid, loops
 each input indefinitely, scales and crops each tile to fit, and renders a
 single 1080p mosaic video. With repetition, the grid can be filled even when
 fewer unique videos exist than tiles.
+
+Corrupt or unreadable MP4 files are silently skipped and reported at the end.
+``.tmp.mp4`` files (incomplete transfers) are excluded from the pool.
 """
 
 import argparse
@@ -73,6 +76,27 @@ def parse_args() -> argparse.Namespace:
     return parser.parse_args()
 
 
+def validate_video(path: Path) -> bool:
+    """Return True if *path* is a readable MP4 with a video stream."""
+    try:
+        result = subprocess.run(
+            [
+                "ffprobe",
+                "-v", "error",
+                "-select_streams", "v:0",
+                "-show_entries", "stream=codec_type",
+                "-of", "default=noprint_wrappers=1:nokey=1",
+                str(path),
+            ],
+            capture_output=True,
+            text=True,
+            timeout=10,
+        )
+        return result.returncode == 0 and "video" in result.stdout
+    except (subprocess.TimeoutExpired, OSError):
+        return False
+
+
 def main() -> None:
     """Create the requested mosaic video."""
     args = parse_args()
@@ -82,13 +106,37 @@ def main() -> None:
     if args.border < 0:
         raise ValueError("Border must be non-negative.")
 
-    files = sorted(args.directory.rglob("*.mp4"))
+    all_files = sorted(args.directory.rglob("*.mp4"))
     tile_count = args.rows * args.cols
 
-    if not files:
+    if not all_files:
         raise RuntimeError(f"No MP4 files found under {args.directory}.")
 
-    selected = random.choices(files, k=tile_count)
+    raw_files = [
+        f for f in all_files
+        if not f.name.endswith(".tmp.mp4") and not f.is_symlink()
+    ]
+
+    valid_files: list[Path] = []
+    skipped_files: list[tuple[Path, str]] = []
+
+    for path in raw_files:
+        if validate_video(path):
+            valid_files.append(path)
+        else:
+            skipped_files.append((path, "ffprobe validation failed"))
+
+    for path in all_files:
+        if path not in raw_files:
+            skipped_files.append((path, "excluded (.tmp.mp4 or symlink)"))
+
+    if not valid_files:
+        raise RuntimeError(
+            f"No valid MP4 files found under {args.directory} "
+            f"({len(skipped_files)} skipped)."
+        )
+
+    selected = random.choices(valid_files, k=tile_count)
 
     output_width = 1920
     output_height = 1080
@@ -164,6 +212,12 @@ def main() -> None:
         ]
     )
 
+    print(f"Discovered {len(all_files)} MP4 file(s), {len(valid_files)} valid.")
+    if skipped_files:
+        print("Skipped (corrupt, temp, or unreadable):")
+        for path, reason in sorted(skipped_files):
+            print(f"  {path}  [{reason}]")
+    print()
     print("Selected videos:")
     for filename in selected:
         print(f"  {filename}")
