@@ -10,6 +10,12 @@
 import type { SimulationClass } from '../selection/simulation-catalog.ts';
 import { withBaseUrl } from '../shared/urls.ts';
 
+const SCALE_DESCRIPTIONS: Record<string, string> = {
+  planetary: 'Smash together proto-planets and try to form the Moon',
+  cosmos: 'Take control of the fundamental laws of the Universe',
+  galaxy: 'Explore the boundless diversity of galaxies in the Universe',
+};
+
 export interface EntryOverlayController {
   /** Reveal the overlay. */
   show: () => void;
@@ -70,9 +76,12 @@ export function createEntryOverlay(
 
       button.className = 'entry-overlay__button';
       button.type = 'button';
+      const description =
+        SCALE_DESCRIPTIONS[simClass.id] ?? 'Explore this simulation scale.';
 
       button.innerHTML = `
         <span class="entry-overlay__button-label">${simClass.label}</span>
+        <span class="entry-overlay__button-description">${description}</span>
       `;
       button.addEventListener('click', () => onSelect(simClass));
       actions.appendChild(button);
