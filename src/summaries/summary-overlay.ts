@@ -3,11 +3,16 @@
  *
  * Renders the centered summary overlay shown after playback ends:
  *   - a hero score (Callum's outcome-based closeness for planetary; the app's
- *     similarityScore for any family that has no scientific bars)
+ *     similarityScore fallback for any family that has no result bars)
  *   - the resource stats as compact cards (top-right)
- *   - the scientific results as bars (Callum's design, full-width below)
+ *   - the result-comparison bars (Callum's design, full-width below)
  *   - tap a bar for a detail pop-up
- * The Replay / New buttons are unchanged.
+ *   - the user's chosen input parameters beside those bars for context
+ *
+ * This file intentionally owns both the data-to-view mapping and the DOM
+ * construction for the overlay. That keeps the feature self-contained, but it
+ * also means a few helpers exist purely to explain the summary's scoring and
+ * fallback rules.
  */
 
 import type {
@@ -97,6 +102,9 @@ function verdict(v: number): { word: string; colour: string } {
   return { word: v > 1 ? 'Way too high' : 'Way too low', colour: RED };
 }
 
+/**
+ * Map a normalized result ratio onto one of the authored message buckets.
+ */
 function situation(v: number): string {
   const d = Math.abs(v - 1);
   const high = v >= 1;
@@ -107,10 +115,16 @@ function situation(v: number): string {
   return high ? 'redHigh' : 'redLow';
 }
 
+/**
+ * Clamp a normalized ratio into the horizontal bar track.
+ */
 function pos(v: number): number {
   return (Math.min(Math.max(v, 0), MAX) / MAX) * 100;
 }
 
+/**
+ * Turn a 0-100 score into the hero headline shown above the gauge.
+ */
 function reaction(p: number): { word: string; colour: string } {
   if (p >= 85) return { word: 'Almost perfect', colour: GREEN };
   if (p >= 65) return { word: 'Really close', colour: GREEN };
@@ -120,6 +134,13 @@ function reaction(p: number): { word: string; colour: string } {
   return { word: 'Way off - try again', colour: RED };
 }
 
+/**
+ * Resolve the explanatory sentence shown when a user opens a result bar.
+ *
+ * We first prefer a YAML-authored message keyed by result id (or label as a
+ * fallback for older content). If no tailored copy exists we still produce a
+ * sensible generic message from the score bucket.
+ */
 function detailForTarget(id: string, label: string, value: number): string {
   const s = situation(value);
   const message = TARGET_MESSAGES[id]?.[s] ?? TARGET_MESSAGES[label]?.[s];
@@ -141,6 +162,13 @@ function detailForTarget(id: string, label: string, value: number): string {
   return `${label} is above the target value for this simulation.`;
 }
 
+/**
+ * Build the per-result bar data shown in the lower comparison section.
+ *
+ * Each bar compares a resolved value against a configured target and stores
+ * both the raw resolved number and a formatted display string. The normalized
+ * `value` field is the only one used for scoring and pointer placement.
+ */
 function buildScientificBars(
   simClass: SimulationClass,
   values: Record<string, number>,
@@ -150,11 +178,14 @@ function buildScientificBars(
     .map((result) => {
       const resolved = resolveScientificValue(result, simClass, values, runMetadata);
 
-      if (resolved === null) {
-        return null;
-      }
+        if (resolved === null) {
+          return null;
+        }
 
-      const normalizedValue = resolved / Math.max(result.target, 1e-9);
+        // Normalize against the configured target so every bar can share the
+        // same visual scale: 1.0 means exactly on target, 0.5 means half the
+        // target value, 2.0 means double, and anything higher is clamped later.
+        const normalizedValue = resolved / Math.max(result.target, 1e-9);
       const label = resolveScientificLabel(result, simClass, runMetadata);
       const detail = detailForTarget(result.id, label, normalizedValue);
       const formattedValue = withUnit(formatSummaryValue(String(resolved), result), result.unit);
@@ -171,6 +202,15 @@ function buildScientificBars(
     .filter((bar) => bar !== null) as ScientificBarDatum[];
 }
 
+/**
+ * Resolve the number to compare against a result target.
+ *
+ * Resolution order matters:
+ * 1. User-selected parameter value when the result refers to a slider.
+ * 2. Parameter values saved with the chosen run sidecar.
+ * 3. Arbitrary numeric summary metrics from the sidecar.
+ * 4. YAML-authored fallback value.
+ */
 function resolveScientificValue(
   result: ResultDisplayConfig,
   simClass: SimulationClass,
@@ -208,6 +248,9 @@ function resolveScientificValue(
   return configuredFallback;
 }
 
+/**
+ * Resolve the label for a result bar from the most specific source available.
+ */
 function resolveScientificLabel(
   result: ResultDisplayConfig,
   simClass: SimulationClass,
@@ -223,6 +266,9 @@ function resolveScientificLabel(
   );
 }
 
+/**
+ * Parse a maybe-numeric string, returning null for absent or invalid input.
+ */
 function parseNumeric(value: string | undefined): number | null {
   if (value === undefined) {
     return null;
@@ -233,6 +279,12 @@ function parseNumeric(value: string | undefined): number | null {
   return Number.isFinite(numeric) ? numeric : null;
 }
 
+/**
+ * Convert the result bars into a single 0-100 outcome score.
+ *
+ * Each bar contributes linearly based on its distance from the ideal ratio of
+ * 1.0, with values more than one target-width away bottoming out at zero.
+ */
 function outcomeScore(scientificBars: ScientificBarDatum[]): number {
   if (scientificBars.length === 0) {
     return 0;
@@ -335,6 +387,8 @@ export function createSummaryOverlay(
   const modalBody = modal.querySelector('.sci-modal__body') as HTMLElement;
   const modalClose = modal.querySelector('.sci-modal__close') as HTMLElement;
 
+  // The same modal is reused for both result bars and info cards so we only
+  // maintain one focus/close behavior and one piece of DOM.
   function openModal(bar: ScientificBarDatum): void {
     const vd = verdict(bar.value);
 
@@ -383,6 +437,9 @@ export function createSummaryOverlay(
       grid.classList.add('metric-grid--single-row');
     }
 
+    // The section config controls both how many cards may appear per row and
+    // the max width of the whole section so YAML can tune layout without the
+    // rendering code needing family-specific branches.
     grid.style.setProperty('--summary-grid-columns', String(columnCount));
     grid.style.setProperty('--summary-grid-max-width', `${config.maxWidthRem}rem`);
 
@@ -426,6 +483,8 @@ export function createSummaryOverlay(
       overlay.classList.remove('is-hidden');
       overlay.classList.remove('is-visible');
 
+      // Force a layout pass so re-adding `is-visible` reliably retriggers the
+      // CSS transition even when the overlay is shown repeatedly in one session.
       void overlay.offsetWidth;
 
       requestAnimationFrame(() => {
@@ -457,6 +516,9 @@ export function createSummaryOverlay(
       content.innerHTML = '';
       closeModal();
 
+      // Rebuild the summary from scratch on every update. The overlay is shown
+      // only at coarse checkpoints, so a full rerender is simpler and safer
+      // than diffing several conditional sections by hand.
       const available = buildSummaryMetricMap(
         simClass,
         values,
@@ -470,8 +532,11 @@ export function createSummaryOverlay(
       let score: number;
 
       if (scientificBars.length > 0) {
+        // Prefer the richer result-bar score when targets exist for this family.
         score = outcomeScore(scientificBars);
       } else {
+        // Otherwise fall back to the generic similarity metric generated by the
+        // summary-metrics module.
         const scoreStr = available.similarityScore?.value ?? '0/100';
 
         score = parseInt(scoreStr, 10) || 0;
@@ -491,6 +556,8 @@ export function createSummaryOverlay(
       hero.className = 'sci-hero panel';
 
       if (thumbnail) {
+        // Some experiences want the finished frame to be the visual hero rather
+        // than the numeric score block.
         hero.classList.add('sci-hero--thumbnail');
         hero.innerHTML = `<img class="sci-hero__thumbnail" src="${thumbnail}" alt="Final frame of simulation" />`;
       } else {
@@ -518,6 +585,9 @@ export function createSummaryOverlay(
           stat.section === 'simulationStats' &&
           !resultIds.has(String(stat.id)),
       );
+
+      // Any stat whose id is already visualized as a result bar is suppressed
+      // here to avoid duplicate information appearing as both a card and a bar.
 
       if (resStats.length > 0) {
         rightColumn.appendChild(
@@ -598,6 +668,9 @@ export function createSummaryOverlay(
             significantFigures: param.displaySignificantFigures,
           });
 
+          // Parameters always show the player's chosen values, not the matched
+          // run's nearest-neighbor values. That keeps the summary faithful to
+          // the user's input even when playback came from a nearby precomputed run.
           value.textContent = withUnit(formatted, displayUnit);
           card.appendChild(label);
           card.appendChild(value);
@@ -627,6 +700,9 @@ export function createSummaryOverlay(
         for (const bar of scientificBars) {
           const row = document.createElement('div');
 
+          // The pointer's horizontal position uses the normalized ratio rather
+          // than an absolute quantity, letting masses, counts, and temperatures
+          // share the same visual treatment.
           row.className = 'sci-bar';
           row.innerHTML = `
             <div class="sci-bar__name">${bar.label}</div>
@@ -654,6 +730,10 @@ export function createSummaryOverlay(
 
 /**
  * Pick one displayable metric row given YAML display config.
+ *
+ * The metric dictionary is intentionally sparse: some values are generated in
+ * code, some come from per-run sidecar YAML, and some are only defaults in the
+ * summary config. This helper merges those sources into one displayable row.
  */
 function selectMetric(
   stat: StatDisplayConfig,
@@ -678,6 +758,9 @@ function selectMetric(
   };
 }
 
+/**
+ * Special-case carbon so sub-kilogram values switch to grams.
+ */
 function formatCarbonMetric(value: string, stat: StatDisplayConfig): string | null {
   if (stat.id !== 'carbonBurnt' || value === '--') {
     return null;
@@ -712,6 +795,9 @@ function formatCarbonMetric(value: string, stat: StatDisplayConfig): string | nu
 
 /**
  * Apply YAML-configured summary formatting to one resolved value.
+ *
+ * Formatting is intentionally permissive: if a value is not numeric we return
+ * it unchanged so authored strings such as "100/100" or "Present" survive.
  */
 function formatSummaryValue(value: string, stat: StatDisplayConfig): string {
   if (value === '--') {

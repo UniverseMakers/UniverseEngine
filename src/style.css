@@ -604,10 +604,20 @@ button {
 
 #app[data-mode='entry'] .app-partner-logo {
   display: block;
+  top: auto;
+  right: auto;
+  bottom: calc(1.5rem + 1.75vh);
+  left: 50%;
+  transform: translateX(-50%);
 }
 
 #app:has(.overlay--summary.is-visible) .app-partner-logo {
   display: block;
+  top: 1.5rem;
+  right: 1.5rem;
+  bottom: auto;
+  left: auto;
+  transform: none;
 }
 
 #app[data-mode='config'] .display-chrome__left-center,

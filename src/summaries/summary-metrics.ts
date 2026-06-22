@@ -10,7 +10,9 @@ import type { SimulationClass } from '../selection/simulation-catalog.ts';
 import type { VideoRunMetadata } from '../selection/video-run-metadata.ts';
 
 export interface SummaryMetricValue {
+  /** Human-readable label shown in the summary card. */
   label: string;
+  /** Raw display value before any per-stat summary formatting is applied. */
   value: string;
 }
 
@@ -197,6 +199,12 @@ function formatCompactNumber(value: number, digits: number): string {
     .replace(/\.$/, '');
 }
 
+/**
+ * Resolve the numeric value for a result target.
+ *
+ * The same precedence order as the overlay is used here so the computed score
+ * matches the values the user sees in the bar section.
+ */
 function resolveResultValue(
   simClass: SimulationClass,
   values: Record<string, number>,
@@ -208,6 +216,9 @@ function resolveResultValue(
   );
 
   if (selectedParameter) {
+    // Score against the player's current input rather than the nearest matched
+    // run. The chosen playback asset is an approximation; the guess itself is
+    // what the summary is evaluating.
     return values[id] ?? selectedParameter.fallbackValue;
   }
 
@@ -228,6 +239,9 @@ function resolveResultValue(
   return Number.isFinite(numeric) ? numeric : null;
 }
 
+/**
+ * Format a percentage-like value, or a placeholder when unavailable.
+ */
 function formatPercent(value: number | null): string {
   if (value === null) {
     return '--';
@@ -236,6 +250,12 @@ function formatPercent(value: number | null): string {
   return value.toFixed(1);
 }
 
+/**
+ * Convert a normalized result ratio into a simple 0-100 closeness percent.
+ *
+ * A value of 1 means perfect agreement with the target, while values one full
+ * target-width away or more clamp to zero.
+ */
 function computeTargetMatchPercent(value: number | null): number | null {
   if (value === null) {
     return null;
@@ -244,6 +264,9 @@ function computeTargetMatchPercent(value: number | null): number | null {
   return Math.max(0, (1 - Math.abs(value - 1)) * 100);
 }
 
+/**
+ * Average result closeness across all available target metrics.
+ */
 function computeOutcomeScore(
   results: Array<{ id: string; value: number; target: number }>,
 ): number {
@@ -260,6 +283,12 @@ function computeOutcomeScore(
   return Math.round((total / results.length) * 100);
 }
 
+/**
+ * Lightweight heuristic used only for the planetary summary card copy.
+ *
+ * This is not a physical likelihood calculation; it is a public-facing score
+ * tuned to reward the broad "canonical" region for angle and velocity.
+ */
 function scorePlanetaryScenario(
   simulationId: string,
   values: Record<string, number>,

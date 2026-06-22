@@ -113,6 +113,8 @@ export async function loadVideoRunMetadata(
 
 async function loadRunParameterValues(url: string): Promise<Record<string, number>> {
   try {
+    // Parameter values live in a sibling YAML file so the summary can display
+    // both aggregate run metrics and the exact parameters saved with that run.
     const response = await fetch(getRunParametersUrl(url));
 
     if (!response.ok) {
@@ -128,6 +130,9 @@ async function loadRunParameterValues(url: string): Promise<Record<string, numbe
   }
 }
 
+/**
+ * Derive the sidecar parameter YAML URL from a run summary URL.
+ */
 function getRunParametersUrl(url: string): string {
   return url.replace(/run_summary\.yaml($|\?)/, 'parameters.yaml$1');
 }
@@ -203,6 +208,7 @@ function toNumberRecord(value: unknown): Record<string, number> {
     const numeric = toNumber(rawEntry);
 
     if (numeric === null) {
+      // Skip malformed entries rather than treating the whole sidecar as bad.
       continue;
     }
 
