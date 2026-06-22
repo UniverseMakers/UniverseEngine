@@ -90,9 +90,13 @@ export function createOverlayPanel(
 
   titleBlock.className = 'config-overlay__title-block';
   titleBlock.innerHTML = `
-    <p class="config-overlay__eyebrow">Celestial observer</p>
-    <h2 class="config-overlay__title">Simulation matrix</h2>
+    <p class="config-overlay__eyebrow"></p>
+    <h2 class="config-overlay__title"></h2>
+    <p class="config-overlay__subtitle"></p>
   `;
+  const titleEyebrow = titleBlock.querySelector('.config-overlay__eyebrow') as HTMLParagraphElement;
+  const titleText = titleBlock.querySelector('.config-overlay__title') as HTMLHeadingElement;
+  const titleSubtitle = titleBlock.querySelector('.config-overlay__subtitle') as HTMLParagraphElement;
 
   const closeButton = document.createElement('button');
 
@@ -101,12 +105,6 @@ export function createOverlayPanel(
   closeButton.setAttribute('aria-label', 'Close overlay');
   closeButton.textContent = '×';
 
-  const sectionLabel = document.createElement('div');
-
-  sectionLabel.className = 'config-overlay__section-indicator';
-  sectionLabel.textContent = 'Parameters';
-
-  header.appendChild(sectionLabel);
   header.appendChild(titleBlock);
   header.appendChild(closeButton);
 
@@ -434,15 +432,31 @@ export function createOverlayPanel(
 
   function applyView(view: OverlayPanelView): void {
     controls.dataset.view = view;
-    sectionLabel.textContent =
-      view === 'parameters' ? 'Parameters' : view === 'settings' ? 'Settings' : 'Credits';
+
+    if (view === 'parameters') {
+      titleEyebrow.textContent = options.simClass.label;
+      titleText.textContent = 'Shape Your Simulation';
+      titleSubtitle.textContent =
+        options.simClass.parameterSubtitle ??
+        "Adjust the parameters, inspect the setup, and press 'Run' when you're ready.";
+    } else if (view === 'settings') {
+      titleEyebrow.textContent = 'Interface';
+      titleText.textContent = 'Adjust The Control Room';
+      titleSubtitle.textContent =
+        'Change the interface theme and manage exhibit-level options for this installation.';
+    } else {
+      titleEyebrow.textContent = 'References';
+      titleText.textContent = 'Project Sources And Attribution';
+      titleSubtitle.textContent =
+        'Review the datasets, imagery, and supporting materials behind this experience.';
+    }
 
     if (view === 'settings') {
       footerButton.textContent = 'Apply';
     } else if (view === 'credits') {
       footerButton.textContent = 'Close';
     } else {
-      footerButton.textContent = 'Run';
+      footerButton.textContent = 'Run Simulation';
     }
   }
 
@@ -525,9 +539,14 @@ export function createOverlayPanel(
       resetAdvancedPanel();
     },
     setSimulation(simClass: SimulationClass, values: Record<string, number>) {
+      options.simClass = simClass;
       parameterEditor.setSimClass(simClass, values);
       mediaImage.src = simClass.placeholderImage;
       mediaImage.alt = `${simClass.label} preview`;
+
+      if ((controls.dataset.view as OverlayPanelView) === 'parameters') {
+        applyView('parameters');
+      }
     },
     setTheme(theme: ThemeId) {
       themePicker.setActive(theme);
