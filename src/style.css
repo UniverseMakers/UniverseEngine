@@ -1057,6 +1057,7 @@ button {
   display: grid;
   gap: 1.5rem;
   width: min(62rem, calc(100vw - 2rem));
+  transform: translateY(-3vh);
   padding: 2.5rem;
   border: 1px solid var(--line-strong);
   border-radius: 0;
@@ -1103,6 +1104,32 @@ button {
   color: var(--text-muted);
   font-size: 0.95rem;
   letter-spacing: 0.24em;
+}
+
+.entry-overlay__info-button {
+  position: absolute;
+  top: 1.25rem;
+  right: 1.25rem;
+  z-index: 6;
+  padding: 0.99rem;
+  border: 1px solid var(--line-strong);
+  border-radius: 0;
+  background: rgba(0, 0, 0, 0.26);
+  color: var(--accent);
+  box-shadow: none;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  opacity: 1;
+}
+
+.entry-overlay__info-button svg {
+  width: 1.3rem;
+  height: 1.3rem;
+}
+
+.entry-overlay__info-button:hover {
+  color: var(--accent);
+  background: rgba(34, 211, 238, 0.1);
 }
 
 .entry-overlay__title {
@@ -1162,6 +1189,51 @@ button {
   text-transform: none;
   text-align: right;
   justify-self: end;
+}
+
+.entry-info-modal {
+  max-height: min(42rem, calc(100vh - 4rem));
+  overflow-y: auto;
+}
+
+.entry-info-modal__section + .entry-info-modal__section {
+  margin-top: 1.35rem;
+}
+
+.entry-info-modal__heading,
+.entry-info-modal__theme-title {
+  margin: 0;
+  color: #e9f1f7;
+  font-family: var(--font-mono);
+  text-transform: uppercase;
+}
+
+.entry-info-modal__heading {
+  font-size: 0.8rem;
+  letter-spacing: 0.16em;
+}
+
+.entry-info-modal__copy {
+  margin: 0.55rem 0 0;
+  color: #c5d2dd;
+  line-height: 1.7;
+}
+
+.entry-info-modal__theme-list {
+  display: grid;
+  gap: 0.95rem;
+  margin-top: 0.8rem;
+}
+
+.entry-info-modal__theme {
+  padding: 0.9rem 1rem;
+  border: 1px solid rgba(99, 196, 232, 0.2);
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.entry-info-modal__theme-title {
+  font-size: 0.78rem;
+  letter-spacing: 0.14em;
 }
 
 .summary-overlay {
@@ -2450,6 +2522,10 @@ button {
 /* -------------------------------------------------------------------------- */
 
 @media (width <= 1024px) {
+  .entry-overlay {
+    transform: translateY(-2vh);
+  }
+
   .display-chrome__top-left {
     top: 1rem;
     left: 1rem;
@@ -2596,6 +2672,7 @@ button {
     width: 100vw;
     min-height: 100vh;
     min-height: 100dvh;
+    transform: none;
     border-radius: 0;
     border-left: 0;
     border-right: 0;
@@ -2626,6 +2703,17 @@ button {
     text-align: left;
     justify-self: start;
     line-height: 1.6;
+  }
+
+  .entry-info-modal {
+    width: calc(100vw - 2rem);
+    max-height: calc(100dvh - 2rem);
+    padding: 1.4rem 1.1rem;
+  }
+
+  .entry-overlay__info-button {
+    top: calc(1rem + env(safe-area-inset-top));
+    right: 1rem;
   }
 
   /* Avoid subpixel clipping by stretching the full-screen summary layout. */
@@ -3069,6 +3157,13 @@ button {
 
   .terminal__cursor {
     padding: 0 1rem 1rem;
+  }
+}
+
+@media (width <= 720px) {
+  .entry-overlay__info-button {
+    top: calc(0.75rem + env(safe-area-inset-top));
+    right: 0.75rem;
   }
 }
 

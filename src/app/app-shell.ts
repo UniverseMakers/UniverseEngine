@@ -669,17 +669,39 @@ export function createAppShell(app: HTMLElement): void {
 
   const bindCollapsibleChrome = (
     el: HTMLElement,
-    options: { toggleOnClick: boolean },
+    options: { toggleOnClick: boolean; isCollapsible?: () => boolean },
   ) => {
+    const isCollapsible = options.isCollapsible ?? (() => true);
+
     el.addEventListener('mouseenter', () => expandOne(el));
-    el.addEventListener('mouseleave', () => scheduleCollapseOne(el));
+    el.addEventListener('mouseleave', () => {
+      if (!isCollapsible()) {
+        expandOne(el);
+
+        return;
+      }
+
+      scheduleCollapseOne(el);
+    });
     el.addEventListener('focusin', () => expandOne(el));
     el.addEventListener('focusout', (event) => {
       if (!el.contains(event.relatedTarget as Node)) {
+        if (!isCollapsible()) {
+          expandOne(el);
+
+          return;
+        }
+
         scheduleCollapseOne(el);
       }
     });
     el.addEventListener('click', () => {
+      if (!isCollapsible()) {
+        expandOne(el);
+
+        return;
+      }
+
       if (el.classList.contains('side-collapsed')) {
         expandOne(el);
         scheduleCollapseOne(el);
@@ -694,11 +716,17 @@ export function createAppShell(app: HTMLElement): void {
       }
     });
 
-    // Start collapsed.
-    collapseOneNow(el);
+    if (isCollapsible()) {
+      collapseOneNow(el);
+    } else {
+      expandOne(el);
+    }
   };
 
-  bindCollapsibleChrome(topLeft, { toggleOnClick: true });
+  bindCollapsibleChrome(topLeft, {
+    toggleOnClick: true,
+    isCollapsible: () => app.dataset.mode !== 'entry',
+  });
   bindCollapsibleChrome(leftCenter, { toggleOnClick: true });
   bindCollapsibleChrome(timelineHost, { toggleOnClick: false });
 
@@ -1270,6 +1298,12 @@ export function createAppShell(app: HTMLElement): void {
       !advancedSettings.lockedScaleId &&
         (nextMode === 'entry' || nextMode === 'config' || nextMode === 'display'),
     );
+
+    if (nextMode === 'entry') {
+      expandOne(topLeft);
+    } else {
+      collapseOneNow(topLeft);
+    }
 
     // Entry overlay: shown only in entry mode, hidden everywhere else.
     if (nextMode === 'entry' && !advancedSettings.lockedScaleId) {

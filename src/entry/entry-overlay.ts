@@ -16,6 +16,50 @@ const SCALE_DESCRIPTIONS: Record<string, string> = {
   galaxy: 'Explore the boundless diversity of galaxies in the Universe',
 };
 
+const ENTRY_INFO_BODY = `
+  <div class="entry-info-modal__section">
+    <h3 class="entry-info-modal__heading">What is it?</h3>
+    <p class="entry-info-modal__copy">
+      Universe Engine is an interactive simulation gallery. Each theme lets you
+      step into a different scale of computational science and explore how changing
+      a few core inputs reshapes the outcome.
+    </p>
+  </div>
+  <div class="entry-info-modal__section">
+    <h3 class="entry-info-modal__heading">What can you do?</h3>
+    <p class="entry-info-modal__copy">
+      Pick a theme, tune the parameters, run the simulation, and compare your
+      choices against the real scientific targets and resource costs behind the scenes.
+    </p>
+  </div>
+  <div class="entry-info-modal__section">
+    <h3 class="entry-info-modal__heading">What should you take away?</h3>
+    <div class="entry-info-modal__theme-list">
+      <div class="entry-info-modal__theme">
+        <p class="entry-info-modal__theme-title">Planetary</p>
+        <p class="entry-info-modal__copy">
+          Small changes in collision angle, speed, and mass can completely change
+          how a Moon-forming impact unfolds.
+        </p>
+      </div>
+      <div class="entry-info-modal__theme">
+        <p class="entry-info-modal__theme-title">Galaxy</p>
+        <p class="entry-info-modal__copy">
+          Galaxies are shaped by long feedback loops between stars, gas, and black holes,
+          not by any one ingredient in isolation.
+        </p>
+      </div>
+      <div class="entry-info-modal__theme">
+        <p class="entry-info-modal__theme-title">Cosmos</p>
+        <p class="entry-info-modal__copy">
+          Even the largest structures in the Universe depend sensitively on the
+          underlying physical rules we often take for granted.
+        </p>
+      </div>
+    </div>
+  </div>
+`;
+
 export interface EntryOverlayController {
   /** Reveal the overlay. */
   show: () => void;
@@ -90,9 +134,45 @@ export function createEntryOverlay(
 
   renderSimulationClasses(simulationClasses);
 
+  const infoModal = document.createElement('div');
+  const infoButton = document.createElement('button');
+
+  infoButton.className = 'view-switcher__info entry-overlay__info-button';
+  infoButton.type = 'button';
+  infoButton.setAttribute('aria-label', 'About this experience');
+  infoButton.appendChild(createInfoIcon());
+  infoModal.className = 'sci-modal is-hidden';
+  infoModal.innerHTML = `
+    <div class="sci-modal__card entry-info-modal">
+      <button class="sci-modal__close" type="button" aria-label="Close">&#10005;</button>
+      <div class="sci-modal__title">About This Experience</div>
+      <div class="sci-modal__body">${ENTRY_INFO_BODY}</div>
+    </div>
+  `;
+
   panel.appendChild(actions);
   overlay.appendChild(panel);
+  overlay.appendChild(infoButton);
+  overlay.appendChild(infoModal);
   container.appendChild(overlay);
+
+  const infoModalClose = infoModal.querySelector('.sci-modal__close') as HTMLButtonElement;
+
+  function openInfoModal(): void {
+    infoModal.classList.remove('is-hidden');
+  }
+
+  function closeInfoModal(): void {
+    infoModal.classList.add('is-hidden');
+  }
+
+  infoButton.addEventListener('click', openInfoModal);
+  infoModalClose.addEventListener('click', closeInfoModal);
+  infoModal.addEventListener('click', (event) => {
+    if (event.target === infoModal) {
+      closeInfoModal();
+    }
+  });
 
   return {
     show() {
@@ -100,6 +180,7 @@ export function createEntryOverlay(
       overlay.classList.remove('is-hidden');
     },
     hide() {
+      closeInfoModal();
       overlay.hidden = true;
       overlay.classList.add('is-hidden');
     },
@@ -107,4 +188,26 @@ export function createEntryOverlay(
       renderSimulationClasses(nextSimulationClasses);
     },
   };
+}
+
+function createSvg(content: string): SVGSVGElement {
+  const template = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+
+  template.setAttribute('viewBox', '0 0 24 24');
+  template.setAttribute('fill', 'none');
+  template.setAttribute('stroke', 'currentColor');
+  template.setAttribute('stroke-width', '1.5');
+  template.setAttribute('stroke-linecap', 'round');
+  template.setAttribute('stroke-linejoin', 'round');
+  template.innerHTML = content;
+
+  return template;
+}
+
+function createInfoIcon(): SVGSVGElement {
+  return createSvg(`
+    <circle cx="12" cy="12" r="10"></circle>
+    <path d="M12 16.5v-6"></path>
+    <circle cx="12" cy="8.5" r="1.1" fill="currentColor" stroke="none"></circle>
+  `);
 }
