@@ -324,6 +324,19 @@ button {
   pointer-events: none;
 }
 
+.app-partner-logo {
+  position: absolute;
+  top: 1.5rem;
+  right: 1.5rem;
+  z-index: 6;
+  width: clamp(4.95rem, 8.4vw, 7.3rem);
+  height: auto;
+  object-fit: contain;
+  opacity: 0.7;
+  pointer-events: none;
+  display: none;
+}
+
 .display-chrome__bottom {
   right: 2.5rem;
   bottom: 1.5rem;
@@ -588,6 +601,14 @@ button {
 }
 
 /* ── Mode Visibility ──────────────────────────────────────────────────────── */
+
+#app[data-mode='entry'] .app-partner-logo {
+  display: block;
+}
+
+#app:has(.overlay--summary.is-visible) .app-partner-logo {
+  display: block;
+}
 
 #app[data-mode='config'] .display-chrome__left-center,
 #app[data-mode='config'] .display-chrome__top-right,
@@ -1714,7 +1735,7 @@ button {
   z-index: 1;
   display: flex;
   flex-direction: column;
-  width: min(68.5rem, calc(100vw - 2rem));
+  width: min(74rem, calc(100vw - 2rem));
   height: min(52rem, calc(100vh - 2.5rem));
   height: min(52rem, calc(100dvh - 2.5rem));
   max-height: calc(100vh - 2.5rem);
@@ -1730,7 +1751,7 @@ button {
 
 .config-overlay__shell {
   display: grid;
-  grid-template-columns: minmax(18rem, 22rem) 1fr;
+  grid-template-columns: minmax(23.5rem, 30.5rem) 1fr;
   height: 100%;
   min-height: min(52rem, calc(100vh - 2.5rem));
 }
@@ -1750,15 +1771,24 @@ button {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  opacity: 0.66;
-  filter: brightness(0.72) saturate(0.75);
+  opacity: 0.86;
+  filter: brightness(0.9) saturate(0.86);
 }
 
 .config-overlay__media::after {
   content: '';
   position: absolute;
   inset: 0;
-  background: rgba(0, 0, 0, 0.36);
+  background: rgba(0, 0, 0, 0.18);
+}
+
+.config-overlay__media[data-sim-class='cosmos'] .config-overlay__media-image {
+  opacity: 0.69;
+  filter: brightness(0.72) saturate(0.8);
+}
+
+.config-overlay__media[data-sim-class='cosmos']::after {
+  background: rgba(0, 0, 0, 0.2);
 }
 
 .config-overlay__media-copy {
