@@ -143,7 +143,7 @@ export function formatNumericString(
   raw: string,
   options: {
     scale?: number;
-    mode?: 'integer' | 'float' | 'scientific';
+    mode?: 'integer' | 'float' | 'scientific' | 'compact';
     precision?: number;
   } = {},
 ): string {
@@ -166,17 +166,8 @@ export function formatNumericString(
     return Math.round(scaled).toLocaleString(undefined);
   }
 
-  if (mode === 'scientific') {
-    const significantFigures = Math.max(1, options.precision ?? 3);
-
-    return (
-      scaled
-        .toExponential(significantFigures - 1)
-        // Clean up the default exponential notation: "1.00e+3" → "1.00e3".
-        .replace('e+', 'e')
-        // And "1.0e+3" → "1e3" when the mantissa has no meaningful fraction.
-        .replace(/\.0+e/, 'e')
-    );
+  if (mode === 'scientific' || mode === 'compact') {
+    return formatCompactNumber(scaled);
   }
 
   const decimals = Math.max(0, options.precision ?? 2);
@@ -208,17 +199,8 @@ export function formatParameterValue(
   const scaledValue = value * scale;
   const scaledStep = step * scale;
 
-  if (options.format === 'compact') {
+  if (options.format === 'compact' || options.format === 'scientific') {
     return formatCompactNumber(scaledValue);
-  }
-
-  if (options.format === 'scientific') {
-    const significantFigures = Math.max(1, options.significantFigures ?? 3);
-
-    return scaledValue
-      .toExponential(significantFigures - 1)
-      .replace('e+', 'e')
-      .replace(/\.0+e/, 'e');
   }
 
   return formatValueByStep(scaledValue, scaledStep);

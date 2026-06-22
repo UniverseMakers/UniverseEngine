@@ -66,7 +66,7 @@ export interface StatDisplayConfig {
   scaleWithTime?: boolean;
   integer?: boolean;
   valueScale?: number;
-  displayFormat?: 'integer' | 'float' | 'scientific';
+  displayFormat?: 'integer' | 'float' | 'scientific' | 'compact';
   precision?: number;
 }
 
@@ -160,7 +160,7 @@ interface RawStatDisplayConfig {
   scale_with_time?: boolean;
   integer?: boolean;
   value_scale?: number;
-  display_format?: 'integer' | 'float' | 'scientific';
+  display_format?: 'integer' | 'float' | 'scientific' | 'compact';
   precision?: number;
 }
 

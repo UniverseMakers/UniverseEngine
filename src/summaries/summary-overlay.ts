@@ -718,7 +718,11 @@ function formatSummaryValue(value: string, stat: StatDisplayConfig): string {
     return value;
   }
 
-  if (stat.displayFormat === 'scientific' || stat.displayFormat === 'float') {
+  if (
+    stat.displayFormat === 'scientific' ||
+    stat.displayFormat === 'compact' ||
+    stat.displayFormat === 'float'
+  ) {
     return formatNumericString(value, {
       scale: stat.valueScale,
       mode: stat.displayFormat,
