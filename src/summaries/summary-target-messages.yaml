@@ -52,24 +52,24 @@ galaxy:
     redHigh: Far too old. Your galaxy is full of ancient stars that formed very early on.
 
 cosmos:
-  baryon_fraction:
-    greenLow: Very close. You picked just a fraction less ordinary matter than our own universe — barely any difference.
-    greenHigh: Very close. You picked just a fraction more ordinary matter than our own universe — barely any difference.
-    amberLow: A bit low. With less ordinary matter, there's less raw material around to build stars and galaxies.
-    amberHigh: A bit high. With more ordinary matter, there's extra gas floating around to feed star formation.
-    redLow: Far too low. There's so little ordinary matter that your universe would struggle to build anything at all.
-    redHigh: Far too high. There's so much ordinary matter that your universe would look completely different to the one we see.
-  black_hole_strength:
-    greenLow: Very close. The push from black holes is just a shade gentler than in our universe.
-    greenHigh: Very close. The push from black holes is just a shade fiercer than in our universe.
-    amberLow: A bit weak. Your black holes are too gentle, letting galaxies hold onto more gas and keep forming stars.
-    amberHigh: A bit strong. Your black holes blast out too much energy, making it harder for galaxies to hold onto their gas.
-    redLow: Far too weak. Black holes barely push back, so galaxy growth would run unchecked.
-    redHigh: Far too strong. Black holes are blasting energy everywhere, dramatically shutting down galaxy growth.
-  gravity_strength:
-    greenLow: Very close. Gravity is a whisker weaker than in our universe, so things take slightly longer to come together.
-    greenHigh: Very close. Gravity is a whisker stronger than in our universe, so things come together slightly faster.
-    amberLow: A bit weak. Weaker gravity means it takes longer for stars and galaxies to start forming.
-    amberHigh: A bit strong. Stronger gravity causes matter to clump together more quickly than normal.
-    redLow: Far too weak. Gravity is so feeble that your universe would take ages to build anything interesting.
-    redHigh: Far too high. Gravity is overwhelming — matter collapses far too fast for the usual cosmic timeline.
+  stellar_fraction:
+    greenLow: Very close. Your universe locked just a slightly smaller fraction of its mass into stars than ours.
+    greenHigh: Very close. Your universe locked just a slightly larger fraction of its mass into stars than ours.
+    amberLow: A bit low. Your universe turned less of its raw material into stars, leaving it a bit darker and emptier.
+    amberHigh: A bit high. Your universe was a bit more efficient at cooking gas into stars than our own.
+    redLow: Far too low. Your universe struggled to form stars — most of the mass is still drifting around as gas.
+    redHigh: Far too high. Your universe is bursting with stars — it converted far more mass into starlight than ours.
+  average_temperature_kelvin:
+    greenLow: Very close. The gas in your universe is just a shade cooler, on average, than in ours.
+    greenHigh: Very close. The gas in your universe is just a shade warmer, on average, than in ours.
+    amberLow: A bit cool. Your gas is cooler than expected — less energetic feedback from black holes and supernovae heating things up.
+    amberHigh: A bit hot. Your gas is warmer than average — more energetic black holes and stars are heating up the cosmos.
+    redLow: Far too cool. The gas in your universe is very cold — there is barely any energetic feedback happening at all.
+    redHigh: Far too hot. The gas is scorching — black holes and stars are pumping so much energy that normal galaxy growth is disrupted.
+  nhalos:
+    greenLow: Very close. Your universe built just a fraction fewer galaxy-sized dark matter halos than ours.
+    greenHigh: Very close. Your universe built just a fraction more galaxy-sized dark matter halos than ours.
+    amberLow: A bit low. Fewer galaxy-sized dark matter clumps formed — your universe needed a bit more time or stronger gravity to pull them together.
+    amberHigh: A bit high. More galaxy-sized dark matter clumps popped up than in ours — structure formation was a little more eager.
+    redLow: Far too low. Very few galaxy halos managed to form — structures barely clumped together.
+    redHigh: Far too high. Galaxy halos are everywhere — your universe is absolutely teeming with dark matter structures.

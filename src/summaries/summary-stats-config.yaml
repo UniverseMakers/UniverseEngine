@@ -79,8 +79,8 @@ planetary:
       unit: '%'
       display_format: float
       precision: 1
-      description: The fraction of the moon-forming material that came from the proto-Earth target rather than the impactor? Analysis of Moon and Earth rocks shows their makeup is very similar, but most impact scenarios struggle to mix together enough material to immediately explain this.
-    - id: scenario_likelihood
+      description: What fraction of the moon-forming material came from the proto-Earth target rather than the impactor? Analysis of Moon and Earth rocks shows their makeup is very similar, but most impact scenarios struggle to mix together enough material to immediately explain this.
+    - id: likelihood
       label: Scenario likelihood
       value: '--'
       unit: ''
@@ -173,29 +173,28 @@ cosmos:
       value: '--'
       description: How much internal computing time and memory the simulation needed to crunch all that physics. Shared across all the CPUs working together in the supercomputer.
   results:
-    - id: baryon_fraction
-      label: Baryon fraction
-      target: 1.0
+    - id: stellar_fraction
+      label: Stellar fraction
+      target: 0.007851
       value: '--'
+      unit: '%'
+      value_scale: 100
       display_format: float
       precision: 2
-      description: How much ordinary matter your universe had compared with our own.
-    - id: black_hole_strength
-      label: Black hole strength
-      target: 1.0
+      description: What fraction of your universe's mass ended up locked inside stars.
+    - id: average_temperature_kelvin
+      label: Average gas temperature
+      target: 901647
       value: '--'
-      value_scale: 8.80e7
       unit: K
       display_format: compact
-      precision: 3
-      description: How powerfully black holes heated and pushed on the surrounding gas.
-    - id: gravity_strength
-      label: Gravity
-      target: 1.0
+      description: The average temperature of gas across your universe. Hotter gas means more energetic feedback from stars and black holes.
+    - id: nhalos
+      label: Galaxy halos
+      target: 1587
       value: '--'
-      display_format: float
-      precision: 2
-      description: How strong gravity was compared with our own universe.
+      display_format: integer
+      description: How many galaxy-sized dark matter halos (above 10 billion solar masses) your universe managed to build.
   simulationStats:
     - id: stellar_mass_msun
       label: Stellar mass formed

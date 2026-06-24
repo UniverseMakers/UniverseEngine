@@ -120,7 +120,6 @@ export function buildSummaryMetricMap(
       resolveResultValue(simClass, values, runMetadata, 'proto_earth_in_moon'),
     ),
   );
-  const scenarioLikelihood = scorePlanetaryScenario(simClass.id, values);
 
   // ── Step 6: Assemble the final metric dictionary ─────────────────────────
   // The summary overlay will filter and order these using its own YAML config.
@@ -146,10 +145,6 @@ export function buildSummaryMetricMap(
     proto_earth_in_moon_percent: {
       label: 'Proto-Earth in Moon',
       value: protoEarthInMoonPercent,
-    },
-    scenario_likelihood: {
-      label: 'Scenario likelihood',
-      value: scenarioLikelihood,
     },
     audioTrack: { label: 'Audio Track', value: audioTrack },
     terminalLines: { label: 'Terminal Lines', value: terminalLines },
@@ -304,35 +299,4 @@ function computeOutcomeScore(
   );
 
   return Math.round((total / results.length) * 100);
-}
-
-/**
- * Lightweight heuristic used only for the planetary summary card copy.
- *
- * This is not a physical likelihood calculation; it is a public-facing score
- * tuned to reward the broad "canonical" region for angle and velocity.
- */
-function scorePlanetaryScenario(
-  simulationId: string,
-  values: Record<string, number>,
-): string {
-  if (simulationId !== 'planetary') {
-    return '--';
-  }
-
-  const impactorVelocity = values.impactor_velocity;
-  const impactorAngle = values.impactor_angle;
-
-  if (!Number.isFinite(impactorVelocity) || !Number.isFinite(impactorAngle)) {
-    return '--';
-  }
-
-  // The heuristic is intentionally legible: velocity deviations dominate more
-  // than angle deviations, reflecting that large speed changes quickly move the
-  // run away from the broad "canonical" giant-impact regime.
-  const velocityPenalty = Math.abs(impactorVelocity - 15) * 6;
-  const anglePenalty = Math.abs(impactorAngle - 45) * 1.6;
-  const score = Math.max(0, Math.round(100 - velocityPenalty - anglePenalty));
-
-  return String(score);
 }
