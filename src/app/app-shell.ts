@@ -206,7 +206,7 @@ export function createAppShell(app: HTMLElement): void {
   swiftLogo.innerHTML = `
     <img
       class="swift-logo__image"
-      src="${withBaseUrl('assets/credits/swift-logo.png')}"
+      src="${withBaseUrl('assets/credits/swift-logo.webp')}"
       alt="SWIFT"
       width="478"
       height="169"

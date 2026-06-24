@@ -44,6 +44,8 @@ export function createEntryOverlay(
     `${withBaseUrl('assets/banner-1600.webp')} 1600w`,
   ].join(', ');
 
+  const aboutImageSrc = withBaseUrl('assets/2-McAlpine.webp');
+
   // Full-screen overlay wrapper.
   const overlay = document.createElement('section');
 
@@ -104,10 +106,10 @@ export function createEntryOverlay(
         <div class="entry-info-modal__media">
           <img
             class="entry-info-modal__image"
-            src="${bannerSrc}"
+            src="${aboutImageSrc}"
             alt="Universe Engine preview"
-            width="1600"
-            height="381"
+            width="1920"
+            height="1080"
             decoding="async"
           />
           <div class="entry-info-modal__media-copy">
