@@ -1057,6 +1057,7 @@ button {
   display: grid;
   gap: 1.5rem;
   width: min(62rem, calc(100vw - 2rem));
+  max-height: calc(100dvh - 5rem);
   transform: translateY(-3vh);
   padding: 2.5rem;
   border: 1px solid var(--line-strong);
@@ -1065,6 +1066,7 @@ button {
   box-shadow: var(--shadow-ambient);
   backdrop-filter: blur(18px);
   -webkit-backdrop-filter: blur(18px);
+  overflow: auto;
 }
 
 .entry-overlay__banner-frame {
@@ -2789,6 +2791,7 @@ button {
     width: 100vw;
     min-height: 100vh;
     min-height: 100dvh;
+    max-height: none;
     transform: none;
     border-radius: 0;
     border-left: 0;
