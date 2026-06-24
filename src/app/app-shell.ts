@@ -95,7 +95,7 @@ const SCRUB_HUD_UPDATE_INTERVAL_MS = 100;
 const SCALE_TO_THEME: Record<string, ThemeId> = {
   galaxy: 'tron',
   planetary: 'matrix',
-  cosmos: 'nostromo',
+  cosmos: 'hal',
 };
 
 /**
