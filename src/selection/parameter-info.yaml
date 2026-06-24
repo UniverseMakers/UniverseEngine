@@ -12,51 +12,51 @@
 planetary:
   impactor_mass:
     label: Impactor Mass
-    description: How big was the object that smashed into the young Earth? A larger impactor creates a bigger debris cloud — and a bigger Moon.
-    unit: M⊕
+    description: How big was the object that smashed into the young Earth? A more massive impactor could spray out more debris — and perhaps a bigger Moon.
+    unit: Earth masses
     min: 0.05
     max: 0.35
     step: 0.01
   impactor_velocity:
-    label: Impactor Velocity
-    description: How fast was the impactor travelling when it hit? Faster collisions are more violent, spraying hotter debris into orbit around the early Earth.
+    label: Impact Speed
+    description: How fast was the impactor travelling when it hit? Faster collisions are more violent, ejecting more and hotter debris.
     unit: km/s
-    min: 8.6
-    max: 27.9
+    min: 8.5
+    max: 30
     step: 0.1
   impactor_angle:
-    label: Impactor Angle
-    description: Did the impactor strike head-on or glance off at an angle? A direct hit throws material straight up, while a sideswipe can spin the debris into a wider, thinner disc.
+    label: Impact Angle
+    description: Was the impact head-on, or grazing at a high angle? A direct hit blasts material straight out, while a sideswipe can spray the debris out into a disk, or even escape as a hit and run.
     unit: °
     min: 0
-    max: 60
+    max: 65
     step: 1
 
 galaxy:
   stellar_mass:
     label: Stellar Mass
     description: How many stars did your galaxy make? This ranges from tiny dwarf galaxies with barely any stars up to enormous systems twice the size of the Milky Way.
-    unit: '×10¹⁰ M☉'
+    unit: '×10¹⁰ solar masses'
     min: 0.1
     max: 20
     value_scale: 1.0e10
-    display_unit: Msun
+    display_unit: solar masses
     display_format: compact
     display_significant_figures: 3
   black_hole_mass:
     label: Black Hole Mass
     description: How heavy is the monster at the centre? Every large galaxy harbours a supermassive black hole — this slider controls how big yours grew over cosmic time.
-    unit: '×10⁶ M☉'
+    unit: '×10⁶ solar masses'
     min: 0.1
     max: 250
     value_scale: 1.0e6
-    display_unit: Msun
+    display_unit: solar masses
     display_format: compact
     display_significant_figures: 3
   galaxy_age:
     label: Galaxy Age
     description: How old are the stars in your galaxy? Older galaxies look redder and smoother, having had time to settle. Younger ones are bluer, brighter, and more chaotic.
-    unit: yrs
+    unit: years
     min: 4
     max: 13.8
     value_scale: 1.0e9

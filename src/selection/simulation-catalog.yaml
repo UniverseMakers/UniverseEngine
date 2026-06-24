@@ -19,20 +19,20 @@
 planetary:
   label: Planetary
   placeholderImage: assets/planetary-parameter-overlay.webp
-  parameterSubtitle: Adjust proto-planet impact parameters and hunt for the initial state that produced our Earth-Moon system.
+  parameterSubtitle: Adjust the collision scenario to explore how varied the outcomes of giant impacts can be. What parameters could lead to the formation of a Moon like ours — or a debris disk from which it could grow?
   metadata:
     distinctSimulations: 384
     correctValues:
       moon_mass: 1.0
       earth_mass: 1.0
       spin: 1.0
-      moon_iron: 1.0
-      proto_earth_in_moon: 1.0
+      # moon_iron: 1.0
+      # proto_earth_in_moon: 1.0
 
 galaxy:
   label: Galaxy
   placeholderImage: assets/galaxy_example.webp
-  parameterSubtitle: Adjust the ingredients of a galaxy and see whether your setup can grow into something like the Milky Way.
+  parameterSubtitle: Adjust the ingredients of a galaxy. What does it take to grow a galaxy like our Milky Way?
   views:
     - id: hst
       label: Hubble Space Telescope
@@ -43,7 +43,6 @@ galaxy:
       icon: large-scale-structure
       description: Zoom out to see the grand architecture of your galaxy — vast streams of gas funnelling in to sustain the galaxy's star formation along the hidden skeleton of dark matter that holds everything together.
   metadata:
-    distinctSimulations: 20488
     correctValues:
       stellar_mass: 6.1 # in units of 1e10 Msun
       black_hole_mass: 4.3 # in units of 1e6 Msun
@@ -52,7 +51,7 @@ galaxy:
 cosmos:
   label: Cosmos
   placeholderImage: assets/cosmos_example.webp
-  parameterSubtitle: Adjust the fundamental laws of our Universe and see how matter evolves from the beginning of time.
+  parameterSubtitle: Adjust the fundamental laws of the Universe and see how matter evolves from the beginning of time. What parameters best explain the Universe we observe?
   views:
     - id: gas_density
       label: Gas Density
