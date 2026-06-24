@@ -12,6 +12,18 @@ local simulation assets.
 | **Python** | 3.9 | Asset-generation and server scripts. |
 | **ffprobe** | (any modern build) | Video metadata probing. Part of `ffmpeg`. |
 
+### Windows users
+
+This project targets Unix-like environments. Windows users should use
+**WSL 2** (Windows Subsystem for Linux) with an Ubuntu distribution.
+All instructions below assume you are working inside WSL.
+
+1. Install WSL: `wsl --install` from PowerShell or Command Prompt (admin).
+2. Reboot, then launch **Ubuntu** from the Start menu.
+3. Follow the **Ubuntu / Debian / WSL** install commands in each section below.
+4. Keep the repository inside the WSL filesystem (`~/...`), **not** `/mnt/c/...` —
+   filesystem performance and case sensitivity differ. |
+
 ### Installing prerequisites
 
 **Node.js** — the simplest way is [nvm](https://github.com/nvm-sh/nvm):
@@ -207,10 +219,3 @@ Settings → Advanced Settings → Manifest Source.
 Run `npm run generate:run-manifest` to regenerate the local manifest.  If you
 added runs manually, make sure each run directory under `public/assets/`
 contains the expected video files in `animations/`.
-
-### WSL-specific notes
-
-- Use the WSL filesystem (`~/...`), **not** `/mnt/c/...`, for the repository.
-  Filesystem performance and case sensitivity differ.
-- If `npm run dev` fails with a port conflict, WSL sometimes maps ports
-  differently.  Try `npx vite --port 5174`.
