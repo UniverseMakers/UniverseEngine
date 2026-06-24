@@ -2,25 +2,84 @@
 
 A web app for displaying and interacting with simulation videos spread across a parameter hypercube.
 
-## Quick Start
-
-- `npm install`
-- `npm run dev`
-
-Production build:
-
-- `npm run build`
-
-Formatting:
-
-- `npm run format`
-- `npm run format:check`
-
 ## Requirements
 
 - `node` / `npm` for the frontend
 - `python3` for asset-generation scripts
 - `ffprobe` for `scripts/generate_run_summaries.py`
+
+## Local Setup
+
+1. **Clone the repository** and `cd` into the project directory.
+
+2. **Install Node dependencies:**
+
+   ```bash
+   npm install
+   ```
+
+3. **Generate the local run manifest** (points the app at the asset files in `public/assets/`):
+
+   ```bash
+   npm run generate:run-manifest
+   ```
+
+   If your `public/assets/` directory only contains a subset of runs, regenerate after
+   adding or removing run directories.
+
+4. **(Optional) Refresh run summaries.** Run this when CSV data or video files have
+   changed and you want up-to-date `run_summary.yaml` files:
+
+   ```bash
+   python3 scripts/generate_run_summaries.py
+   ```
+
+   Requires `ffprobe` (part of `ffmpeg`).
+
+5. **Start the dev server:**
+
+   ```bash
+   npm run dev
+   ```
+
+   Then open `http://localhost:5173` in a browser.
+
+6. **(Optional) Download cloud assets.** If you want to pull simulation files
+   from the online R2 bucket into your local ``public/assets/`` for offline use:
+
+   ```bash
+   npm run download:assets          # everything (all three families)
+   npm run download:cosmos          # cosmos only
+   ```
+
+   This reads ``public/assets/run-manifest.json`` (the online manifest), downloads
+   every referenced file, and skips files that already exist locally. Requires
+   network access to the R2 public bucket.
+
+### Troubleshooting
+
+- **Qt / xcb error on WSL** — This is a system-level Qt library conflict on some WSL
+  installations and is not related to the project. Ensure `node_modules` exists by
+  running `npm install` first. If the error persists, check your `PATH` for any
+  Qt-linked binaries that may be shadowing `node` or `vite`.
+
+- **Missing assets / blank screen** — Run `npm run generate:run-manifest` to
+  regenerate the local manifest. The app defaults to online manifest mode; switch to
+  local mode in **Settings → Advanced Settings** to use your local assets.
+
+## Quick Reference
+
+| Command | What it does |
+|---|---|
+| `npm install` | Install dependencies |
+| `npm run dev` | Start dev server |
+| `npm run generate:run-manifest` | Regenerate `public/assets/local-manifest.json` |
+| `npm run build` | Production build |
+| `npm run format` | Format source files |
+| `npm run format:check` | Check formatting (CI) |
+| `python3 scripts/generate_run_summaries.py` | Refresh per-run `run_summary.yaml` files |
+| `npm run download:assets` | Download all cloud assets to `public/assets/` |
+| `npm run download:cosmos` | Download cosmos cloud assets only |
 
 ## App Configuration
 
