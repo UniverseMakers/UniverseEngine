@@ -7,6 +7,7 @@
  */
 
 import { defineConfig } from 'vite';
+import { resolve } from 'path';
 
 export default defineConfig({
   // Base path — '/' for local dev. The GitHub Actions deploy workflow
@@ -15,6 +16,12 @@ export default defineConfig({
   build: {
     outDir: 'dist',
     sourcemap: true,
+    rollupOptions: {
+      input: {
+        main: resolve(__dirname, 'index.html'),
+        'summary-test': resolve(__dirname, 'tests/summary-test.html'),
+      },
+    },
   },
   server: {
     port: 5173,

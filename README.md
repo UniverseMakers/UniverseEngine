@@ -201,6 +201,43 @@ Current supported cosmos run-name tokens are:
 
 The manifest keeps local relative asset paths today, but the same schema can later be regenerated as `run-manifest.json` with remote URLs for Cloudflare-hosted assets.
 
+## Testing Summary Overlays
+
+A standalone test page for the end-of-run summary overlay lives at
+`tests/summary-test.html`. It renders the summary screen exactly as the
+app does — same CSS, same layout, same data pipeline — without requiring
+a full video playback session.
+
+### What it includes
+
+- Dropdown to switch between simulation families (Planetary, Galaxy, Cosmos)
+- Visual theme picker (Glass, Matrix, HAL 9000, Nostromo, Tron)
+- Paired range slider + number input for every parameter in the selected family
+- Configurable video duration (affects runtime formatting)
+- Placeholder final-frame image (the hero panel is intentionally not the
+  numeric score gauge — that path only triggers when no thumbnail is
+  available, which never happens in the app)
+
+### Running it
+
+```bash
+npm run dev
+```
+
+Then open `http://localhost:5173/tests/summary-test.html`.
+
+The control panel floats top-right so you can tweak parameters and
+re-show the overlay without reloading.
+
+### What it's good for
+
+- Visually verifying summary layout, card grids, result bars, and modal
+  detail pop-ups across all simulation families and visual themes
+- Catching regressions when YAML configs (parameter ranges, stat config,
+  target messages) are updated
+- Checking that per-family scoring behaviour (bar score vs. similarity
+  fallback) produces the expected hero verdict and colour
+
 ## Notes
 
 - If `Advanced Settings` is set to `online` before the online manifest exists, the app will fall back gracefully to placeholder assets.
