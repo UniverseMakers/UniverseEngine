@@ -368,7 +368,7 @@ button {
   padding: 0.99rem;
   border: 1px solid var(--line-strong);
   border-radius: 0;
-  background: rgba(0, 0, 0, 0.26);
+  background: rgba(0, 0, 0, 0.46);
   color: var(--accent);
   box-shadow: none;
   backdrop-filter: blur(8px);
@@ -490,7 +490,7 @@ button {
 
 .display-chrome__top-left.side-collapsed .display-button {
   padding: 0.5rem 0.55rem;
-  opacity: 0.38;
+  opacity: 0.72;
   transform: scale(0.76);
 }
 
@@ -502,7 +502,7 @@ button {
 }
 
 .display-chrome__left-center.side-collapsed .view-switcher {
-  opacity: 0.38;
+  opacity: 0.72;
 }
 
 .display-chrome__left-center.side-collapsed .view-switcher__label {
@@ -558,7 +558,7 @@ button {
 }
 
 .display-chrome__bottom.side-collapsed {
-  opacity: 0.26;
+  opacity: 0.62;
   transform: translateY(0.65rem) scaleY(0.92);
   transform-origin: bottom center;
 }
@@ -654,7 +654,7 @@ button {
   gap: 0.5rem;
   padding: 0.5rem;
   border: 1px solid var(--line-strong);
-  background: rgba(0, 0, 0, 0.36);
+  background: rgba(0, 0, 0, 0.55);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   box-shadow: var(--shadow-ambient);
@@ -814,7 +814,7 @@ button {
   margin: 0 auto;
   padding: 0.66rem 1.06rem;
   border: 1px solid var(--line-strong);
-  background: rgba(0, 0, 0, 0.34);
+  background: rgba(0, 0, 0, 0.52);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
 }
