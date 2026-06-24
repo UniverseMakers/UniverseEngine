@@ -119,7 +119,7 @@ The app defaults to **online** manifest mode.  To use your downloaded assets:
 
 1. Start the dev server: `npm run dev`
 2. Open Settings (burger menu → Settings)
-3. Click the **Advanced Settings** toggle (password is on the screen)
+3. Click the **Advanced Settings** toggle and enter the password: `RSSSE26UM_Engine`
 4. Set **Manifest Source** to `local`
 
 This setting is not persisted — you'll need to switch it again on each fresh
