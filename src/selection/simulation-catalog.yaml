@@ -2,13 +2,7 @@
 #
 # Each top-level key is one simulation family shown in the UI.
 # Parameter definitions live in `parameter-info.yaml`.
-# Display stat configuration lives in `stats-config.yaml`.
-#
-# `metadata.correctValues`
-#   Canonical target values for summary comparisons.
-#   - when an id matches a simulation parameter, parameter-based similarity can use it
-#   - when an id matches a run `parameters.yaml` entry or `run_summary.yaml`
-#     summary metric, the summary overlay can render answer-closeness bars for it
+# Display stat configuration lives in `summary-stats-config.yaml`.
 #
 # `views`
 #   Optional display-mode video tabs.
@@ -20,13 +14,6 @@ planetary:
   label: Planetary
   placeholderImage: assets/planetary-parameter-overlay.webp
   parameterSubtitle: Adjust the collision scenario to explore how varied the outcomes of giant impacts can be. What parameters could lead to the formation of a Moon like ours — or a debris disk from which it could grow?
-  metadata:
-    correctValues:
-      moon_mass: 1.0
-      earth_mass: 1.0
-      spin: 1.0
-      # moon_iron: 1.0
-      # proto_earth_in_moon: 1.0
 
 galaxy:
   label: Galaxy
@@ -41,11 +28,6 @@ galaxy:
       label: Large Scale Structure
       icon: large-scale-structure
       description: Zoom out to see the grand architecture of your galaxy — vast streams of gas funnelling in to sustain the galaxy's star formation along the hidden skeleton of dark matter that holds everything together.
-  metadata:
-    correctValues:
-      stellar_mass: 6.1 # in units of 1e10 Msun
-      black_hole_mass: 4.3 # in units of 1e6 Msun
-      galaxy_age: 8.5 # in B yrs; approximate Milky Way mass-weighted stellar age
 
 cosmos:
   label: Cosmos
@@ -68,8 +50,3 @@ cosmos:
       label: Metals + Stars
       icon: metals-stars
       description: Where stars live and die. This view combines the light of stars with the heavy elements they forge — oxygen, carbon, iron — sprayed back into space by supernova explosions to seed the next generation of stars.
-  metadata:
-    correctValues:
-      baryon_fraction: 1.0
-      black_hole_strength: 1.0
-      gravity_strength: 1.0

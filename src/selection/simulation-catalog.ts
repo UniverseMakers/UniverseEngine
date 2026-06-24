@@ -34,7 +34,6 @@ export interface SimParameter {
 }
 
 export interface SimulationMetadata {
-  correctValues: Record<string, number>;
   results: ResultDisplayConfig[];
   summaryStats: StatDisplayConfig[];
   liveStats: StatDisplayConfig[];
@@ -100,9 +99,6 @@ interface RawCatalogEntry {
   label: string;
   placeholderImage: string;
   parameterSubtitle?: string;
-  metadata: {
-    correctValues: Record<string, number>;
-  };
   views?: RawSimulationViewOption[];
 }
 
@@ -189,7 +185,6 @@ export const SIMULATION_CLASSES: SimulationClass[] = Object.entries(catalog).map
       placeholderImage: withBaseUrl(entry.placeholderImage),
       parameterSubtitle: entry.parameterSubtitle,
       metadata: {
-        correctValues: entry.metadata.correctValues,
         results,
         summaryStats: summaryStats.map(normalizeStatConfig),
         liveStats: liveStats.map(normalizeStatConfig),
