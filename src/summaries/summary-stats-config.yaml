@@ -54,9 +54,10 @@ planetary:
       precision: 2
       description: How big the planet ended up after the impact.
     - id: spin
-      label: Earth—Moon system spin
+      label: System spin
       target: 1.0
       value: '--'
+      unit: Earth—Moon system
       display_format: float
       precision: 3
       description: The combined 'angular momentum' of the spinning planet and anything in orbit, compared with the real system (3.4×10³⁴ kg m² / s).
@@ -64,27 +65,27 @@ planetary:
     - id: similarityScore
       label: Similarity score
       value: '--'
-      description: How similar would the moon that formed from this impact be to ours overall?
+      description: How similar the moon that formed from this impact would be to ours overall.
     - id: moon_iron_percent
       label: Moon-forming iron
       value: '--'
       unit: '%'
       display_format: float
       precision: 1
-      description: What fraction of the moon-forming material is iron? Our Moon is mostly rock with a very small iron core, around 2% of its mass. Typical rocky planets like Earth are around 30% core and 70% mantle.
+      description: The fraction of the moon-forming material that is iron. Our Moon is mostly rock with a very small iron core, around 2% of its mass. Typical rocky planets like Earth are around 30% core and 70% mantle.
     - id: proto_earth_in_moon_percent
       label: Moon-forming proto-Earth
       value: '--'
       unit: '%'
       display_format: float
       precision: 1
-      description: What fraction of the moon-forming material came from the proto-Earth target rather than the impactor? Analysis of Moon and Earth rocks shows their makeup is very similar, but most impact scenarios struggle to mix together enough material to immediately explain this.
+      description: The fraction of the moon-forming material that came from the proto-Earth target rather than the impactor? Analysis of Moon and Earth rocks shows their makeup is very similar, but most impact scenarios struggle to mix together enough material to immediately explain this.
     - id: scenario_likelihood
       label: Scenario likelihood
       value: '--'
       unit: ''
       display_format: string
-      description: We only have one Moon like ours to study, and its possible that its formation wasn't very likely! However, impacts at very low or high angles, or very high speeds, are less likely. Impacts at very low speeds might not even be possible in reality without something mysterious to slow down the impactor, but that doesn't stop us from simulating what could happen if it did.
+      description: We only have one Moon like ours to study, and it's possible that its formation wasn't very likely! However, impacts at very low or high angles, or very high speeds, are less likely. Impacts at very low speeds might not even be possible in reality without something mysterious to slow down the impactor, but that doesn't stop us from simulating what could happen if it did.
   similarityScore:
     value: '--'
 
