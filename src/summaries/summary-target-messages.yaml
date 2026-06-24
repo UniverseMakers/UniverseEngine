@@ -7,8 +7,8 @@
 
 planetary:
   Moon mass:
-    greenLow: Spot on. Your Moon came out just a fraction lighter than the real one — well within range.
-    greenHigh: Spot on. Your Moon came out just a fraction heavier than the real one — well within range.
+    greenLow: Spot on. Your moon — or the moon that could grow out of your orbiting debris disk — came out just a fraction lighter than our real one.
+    greenHigh: Spot on. Your moon — or the moon that could grow out of your orbiting debris disk — came out just a fraction heavier than our real one.
     amberLow: A bit light. Slightly too little material made it into orbit, so this Moon is a touch small.
     amberHigh: A bit heavy. Slightly too much material made it into orbit, so this Moon is a touch large.
     redLow: Far too light. Barely any material reached orbit — this Moon would be much smaller than the real one.
@@ -27,20 +27,6 @@ planetary:
     amberHigh: A bit fast. The early day would have been a little shorter than it should have been.
     redLow: Far too slow. This impact gave the system hardly any spin — nothing like the fast-spinning early Earth-Moon.
     redHigh: Far too fast. This impact gave the system huge spin — the early day would have been extremely short.
-  Moon iron:
-    greenLow: Spot on — just a hair below the real Moon's iron, which is famously tiny.
-    greenHigh: Spot on — just a hair above the real Moon's iron, which is famously tiny.
-    amberLow: A little under. Even less iron than the real Moon, which already has very little.
-    amberHigh: A little over. Somewhat more iron than the real Moon, which is unusually iron-poor.
-    redLow: Far too little — almost no iron at all, well below even the real Moon's tiny amount.
-    redHigh: Far too much iron. The real Moon is strange because it has almost none — a high-iron Moon looks nothing like ours.
-  Proto-Earth in Moon:
-    greenLow: Spot on — just below the expected share of material from the original Earth.
-    greenHigh: Spot on — just above the expected share of material from the original Earth.
-    amberLow: A bit low. Slightly less of this Moon comes from the original Earth than models expect.
-    amberHigh: A bit high. Slightly more of this Moon comes from the original Earth than models expect.
-    redLow: Far too low. Almost none of this Moon came from the original Earth — it is mostly impactor material.
-    redHigh: Far too high. This Moon is made almost entirely of original-Earth material, more than models suggest.
 
 galaxy:
   stellar_mass:

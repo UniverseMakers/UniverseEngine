@@ -26,65 +26,65 @@ planetary:
       unit: hours
       display_format: float
       precision: 2
-      description: How long the simulation took to run. Think of it like the render time for a CGI movie.
+      description: How long the simulation took to run. Calculating how everything moves and affects each other takes a lot of work, even for a supercomputer!
     - id: carbonBurnt
-      value: '--'
-      unit: kg CO2
+      value: '0.00'
+      unit: kg CO₂
       display_format: float
       precision: 2
       description: The carbon cost of running this simulation. Roughly the same as the emissions from a short-haul flight.
     - id: computeUsed
-      value: '--'
-      description: How much computer muscle the simulation needed to crunch all that physics.
+      value: 0 CPU-hrs / 0 GB
+      description: How much internal computing time and memory the simulation needed to crunch all that physics. Shared across all the CPUs working together in the supercomputer.
   results:
     - id: moon_mass
       label: Moon-forming mass
       target: 1.0
-      value: '--'
-      unit: M⊕
+      value: '0.5'
+      unit: lunar masses
       display_format: float
       precision: 2
-      description: How close you got to making the real Moon. Too small and the tides would be weak — too big and the night sky would be terrifying.
+      description: How big a moon was formed or could later form by growing out of orbiting debris.
     - id: earth_mass
       label: Planet mass
       target: 1.0
-      value: '--'
-      unit: M⊕
+      value: '0.95'
+      unit: Earth masses
       display_format: float
       precision: 2
-      description: How close your Earth ended up to the one we actually live on.
+      description: How big the planet ended up after the impact.
     - id: spin
-      label: System spin
+      label: Earth—Moon system spin
       target: 1.0
-      value: '--'
+      value: '1.1'
       display_format: float
       precision: 3
-      description: How fast the Earth-Moon pair is spinning as a fraction of the real system.
+      description: The combined 'angular momentum' of the spinning planet and anything in orbit, compared with the real system (3.4×10³⁴ kg m² / s).
   simulationStats:
     - id: similarityScore
       label: Similarity score
-      value: '--'
-      description: A simple overall score showing how close this Moon-forming collision came to the target outcome.
+      value: 100/100
+      description: How similar would the moon that formed from this impact be to ours overall?
     - id: moon_iron_percent
-      label: Moon iron
-      value: '--'
+      label: Moon-forming iron
+      value: '0'
       unit: '%'
       display_format: float
       precision: 1
-      description: How closely the Moon's iron content matches the target value. Higher percentages are more Moon-like.
+      description: What fraction of the moon-forming material is iron? Our Moon is mostly rock with a very small iron core, around 2% of its mass. Typical rocky planets like Earth are around 30% core and 70% mantle.
     - id: proto_earth_in_moon_percent
-      label: Proto-Earth Moon fraction
-      value: '--'
+      label: Moon-forming proto-Earth
+      value: '0'
       unit: '%'
       display_format: float
       precision: 1
-      description: How closely the proto-Earth contribution to the Moon matches the target value. Higher percentages are a better match.
+      description: What fraction of the moon-forming material came from the proto-Earth target rather than the impactor? Analysis of Moon and Earth rocks shows their makeup is very similar, but most impact scenarios struggle to mix together enough material to immediately explain this.
     - id: scenario_likelihood
       label: Scenario likelihood
-      value: '--'
-      unit: '%'
-      display_format: integer
-      description: A simple numerical plausibility score for the chosen impact geometry. More extreme speeds or near head-on collisions score lower.
+      value: 'Fair'
+      unit: ''
+      display_format: string
+      description: We only have one Moon like ours to study, and its possible that its formation wasn't very likely! However, impacts at very low or high angles, or very high speeds, are less likely. Impacts at very low speeds might not even be possible in reality without something mysterious to slow down the impactor, but that doesn't stop us from simulating what could happen if it did.
   similarityScore:
     value: '--'
 
@@ -95,14 +95,14 @@ galaxy:
       unit: hours
       display_format: float
       precision: 2
-      description: How long the simulation took to run. Think of it like the render time for a CGI movie.
+      description: How long the simulation took to run. Calculating how everything moves and affects each other takes a lot of work, even for a supercomputer!
     - id: carbonBurnt
-      value: '--'
-      unit: kg CO2
+      value: '0.00'
+      unit: kg CO₂
       description: The carbon cost of running this simulation. Roughly the same as the emissions from a short-haul flight.
     - id: computeUsed
-      value: '--'
-      description: How much computer muscle the simulation needed to crunch all that physics.
+      value: 0 CPU-hrs / 0 GB
+      description: How much internal computing time and memory the simulation needed to crunch all that physics. Shared across all the CPUs working together in the supercomputer.
   results:
     - id: stellar_mass
       label: Stellar mass
@@ -161,16 +161,16 @@ cosmos:
       unit: hours
       display_format: float
       precision: 2
-      description: How long the simulation took to run. Think of it like the render time for a CGI movie.
+      description: How long the simulation took to run. Calculating how everything moves and affects each other takes a lot of work, even for a supercomputer!
     - id: carbonBurnt
-      value: '--'
-      unit: kg CO2
+      value: '0.00'
+      unit: kg CO₂
       display_format: float
       precision: 2
       description: The carbon cost of running this simulation. Roughly the same as the emissions from a short-haul flight.
     - id: computeUsed
-      value: '--'
-      description: How much computer muscle the simulation needed to crunch all that physics.
+      value: 0 CPU-hrs / 0 GB
+      description: How much internal computing time and memory the simulation needed to crunch all that physics. Shared across all the CPUs working together in the supercomputer.
   results:
     - id: baryon_fraction
       label: Baryon fraction
