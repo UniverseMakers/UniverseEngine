@@ -32,7 +32,7 @@ planetary:
 galaxy:
   label: Galaxy
   placeholderImage: assets/galaxy_example.webp
-  parameterSubtitle: Adjust the ingredients of a galaxy and see whether your setup can grow into something like the Milky Way.
+  parameterSubtitle: Discover how brighter and fainter galaxies are shaped by their local neighbourhood. Can you make a spiral galaxy, an elliptical galaxy and an irregular galaxy?
   views:
     - id: hst
       label: Hubble Space Telescope
