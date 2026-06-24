@@ -33,34 +33,30 @@ planetary:
     step: 1
 
 galaxy:
-  stellar_mass:
-    label: Stellar Mass
-    description: How many stars did your galaxy make? This ranges from tiny dwarf galaxies with barely any stars up to enormous systems twice the size of the Milky Way.
-    unit: '×10¹⁰ M☉'
-    min: 0.1
-    max: 20
-    value_scale: 1.0e10
-    display_unit: Msun
-    display_format: compact
-    display_significant_figures: 3
-  black_hole_mass:
-    label: Black Hole Mass
-    description: How heavy is the monster at the centre? Every large galaxy harbours a supermassive black hole — this slider controls how big yours grew over cosmic time.
-    unit: '×10⁶ M☉'
-    min: 0.1
-    max: 250
-    value_scale: 1.0e6
-    display_unit: Msun
-    display_format: compact
-    display_significant_figures: 3
-  galaxy_age:
-    label: Galaxy Age
-    description: How old are the stars in your galaxy? Older galaxies look redder and smoother, having had time to settle. Younger ones are bluer, brighter, and more chaotic.
-    unit: yrs
-    min: 4
-    max: 13.8
-    value_scale: 1.0e9
-    display_format: compact
+  crowding:
+    label: Neighbourhood
+    description: Are you making a galaxy that stays far away from others, is part of a group of galaxies, or joins a huge cluster of galaxies? Merging with other galaxies is more common in a more crowded neighbourhood.
+    quali_labels:
+      - lonely
+      - sparse
+      - bustling
+      - crowded
+    display_format: qualitative
+    min: -0.5
+    max: 3.5
+  mass_rank:
+    label: Luminosity
+    description: How bright is the galaxy you're making? Brighter galaxies usually have more stars, are bigger and are more massive.
+    quali_labels: 
+      - faintest
+      - fainter
+      - faint
+      - bright
+      - brighter
+      - brightest
+    display_format: qualitative
+    min: -0.5
+    max: 5.5
 
 cosmos:
   baryon_fraction:
