@@ -13,7 +13,7 @@
 planetary:
   label: Planetary
   placeholderImage: assets/planetary-parameter-overlay.webp
-  parameterSubtitle: Adjust the collision scenario to explore how varied the outcomes of giant impacts can be. What parameters could lead to the formation of a Moon like ours — or a debris disk from which it could grow?
+  parameterSubtitle: Set up your collision scenario to explore how varied the outcomes of giant impacts can be.  What parameters lead to the formation of a Moon like ours, a debris disk from which it could grow, or something dramatically different?
 
 galaxy:
   label: Galaxy

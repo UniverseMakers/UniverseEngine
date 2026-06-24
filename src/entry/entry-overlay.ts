@@ -11,7 +11,7 @@ import type { SimulationClass } from '../selection/simulation-catalog.ts';
 import { withBaseUrl } from '../shared/urls.ts';
 
 const SCALE_DESCRIPTIONS: Record<string, string> = {
-  planetary: 'Smash together planets into the early Earth. Can you make the Moon?',
+  planetary: 'Smash a planet into the early Earth. Can you make the Moon?',
   cosmos: 'Take control of the fundamental laws of the Universe',
   galaxy: 'Explore the boundless diversity of galaxies in the Universe',
 };
