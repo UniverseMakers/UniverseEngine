@@ -128,10 +128,6 @@ export function buildSummaryMetricMap(
   // under their original keys, so the YAML can define custom metrics per run.
   return {
     scale: { label: 'Scale', value: simClass.label },
-    distinctSimulations: {
-      label: 'Distinct Sims',
-      value: String(simClass.metadata.distinctSimulations),
-    },
     parameters: { label: 'Parameters', value: parameterCount },
     runtime: { label: 'Total Runtime', value: runtimeHours },
     similarityScore: { label: 'Similarity Score', value: `${score}/100` },

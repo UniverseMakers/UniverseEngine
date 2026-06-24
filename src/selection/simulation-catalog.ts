@@ -34,7 +34,6 @@ export interface SimParameter {
 }
 
 export interface SimulationMetadata {
-  distinctSimulations: number;
   correctValues: Record<string, number>;
   results: ResultDisplayConfig[];
   summaryStats: StatDisplayConfig[];
@@ -72,7 +71,6 @@ export interface StatDisplayConfig {
 
 export type SummaryStatId =
   | 'scale'
-  | 'distinctSimulations'
   | 'parameters'
   | 'runtime'
   | 'similarityScore'
@@ -103,7 +101,6 @@ interface RawCatalogEntry {
   placeholderImage: string;
   parameterSubtitle?: string;
   metadata: {
-    distinctSimulations: number;
     correctValues: Record<string, number>;
   };
   views?: RawSimulationViewOption[];
@@ -192,7 +189,6 @@ export const SIMULATION_CLASSES: SimulationClass[] = Object.entries(catalog).map
       placeholderImage: withBaseUrl(entry.placeholderImage),
       parameterSubtitle: entry.parameterSubtitle,
       metadata: {
-        distinctSimulations: entry.metadata.distinctSimulations,
         correctValues: entry.metadata.correctValues,
         results,
         summaryStats: summaryStats.map(normalizeStatConfig),

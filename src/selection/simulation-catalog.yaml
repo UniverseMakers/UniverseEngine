@@ -21,7 +21,6 @@ planetary:
   placeholderImage: assets/planetary-parameter-overlay.webp
   parameterSubtitle: Adjust proto-planet impact parameters and hunt for the initial state that produced our Earth-Moon system.
   metadata:
-    distinctSimulations: 384
     correctValues:
       moon_mass: 1.0
       earth_mass: 1.0
@@ -43,7 +42,6 @@ galaxy:
       icon: large-scale-structure
       description: Zoom out to see the grand architecture of your galaxy — vast streams of gas funnelling in to sustain the galaxy's star formation along the hidden skeleton of dark matter that holds everything together.
   metadata:
-    distinctSimulations: 20488
     correctValues:
       stellar_mass: 6.1 # in units of 1e10 Msun
       black_hole_mass: 4.3 # in units of 1e6 Msun
@@ -71,7 +69,6 @@ cosmos:
       icon: metals-stars
       description: Where stars live and die. This view combines the light of stars with the heavy elements they forge — oxygen, carbon, iron — sprayed back into space by supernova explosions to seed the next generation of stars.
   metadata:
-    distinctSimulations: 8192
     correctValues:
       baryon_fraction: 1.0
       black_hole_strength: 1.0

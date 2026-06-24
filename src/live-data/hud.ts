@@ -117,10 +117,6 @@ function buildAvailableMetrics(
   const namedMetrics: Partial<Record<SummaryStatId, { label: string; value: string }>> =
     {
       scale: { label: 'Scale', value: simClass.label },
-      distinctSimulations: {
-        label: 'Distinct Sims',
-        value: String(simClass.metadata.distinctSimulations),
-      },
       parameters: { label: 'Parameters', value: String(simClass.parameters.length) },
     };
 
