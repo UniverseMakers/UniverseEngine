@@ -28,7 +28,7 @@ export const SUMMARY_OVERLAY = {
 
 /** Bucket-hosted online manifest URL used by online mode. */
 export const ONLINE_MANIFEST_URL =
-  'https://pub-e00201311979473b8a30e279dcc56838.r2.dev/engine/run-manifest.json';
+  'https://media.universemakers.org/engine/run-manifest.json';
 
 /**
  * API endpoint for run-selection tracking.
