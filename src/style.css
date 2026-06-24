@@ -1302,7 +1302,7 @@ button {
 
 .entry-info-modal__title {
   color: var(--text-primary);
-  font-size: 1.55rem;
+  font-size: 1.85rem;
   line-height: 1.08;
   letter-spacing: 0.08em;
 }
@@ -1331,11 +1331,17 @@ button {
   gap: 0.7rem;
 }
 
-.entry-info-modal__section-title,
+.entry-info-modal__section-title {
+  color: #e9f1f7;
+  font-family: var(--font-mono);
+  font-size: 1.3rem;
+  letter-spacing: 0.16em;
+}
+
 .entry-info-modal__theme-title {
   color: #e9f1f7;
   font-family: var(--font-mono);
-  font-size: 0.8rem;
+  font-size: 1.1rem;
   letter-spacing: 0.16em;
 }
 
@@ -1343,6 +1349,7 @@ button {
   margin: 0;
   color: #c5d2dd;
   line-height: 1.72;
+  font-size: 1rem;
 }
 
 .entry-info-modal__theme-list {

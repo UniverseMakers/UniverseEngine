@@ -60,27 +60,33 @@ export function createEntryInfoOverlay(): EntryInfoOverlayController {
             <h2 class="entry-info-modal__title">What Is The Universe Engine?</h2>
             <p class="entry-info-modal__subtitle">
               Universe Engine turns large scientific simulations into an interactive hands-on
-              experience: 
+              experience 
             </p>
           </div>
           <div class="entry-info-modal__body">
             <section class="entry-info-modal__section">
               <p class="entry-info-modal__copy">
                 Choose a cosmic scale, select your inputs, and see how those decisions reshape the cosmos.
+              </p>
+              <p class="entry-info-modal__copy">
                 Run your own simulations of proto-planetary impacts, galaxy formation, and cosmic evolution.
+              </p>
+              <p class="entry-info-modal__copy">
                 Compare your choices with real scientific targets and outputs, and see the computational cost
                 of real computational astrophysical research.  
               </p>
             </section>
             <section class="entry-info-modal__section">
-              <h3 class="entry-info-modal__section-title">From Worlds to Universes</h3>
+              <h3 class="entry-info-modal__section-title">From Universes to Worlds</h3>
               <div class="entry-info-modal__theme-list">
                 <div class="entry-info-modal__theme">
-                  <p class="entry-info-modal__theme-title">Planetary</p>
+                  <p class="entry-info-modal__theme-title">Cosmos</p>
                   <p class="entry-info-modal__copy">
-                    Even the smallest changes in angle, speed, or mass can completely transform how a giant
-                    impact unfolds. See if you can find the right combination to form a Moon like ours, and uncover
-                    the hidden interplay between the initial conditions that turns planetary chaos into an Earth–Moon system.
+                    The largest structures in the Universe began as tiny ripples in the early cosmos. Over billions
+                    of years, gravity amplifies these subtle differences, drawing dark matter and eventually
+                    gas into a vast cosmic web — the skeleton of the Universe. Along this skeleton, gas continues
+                    to collapse, forming stars, galaxies, stars, planets, and eventually us. Explore how changing
+                    the fundamental laws of the Universe shapes the filaments, clusters, and voids we see today.
                   </p>
                 </div>
                 <div class="entry-info-modal__theme">
@@ -95,13 +101,11 @@ export function createEntryInfoOverlay(): EntryInfoOverlayController {
                   </p>
                 </div>
                 <div class="entry-info-modal__theme">
-                  <p class="entry-info-modal__theme-title">Cosmos</p>
+                  <p class="entry-info-modal__theme-title">Planetary</p>
                   <p class="entry-info-modal__copy">
-                    The largest structures in the Universe began as tiny ripples in the early cosmos. Over billions
-                    of years, gravity amplifies these subtle differences, drawing dark matter and eventually
-                    gas into a vast cosmic web — the skeleton of the Universe. Along this skeleton, gas continues
-                    to collapse, forming stars, galaxies, stars, planets, and eventually us. Explore how changing
-                    the fundamental laws of the Universe shapes the filaments, clusters, and voids we see today.
+                    Even the smallest changes in angle, speed, or mass can completely transform how a giant
+                    impact unfolds. See if you can find the right combination to form a Moon like ours, and uncover
+                    the hidden interplay between the initial conditions that turns planetary chaos into an Earth–Moon system.
                   </p>
                 </div>
               </div>
