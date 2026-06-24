@@ -155,8 +155,7 @@ function humanizeKey(key: string): string {
  * Selection priority:
  * 1. A sampled live value keyed by `stat.liveKey` (or `stat.id`)
  * 2. The static parameter/named metric from `availableMetrics`
- * 3. The YAML-configured placeholder value (`stat.value`)
- * 4. A fallback "--" placeholder
+ * 3. A fallback "--" placeholder
  *
  * @param stat - Display configuration for this metric row.
  * @param availableMetrics - All known metrics keyed by id.
@@ -166,17 +165,13 @@ function selectMetric(
   stat: StatDisplayConfig,
   availableMetrics: Record<string, { label: string; value: string }>,
 ): { label: string; value: string } {
-  // Start with the metric matching this stat's id, or create a placeholder.
   const metric = availableMetrics[stat.id] ?? { label: stat.id, value: '--' };
 
-  // Optionally point at a different live-stream key rather than the stat id.
-  // This lets a stat labeled "Compute" pull from a CSV column called "compute_used".
   const liveKey = stat.liveKey ?? stat.id;
   const liveMetric = availableMetrics[liveKey];
 
-  // Prefer sampled live values when present, then fall back to static/placeholder values.
   const resolvedValue = formatMetricValue(
-    liveMetric?.value ?? metric.value ?? stat.value ?? '--',
+    liveMetric?.value ?? metric.value ?? '--',
     stat,
     Boolean(liveMetric),
   );

@@ -95,16 +95,22 @@ export function createOverlayPanel(
     <h2 class="config-overlay__title"></h2>
     <p class="config-overlay__subtitle"></p>
   `;
-  const titleEyebrow = titleBlock.querySelector('.config-overlay__eyebrow') as HTMLParagraphElement;
-  const titleText = titleBlock.querySelector('.config-overlay__title') as HTMLHeadingElement;
-  const titleSubtitle = titleBlock.querySelector('.config-overlay__subtitle') as HTMLParagraphElement;
+  const titleEyebrow = titleBlock.querySelector(
+    '.config-overlay__eyebrow',
+  ) as HTMLParagraphElement;
+  const titleText = titleBlock.querySelector(
+    '.config-overlay__title',
+  ) as HTMLHeadingElement;
+  const titleSubtitle = titleBlock.querySelector(
+    '.config-overlay__subtitle',
+  ) as HTMLParagraphElement;
 
   const closeButton = document.createElement('button');
 
   closeButton.className = 'config-overlay__close';
   closeButton.type = 'button';
-  closeButton.setAttribute('aria-label', 'Close overlay');
-  closeButton.textContent = '×';
+  closeButton.setAttribute('aria-label', 'Back');
+  closeButton.textContent = '←';
 
   header.appendChild(titleBlock);
   header.appendChild(closeButton);
@@ -417,8 +423,12 @@ export function createOverlayPanel(
         return;
       }
 
-      pendingAdvancedSettings.hiddenScaleIds = Array.from(visibilityInputs.keys()).filter(
-        (id) => !visibilityInputs.get(id)?.checked && id !== pendingAdvancedSettings.lockedScaleId,
+      pendingAdvancedSettings.hiddenScaleIds = Array.from(
+        visibilityInputs.keys(),
+      ).filter(
+        (id) =>
+          !visibilityInputs.get(id)?.checked &&
+          id !== pendingAdvancedSettings.lockedScaleId,
       );
       syncAdvancedControls();
     });

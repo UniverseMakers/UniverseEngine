@@ -238,9 +238,10 @@ function buildScientificBars(
  *
  * Resolution order matters:
  * 1. User-selected parameter value when the result refers to a slider.
- * 2. Parameter values saved with the chosen run sidecar.
- * 3. Arbitrary numeric summary metrics from the sidecar.
- * 4. YAML-authored fallback value.
+ * 2. Numeric summary metrics from the run sidecar (run_summary.yaml).
+ * 3. Parameter values saved with the chosen run sidecar (parameters.yaml).
+ *
+ * Returns null when no value can be resolved — the bar is then suppressed.
  */
 function resolveScientificValue(
   result: ResultDisplayConfig,
@@ -260,23 +261,21 @@ function resolveScientificValue(
     return values[id] ?? selectedParameter.fallbackValue;
   }
 
-  const parameterValue = runMetadata?.parameterValues[id];
-
-  if (typeof parameterValue === 'number' && Number.isFinite(parameterValue)) {
-    return parameterValue;
-  }
-
+  // Prefer summaryMetrics over parameterValues for non-parameter keys.
+  // run_summary.yaml is the authoritative source for output values.
   const summaryValue = parseNumeric(runMetadata?.summaryMetrics[id]?.value);
 
   if (summaryValue !== null) {
     return summaryValue;
   }
 
-  const configuredFallback = parseNumeric(
-    result.value,
-  );
+  const parameterValue = runMetadata?.parameterValues[id];
 
-  return configuredFallback;
+  if (typeof parameterValue === 'number' && Number.isFinite(parameterValue)) {
+    return parameterValue;
+  }
+
+  return null;
 }
 
 /**
@@ -799,20 +798,15 @@ export function createSummaryOverlay(
 /**
  * Pick one displayable metric row given YAML display config.
  *
- * The metric dictionary is intentionally sparse: some values are generated in
- * code, some come from per-run sidecar YAML, and some are only defaults in the
- * summary config. This helper merges those sources into one displayable row.
+ * Only uses concrete generated or sidecar metric values.  When a metric is
+ * absent its card shows `--` so missing data is immediately obvious.
  */
 function selectMetric(
   stat: StatDisplayConfig,
   availableMetrics: Record<string, { label: string; value: string }>,
 ): { label: string; value: string } {
-  // Resolution precedence here is deliberate:
-  // 1. A concrete generated/sidecar metric value, if available.
-  // 2. The YAML-authored fallback `value`, if the metric is absent.
-  // 3. A final `--` placeholder when neither exists.
   const metric = availableMetrics[stat.id] ?? { label: stat.id, value: '--' };
-  const resolvedValue = metric.value !== '--' ? metric.value : (stat.value ?? '--');
+  const resolvedValue = metric.value !== '--' ? metric.value : '--';
   const formattedCarbon = formatCarbonMetric(resolvedValue, stat);
 
   if (formattedCarbon) {

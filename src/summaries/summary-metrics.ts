@@ -235,23 +235,26 @@ function resolveResultValue(
     return values[id] ?? selectedParameter.fallbackValue;
   }
 
+  // For non-parameter result keys, prefer summaryMetrics over parameterValues.
+  // run_summary.yaml is the authoritative source for output values; the
+  // parameters.yaml sidecar may contain stale placeholders for those keys.
+  const summaryValue = runMetadata?.summaryMetrics[id]?.value;
+
+  if (summaryValue !== undefined) {
+    const numeric = Number(summaryValue);
+
+    if (Number.isFinite(numeric)) {
+      return numeric;
+    }
+  }
+
   const parameterValue = runMetadata?.parameterValues[id];
 
   if (typeof parameterValue === 'number' && Number.isFinite(parameterValue)) {
-    // When a result metric is not a direct slider, the saved run sidecar can
-    // still expose the exact number that should be compared against the target.
     return parameterValue;
   }
 
-  const value = runMetadata?.summaryMetrics[id]?.value;
-
-  if (value === undefined) {
-    return null;
-  }
-
-  const numeric = Number(value);
-
-  return Number.isFinite(numeric) ? numeric : null;
+  return null;
 }
 
 /**
