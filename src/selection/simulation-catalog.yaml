@@ -18,12 +18,12 @@ planetary:
 galaxy:
   label: Galaxy
   placeholderImage: assets/galaxy_example.webp
-  parameterSubtitle: Adjust the ingredients of a galaxy. What does it take to grow a galaxy like our Milky Way?
+  parameterSubtitle: Adjust the ingredients of a galaxy.  What does it take to grow a galaxy like our Milky Way?
   views:
     - id: hst
       label: Hubble Space Telescope
       icon: hubble-space-telescope
-      description: See your galaxy as the Hubble Space Telescope would — a luminous swirl of billions of stars. Brighter regions trace where the most stars were born while dark lanes mark the dust (complex molecules and tiny grains) that blocks starlight.
+      description: See your galaxy as the Hubble Space Telescope would — a luminous swirl of billions of stars.  Brighter regions trace where the most stars were born while dark lanes mark the dust (complex molecules and tiny grains) that blocks starlight.
     - id: sph_plus_hst
       label: Large Scale Structure
       icon: large-scale-structure
@@ -32,21 +32,21 @@ galaxy:
 cosmos:
   label: Cosmos
   placeholderImage: assets/cosmos_example.webp
-  parameterSubtitle: Adjust the fundamental laws of the Universe and see how matter evolves from the beginning of time. What parameters best explain the Universe we observe?
+  parameterSubtitle: Adjust the fundamental laws of the Universe and see how matter evolves from the beginning of time.  What parameters best explain the Universe we observe?
   views:
     - id: gas_density
       label: Gas Density
       icon: gas-density
-      description: The density of gas in the Universe. Gas collapses onto the cosmic web — the largest structure in the Universe as it cools and succumbs to gravity. Bright knots are galaxy clusters and groups, the wispy threads are filaments of gas stretching between them, and the dark empty patches are vast cosmic voids separating them.
+      description: The density of gas in the Universe.  Gas collapses onto the cosmic web — the largest structure in the Universe as it cools and succumbs to gravity.  Bright knots are galaxy clusters and groups, the wispy threads are filaments of gas stretching between them, and the dark empty patches are vast cosmic voids separating them.
     - id: gas_temperature
       label: Gas Temperature
       icon: gas-temperature
-      description: The temperature of the gas in the Universe. As gas collapses onto the cosmic web, it heats up but also cools as it radiates energy away. This cooling is imperitive for the formation of galaxies and stars, which can only form in cold, dense gas. However, once stars form they begin to heat the surrounding gas suppresing local star formation while supermassive black holes super heats gas as it falls into the black hole and ejects energy back into the surrounding gas on the largest scales. These are the massive bubbles seen in the gas temperature view.
+      description: The temperature of the gas in the Universe.  As gas collapses onto the cosmic web, it heats up but also cools as it radiates energy away.  This cooling is imperitive for the formation of galaxies and stars, which can only form in cold, dense gas.  However, once stars form they begin to heat the surrounding gas suppresing local star formation while supermassive black holes super heats gas as it falls into the black hole and ejects energy back into the surrounding gas on the largest scales.  These are the massive bubbles seen in the gas temperature view.
     - id: dark_matter_density
       label: Dark Matter
       icon: dark-matter
-      description: The invisible scaffolding of the cosmos. Dark matter outweighs ordinary matter five to one in our Universe — you can't see it, but without it, galaxies like ours would never have formed.
+      description: The invisible scaffolding of the cosmos.  Dark matter outweighs ordinary matter five to one in our Universe — you can't see it, but without it, galaxies like ours would never have formed.
     - id: gas_metallicity_plus_stellar_density
       label: Metals + Stars
       icon: metals-stars
-      description: Where stars live and die. This view combines the light of stars with the heavy elements they forge — oxygen, carbon, iron — sprayed back into space by supernova explosions to seed the next generation of stars.
+      description: Where stars live and die.  This view combines the light of stars with the heavy elements they forge — oxygen, carbon, iron — sprayed back into space by supernova explosions to seed the next generation of stars.

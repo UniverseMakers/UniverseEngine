@@ -12,7 +12,7 @@ import { withBaseUrl } from '../shared/urls.ts';
 import { createEntryInfoOverlay } from './entry-info-overlay.ts';
 
 const SCALE_DESCRIPTIONS: Record<string, string> = {
-  planetary: 'Smash a planet into the early Earth. Can you make the Moon?',
+  planetary: 'Smash a planet into the early Earth.  Can you make the Moon?',
   cosmos: 'Take control of the fundamental laws of the Universe',
   galaxy: 'Explore the boundless diversity of galaxies in the Universe',
 };

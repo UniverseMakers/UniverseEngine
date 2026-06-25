@@ -12,21 +12,21 @@
 planetary:
   impactor_mass:
     label: Impactor Mass
-    description: How big was the object that smashed into the young Earth? A more massive impactor could spray out more debris — and perhaps a bigger Moon.
+    description: How big was the object that smashed into the young Earth?  A more massive impactor could spray out more debris — and perhaps a bigger Moon.
     unit: Earth masses
     min: 0.05
     max: 0.35
     step: 0.01
   impactor_velocity:
     label: Impact Speed
-    description: How fast was the impactor travelling when it hit? Faster collisions are more violent, ejecting more and hotter debris.
+    description: How fast was the impactor travelling when it hit?  Faster collisions are more violent, ejecting more and hotter debris.
     unit: km/s
     min: 8.5
     max: 30
     step: 0.1
   impactor_angle:
     label: Impact Angle
-    description: Was the impact head-on, or grazing at a high angle? A direct hit blasts material straight out, while a sideswipe can spray the debris out into a disk, or even escape as a hit and run.
+    description: Was the impact head-on, or grazing at a high angle?  A direct hit blasts material straight out, while a sideswipe can spray the debris out into a disk, or even escape as a hit and run.
     unit: °
     min: 0
     max: 65
@@ -35,7 +35,7 @@ planetary:
 galaxy:
   stellar_mass:
     label: Stellar Mass
-    description: How many stars did your galaxy make? This ranges from tiny dwarf galaxies with barely any stars up to enormous systems twice the size of the Milky Way.
+    description: How many stars did your galaxy make?  This ranges from tiny dwarf galaxies with barely any stars up to enormous systems twice the size of the Milky Way.
     unit: '×10¹⁰ solar masses'
     min: 0.1
     max: 20
@@ -45,7 +45,7 @@ galaxy:
     display_significant_figures: 3
   black_hole_mass:
     label: Black Hole Mass
-    description: How heavy is the monster at the centre? Every large galaxy harbours a supermassive black hole — this slider controls how big yours grew over cosmic time.
+    description: How heavy is the monster at the centre?  Every large galaxy harbours a supermassive black hole — this slider controls how big yours grew over cosmic time.
     unit: '×10⁶ solar masses'
     min: 0.1
     max: 250
@@ -55,7 +55,7 @@ galaxy:
     display_significant_figures: 3
   galaxy_age:
     label: Galaxy Age
-    description: How old are the stars in your galaxy? Older galaxies look redder and smoother, having had time to settle. Younger ones are bluer, brighter, and more chaotic.
+    description: How old are the stars in your galaxy?  Older galaxies look redder and smoother, having had time to settle.  Younger ones are bluer, brighter, and more chaotic.
     unit: years
     min: 4
     max: 13.8
@@ -65,7 +65,7 @@ galaxy:
 cosmos:
   baryon_fraction:
     label: Baryon Fraction
-    description: How much of the Universe is made of ordinary stuff — the atoms that form stars, planets, and you? Turn this up and there's more gas to make galaxies; turn it down and dark matter dominates.
+    description: How much of the Universe is made of ordinary stuff — the atoms that form stars, planets, and you?  Turn this up and there's more gas to make galaxies; turn it down and dark matter dominates.
     unit: ''
     min: 0.10
     max: 4
@@ -73,7 +73,7 @@ cosmos:
     value_scale: 0.159
   black_hole_strength:
     label: Black Hole Strength
-    description: How powerfully do black holes push back? As gas spirals inward it heats to millions of degrees. Some of that energy blasts back out as fierce winds or jets, shutting down star formation across entire galaxies.
+    description: How powerfully do black holes push back?  As gas spirals inward it heats to millions of degrees.  Some of that energy blasts back out as fierce winds or jets, shutting down star formation across entire galaxies.
     unit: 'K'
     min: 0.01
     max: 50.0
@@ -84,7 +84,7 @@ cosmos:
     log_scale: true
   gravity_strength:
     label: Gravity
-    description: What if gravity were stronger — or weaker? Turn it up and the cosmic web forms faster, pulling galaxies into tighter clumps. Turn it down and the Universe stays smoother and emptier for longer.
+    description: What if gravity were stronger — or weaker?  Turn it up and the cosmic web forms faster, pulling galaxies into tighter clumps.  Turn it down and the Universe stays smoother and emptier for longer.
     unit: m/s²
     min: 0.01
     max: 10

@@ -15,7 +15,7 @@ planetary:
   liveStats:
     - id: impactor_mass
       value: '0.10'
-      unit: M⊕
+      unit: Earth masses
       live: false
     - id: impactor_velocity
       value: '12.0'

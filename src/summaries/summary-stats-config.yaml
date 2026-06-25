@@ -26,16 +26,16 @@ planetary:
       unit: hours
       display_format: float
       precision: 2
-      description: How long the simulation took to run. Calculating how everything moves and affects each other takes a lot of work, even for a supercomputer!
+      description: How long the simulation took to run.  Calculating how everything moves and affects each other takes a lot of work, even for a supercomputer!
     - id: carbonBurnt
       value: '--'
       unit: kg CO₂
       display_format: float
       precision: 2
-      description: The carbon cost of running this simulation. Roughly the same as the emissions from a short-haul flight.
+      description: The carbon cost of running this simulation.  Roughly the same as the emissions from a short-haul flight.
     - id: computeUsed
       value: '--'
-      description: How much internal computing time and memory the simulation needed to crunch all that physics. Shared across all the CPUs working together in the supercomputer.
+      description: How much internal computing time and memory the simulation needed to crunch all that physics.  Shared across all the CPUs working together in the supercomputer.
   results:
     - id: moon_mass
       label: Moon-forming mass
@@ -72,7 +72,7 @@ planetary:
       unit: '%'
       display_format: float
       precision: 1
-      description: The fraction of the moon-forming material that is iron. Our Moon is mostly rock with a very small iron core, around 2% of its mass. Typical rocky planets like Earth are around 30% core and 70% mantle.
+      description: The fraction of the moon-forming material that is iron.  Our Moon is mostly rock with a very small iron core, around 2% of its mass.  Typical rocky planets like Earth are around 30% core and 70% mantle.
     - id: proto_earth_in_moon_percent
       label: Moon-forming proto-Earth
       value: '--'
@@ -85,7 +85,7 @@ planetary:
       value: '--'
       unit: ''
       display_format: string
-      description: We only have one Moon like ours to study, and it's possible that its formation wasn't very likely! However, impacts at very low or high angles, or very high speeds, are less likely. Impacts at very low speeds might not even be possible in reality without something mysterious to slow down the impactor, but that doesn't stop us from simulating what could happen if it did.
+      description: We only have one Moon like ours to study, and it's possible that its formation wasn't very likely! However, impacts at very low or high angles, or very high speeds, are less likely.  Impacts at very low speeds might not even be possible in reality without something mysterious to slow down the impactor, but that doesn't stop us from simulating what could happen if it did.
   similarityScore:
     value: '--'
 
@@ -96,14 +96,14 @@ galaxy:
       unit: hours
       display_format: float
       precision: 2
-      description: How long the simulation took to run. Calculating how everything moves and affects each other takes a lot of work, even for a supercomputer!
+      description: How long the simulation took to run.  Calculating how everything moves and affects each other takes a lot of work, even for a supercomputer!
     - id: carbonBurnt
       value: '--'
       unit: kg CO₂
-      description: The carbon cost of running this simulation. Roughly the same as the emissions from a short-haul flight.
+      description: The carbon cost of running this simulation.  Roughly the same as the emissions from a short-haul flight.
     - id: computeUsed
       value: '--'
-      description: How much internal computing time and memory the simulation needed to crunch all that physics. Shared across all the CPUs working together in the supercomputer.
+      description: How much internal computing time and memory the simulation needed to crunch all that physics.  Shared across all the CPUs working together in the supercomputer.
   results:
     - id: stellar_mass
       label: Stellar mass
@@ -113,7 +113,7 @@ galaxy:
       value_scale: 1.0e10
       display_format: compact
       precision: 3
-      description: How many stars your galaxy managed to make. Each solar mass is the weight of our own Sun.
+      description: How many stars your galaxy managed to make.  Each solar mass is the weight of our own Sun.
     - id: black_hole_mass
       label: Black hole mass
       target: 4.3
@@ -129,7 +129,7 @@ galaxy:
       value: '--'
       unit: yrs
       value_scale: 1.0e9
-      description: How old the stars in your galaxy are on average. Older galaxies look redder and smoother; younger ones are bluer and more chaotic.
+      description: How old the stars in your galaxy are on average.  Older galaxies look redder and smoother; younger ones are bluer and more chaotic.
   simulationStats:
     - id: stellar_mass_msun
       label: Stellar mass
@@ -137,7 +137,7 @@ galaxy:
       unit: Msun
       display_format: compact
       precision: 3
-      description: How many stars your galaxy managed to make. Each solar mass is the weight of our own Sun.
+      description: How many stars your galaxy managed to make.  Each solar mass is the weight of our own Sun.
     - id: stellar_size_kpc
       label: Stellar size
       value: '--'
@@ -162,16 +162,16 @@ cosmos:
       unit: hours
       display_format: float
       precision: 2
-      description: How long the simulation took to run. Calculating how everything moves and affects each other takes a lot of work, even for a supercomputer!
+      description: How long the simulation took to run.  Calculating how everything moves and affects each other takes a lot of work, even for a supercomputer!
     - id: carbonBurnt
       value: '--'
       unit: kg CO₂
       display_format: float
       precision: 2
-      description: The carbon cost of running this simulation. Roughly the same as the emissions from a short-haul flight.
+      description: The carbon cost of running this simulation.  Roughly the same as the emissions from a short-haul flight.
     - id: computeUsed
       value: '--'
-      description: How much internal computing time and memory the simulation needed to crunch all that physics. Shared across all the CPUs working together in the supercomputer.
+      description: How much internal computing time and memory the simulation needed to crunch all that physics.  Shared across all the CPUs working together in the supercomputer.
   results:
     - id: stellar_fraction
       label: Stellar fraction
@@ -188,7 +188,7 @@ cosmos:
       value: '--'
       unit: K
       display_format: compact
-      description: The average temperature of gas across your universe. Hotter gas means more energetic feedback from stars and black holes.
+      description: The average temperature of gas across your universe.  Hotter gas means more energetic feedback from stars and black holes.
     - id: nhalos
       label: Galaxy halos
       target: 1587
