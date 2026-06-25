@@ -65,7 +65,7 @@ planetary:
     - id: similarityScore
       label: Similarity score
       value: '--'
-      description: How similar the moon that formed from this impact would be to ours overall.
+      description: How similar the planet—moon system after this impact would be to ours overall.
     - id: moon_iron_percent
       label: Moon-forming iron
       value: '--'
@@ -85,7 +85,7 @@ planetary:
       value: '--'
       unit: ''
       display_format: string
-      description: We only have one Moon like ours to study, and it's possible that its formation wasn't very likely! However, impacts at very low or high angles, or very high speeds, are less likely.  Impacts at very low speeds might not even be possible in reality without something mysterious to slow down the impactor, but that doesn't stop us from simulating what could happen if it did.
+      description: We only have one Moon like ours to study, and it's possible that its formation wasn't very likely!  However, impacts at very low or high angles, or very high speeds, are less likely.  Impacts at very low speeds might not even be possible in reality without something mysterious to slow down the impactor, but that doesn't stop us from simulating what could happen if it did.
   similarityScore:
     value: '--'
 
