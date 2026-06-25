@@ -828,6 +828,15 @@ button {
   gap: 0.73rem;
 }
 
+.timeline__audio {
+  position: relative;
+  flex: 0 0 auto;
+}
+
+.timeline__audio.is-hidden {
+  display: none;
+}
+
 .timeline__play-btn {
   flex: 0 0 auto;
   width: 2.64rem;
@@ -854,6 +863,67 @@ button {
 
 .timeline__play-btn.is-paused {
   color: var(--text-muted);
+}
+
+.timeline__audio-btn {
+  width: 2.64rem;
+  height: 2.64rem;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border: 1px solid var(--line-strong);
+  border-radius: 0;
+  background: rgba(255, 255, 255, 0.03);
+  color: var(--accent);
+  font-size: 1rem;
+  line-height: 1;
+  transition:
+    background 0.16s ease,
+    border-color 0.16s ease;
+}
+
+.timeline__audio-btn:hover {
+  background: var(--accent-soft);
+  border-color: var(--accent-dim);
+}
+
+.timeline__audio-btn.is-muted {
+  color: var(--text-muted);
+}
+
+.timeline__audio-slider-wrap {
+  position: absolute;
+  left: 50%;
+  bottom: calc(100% + 0.46rem);
+  display: grid;
+  place-items: center;
+  width: 3rem;
+  height: 9.5rem;
+  border: 1px solid var(--line-strong);
+  background: rgba(6, 9, 12, 0.96);
+  box-shadow: var(--shadow-ambient);
+  opacity: 0;
+  pointer-events: none;
+  transform: translate(-50%, 0.35rem);
+  transition:
+    opacity 0.16s ease,
+    transform 0.16s ease;
+}
+
+.timeline__audio.open .timeline__audio-slider-wrap {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translate(-50%, 0);
+}
+
+.timeline__audio-slider {
+  appearance: slider-vertical;
+  -webkit-appearance: slider-vertical;
+  writing-mode: vertical-lr;
+  direction: rtl;
+  width: 1.2rem;
+  height: 7.5rem;
+  background: rgba(34, 211, 238, 0.18);
 }
 
 .timeline__slider {
@@ -2061,6 +2131,28 @@ button {
   line-height: 1.8;
   letter-spacing: 0.04em;
   text-transform: uppercase;
+}
+
+.audio-settings {
+  display: grid;
+  gap: 0.9rem;
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--line);
+}
+
+.audio-settings__slider {
+  width: 100%;
+  margin-top: 0.85rem;
+}
+
+.audio-settings__value {
+  display: inline-block;
+  margin-top: 0.45rem;
+  color: var(--text-secondary);
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  letter-spacing: 0.08em;
 }
 
 .config-overlay__controls {

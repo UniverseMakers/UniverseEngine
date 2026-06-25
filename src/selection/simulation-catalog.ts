@@ -47,6 +47,7 @@ export interface SimulationViewOption {
   id: string;
   label?: string;
   icon?: string;
+  audio?: boolean;
   description?: string;
 }
 
@@ -136,6 +137,7 @@ interface RawSimulationViewOption {
   id: string;
   label?: string;
   icon?: string;
+  audio?: boolean;
   description?: string;
 }
 
@@ -218,6 +220,7 @@ export const SIMULATION_CLASSES: SimulationClass[] = Object.entries(catalog).map
         id: view.id,
         label: view.label,
         icon: view.icon,
+        audio: view.audio ?? false,
         description: view.description,
       })),
     };

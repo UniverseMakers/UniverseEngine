@@ -135,6 +135,13 @@ export function createAppShell(app: HTMLElement): void {
   // Sidecar run metadata for the currently loaded video (wallclock, compute, etc).
   let activeRunMetadata: VideoRunMetadata | null = null;
 
+  // Optional per-run audio track used by audio-capable views.
+  let activeAudioUrl: string | null = null;
+  let activeAudioAvailable = false;
+  let audioMuted = advancedSettings.audioMutedByDefault;
+  let audioVolume = advancedSettings.defaultAudioVolume;
+  let audioProbeNonce = 0;
+
   // Manifest-backed run selection for the currently loaded simulation.
   let activeRunMatch: VideoMatch | null = null;
 
@@ -172,6 +179,14 @@ export function createAppShell(app: HTMLElement): void {
   // Mount the persistent viewport layer first so every overlay can sit above it.
   // The viewport stays mounted forever — only its source video changes.
   const viewport = createViewport(app, initialPlaceholderVideo);
+  const runAudio = document.createElement('audio');
+
+  runAudio.preload = 'auto';
+  runAudio.hidden = true;
+  runAudio.setAttribute('playsinline', 'true');
+  runAudio.muted = audioMuted;
+  runAudio.volume = audioVolume;
+  app.appendChild(runAudio);
 
   // Build the display HUD container that appears in config/display contexts.
   const displayChrome = document.createElement('div');
@@ -344,6 +359,8 @@ export function createAppShell(app: HTMLElement): void {
       scheduleViewportSeek(position);
     },
     onTogglePlay: handleTogglePlay,
+    onAudioToggle: handleAudioToggle,
+    onAudioVolumeChange: handleAudioVolumeChange,
     onSpeedChange: handleSpeedChange,
     onSummaryClick: handleShowSummary,
     onScrubStart() {
@@ -361,6 +378,14 @@ export function createAppShell(app: HTMLElement): void {
 
   // Prime the play/pause button from the current video state.
   timeline.setPlaying(!viewport.isPaused());
+  timeline.setAudioVisible(false);
+  timeline.setMuted(audioMuted);
+  timeline.setVolume(audioVolume);
+
+  runAudio.addEventListener('loadedmetadata', () => {
+    syncAudioToViewport(true);
+    syncRunAudioPlayback();
+  });
 
   // ── Smooth scrubber updates via requestAnimationFrame ──────────────────
   // The video's native `timeupdate` event fires too infrequently (~4 Hz) to
@@ -416,6 +441,7 @@ export function createAppShell(app: HTMLElement): void {
 
       pendingSeekFraction = null;
       viewport.seekToFraction(fractionToSeek);
+      syncAudioToViewport(true);
     });
   }
 
@@ -433,6 +459,7 @@ export function createAppShell(app: HTMLElement): void {
 
     pendingSeekFraction = null;
     viewport.seekToFraction(fractionToSeek);
+    syncAudioToViewport(true);
   }
 
   function clearAlternatePrewarmResumeTimer(): void {
@@ -488,6 +515,7 @@ export function createAppShell(app: HTMLElement): void {
     isPointerScrubbing = true;
     lastScrubHudUpdateAt = 0;
     suspendAlternatePrewarming();
+    syncRunAudioPlayback();
   }
 
   function handleScrubEnd(): void {
@@ -498,6 +526,7 @@ export function createAppShell(app: HTMLElement): void {
       viewport.getPlaybackFraction() * viewport.getDurationSeconds();
     refreshDisplayData(lastPlaybackSeconds);
     scheduleAlternatePrewarmingResume();
+    syncRunAudioPlayback();
   }
 
   // Keep the timeline button in sync and start/stop the smooth scrubber loop.
@@ -511,6 +540,8 @@ export function createAppShell(app: HTMLElement): void {
       startScrubberLoop();
       scheduleAlternatePrewarmingResume(0);
     }
+
+    syncRunAudioPlayback();
   });
 
   // The native `timeupdate` event still drives HUD data refresh — its rate
@@ -529,6 +560,7 @@ export function createAppShell(app: HTMLElement): void {
     }
 
     refreshDisplayData(lastPlaybackSeconds);
+    syncAudioToViewport();
   });
 
   // Mount the shared overlay layer used by the app's mode transitions.
@@ -559,6 +591,7 @@ export function createAppShell(app: HTMLElement): void {
       thumbnail,
     );
     summaryOverlay.show();
+    syncRunAudioPlayback();
   });
 
   // Mount the first-load entry overlay — the very first thing the user sees.
@@ -966,9 +999,11 @@ export function createAppShell(app: HTMLElement): void {
 
     if (atEnd) {
       viewport.resetPlayback();
+      syncAudioToViewport(true);
     }
 
     void playViewportWithMutedFallback(viewport);
+    syncRunAudioPlayback();
   }
 
   /**
@@ -989,6 +1024,7 @@ export function createAppShell(app: HTMLElement): void {
       thumbnail,
     );
     summaryOverlay.show();
+    syncRunAudioPlayback();
   }
 
   /**
@@ -1002,6 +1038,17 @@ export function createAppShell(app: HTMLElement): void {
     } else {
       viewport.pause();
     }
+  }
+
+  function handleAudioToggle(): void {
+    audioMuted = !audioMuted;
+    syncRunAudioPlayback();
+  }
+
+  function handleAudioVolumeChange(volume: number): void {
+    audioVolume = Math.max(0, Math.min(1, volume));
+    audioMuted = audioVolume <= 0 ? true : false;
+    syncRunAudioPlayback();
   }
 
   /**
@@ -1075,8 +1122,10 @@ export function createAppShell(app: HTMLElement): void {
     // Fire-and-forget the async data loads — they'll update the HUD when done.
     void loadActiveLiveStats(match.liveDataUrl, runRequestId);
     void loadActiveRunMetadata(match.summaryUrl, runRequestId);
-    viewport.setMuted(false);
+    void loadActiveRunAudio(match.summaryUrl, runRequestId);
+    viewport.setMuted(true);
     refreshViewSwitcher(selectedViewId);
+    refreshAudioControlVisibility();
     setMode('initializing');
 
     const preparedSourcePromise = prepareActiveVideoSource(selectedViewUrl);
@@ -1131,6 +1180,7 @@ export function createAppShell(app: HTMLElement): void {
     viewport.showMedia();
     void playViewportWithMutedFallback(viewport);
     setMode('display');
+    syncRunAudioPlayback();
   }
 
   async function prepareActiveVideoSource(
@@ -1360,6 +1410,7 @@ export function createAppShell(app: HTMLElement): void {
     }
 
     updateSynthesizerLogo();
+    syncRunAudioPlayback();
   }
 
   function updateSynthesizerLogo(): void {
@@ -1461,9 +1512,12 @@ export function createAppShell(app: HTMLElement): void {
     summaryOverlay.hide();
     viewSwitcher.hide();
     viewport.pause();
+    runAudio.pause();
     viewport.clearPrewarmedSources();
     viewport.resetPlayback();
     timeline.setPosition(0);
+    clearActiveRunAudio();
+    resetAudioPreferencesToDefaults();
   }
 
   /**
@@ -1518,6 +1572,8 @@ export function createAppShell(app: HTMLElement): void {
     }
 
     refreshViewSwitcher(viewId);
+    refreshAudioControlVisibility();
+    syncRunAudioPlayback();
     infoOverlay.classList.remove('is-visible');
     updateSynthesizerLogo();
   }
@@ -1734,6 +1790,151 @@ export function createAppShell(app: HTMLElement): void {
     return match.views[viewId] ?? null;
   }
 
+  function doesActiveViewSupportAudio(): boolean {
+    const selectedViewId = resolveSelectedViewId(activeClass, activeRunMatch);
+
+    if (!selectedViewId) {
+      return false;
+    }
+
+    return activeClass.views.some((view) => view.id === selectedViewId && view.audio);
+  }
+
+  function getRunAudioUrl(summaryUrl: string): string {
+    return summaryUrl.replace(/run_summary\.yaml($|\?)/, 'audio_track.wav$1');
+  }
+
+  async function loadActiveRunAudio(
+    summaryUrl: string,
+    runRequestId: number,
+  ): Promise<void> {
+    const audioUrl = getRunAudioUrl(summaryUrl);
+    const probeNonce = ++audioProbeNonce;
+    const available = await doesAudioTrackExist(audioUrl);
+
+    if (!runRequests.isCurrent(runRequestId) || probeNonce !== audioProbeNonce) {
+      return;
+    }
+
+    if (!available) {
+      clearActiveRunAudio();
+
+      return;
+    }
+
+    activeAudioUrl = resolveOnlineAssetUrl(audioUrl);
+    activeAudioAvailable = true;
+
+    if (runAudio.src !== activeAudioUrl) {
+      runAudio.pause();
+      runAudio.src = activeAudioUrl;
+      runAudio.load();
+    }
+
+    refreshAudioControlVisibility();
+    syncRunAudioPlayback();
+  }
+
+  async function doesAudioTrackExist(audioUrl: string): Promise<boolean> {
+    try {
+      const headResponse = await fetchWithOnlineAssetFallback(audioUrl, {
+        method: 'HEAD',
+      });
+
+      if (headResponse.ok) {
+        return true;
+      }
+    } catch {
+      // Fall through to the range request fallback.
+    }
+
+    try {
+      const rangeResponse = await fetchWithOnlineAssetFallback(audioUrl, {
+        headers: { Range: 'bytes=0-0' },
+      });
+
+      return rangeResponse.ok;
+    } catch {
+      return false;
+    }
+  }
+
+  function clearActiveRunAudio(): void {
+    audioProbeNonce += 1;
+    activeAudioUrl = null;
+    activeAudioAvailable = false;
+    runAudio.pause();
+    runAudio.removeAttribute('src');
+    runAudio.load();
+    refreshAudioControlVisibility();
+  }
+
+  function resetAudioPreferencesToDefaults(): void {
+    audioMuted = advancedSettings.audioMutedByDefault;
+    audioVolume = advancedSettings.defaultAudioVolume;
+    runAudio.muted = audioMuted;
+    runAudio.volume = audioVolume;
+    timeline.setMuted(audioMuted);
+    timeline.setVolume(audioVolume);
+  }
+
+  function refreshAudioControlVisibility(): void {
+    timeline.setAudioVisible(
+      doesActiveViewSupportAudio() && activeAudioAvailable && Boolean(activeAudioUrl),
+    );
+    timeline.setMuted(audioMuted);
+    timeline.setVolume(audioVolume);
+  }
+
+  function syncAudioToViewport(force = false): void {
+    if (!activeAudioAvailable || !Number.isFinite(runAudio.duration) || runAudio.duration <= 0) {
+      return;
+    }
+
+    const targetTime = Math.max(
+      0,
+      Math.min(runAudio.duration, viewport.getPlaybackFraction() * runAudio.duration),
+    );
+
+    if (force || Math.abs(runAudio.currentTime - targetTime) > 0.35) {
+      runAudio.currentTime = targetTime;
+    }
+  }
+
+  function syncRunAudioPlayback(): void {
+    const audioVisible =
+      doesActiveViewSupportAudio() && activeAudioAvailable && Boolean(activeAudioUrl);
+
+    refreshAudioControlVisibility();
+    runAudio.muted = audioMuted;
+    runAudio.volume = audioVolume;
+
+    if (!audioVisible) {
+      runAudio.pause();
+
+      return;
+    }
+
+    syncAudioToViewport();
+
+    if (
+      app.dataset.mode !== 'display' ||
+      viewport.isPaused() ||
+      hasCompletedPlayback ||
+      isPointerScrubbing
+    ) {
+      runAudio.pause();
+
+      return;
+    }
+
+    void runAudio.play().catch(() => {
+      audioMuted = true;
+      runAudio.muted = true;
+      timeline.setMuted(true);
+    });
+  }
+
   function getSelectableSimulationClasses(
     settings: AdvancedSettings,
   ): SimulationClass[] {
@@ -1785,6 +1986,8 @@ export function createAppShell(app: HTMLElement): void {
     entryOverlay.setSimulationClasses(availableSimulationClasses);
     overlayPanel.setAdvancedSettings(advancedSettings);
     logInfo('Advanced settings updated', advancedSettings);
+    resetAudioPreferencesToDefaults();
+    syncRunAudioPlayback();
 
     if (previousManifestSource !== advancedSettings.manifestSource) {
       activeRunMatch = null;

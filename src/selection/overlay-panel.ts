@@ -130,11 +130,56 @@ export function createOverlayPanel(
   settingsSection.dataset.section = 'settings';
   settingsSection.innerHTML = `
     <p class="config-overlay__eyebrow">Theme settings</p>
-    <p class="config-overlay__settings-copy">Theme only for this pass. Choose the interface era here instead of keeping extra buttons inside the overlay.</p>
+    <p class="config-overlay__settings-copy">Theme only for this pass. Choose the interface era here, and set the default audio behavior for views that support sonification.</p>
   `;
   const themePickerHost = document.createElement('div');
 
   settingsSection.appendChild(themePickerHost);
+
+  const audioSettings = document.createElement('section');
+
+  audioSettings.className = 'audio-settings';
+  audioSettings.innerHTML = `
+    <p class="config-overlay__eyebrow">Audio defaults</p>
+    <p class="config-overlay__settings-copy">These defaults apply when a run opens an audio-enabled view. You can still change them from the playback controls.</p>
+  `;
+
+  const audioMuteField = document.createElement('label');
+
+  audioMuteField.className = 'advanced-settings__field advanced-settings__field--inline';
+  const audioMuteInput = document.createElement('input');
+  const audioMuteCopy = document.createElement('span');
+
+  audioMuteInput.type = 'checkbox';
+  audioMuteInput.className = 'advanced-settings__checkbox';
+  audioMuteCopy.innerHTML = `
+    <span class="advanced-settings__label">Mute audio by default</span>
+    <span class="advanced-settings__help">Start audio-enabled views muted until the visitor chooses to listen.</span>
+  `;
+  audioMuteField.appendChild(audioMuteInput);
+  audioMuteField.appendChild(audioMuteCopy);
+  audioSettings.appendChild(audioMuteField);
+
+  const audioVolumeField = document.createElement('label');
+
+  audioVolumeField.className = 'advanced-settings__field';
+  audioVolumeField.innerHTML = `
+    <span class="advanced-settings__label">Default audio volume</span>
+    <span class="advanced-settings__help">Set the starting playback level for sonified runs.</span>
+  `;
+  const audioVolumeInput = document.createElement('input');
+  const audioVolumeValue = document.createElement('span');
+
+  audioVolumeInput.type = 'range';
+  audioVolumeInput.min = '0';
+  audioVolumeInput.max = '100';
+  audioVolumeInput.step = '1';
+  audioVolumeInput.className = 'audio-settings__slider';
+  audioVolumeValue.className = 'audio-settings__value';
+  audioVolumeField.appendChild(audioVolumeInput);
+  audioVolumeField.appendChild(audioVolumeValue);
+  audioSettings.appendChild(audioVolumeField);
+  settingsSection.appendChild(audioSettings);
 
   const advancedPanel = document.createElement('section');
 
@@ -411,6 +456,13 @@ export function createOverlayPanel(
   verboseInput.addEventListener('change', () => {
     pendingAdvancedSettings.verboseLogging = verboseInput.checked;
   });
+  audioMuteInput.addEventListener('change', () => {
+    pendingAdvancedSettings.audioMutedByDefault = audioMuteInput.checked;
+  });
+  audioVolumeInput.addEventListener('input', () => {
+    pendingAdvancedSettings.defaultAudioVolume = Number(audioVolumeInput.value) / 100;
+    syncAudioVolumeValue();
+  });
 
   for (const [scaleId, checkbox] of visibilityInputs.entries()) {
     checkbox.addEventListener('change', () => {
@@ -483,6 +535,11 @@ export function createOverlayPanel(
     localSourceInput.checked = pendingAdvancedSettings.manifestSource === 'local';
     onlineSourceInput.checked = pendingAdvancedSettings.manifestSource === 'online';
     verboseInput.checked = pendingAdvancedSettings.verboseLogging;
+    audioMuteInput.checked = pendingAdvancedSettings.audioMutedByDefault;
+    audioVolumeInput.value = String(
+      Math.round(pendingAdvancedSettings.defaultAudioVolume * 100),
+    );
+    syncAudioVolumeValue();
 
     for (const [scaleId, checkbox] of visibilityInputs.entries()) {
       const isLockedScale = pendingAdvancedSettings.lockedScaleId === scaleId;
@@ -525,6 +582,10 @@ export function createOverlayPanel(
   function resetAdvancedDraft(): void {
     pendingAdvancedSettings = cloneAdvancedSettings(options.advancedSettings);
     syncAdvancedControls();
+  }
+
+  function syncAudioVolumeValue(): void {
+    audioVolumeValue.textContent = `${Math.round(Number(audioVolumeInput.value))}%`;
   }
 
   footerButton.addEventListener('click', () => {
@@ -591,5 +652,7 @@ function cloneAdvancedSettings(settings: AdvancedSettings): AdvancedSettings {
     manifestSource: settings.manifestSource,
     verboseLogging: settings.verboseLogging,
     hiddenScaleIds: [...settings.hiddenScaleIds],
+    audioMutedByDefault: settings.audioMutedByDefault,
+    defaultAudioVolume: settings.defaultAudioVolume,
   };
 }

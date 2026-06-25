@@ -5,6 +5,8 @@ export interface AdvancedSettings {
   manifestSource: ManifestSource;
   verboseLogging: boolean;
   hiddenScaleIds: string[];
+  audioMutedByDefault: boolean;
+  defaultAudioVolume: number;
 }
 
 const STORAGE_KEY = 'universe-engine-advanced-settings';
@@ -17,6 +19,8 @@ export function getDefaultAdvancedSettings(): AdvancedSettings {
     manifestSource: 'online',
     verboseLogging: false,
     hiddenScaleIds: [],
+    audioMutedByDefault: true,
+    defaultAudioVolume: 0.75,
   };
 }
 
@@ -45,11 +49,13 @@ export function saveAdvancedSettings(
   localStorage.setItem(
     STORAGE_KEY,
     JSON.stringify({
-      lockedScaleId: normalized.lockedScaleId,
-      manifestSource: normalized.manifestSource,
-      verboseLogging: normalized.verboseLogging,
-      hiddenScaleIds: normalized.hiddenScaleIds,
-    }),
+        lockedScaleId: normalized.lockedScaleId,
+        manifestSource: normalized.manifestSource,
+        verboseLogging: normalized.verboseLogging,
+        hiddenScaleIds: normalized.hiddenScaleIds,
+        audioMutedByDefault: normalized.audioMutedByDefault,
+        defaultAudioVolume: normalized.defaultAudioVolume,
+      }),
   );
 
   return normalized;
@@ -78,6 +84,11 @@ export function normalizeAdvancedSettings(
           scaleId !== lockedScaleId,
       )
     : defaults.hiddenScaleIds;
+  const defaultAudioVolume = normalizeVolume(
+    typeof settings.defaultAudioVolume === 'number'
+      ? settings.defaultAudioVolume
+      : defaults.defaultAudioVolume,
+  );
 
   if (!lockedScaleId && hiddenScaleIds.length >= scaleIds.length && scaleIds.length > 0) {
     hiddenScaleIds.pop();
@@ -88,7 +99,17 @@ export function normalizeAdvancedSettings(
     manifestSource,
     verboseLogging: Boolean(settings.verboseLogging),
     hiddenScaleIds,
+    audioMutedByDefault: Boolean(settings.audioMutedByDefault),
+    defaultAudioVolume,
   };
+}
+
+function normalizeVolume(value: number): number {
+  if (!Number.isFinite(value)) {
+    return getDefaultAdvancedSettings().defaultAudioVolume;
+  }
+
+  return Math.max(0, Math.min(1, value));
 }
 
 export function getVisibleScaleIds(

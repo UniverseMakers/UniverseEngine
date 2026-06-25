@@ -23,10 +23,12 @@ galaxy:
     - id: hst
       label: Hubble Space Telescope
       icon: hubble-space-telescope
+      audio: true
       description: See your galaxy as the Hubble Space Telescope would — a luminous swirl of billions of stars.  Brighter regions trace where the most stars were born while dark lanes mark the dust (complex molecules and tiny grains) that blocks starlight.
     - id: sph_plus_hst
       label: Large Scale Structure
       icon: large-scale-structure
+      audio: true
       description: Zoom out to see the grand architecture of your galaxy — vast streams of gas funnelling in to sustain the galaxy's star formation along the hidden skeleton of dark matter that holds everything together.
 
 cosmos:
