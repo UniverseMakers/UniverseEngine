@@ -383,14 +383,14 @@ export function createSummaryOverlay(
 
   const replayButton = document.createElement('button');
 
-  replayButton.className = 'summary-overlay__button summary-overlay__button--primary';
+  replayButton.className = 'summary-overlay__button';
   replayButton.type = 'button';
   replayButton.textContent = 'Replay';
 
   const newButton = document.createElement('button');
   const homeButton = document.createElement('button');
 
-  newButton.className = 'summary-overlay__button';
+  newButton.className = 'summary-overlay__button summary-overlay__button--primary';
   newButton.type = 'button';
   newButton.textContent = 'New Parameters';
 
@@ -403,8 +403,8 @@ export function createSummaryOverlay(
   newButton.addEventListener('click', options.onParameters);
   homeButton.addEventListener('click', options.onHome);
 
-  actions.appendChild(replayButton);
   actions.appendChild(newButton);
+  actions.appendChild(replayButton);
   actions.appendChild(homeButton);
 
   panel.appendChild(header);
