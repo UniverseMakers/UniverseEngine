@@ -385,7 +385,7 @@ export function createSummaryOverlay(
 
   replayButton.className = 'summary-overlay__button';
   replayButton.type = 'button';
-  replayButton.textContent = 'Replay';
+  replayButton.textContent = 'Continue Visualising';
 
   const newButton = document.createElement('button');
   const homeButton = document.createElement('button');
@@ -467,6 +467,12 @@ export function createSummaryOverlay(
   modal.addEventListener('click', (event) => {
     if (event.target === modal) {
       closeModal();
+    }
+  });
+
+  overlay.addEventListener('click', (event) => {
+    if (event.target === overlay) {
+      options.onReplay();
     }
   });
 

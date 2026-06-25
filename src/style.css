@@ -886,8 +886,11 @@ button {
 }
 
 .timeline__speed-btn {
+  display: grid;
+  place-items: center;
+  height: 2.64rem;
   min-width: 3.96rem;
-  padding: 0.46rem 0.73rem;
+  padding: 0 0.73rem;
   border: 1px solid var(--line-strong);
   border-radius: 0;
   background: rgba(255, 255, 255, 0.03);
@@ -954,6 +957,30 @@ button {
 .timeline__speed-option.is-active {
   background: var(--accent-soft);
   color: var(--accent);
+}
+
+.timeline__summary-btn {
+  flex: 0 0 auto;
+  width: 2.64rem;
+  height: 2.64rem;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border: 1px solid var(--line-strong);
+  border-radius: 0;
+  background: rgba(255, 255, 255, 0.03);
+  color: var(--accent);
+  font-family: var(--font-mono);
+  font-size: 0.95rem;
+  line-height: 1;
+  transition:
+    background 0.16s ease,
+    border-color 0.16s ease;
+}
+
+.timeline__summary-btn:hover {
+  background: var(--accent-soft);
+  border-color: var(--accent-dim);
 }
 
 /* ── View Info Overlay ────────────────────────────────────────────────────── */

@@ -365,6 +365,7 @@ export function createAppShell(app: HTMLElement): void {
     },
     onTogglePlay: handleTogglePlay,
     onSpeedChange: handleSpeedChange,
+    onSummaryClick: handleShowSummary,
     onScrubStart() {
       handleScrubStart();
       stopScrubberLoop();
@@ -980,13 +981,36 @@ export function createAppShell(app: HTMLElement): void {
   function handleReplay(): void {
     hasCompletedPlayback = false;
     summaryOverlay.hide();
-    viewport.resetPlayback();
+    const atEnd = viewport.getPlaybackFraction() >= 0.999;
+    if (atEnd) {
+      viewport.resetPlayback();
+    }
     // Browsers often require a user gesture to play audio. If the initial play
     // fails, fall back to muted playback so the video still works.
     void viewport.play().catch(() => {
       viewport.setMuted(true);
       void viewport.play();
     });
+  }
+
+  /**
+   * Pause playback and show the end-of-run summary overlay on demand.
+   *
+   * @returns void
+   */
+  function handleShowSummary(): void {
+    hasCompletedPlayback = true;
+    viewport.pause();
+    const thumbnail = activeRunMetadata ? viewport.captureFrame() : null;
+
+    summaryOverlay.update(
+      activeClass,
+      getActiveValues(),
+      viewport.getDurationSeconds(),
+      activeRunMetadata,
+      thumbnail,
+    );
+    summaryOverlay.show();
   }
 
   /**
