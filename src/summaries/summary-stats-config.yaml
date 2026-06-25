@@ -139,6 +139,13 @@ galaxy:
       description: The monster at the centre — how massive your galaxy's central black hole grew.
   similarityScore:
     value: '--'
+  morphologyChecklist:
+    - id: spiral
+      label: Spiral
+    - id: elliptical
+      label: Elliptical
+    - id: irregular
+      label: Irregular
 
 cosmos:
   resources:

@@ -149,7 +149,7 @@ export function createParameterEditor(
 
       slider.min = '0';
       slider.max = String(labelCount - 1);
-      slider.step = '1';
+      slider.step = 'any';
       slider.value = String(Math.round(rawValue));
     } else {
       const sliderMin = param.logScale ? Math.log10(param.min) : param.min;
@@ -174,10 +174,9 @@ export function createParameterEditor(
         const labels = param.qualiLabels!;
 
         values[param.id] = index;
-        slider.value = String(index);
         slider.style.setProperty(
           '--fill',
-          `${calculateFill(index, 0, labels.length - 1)}%`,
+          `${calculateFill(raw, 0, labels.length - 1)}%`,
         );
         readout.textContent = labels[index] ?? String(index);
       } else {

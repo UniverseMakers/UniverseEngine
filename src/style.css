@@ -1581,6 +1581,107 @@ button {
   color: #f5f8ff;
 }
 
+.galaxy-summary__desc-text {
+  margin: 0.45rem 0 0;
+  color: #e9f1f7;
+  font-family: var(--font-body);
+  font-size: 0.88rem;
+  line-height: 1.6;
+  letter-spacing: 0.02em;
+}
+
+.galaxy-summary__checklist {
+  display: flex;
+  gap: 0.65rem;
+  flex-wrap: wrap;
+}
+
+.galaxy-summary__hunt-row {
+  display: flex;
+  align-items: center;
+  gap: 1.2rem;
+  margin-top: 0.6rem;
+}
+
+.galaxy-summary__current {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex: 0 0 auto;
+  padding: 0.6rem 0.9rem;
+  border: 1px solid var(--line-strong);
+  border-radius: 4px;
+  background: rgba(99, 196, 232, 0.04);
+}
+
+.galaxy-summary__current-label {
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  font-size: 0.58rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.galaxy-summary__current-value {
+  color: var(--accent);
+  font-family: var(--font-mono);
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  margin-top: 0.2rem;
+}
+
+.galaxy-summary__check {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.55rem 1rem;
+  border: 1px solid rgba(99, 196, 232, 0.3);
+  border-radius: 4px;
+  background: rgba(99, 196, 232, 0.03);
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  color: var(--text-secondary);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  transition:
+    border-color 0.2s ease,
+    background 0.2s ease,
+    color 0.2s ease;
+}
+
+.galaxy-summary__check.is-found {
+  border-color: #4CD98A;
+  background: rgba(76, 217, 138, 0.08);
+  color: #4CD98A;
+}
+
+.galaxy-summary__check-box {
+  display: grid;
+  place-items: center;
+  width: 1.15rem;
+  height: 1.15rem;
+  border: 1px solid currentColor;
+  border-radius: 3px;
+  font-size: 0.75rem;
+  line-height: 1;
+}
+
+.galaxy-summary__done {
+  margin-top: 0.9rem;
+  padding: 0.55rem 1rem;
+  border: 1px solid #4CD98A;
+  border-radius: 4px;
+  background: rgba(76, 217, 138, 0.05);
+  color: #4CD98A;
+  font-family: var(--font-mono);
+  font-size: 0.76rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  text-align: center;
+}
+
 .panel {
   position: relative;
   border: 1px solid rgba(99, 196, 232, 0.3);

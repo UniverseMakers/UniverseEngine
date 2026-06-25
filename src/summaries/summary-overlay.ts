@@ -434,6 +434,11 @@ export function createSummaryOverlay(
   const modalBody = modal.querySelector('.sci-modal__body') as HTMLElement;
   const modalClose = modal.querySelector('.sci-modal__close') as HTMLElement;
 
+  // Session-based scavenger hunt: accumulates found morphologies across runs
+  // and only purges when the summary closes AFTER the hunt is complete.
+  const foundMorphologies = new Set<string>();
+  let huntCompleteAtClose = false;
+
   // The same modal is reused for both result bars and info cards so we only
   // maintain one focus/close behavior and one piece of DOM.
   function openModal(bar: ScientificBarDatum): void {
@@ -562,6 +567,10 @@ export function createSummaryOverlay(
         overlay.hidden = true;
         overlay.classList.add('is-hidden');
         hideTimer = undefined;
+        if (huntCompleteAtClose) {
+          foundMorphologies.clear();
+          huntCompleteAtClose = false;
+        }
       }, SUMMARY_OVERLAY.HIDE_AFTER_MS);
     },
 
@@ -696,7 +705,118 @@ export function createSummaryOverlay(
 
       content.appendChild(topRow);
 
-      if (scientificBars.length > 0) {
+      const checklist = simClass.metadata.morphologyChecklist;
+
+      if (checklist && checklist.length > 0) {
+        // ── Galaxy summary: params on left, description + hunt on right ──
+        const currentMorphology =
+          runMetadata?.summaryMetrics?.morphology?.value ?? null;
+
+        if (currentMorphology) {
+          foundMorphologies.add(currentMorphology.toLowerCase());
+        }
+
+        const bottomRow = document.createElement('div');
+
+        bottomRow.className = 'sci-bottom-row';
+
+        bottomRow.appendChild(buildParamSection(simClass, values));
+
+        const rightColumn = document.createElement('div');
+
+        rightColumn.className = 'summary-side-column';
+
+        const descriptionText = runMetadata?.summaryMetrics?.description?.value ?? null;
+
+        if (descriptionText) {
+          const descPanel = document.createElement('div');
+
+          descPanel.className = 'sci-section panel';
+
+          const descHeading = document.createElement('p');
+
+          descHeading.className = 'sci-section__title';
+          descHeading.textContent = 'About This Galaxy';
+
+          const descText = document.createElement('p');
+
+          descText.className = 'galaxy-summary__desc-text';
+          descText.textContent = descriptionText;
+
+          descPanel.appendChild(descHeading);
+          descPanel.appendChild(descText);
+          rightColumn.appendChild(descPanel);
+        }
+
+        const huntPanel = document.createElement('div');
+
+        huntPanel.className = 'sci-section panel';
+
+        const huntHeading = document.createElement('p');
+
+        huntHeading.className = 'sci-section__title';
+        huntHeading.textContent = 'Morphology Scavenger Hunt';
+
+        const huntRow = document.createElement('div');
+
+        huntRow.className = 'galaxy-summary__hunt-row';
+
+        const currentMorphologyLabel =
+          checklist.find((item) => item.id === (currentMorphology ?? '').toLowerCase())?.label ??
+          currentMorphology;
+
+        const currentOutput = document.createElement('div');
+
+        currentOutput.className = 'galaxy-summary__current';
+        currentOutput.innerHTML = `
+          <span class="galaxy-summary__current-label">This galaxy</span>
+          <span class="galaxy-summary__current-value">${currentMorphologyLabel ?? '--'}</span>
+        `;
+
+        const huntGrid = document.createElement('div');
+
+        huntGrid.className = 'galaxy-summary__checklist';
+
+        const allFound = foundMorphologies.size >= checklist.length;
+
+        for (const item of checklist) {
+          const box = document.createElement('div');
+
+          box.className = 'galaxy-summary__check';
+          if (foundMorphologies.has(item.id)) {
+            box.classList.add('is-found');
+          }
+
+          box.innerHTML = `
+            <span class="galaxy-summary__check-box">
+              ${foundMorphologies.has(item.id) ? '\u2713' : ''}
+            </span>
+            <span class="galaxy-summary__check-label">${item.label}</span>
+          `;
+          huntGrid.appendChild(box);
+        }
+
+        huntRow.appendChild(currentOutput);
+        huntRow.appendChild(huntGrid);
+
+        huntPanel.appendChild(huntHeading);
+        huntPanel.appendChild(huntRow);
+
+        if (allFound) {
+          huntCompleteAtClose = true;
+
+          const doneBanner = document.createElement('div');
+
+          doneBanner.className = 'galaxy-summary__done';
+          doneBanner.textContent =
+            "\u2605 Well done! You've discovered all the galaxy types! \u2605";
+          huntPanel.appendChild(doneBanner);
+        }
+
+        rightColumn.appendChild(huntPanel);
+        bottomRow.appendChild(rightColumn);
+        content.appendChild(bottomRow);
+      } else if (scientificBars.length > 0) {
         // The lower half of the overlay only exists for families with authored
         // result targets. It pairs the player's chosen inputs with the resulting
         // comparison bars so visitors can connect cause (inputs) to effect (fit).
@@ -704,56 +824,7 @@ export function createSummaryOverlay(
 
         bottomRow.className = 'sci-bottom-row';
 
-        const paramSection = document.createElement('div');
-
-        paramSection.className = 'sci-section panel param-section';
-        paramSection.innerHTML = '<p class="sci-section__title">Input Parameters</p>';
-
-        const paramCards = document.createElement('div');
-
-        paramCards.className = 'param-cards';
-
-        for (const param of simClass.parameters) {
-          // Every parameter card is rebuilt from the current value map so the
-          // summary remains faithful to what the user actually selected, even if
-          // the chosen playback asset came from a nearest-neighbor manifest match.
-          const rawValue = values[param.id] ?? param.fallbackValue;
-          const displayUnit = param.displayUnit ?? param.unit;
-
-          const card = document.createElement('div');
-          const label = document.createElement('span');
-          const value = document.createElement('span');
-
-          card.className = 'res-card';
-          if (param.description) {
-            card.classList.add('res-card--has-info');
-            card.addEventListener('click', () =>
-              openCardModal(param.label, param.description!),
-            );
-          }
-
-          label.className = 'res-card__label';
-          label.textContent = param.label;
-          value.className = 'res-card__value';
-          const formatted =
-            param.displayFormat === 'qualitative' && param.qualiLabels
-              ? param.qualiLabels[Math.round(rawValue)] ?? '--'
-              : formatParameterValue(rawValue, param.step, {
-                  scale: param.valueScale,
-                  format: param.displayFormat,
-                  significantFigures: param.displaySignificantFigures,
-                });
-
-          // Parameters always show the player's chosen values, not the matched
-          // run's nearest-neighbor values. That keeps the summary faithful to
-          // the user's input even when playback came from a nearby precomputed run.
-          value.textContent = withUnit(formatted, displayUnit);
-          card.appendChild(label);
-          card.appendChild(value);
-          paramCards.appendChild(card);
-        }
-
-        paramSection.appendChild(paramCards);
+        bottomRow.appendChild(buildParamSection(simClass, values));
 
         const sciSection = document.createElement('div');
         const sciHeader = document.createElement('div');
@@ -776,9 +847,6 @@ export function createSummaryOverlay(
         for (const bar of scientificBars) {
           const row = document.createElement('div');
 
-          // The pointer's horizontal position uses the normalized ratio rather
-          // than an absolute quantity, letting masses, counts, and temperatures
-          // share the same visual treatment.
           row.className = 'sci-bar';
           row.innerHTML = `
             <div class="sci-bar__name">${bar.label}</div>
@@ -796,7 +864,6 @@ export function createSummaryOverlay(
 
         sciSection.appendChild(sciHeader);
         sciSection.appendChild(list);
-        bottomRow.appendChild(paramSection);
         bottomRow.appendChild(sciSection);
         content.appendChild(bottomRow);
       }
@@ -831,6 +898,55 @@ function selectMetric(
     label: stat.label ?? metric.label,
     value: withUnit(formattedValue, stat.unit),
   };
+}
+
+/**
+ * Build the shared input-parameters card list used by every summary family.
+ */
+function buildParamSection(
+  simClass: SimulationClass,
+  values: Record<string, number>,
+): HTMLElement {
+  const section = document.createElement('div');
+
+  section.className = 'sci-section panel param-section';
+  section.innerHTML = '<p class="sci-section__title">Input Parameters</p>';
+
+  const cards = document.createElement('div');
+
+  cards.className = 'param-cards';
+
+  for (const param of simClass.parameters) {
+    const rawValue = values[param.id] ?? param.fallbackValue;
+    const displayUnit = param.displayUnit ?? param.unit;
+
+    const card = document.createElement('div');
+    const label = document.createElement('span');
+    const value = document.createElement('span');
+
+    card.className = 'res-card';
+
+    label.className = 'res-card__label';
+    label.textContent = param.label;
+    value.className = 'res-card__value';
+    const formatted =
+      param.displayFormat === 'qualitative' && param.qualiLabels
+        ? (param.qualiLabels[Math.round(rawValue)] ?? '--')
+        : formatParameterValue(rawValue, param.step, {
+            scale: param.valueScale,
+            format: param.displayFormat,
+            significantFigures: param.displaySignificantFigures,
+          });
+
+    value.textContent = withUnit(formatted, displayUnit);
+    card.appendChild(label);
+    card.appendChild(value);
+    cards.appendChild(card);
+  }
+
+  section.appendChild(cards);
+
+  return section;
 }
 
 /**

@@ -1509,7 +1509,6 @@ export function createAppShell(app: HTMLElement): void {
     viewport.resetPlayback();
     timeline.setPosition(0);
     clearActiveRunAudio();
-    resetAudioPreferencesToDefaults();
   }
 
   /**

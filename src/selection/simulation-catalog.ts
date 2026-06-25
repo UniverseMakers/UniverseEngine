@@ -35,10 +35,16 @@ export interface SimParameter {
   qualiLabels?: string[];
 }
 
+export interface MorphologyChecklistItem {
+  id: string;
+  label: string;
+}
+
 export interface SimulationMetadata {
   results: ResultDisplayConfig[];
   summaryStats: StatDisplayConfig[];
   liveStats: StatDisplayConfig[];
+  morphologyChecklist?: MorphologyChecklistItem[];
 }
 
 export interface ResultDisplayConfig extends StatDisplayConfig {
@@ -130,6 +136,7 @@ interface RawSummaryConfig {
   results?: RawResultDisplayConfig[];
   simulationStats?: RawStatDisplayConfig[];
   similarityScore?: { value: string };
+  morphologyChecklist?: MorphologyChecklistItem[];
 }
 
 interface RawResultDisplayConfig extends RawStatDisplayConfig {
@@ -193,6 +200,7 @@ export const SIMULATION_CLASSES: SimulationClass[] = Object.entries(catalog).map
         results,
         summaryStats: summaryStats.map(normalizeStatConfig),
         liveStats: liveStats.map(normalizeStatConfig),
+        morphologyChecklist: summaryStatsByFamily[id]?.morphologyChecklist,
       },
       parameters: Object.entries(rawParams).map(([parameterId, parameter]) => {
         const quali = parameter.quali_labels;
