@@ -311,7 +311,7 @@ button {
 
 .display-chrome__top-right {
   top: 1.25rem;
-  right: 1.25rem;
+  right: 1.75rem;
   z-index: 2;
   pointer-events: auto;
 }
@@ -753,7 +753,7 @@ button {
 /* ── Data Panel (HUD) ────────────────────────────────────────────────────── */
 
 .data-panel {
-  width: 18rem;
+  width: 20rem;
   max-width: calc(100vw - 2rem);
   padding: 1.05rem 1.2rem 1rem;
   background: rgba(0, 0, 0, 0.34);
@@ -762,6 +762,7 @@ button {
   border: 1px solid var(--line-strong);
   border-radius: 0;
   box-shadow: var(--shadow-ambient);
+  overflow: hidden;
 }
 
 .data-panel__metrics {
@@ -788,11 +789,13 @@ button {
 }
 
 .data-panel__metric-value {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
   color: var(--accent);
   font-family: var(--font-mono);
   font-size: 0.85rem;
   font-weight: 700;
-  flex: 0 0 auto;
   white-space: nowrap;
   text-align: right;
 }
@@ -2668,7 +2671,7 @@ button {
 
   .display-chrome__top-right {
     top: 1rem;
-    right: 1rem;
+    right: 1.25rem;
     bottom: auto;
   }
 
@@ -2758,12 +2761,12 @@ button {
 
   .display-chrome__top-right {
     top: 1.6rem;
-    right: 1rem;
+    right: 1.25rem;
     bottom: auto;
   }
 
   .data-panel {
-    width: 16rem;
+    width: 18rem;
     min-width: 0;
     max-width: calc(100vw - 2rem);
   }
@@ -3234,7 +3237,7 @@ button {
 
   .display-chrome__top-right {
     top: 0.75rem;
-    right: 0.75rem;
+    right: 1rem;
     left: auto;
     bottom: auto;
   }
@@ -3242,8 +3245,8 @@ button {
   .data-panel {
     width: 13.5rem;
     min-width: 0;
-    max-width: calc(100vw - 1.5rem);
-    padding: 0.75rem 0.85rem;
+    max-width: calc(100vw - 2rem);
+    padding: 0.75rem 1rem 0.75rem 0.85rem;
   }
 
   /* Keep the HUD compact: show a few rows and allow vertical scroll for more. */
