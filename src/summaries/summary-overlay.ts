@@ -209,17 +209,20 @@ function buildScientificBars(
     .map((result) => {
       const resolved = resolveScientificValue(result, simClass, values, runMetadata);
 
-        if (resolved === null) {
-          return null;
-        }
+      if (resolved === null) {
+        return null;
+      }
 
-        // Normalize against the configured target so every bar can share the
-        // same visual scale: 1.0 means exactly on target, 0.5 means half the
-        // target value, 2.0 means double, and anything higher is clamped later.
-        const normalizedValue = resolved / Math.max(result.target, 1e-9);
+      // Normalize against the configured target so every bar can share the
+      // same visual scale: 1.0 means exactly on target, 0.5 means half the
+      // target value, 2.0 means double, and anything higher is clamped later.
+      const normalizedValue = resolved / Math.max(result.target, 1e-9);
       const label = resolveScientificLabel(result, simClass, runMetadata);
       const detail = detailForTarget(result.id, label, normalizedValue);
-      const formattedValue = withUnit(formatSummaryValue(String(resolved), result), result.unit);
+      const formattedValue = withUnit(
+        formatSummaryValue(String(resolved), result),
+        result.unit,
+      );
 
       return {
         id: result.id,
@@ -382,7 +385,7 @@ export function createSummaryOverlay(
 
   replayButton.className = 'summary-overlay__button summary-overlay__button--primary';
   replayButton.type = 'button';
-  replayButton.textContent = 'Continue Exploring';
+  replayButton.textContent = 'Replay';
 
   const newButton = document.createElement('button');
   const homeButton = document.createElement('button');
@@ -642,9 +645,7 @@ export function createSummaryOverlay(
           stat.id !== 'similarityScore',
       );
       const simulationStats = stats.filter(
-        (stat) =>
-          stat.section === 'simulationStats' &&
-          !resultIds.has(String(stat.id)),
+        (stat) => stat.section === 'simulationStats' && !resultIds.has(String(stat.id)),
       );
 
       // Any stat whose id is already visualized as a result bar is suppressed
@@ -700,8 +701,7 @@ export function createSummaryOverlay(
         const paramSection = document.createElement('div');
 
         paramSection.className = 'sci-section panel param-section';
-        paramSection.innerHTML =
-          '<p class="sci-section__title">Input Parameters</p>';
+        paramSection.innerHTML = '<p class="sci-section__title">Input Parameters</p>';
 
         const paramCards = document.createElement('div');
 
