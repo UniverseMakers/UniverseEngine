@@ -9,9 +9,10 @@
 
 import type { SimulationClass } from '../selection/simulation-catalog.ts';
 import { withBaseUrl } from '../shared/urls.ts';
+import { createEntryInfoOverlay } from './entry-info-overlay.ts';
 
 const SCALE_DESCRIPTIONS: Record<string, string> = {
-  planetary: 'Smash together proto-planets and try to form the Moon',
+  planetary: 'Smash a planet into the early Earth.  Can you make the Moon?',
   cosmos: 'Take control of the fundamental laws of the Universe',
   galaxy: 'Explore the boundless diversity of galaxies in the Universe',
 };
@@ -90,81 +91,7 @@ export function createEntryOverlay(
 
   renderSimulationClasses(simulationClasses);
 
-  const infoModal = document.createElement('div');
-  const infoButton = document.createElement('button');
-
-  infoButton.className = 'view-switcher__info entry-overlay__info-button';
-  infoButton.type = 'button';
-  infoButton.setAttribute('aria-label', 'About this experience');
-  infoButton.appendChild(createInfoIcon());
-  infoModal.className = 'sci-modal is-hidden';
-  infoModal.innerHTML = `
-    <div class="entry-info-modal">
-      <div class="entry-info-modal__shell">
-        <div class="entry-info-modal__media">
-          <img
-            class="entry-info-modal__image"
-            src="${bannerSrc}"
-            alt="Universe Engine preview"
-            width="1600"
-            height="381"
-            decoding="async"
-          />
-          <div class="entry-info-modal__media-copy">
-            <p class="entry-info-modal__eyebrow">Universe Engine</p>
-            <h2 class="entry-info-modal__headline">Explore Simulation At Human Scale</h2>
-          </div>
-        </div>
-        <div class="entry-info-modal__content">
-          <button class="entry-info-modal__close" type="button" aria-label="Close">×</button>
-          <div class="entry-info-modal__header">
-            <p class="entry-info-modal__eyebrow">About</p>
-            <h2 class="entry-info-modal__title">What Is This Experience?</h2>
-            <p class="entry-info-modal__subtitle">
-              Universe Engine turns large scientific simulations into an interactive public-facing
-              experience: choose a scale, change the inputs, and see how those decisions reshape
-              the final outcome.
-            </p>
-          </div>
-          <div class="entry-info-modal__body">
-            <section class="entry-info-modal__section">
-              <h3 class="entry-info-modal__section-title">What can you do?</h3>
-              <p class="entry-info-modal__copy">
-                Pick a theme, tune a small set of meaningful parameters, run the simulation, and
-                compare your choices with the scientific targets, outputs, and computational cost.
-              </p>
-            </section>
-            <section class="entry-info-modal__section">
-              <h3 class="entry-info-modal__section-title">What should you take away?</h3>
-              <div class="entry-info-modal__theme-list">
-                <div class="entry-info-modal__theme">
-                  <p class="entry-info-modal__theme-title">Planetary</p>
-                  <p class="entry-info-modal__copy">
-                    Small shifts in angle, speed, and mass can completely change how a Moon-forming
-                    impact unfolds.
-                  </p>
-                </div>
-                <div class="entry-info-modal__theme">
-                  <p class="entry-info-modal__theme-title">Galaxy</p>
-                  <p class="entry-info-modal__copy">
-                    Galaxies emerge from long feedback loops between stars, gas, and black holes,
-                    not from any single parameter in isolation.
-                  </p>
-                </div>
-                <div class="entry-info-modal__theme">
-                  <p class="entry-info-modal__theme-title">Cosmos</p>
-                  <p class="entry-info-modal__copy">
-                    Even the largest structures in the Universe depend sensitively on the basic
-                    physical laws underpinning everything from the Big Bang to the present day.
-                  </p>
-                </div>
-              </div>
-            </section>
-          </div>
-        </div>
-      </div>
-    </div>
-  `;
+  const { infoButton, infoModal, close: closeInfoOverlay } = createEntryInfoOverlay();
 
   panel.appendChild(actions);
   overlay.appendChild(panel);
@@ -172,33 +99,13 @@ export function createEntryOverlay(
   overlay.appendChild(infoModal);
   container.appendChild(overlay);
 
-  const infoModalClose = infoModal.querySelector(
-    '.entry-info-modal__close',
-  ) as HTMLButtonElement;
-
-  function openInfoModal(): void {
-    infoModal.classList.remove('is-hidden');
-  }
-
-  function closeInfoModal(): void {
-    infoModal.classList.add('is-hidden');
-  }
-
-  infoButton.addEventListener('click', openInfoModal);
-  infoModalClose.addEventListener('click', closeInfoModal);
-  infoModal.addEventListener('click', (event) => {
-    if (event.target === infoModal) {
-      closeInfoModal();
-    }
-  });
-
   return {
     show() {
       overlay.hidden = false;
       overlay.classList.remove('is-hidden');
     },
     hide() {
-      closeInfoModal();
+      closeInfoOverlay();
       overlay.hidden = true;
       overlay.classList.add('is-hidden');
     },
@@ -206,26 +113,4 @@ export function createEntryOverlay(
       renderSimulationClasses(nextSimulationClasses);
     },
   };
-}
-
-function createSvg(content: string): SVGSVGElement {
-  const template = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-
-  template.setAttribute('viewBox', '0 0 24 24');
-  template.setAttribute('fill', 'none');
-  template.setAttribute('stroke', 'currentColor');
-  template.setAttribute('stroke-width', '1.5');
-  template.setAttribute('stroke-linecap', 'round');
-  template.setAttribute('stroke-linejoin', 'round');
-  template.innerHTML = content;
-
-  return template;
-}
-
-function createInfoIcon(): SVGSVGElement {
-  return createSvg(`
-    <circle cx="12" cy="12" r="10"></circle>
-    <path d="M12 16.5v-6"></path>
-    <circle cx="12" cy="8.5" r="1.1" fill="currentColor" stroke="none"></circle>
-  `);
 }

@@ -15,7 +15,7 @@ planetary:
   liveStats:
     - id: impactor_mass
       value: '0.10'
-      unit: M⊕
+      unit: Earth masses
       live: false
     - id: impactor_velocity
       value: '12.0'
@@ -28,6 +28,7 @@ planetary:
     - id: time
       value: 0.0
       unit: hours
+      label: Time
       live: true
       live_key: time_seconds
       value_scale: 2.777777777777778e-4

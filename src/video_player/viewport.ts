@@ -77,31 +77,7 @@ export interface ViewportController {
   /** Access the root viewport element. */
   getElement: () => HTMLElement;
 
-  /** Ask the browser to begin buffering a set of likely-next videos.
-   *
-   *  This runs two strategies in parallel for every candidate URL:
-   *
-   *  1.  **Media-element preloading** — a detached `<video>` element whose
-   *      `preload="auto"` tells the browser to fetch and cache a useful
-   *      buffer window.  If the user later switches tabs, the browser's
-   *      media cache may serve the data directly.
-   *
-   *  2.  **Background blob pre-fetch** — a `fetch()` of the full file.  When
-   *      it completes the resulting Blob URL is stored so that
-   *      `setSource()` can swap it in silently, giving the viewport a
-   *      completely local media source with zero network activity on the
-   *      next seek or tab switch.
-   *
-   *  Pre-fetched blob URLs are automatically consumed and cleaned up by
-   *  `setSource()` (so the caller does not need to look them up) and are
-   *  revoked together when `clearPrewarmedSources()` runs.
-   *
-   *  ── Why both strategies? ──────────────────────────────────────────
-   *  Media-element preloading is fast to start and lets progressive
-   *  playback begin quickly.  Background blob pre-fetch eliminates
-   *  network reads and decode stalls entirely once the file is local.
-   *  Together they give the best chance of an instant tab switch
-   *  regardless of which strategy finishes first. */
+  /** Ask the browser to begin buffering a set of likely-next videos. */
   prewarmSources: (sources: string[]) => void;
 
   /** Pause alternate-view prewarming without discarding finished blob caches. */
@@ -207,13 +183,6 @@ export function createViewport(
   }
 
   function setSource(src: string, options: ViewportSourceOptions = {}): void {
-    // ── Blob-URL substitution ──────────────────────────────────────────
-    // If a background pre-fetch primed a local Blob URL for this remote
-    // source, substitute it now.  This is how tab switches and re-selects
-    // get instant local scrubbing without any special-case code in the
-    // callers.  The Blob URL is consumed on first use (removed from the
-    // cache) so that a subsequent call with the same remote source won't
-    // accidentally re-use a stale reference.
     const primedBlobUrl = prewarmedBlobUrls.get(src);
 
     if (primedBlobUrl) {
@@ -396,24 +365,6 @@ export function createViewport(
     return false;
   }
 
-  // ── Prewarm / background-fetch strategy ──────────────────────────────
-  //
-  // Alternate-video views are prewarmed *after* the active video has been
-  // revealed, so they never compete for bandwidth during the critical
-  // initial-buffering window.
-  //
-  // Prewarming runs two parallel strategies (see the interface doc above):
-  // detached <video> preloading + background Blob fetches.
-  //
-  // When `setSource()` is later called with a remote URL for which a Blob
-  // is already primed, the Blob URL is silently substituted.  That gives the
-  // viewport a fully local source — network-free scrubbing — with no extra
-  // work or delay in the tab-switch code path.
-  //
-  // ── Cleanup ──────────────────────────────────────────────────────────
-  // `clearPrewarmedSources()` revokes all tracked Blob URLs and resets the
-  // detached media elements so the next run starts from a clean state.
-
   function prewarmSources(sources: string[]): void {
     wantedPrewarmSources = new Set(
       sources.filter(Boolean).filter((src) => src !== video.currentSrc),
@@ -503,9 +454,6 @@ export function createViewport(
 
     prewarmFetchControllers.set(src, controller);
 
-    // Append a cache-busting query parameter so that Cloudflare's edge
-    // cache serves a fresh response with CORS headers.  Without a custom
-    // domain the dashboard cache-purge controls are unavailable.
     const cacheBustedUrl = `${src}?_=${Date.now()}`;
 
     void fetch(cacheBustedUrl, { signal: controller.signal })
@@ -526,11 +474,6 @@ export function createViewport(
         if (error instanceof DOMException && error.name === 'AbortError') {
           return;
         }
-
-        // Background fetch failed — either CORS headers are still
-        // propagating through Cloudflare's cache or the preflight
-        // was rejected.  The <video>-element preload and the
-        // progressive path will handle this view.
       })
       .finally(() => {
         if (prewarmFetchControllers.get(src) === controller) {
@@ -540,9 +483,6 @@ export function createViewport(
   }
 
   function clearPrewarmedSources(): void {
-    // Reset detached <video> elements and revoke every background Blob URL
-    // so the next run starts with a clean prewarm cache and no leaked Blob
-    // references.
     wantedPrewarmSources.clear();
     prewarmingSuspended = false;
     stopDetachedPrewarmedVideos();

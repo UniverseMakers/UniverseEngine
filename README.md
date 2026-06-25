@@ -4,23 +4,37 @@ A web app for displaying and interacting with simulation videos spread across a 
 
 ## Quick Start
 
-- `npm install`
-- `npm run dev`
+```bash
+npm install
+npm run dev
+```
 
-Production build:
+Open `http://localhost:5173` — the app streams assets from the cloud by default.
 
-- `npm run build`
-
-Formatting:
-
-- `npm run format`
-- `npm run format:check`
+For a full offline setup, asset downloads, local tracking, and production
+workflows, see **[Running Locally](./running_locally.md)**.
 
 ## Requirements
 
-- `node` / `npm` for the frontend
-- `python3` for asset-generation scripts
-- `ffprobe` for `scripts/generate_run_summaries.py`
+- **Node.js >= 18** (Vite 6 requires ESM support; Node 18 is the minimum supported LTS)
+- **Python >= 3.9** for asset-generation scripts
+- **ffprobe** (part of `ffmpeg`) for `scripts/generate_run_summaries.py`
+
+## Quick Reference
+
+| Command | What it does |
+|---|---|
+| `npm install` | Install dependencies |
+| `npm run dev` | Start dev server |
+| `npm run generate:run-manifest` | Regenerate `public/assets/local-manifest.json` |
+| `npm run build` | Production build |
+| `npm run format` | Format source files |
+| `npm run format:check` | Check formatting (CI) |
+| `python3 scripts/generate_run_summaries.py` | Refresh per-run `run_summary.yaml` files |
+| `npm run download:assets` | Download all cloud assets to `public/assets/` |
+| `npm run download:cosmos` | Download cosmos cloud assets only |
+| `npm run tracking:server` | Start local tracking server |
+| `npm run tracking:sync` | Sync local tracking DB to online D1 |
 
 ## App Configuration
 

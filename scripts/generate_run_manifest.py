@@ -678,14 +678,14 @@ def infer_view_id(video_path: Path) -> str:
         View id string (e.g. "gas_density").
     """
     name = video_path.stem
-    if name == "Gas_Density_-_Viola":
+    if name == "Gas_Density":
         return "gas_density"
-    if name == "Gas_Temperature_-_Pride":
+    if name == "Gas_Temperature":
         return "gas_temperature"
-    if name == "DM_Density_-_Emergency":
+    if name == "DM_Density":
         return "dark_matter_density"
-    if name == "Gas_Metallicity_plus_Stellar_Density__inferno":
-        return "gas_metallicity_stellar_density"
+    if name == "Gas_Metallicity_plus_Stellar_Density":
+        return "gas_metallicity_plus_stellar_density"
     return normalize_key(name)
 
 

@@ -24,6 +24,12 @@ import {
 } from '../selection/overlay-panel.ts';
 import { createLoadingOverlay } from '../loading/overlay.ts';
 import { createDisplayMenu } from './display-menu.ts';
+import {
+  loadPlaybackSpeed,
+  persistPlaybackSpeed,
+  playViewportWithMutedFallback,
+} from './playback.ts';
+import { createRunRequestController } from './run-requests.ts';
 import { getInitializationLines } from '../loading/init-text.ts';
 import {
   createManifestController,
@@ -49,7 +55,11 @@ import {
   saveAdvancedSettings,
   type AdvancedSettings,
 } from '../shared/advanced-settings.ts';
-import { logInfo, logWarn } from '../shared/logger.ts';
+import {
+  logInfo,
+  logWarn,
+  setVerboseLoggingEnabled,
+} from '../shared/logger.ts';
 import { trackRunSelection } from '../shared/track-run.ts';
 
 type AppMode = 'entry' | 'config' | 'initializing' | 'display';
@@ -59,29 +69,6 @@ interface PreparedVideoSource {
   ownedObjectUrl: boolean;
   shouldWaitForBuffer: boolean;
 }
-
-// ── Hybrid active-video loading strategy ─────────────────────────────────
-//
-// The app tries to hide cold-network time behind the faux terminal boot
-// sequence.  For the *selected* active view it has two paths:
-//
-//   1.  Full local fetch (≤ ACTIVE_VIDEO_FULL_FETCH_MAX_BYTES behind the
-//       terminal) — after that scrubbing is entirely local and instant.
-//   2.  Progressive remote playback — the browser buffers via native HTTP
-//       byte ranges.  The terminal holds until a useful buffer-ahead window
-//       is reached (ACTIVE_VIDEO_BUFFER_SECONDS), with a hard timeout
-//       (ACTIVE_VIDEO_BUFFER_WAIT_MS) so the user is never stalled forever.
-//
-// This hybrid design balances smooth UX (arbitrary scrubbing, quick tab
-// switches) against Cloudflare R2 Class B operation costs: downloading one
-// full video *once* per selected run is often cheaper in operations than
-// many scattered byte-range reads during heavy scrubbing, and local Blobs
-// completely eliminate network activity for that view.
-//
-// Alternate views are *not* downloaded during the loading phase — that
-// would compete for bandwidth with the active view.  Instead they are
-// prewarmed in the background *after* the active video has been revealed
-// (see `viewport.prewarmSources`).
 
 const ACTIVE_VIDEO_FULL_FETCH_MAX_BYTES = 50 * 1024 * 1024;
 const ACTIVE_VIDEO_BUFFER_SECONDS = 8;
@@ -95,7 +82,7 @@ const SCRUB_HUD_UPDATE_INTERVAL_MS = 100;
 const SCALE_TO_THEME: Record<string, ThemeId> = {
   galaxy: 'tron',
   planetary: 'matrix',
-  cosmos: 'nostromo',
+  cosmos: 'hal',
 };
 
 /**
@@ -112,6 +99,9 @@ export function createAppShell(app: HTMLElement): void {
   let advancedSettings = loadAdvancedSettings(scaleIds);
   let availableSimulationClasses = getSelectableSimulationClasses(advancedSettings);
   const manifestController = createManifestController(advancedSettings.manifestSource);
+  const runRequests = createRunRequestController();
+
+  setVerboseLoggingEnabled(advancedSettings.verboseLogging);
 
   if (advancedSettings.manifestSource === 'online') {
     void manifestController.preloadActiveManifest();
@@ -206,7 +196,7 @@ export function createAppShell(app: HTMLElement): void {
   swiftLogo.innerHTML = `
     <img
       class="swift-logo__image"
-      src="${withBaseUrl('assets/credits/swift-logo.png')}"
+      src="${withBaseUrl('assets/credits/swift-logo.webp')}"
       alt="SWIFT"
       width="478"
       height="169"
@@ -334,21 +324,6 @@ export function createAppShell(app: HTMLElement): void {
   `;
   displayChrome.appendChild(centerStatus);
 
-  // ── Playback speed persistence ─────────────────────────────────────────
-  const PLAYBACK_SPEED_KEY = 'universe-engine-playback-speed';
-
-  const loadPlaybackSpeed = (): number => {
-    const raw = localStorage.getItem(PLAYBACK_SPEED_KEY);
-    const parsed = raw ? Number(raw) : NaN;
-
-    // Only accept known rates so hand-edited storage doesn't break the dropdown.
-    return [0.25, 0.5, 1, 2].includes(parsed) ? parsed : 1;
-  };
-
-  const persistPlaybackSpeed = (rate: number) => {
-    localStorage.setItem(PLAYBACK_SPEED_KEY, String(rate));
-  };
-
   const initialPlaybackSpeed = loadPlaybackSpeed();
 
   // Prime the video element with the persisted speed before the first frame.
@@ -365,6 +340,7 @@ export function createAppShell(app: HTMLElement): void {
     },
     onTogglePlay: handleTogglePlay,
     onSpeedChange: handleSpeedChange,
+    onSummaryClick: handleShowSummary,
     onScrubStart() {
       handleScrubStart();
       stopScrubberLoop();
@@ -980,13 +956,34 @@ export function createAppShell(app: HTMLElement): void {
   function handleReplay(): void {
     hasCompletedPlayback = false;
     summaryOverlay.hide();
-    viewport.resetPlayback();
-    // Browsers often require a user gesture to play audio. If the initial play
-    // fails, fall back to muted playback so the video still works.
-    void viewport.play().catch(() => {
-      viewport.setMuted(true);
-      void viewport.play();
-    });
+
+    const atEnd = viewport.getPlaybackFraction() >= 0.999;
+
+    if (atEnd) {
+      viewport.resetPlayback();
+    }
+
+    void playViewportWithMutedFallback(viewport);
+  }
+
+  /**
+   * Pause playback and show the end-of-run summary overlay on demand.
+   *
+   * @returns void
+   */
+  function handleShowSummary(): void {
+    hasCompletedPlayback = true;
+    viewport.pause();
+    const thumbnail = activeRunMetadata ? viewport.captureFrame() : null;
+
+    summaryOverlay.update(
+      activeClass,
+      getActiveValues(),
+      viewport.getDurationSeconds(),
+      activeRunMetadata,
+      thumbnail,
+    );
+    summaryOverlay.show();
   }
 
   /**
@@ -996,10 +993,7 @@ export function createAppShell(app: HTMLElement): void {
    */
   function handleTogglePlay(): void {
     if (viewport.isPaused()) {
-      void viewport.play().catch(() => {
-        viewport.setMuted(true);
-        void viewport.play();
-      });
+      void playViewportWithMutedFallback(viewport);
     } else {
       viewport.pause();
     }
@@ -1030,6 +1024,7 @@ export function createAppShell(app: HTMLElement): void {
    */
   async function handleRun(): Promise<void> {
     const values = getActiveValues();
+    const runRequestId = runRequests.start();
 
     logInfo('Run requested', {
       simClassId: activeClass.id,
@@ -1046,7 +1041,11 @@ export function createAppShell(app: HTMLElement): void {
       values,
     );
 
-    resetSimulationState();
+    if (!runRequests.isCurrent(runRequestId)) {
+      return;
+    }
+
+    resetSimulationState({ preserveRunRequest: true });
     activeRunMatch = match;
     // Resolve which view (dark matter, gas density, etc.) to show first.
     const selectedViewId = resolveSelectedViewId(activeClass, match);
@@ -1058,21 +1057,19 @@ export function createAppShell(app: HTMLElement): void {
       manifestSource: manifestController.getSource(),
       matchedRunId: match.runId,
     });
+
     const selectedViewUrl = getViewUrl(match, selectedViewId) ?? match.url;
     const alternateViewUrls = Object.entries(match.views ?? {})
       .filter(([viewId]) => viewId !== selectedViewId)
       .map(([, url]) => url);
 
     // Fire-and-forget the async data loads — they'll update the HUD when done.
-    void loadActiveLiveStats(match.liveDataUrl);
-    void loadActiveRunMetadata(match.summaryUrl);
+    void loadActiveLiveStats(match.liveDataUrl, runRequestId);
+    void loadActiveRunMetadata(match.summaryUrl, runRequestId);
     viewport.setMuted(false);
     refreshViewSwitcher(selectedViewId);
     setMode('initializing');
 
-    // Start both the active video and alternate views downloading during the
-    // loading-terminal window. Later, active scrubbing can temporarily suspend
-    // alternate warming so the visible view keeps maximum responsiveness.
     const preparedSourcePromise = prepareActiveVideoSource(selectedViewUrl);
 
     viewport.resumePrewarming();
@@ -1080,6 +1077,10 @@ export function createAppShell(app: HTMLElement): void {
 
     const videoReady = (async (): Promise<void> => {
       const preparedSource = await preparedSourcePromise;
+
+      if (!runRequests.isCurrent(runRequestId)) {
+        return;
+      }
 
       logInfo(
         `Prepared active video source: ${preparedSource.ownedObjectUrl ? 'FULL-FETCH' : 'PROGRESSIVE'}`,
@@ -1092,6 +1093,10 @@ export function createAppShell(app: HTMLElement): void {
       viewport.pause();
 
       await viewport.waitForLoadedData(ACTIVE_VIDEO_LOADED_DATA_WAIT_MS);
+
+      if (!runRequests.isCurrent(runRequestId)) {
+        return;
+      }
 
       if (preparedSource.shouldWaitForBuffer) {
         await viewport.waitForBufferedAhead(
@@ -1109,35 +1114,16 @@ export function createAppShell(app: HTMLElement): void {
 
     await loadingFinished;
 
+    if (!runRequests.isCurrent(runRequestId)) {
+      return;
+    }
+
     hasCompletedInitialization = true;
     viewport.showMedia();
-    void viewport.play().catch(() => {
-      viewport.setMuted(true);
-      void viewport.play().catch(() => {
-        // Leave the media paused if the browser still rejects playback.
-        // This is expected on some mobile browsers without a user gesture.
-      });
-    });
+    void playViewportWithMutedFallback(viewport);
     setMode('display');
   }
 
-  /**
-   * Decide how to load the active video: full local download or progressive.
-   *
-   * ── Why probe size first? ────────────────────────────────────────────
-   * A small Range GET gives us Content-Length without fetching the whole
-   * file.  If the video is small enough to download fully while the terminal
-   * plays we do that — a single GET that may be cheaper in Class B
-   * operations than dozens of scattered byte-range reads during heavy
-   * scrubbing.  If the video is too large we fall back to native progressive
-   * playback so the user is never blocked on a multi-minute download.
-   *
-   * ── Why Range instead of HEAD? ───────────────────────────────────────
-   * Cloudflare R2's CORS policy may not include Access-Control-Allow-Origin
-   * on HEAD responses even when GET works correctly.  A Range GET (bytes=0-0)
-   * is treated as a simple CORS request and consistently returns the headers
-   * we need.
-   */
   async function prepareActiveVideoSource(
     videoUrl: string,
   ): Promise<PreparedVideoSource> {
@@ -1443,7 +1429,11 @@ export function createAppShell(app: HTMLElement): void {
    *
    * @returns void
    */
-  function resetSimulationState(): void {
+  function resetSimulationState(options: { preserveRunRequest?: boolean } = {}): void {
+    if (!options.preserveRunRequest) {
+      runRequests.invalidate();
+    }
+
     activeLiveStatsFrames = EMPTY_LIVE_STATS_DATASET;
     hasCompletedPlayback = false;
     activeRunMetadata = null;
@@ -1473,20 +1463,8 @@ export function createAppShell(app: HTMLElement): void {
    * matter vs. gas density). Switching views should feel seamless — we preserve
    * the current seek position and autoplay state.
    *
-   * ── Why this path does NOT probe or full-fetch ────────────────────────
-   * Every millisecond of delay on a tab switch is directly visible to the
-   * user.  Instead, alternate views were already prewarmed in the background
-   * after the active video revealed (see `viewport.prewarmSources`).  That
-   * prewarm runs full fetches AND progressive preloading; when the user
-   * switches, `viewport.setSource` automatically picks up any primed blob
-   * URL with zero extra work.  If the prewarm has not finished yet the
-   * browser falls through to its already-buffered media data.
-   *
-   * ── Why we no longer remember the last-selected view ──────────────────
-   * Every fresh run always starts on the canonical default view (e.g. gas
-   * density for cosmos).  This makes the loading path predictable: we know
-   * which video to download behind the terminal, and the remaining views
-   * can warm in the background on a fixed schedule.
+   * Alternate views are prewarmed in the background and may already have a
+   * primed Blob URL by the time the user switches.
    *
    * @param viewId - Manifest/YAML view id.
    * @returns void
@@ -1599,17 +1577,23 @@ export function createAppShell(app: HTMLElement): void {
    *
    * @returns Promise that resolves once loading completes.
    */
-  async function loadActiveLiveStats(url: string): Promise<void> {
+  async function loadActiveLiveStats(url: string, runRequestId: number): Promise<void> {
+    let nextFrames = EMPTY_LIVE_STATS_DATASET;
+
     try {
-      activeLiveStatsFrames = await loadLiveStatsCsv(url);
+      nextFrames = await loadLiveStatsCsv(url);
     } catch (error) {
-      activeLiveStatsFrames = EMPTY_LIVE_STATS_DATASET;
       logWarn('Failed to load live stats', {
         url,
         error: error instanceof Error ? error.message : String(error),
       });
     }
 
+    if (!runRequests.isCurrent(runRequestId)) {
+      return;
+    }
+
+    activeLiveStatsFrames = nextFrames;
     refreshDisplayData();
   }
 
@@ -1619,8 +1603,17 @@ export function createAppShell(app: HTMLElement): void {
    * @param summaryUrl - URL of the currently selected run summary YAML.
    * @returns Promise that resolves once loading completes.
    */
-  async function loadActiveRunMetadata(summaryUrl: string): Promise<void> {
-    activeRunMetadata = await loadVideoRunMetadata(summaryUrl);
+  async function loadActiveRunMetadata(
+    summaryUrl: string,
+    runRequestId: number,
+  ): Promise<void> {
+    const nextMetadata = await loadVideoRunMetadata(summaryUrl);
+
+    if (!runRequests.isCurrent(runRequestId)) {
+      return;
+    }
+
+    activeRunMetadata = nextMetadata;
     refreshDisplayData(lastPlaybackSeconds);
   }
 
@@ -1770,6 +1763,7 @@ export function createAppShell(app: HTMLElement): void {
     const previousManifestSource = advancedSettings.manifestSource;
 
     advancedSettings = saveAdvancedSettings(nextAdvancedSettings, scaleIds);
+    setVerboseLoggingEnabled(advancedSettings.verboseLogging);
     availableSimulationClasses = getSelectableSimulationClasses(advancedSettings);
     manifestController.setSource(advancedSettings.manifestSource);
     if (advancedSettings.manifestSource === 'online') {

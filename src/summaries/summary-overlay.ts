@@ -209,17 +209,20 @@ function buildScientificBars(
     .map((result) => {
       const resolved = resolveScientificValue(result, simClass, values, runMetadata);
 
-        if (resolved === null) {
-          return null;
-        }
+      if (resolved === null) {
+        return null;
+      }
 
-        // Normalize against the configured target so every bar can share the
-        // same visual scale: 1.0 means exactly on target, 0.5 means half the
-        // target value, 2.0 means double, and anything higher is clamped later.
-        const normalizedValue = resolved / Math.max(result.target, 1e-9);
+      // Normalize against the configured target so every bar can share the
+      // same visual scale: 1.0 means exactly on target, 0.5 means half the
+      // target value, 2.0 means double, and anything higher is clamped later.
+      const normalizedValue = resolved / Math.max(result.target, 1e-9);
       const label = resolveScientificLabel(result, simClass, runMetadata);
       const detail = detailForTarget(result.id, label, normalizedValue);
-      const formattedValue = withUnit(formatSummaryValue(String(resolved), result), result.unit);
+      const formattedValue = withUnit(
+        formatSummaryValue(String(resolved), result),
+        result.unit,
+      );
 
       return {
         id: result.id,
@@ -238,9 +241,10 @@ function buildScientificBars(
  *
  * Resolution order matters:
  * 1. User-selected parameter value when the result refers to a slider.
- * 2. Parameter values saved with the chosen run sidecar.
- * 3. Arbitrary numeric summary metrics from the sidecar.
- * 4. YAML-authored fallback value.
+ * 2. Numeric summary metrics from the run sidecar (run_summary.yaml).
+ * 3. Parameter values saved with the chosen run sidecar (parameters.yaml).
+ *
+ * Returns null when no value can be resolved — the bar is then suppressed.
  */
 function resolveScientificValue(
   result: ResultDisplayConfig,
@@ -260,23 +264,21 @@ function resolveScientificValue(
     return values[id] ?? selectedParameter.fallbackValue;
   }
 
-  const parameterValue = runMetadata?.parameterValues[id];
-
-  if (typeof parameterValue === 'number' && Number.isFinite(parameterValue)) {
-    return parameterValue;
-  }
-
+  // Prefer summaryMetrics over parameterValues for non-parameter keys.
+  // run_summary.yaml is the authoritative source for output values.
   const summaryValue = parseNumeric(runMetadata?.summaryMetrics[id]?.value);
 
   if (summaryValue !== null) {
     return summaryValue;
   }
 
-  const configuredFallback = parseNumeric(
-    result.value,
-  );
+  const parameterValue = runMetadata?.parameterValues[id];
 
-  return configuredFallback;
+  if (typeof parameterValue === 'number' && Number.isFinite(parameterValue)) {
+    return parameterValue;
+  }
+
+  return null;
 }
 
 /**
@@ -381,14 +383,14 @@ export function createSummaryOverlay(
 
   const replayButton = document.createElement('button');
 
-  replayButton.className = 'summary-overlay__button summary-overlay__button--primary';
+  replayButton.className = 'summary-overlay__button';
   replayButton.type = 'button';
-  replayButton.textContent = 'Continue Exploring';
+  replayButton.textContent = 'Continue Visualising';
 
   const newButton = document.createElement('button');
   const homeButton = document.createElement('button');
 
-  newButton.className = 'summary-overlay__button';
+  newButton.className = 'summary-overlay__button summary-overlay__button--primary';
   newButton.type = 'button';
   newButton.textContent = 'New Parameters';
 
@@ -401,8 +403,8 @@ export function createSummaryOverlay(
   newButton.addEventListener('click', options.onParameters);
   homeButton.addEventListener('click', options.onHome);
 
-  actions.appendChild(replayButton);
   actions.appendChild(newButton);
+  actions.appendChild(replayButton);
   actions.appendChild(homeButton);
 
   panel.appendChild(header);
@@ -465,6 +467,12 @@ export function createSummaryOverlay(
   modal.addEventListener('click', (event) => {
     if (event.target === modal) {
       closeModal();
+    }
+  });
+
+  overlay.addEventListener('click', (event) => {
+    if (event.target === overlay) {
+      options.onReplay();
     }
   });
 
@@ -643,9 +651,7 @@ export function createSummaryOverlay(
           stat.id !== 'similarityScore',
       );
       const simulationStats = stats.filter(
-        (stat) =>
-          stat.section === 'simulationStats' &&
-          !resultIds.has(String(stat.id)),
+        (stat) => stat.section === 'simulationStats' && !resultIds.has(String(stat.id)),
       );
 
       // Any stat whose id is already visualized as a result bar is suppressed
@@ -701,8 +707,7 @@ export function createSummaryOverlay(
         const paramSection = document.createElement('div');
 
         paramSection.className = 'sci-section panel param-section';
-        paramSection.innerHTML =
-          '<p class="sci-section__title">Input Parameters</p>';
+        paramSection.innerHTML = '<p class="sci-section__title">Input Parameters</p>';
 
         const paramCards = document.createElement('div');
 
@@ -799,20 +804,15 @@ export function createSummaryOverlay(
 /**
  * Pick one displayable metric row given YAML display config.
  *
- * The metric dictionary is intentionally sparse: some values are generated in
- * code, some come from per-run sidecar YAML, and some are only defaults in the
- * summary config. This helper merges those sources into one displayable row.
+ * Only uses concrete generated or sidecar metric values.  When a metric is
+ * absent its card shows `--` so missing data is immediately obvious.
  */
 function selectMetric(
   stat: StatDisplayConfig,
   availableMetrics: Record<string, { label: string; value: string }>,
 ): { label: string; value: string } {
-  // Resolution precedence here is deliberate:
-  // 1. A concrete generated/sidecar metric value, if available.
-  // 2. The YAML-authored fallback `value`, if the metric is absent.
-  // 3. A final `--` placeholder when neither exists.
   const metric = availableMetrics[stat.id] ?? { label: stat.id, value: '--' };
-  const resolvedValue = metric.value !== '--' ? metric.value : (stat.value ?? '--');
+  const resolvedValue = metric.value !== '--' ? metric.value : '--';
   const formattedCarbon = formatCarbonMetric(resolvedValue, stat);
 
   if (formattedCarbon) {

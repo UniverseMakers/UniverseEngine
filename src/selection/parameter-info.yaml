@@ -12,24 +12,24 @@
 planetary:
   impactor_mass:
     label: Impactor Mass
-    description: How big was the object that smashed into the young Earth? A larger impactor creates a bigger debris cloud — and a bigger Moon.
-    unit: M⊕
+    description: How big was the object that smashed into the young Earth?  A more massive impactor could spray out more debris — and perhaps a bigger Moon.
+    unit: Earth masses
     min: 0.05
     max: 0.35
     step: 0.01
   impactor_velocity:
-    label: Impactor Velocity
-    description: How fast was the impactor travelling when it hit? Faster collisions are more violent, spraying hotter debris into orbit around the early Earth.
+    label: Impact Speed
+    description: How fast was the impactor travelling when it hit?  Faster collisions are more violent, ejecting more and hotter debris.
     unit: km/s
-    min: 8.6
-    max: 27.9
+    min: 8.5
+    max: 30
     step: 0.1
   impactor_angle:
-    label: Impactor Angle
-    description: Did the impactor strike head-on or glance off at an angle? A direct hit throws material straight up, while a sideswipe can spin the debris into a wider, thinner disc.
+    label: Impact Angle
+    description: Was the impact head-on, or grazing at a high angle?  A direct hit blasts material straight out, while a sideswipe can spray the debris out into a disk, or even escape as a hit and run.
     unit: °
     min: 0
-    max: 60
+    max: 65
     step: 1
 
 galaxy:
@@ -61,7 +61,7 @@ galaxy:
 cosmos:
   baryon_fraction:
     label: Baryon Fraction
-    description: How much of the Universe is made of ordinary stuff — the atoms that form stars, planets, and you? Turn this up and there's more gas to make galaxies; turn it down and dark matter dominates.
+    description: How much of the Universe is made of ordinary stuff — the atoms that form stars, planets, and you?  Turn this up and there's more gas to make galaxies; turn it down and dark matter dominates.
     unit: ''
     min: 0.10
     max: 4
@@ -69,7 +69,7 @@ cosmos:
     value_scale: 0.159
   black_hole_strength:
     label: Black Hole Strength
-    description: How powerfully do black holes push back? As gas spirals inward it heats to millions of degrees. Some of that energy blasts back out as fierce winds or jets, shutting down star formation across entire galaxies.
+    description: How powerfully do black holes push back?  As gas spirals inward it heats to millions of degrees.  Some of that energy blasts back out as fierce winds or jets, shutting down star formation across entire galaxies.
     unit: 'K'
     min: 0.01
     max: 50.0
@@ -80,12 +80,11 @@ cosmos:
     log_scale: true
   gravity_strength:
     label: Gravity
-    description: What if gravity were stronger — or weaker? Turn it up and the cosmic web forms faster, pulling galaxies into tighter clumps. Turn it down and the Universe stays smoother and emptier for longer.
-    # unit: m^3 kg^-1 s^-2
+    description: What if gravity were stronger — or weaker?  Turn it up and the cosmic web forms faster, pulling galaxies into tighter clumps.  Turn it down and the Universe stays smoother and emptier for longer.
+    unit: m/s²
     min: 0.01
     max: 10
     step: 0.01
-    # value_scale: 6.6743e-11
-    # display_format: compact
+    value_scale: 9.81
     display_significant_figures: 2
     log_scale: true

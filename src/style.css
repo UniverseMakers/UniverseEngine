@@ -311,7 +311,7 @@ button {
 
 .display-chrome__top-right {
   top: 1.25rem;
-  right: 1.25rem;
+  right: 1.75rem;
   z-index: 2;
   pointer-events: auto;
 }
@@ -368,7 +368,7 @@ button {
   padding: 0.99rem;
   border: 1px solid var(--line-strong);
   border-radius: 0;
-  background: rgba(0, 0, 0, 0.26);
+  background: rgba(0, 0, 0, 0.46);
   color: var(--accent);
   box-shadow: none;
   backdrop-filter: blur(8px);
@@ -490,7 +490,7 @@ button {
 
 .display-chrome__top-left.side-collapsed .display-button {
   padding: 0.5rem 0.55rem;
-  opacity: 0.38;
+  opacity: 0.72;
   transform: scale(0.76);
 }
 
@@ -502,7 +502,7 @@ button {
 }
 
 .display-chrome__left-center.side-collapsed .view-switcher {
-  opacity: 0.38;
+  opacity: 0.72;
 }
 
 .display-chrome__left-center.side-collapsed .view-switcher__label {
@@ -558,7 +558,7 @@ button {
 }
 
 .display-chrome__bottom.side-collapsed {
-  opacity: 0.26;
+  opacity: 0.62;
   transform: translateY(0.65rem) scaleY(0.92);
   transform-origin: bottom center;
 }
@@ -654,7 +654,7 @@ button {
   gap: 0.5rem;
   padding: 0.5rem;
   border: 1px solid var(--line-strong);
-  background: rgba(0, 0, 0, 0.36);
+  background: rgba(0, 0, 0, 0.55);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   box-shadow: var(--shadow-ambient);
@@ -753,7 +753,7 @@ button {
 /* ── Data Panel (HUD) ────────────────────────────────────────────────────── */
 
 .data-panel {
-  width: 18rem;
+  width: 20rem;
   max-width: calc(100vw - 2rem);
   padding: 1.05rem 1.2rem 1rem;
   background: rgba(0, 0, 0, 0.34);
@@ -762,6 +762,7 @@ button {
   border: 1px solid var(--line-strong);
   border-radius: 0;
   box-shadow: var(--shadow-ambient);
+  overflow: hidden;
 }
 
 .data-panel__metrics {
@@ -788,11 +789,13 @@ button {
 }
 
 .data-panel__metric-value {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
   color: var(--accent);
   font-family: var(--font-mono);
   font-size: 0.85rem;
   font-weight: 700;
-  flex: 0 0 auto;
   white-space: nowrap;
   text-align: right;
 }
@@ -814,7 +817,7 @@ button {
   margin: 0 auto;
   padding: 0.66rem 1.06rem;
   border: 1px solid var(--line-strong);
-  background: rgba(0, 0, 0, 0.34);
+  background: rgba(0, 0, 0, 0.52);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
 }
@@ -883,8 +886,11 @@ button {
 }
 
 .timeline__speed-btn {
+  display: grid;
+  place-items: center;
+  height: 2.64rem;
   min-width: 3.96rem;
-  padding: 0.46rem 0.73rem;
+  padding: 0 0.73rem;
   border: 1px solid var(--line-strong);
   border-radius: 0;
   background: rgba(255, 255, 255, 0.03);
@@ -951,6 +957,30 @@ button {
 .timeline__speed-option.is-active {
   background: var(--accent-soft);
   color: var(--accent);
+}
+
+.timeline__summary-btn {
+  flex: 0 0 auto;
+  width: 2.64rem;
+  height: 2.64rem;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border: 1px solid var(--line-strong);
+  border-radius: 0;
+  background: rgba(255, 255, 255, 0.03);
+  color: var(--accent);
+  font-family: var(--font-mono);
+  font-size: 0.95rem;
+  line-height: 1;
+  transition:
+    background 0.16s ease,
+    border-color 0.16s ease;
+}
+
+.timeline__summary-btn:hover {
+  background: var(--accent-soft);
+  border-color: var(--accent-dim);
 }
 
 /* ── View Info Overlay ────────────────────────────────────────────────────── */
@@ -1055,22 +1085,27 @@ button {
   position: relative;
   z-index: 1;
   display: grid;
-  gap: 1.5rem;
+  gap: clamp(0.5rem, 2vh, 1.5rem);
   width: min(62rem, calc(100vw - 2rem));
+  max-height: calc(100dvh - 8rem);
   transform: translateY(-3vh);
-  padding: 2.5rem;
+  padding: clamp(1rem, 3.5vh, 2.5rem);
   border: 1px solid var(--line-strong);
   border-radius: 0;
   background: rgba(8, 11, 16, 0.94);
   box-shadow: var(--shadow-ambient);
   backdrop-filter: blur(18px);
   -webkit-backdrop-filter: blur(18px);
+  overflow: auto;
 }
 
 .entry-overlay__banner-frame {
   position: relative;
-  margin: -2.5rem -2.5rem 1.75rem;
-  height: 11rem;
+  margin-top: calc(clamp(1rem, 3.5vh, 2.5rem) * -1);
+  margin-right: calc(clamp(1rem, 3.5vh, 2.5rem) * -1);
+  margin-bottom: clamp(0.75rem, 2.5vh, 1.75rem);
+  margin-left: calc(clamp(1rem, 3.5vh, 2.5rem) * -1);
+  height: clamp(5rem, 15vh, 11rem);
   overflow: hidden;
   border-bottom: 1px solid var(--line-strong);
   background: #000;
@@ -1144,8 +1179,8 @@ button {
 
 .entry-overlay__actions {
   display: grid;
-  gap: 1.15rem;
-  margin-top: 0.25rem;
+  gap: clamp(0.4rem, 1.5vh, 1.15rem);
+  margin-top: clamp(0, 0.5vh, 0.25rem);
 }
 
 .entry-overlay__button {
@@ -1154,8 +1189,8 @@ button {
   align-items: center;
   gap: 2rem;
   width: 100%;
-  min-height: 5.75rem;
-  padding: 1.35rem 1.5rem;
+  min-height: clamp(3.5rem, 8vh, 5.75rem);
+  padding: clamp(0.65rem, 2vh, 1.35rem) clamp(0.75rem, 2.5vh, 1.5rem);
   border: 1px solid var(--line-strong);
   border-radius: 0;
   background: rgba(255, 255, 255, 0.03);
@@ -1297,7 +1332,7 @@ button {
 
 .entry-info-modal__title {
   color: var(--text-primary);
-  font-size: 1.55rem;
+  font-size: 1.85rem;
   line-height: 1.08;
   letter-spacing: 0.08em;
 }
@@ -1326,11 +1361,17 @@ button {
   gap: 0.7rem;
 }
 
-.entry-info-modal__section-title,
+.entry-info-modal__section-title {
+  color: #e9f1f7;
+  font-family: var(--font-mono);
+  font-size: 1.3rem;
+  letter-spacing: 0.16em;
+}
+
 .entry-info-modal__theme-title {
   color: #e9f1f7;
   font-family: var(--font-mono);
-  font-size: 0.8rem;
+  font-size: 1.1rem;
   letter-spacing: 0.16em;
 }
 
@@ -1338,6 +1379,7 @@ button {
   margin: 0;
   color: #c5d2dd;
   line-height: 1.72;
+  font-size: 1rem;
 }
 
 .entry-info-modal__theme-list {
@@ -2656,7 +2698,7 @@ button {
 
   .display-chrome__top-right {
     top: 1rem;
-    right: 1rem;
+    right: 1.25rem;
     bottom: auto;
   }
 
@@ -2746,12 +2788,12 @@ button {
 
   .display-chrome__top-right {
     top: 1.6rem;
-    right: 1rem;
+    right: 1.25rem;
     bottom: auto;
   }
 
   .data-panel {
-    width: 16rem;
+    width: 18rem;
     min-width: 0;
     max-width: calc(100vw - 2rem);
   }
@@ -2789,6 +2831,7 @@ button {
     width: 100vw;
     min-height: 100vh;
     min-height: 100dvh;
+    max-height: none;
     transform: none;
     border-radius: 0;
     border-left: 0;
@@ -3221,7 +3264,7 @@ button {
 
   .display-chrome__top-right {
     top: 0.75rem;
-    right: 0.75rem;
+    right: 1rem;
     left: auto;
     bottom: auto;
   }
@@ -3229,8 +3272,8 @@ button {
   .data-panel {
     width: 13.5rem;
     min-width: 0;
-    max-width: calc(100vw - 1.5rem);
-    padding: 0.75rem 0.85rem;
+    max-width: calc(100vw - 2rem);
+    padding: 0.75rem 1rem 0.75rem 0.85rem;
   }
 
   /* Keep the HUD compact: show a few rows and allow vertical scroll for more. */

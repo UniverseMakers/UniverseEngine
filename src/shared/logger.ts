@@ -1,10 +1,12 @@
-import { loadAdvancedSettings } from './advanced-settings.ts';
-
 const LOG_PREFIX = '[UniverseEngine]';
-const DEFAULT_SCALE_IDS = ['planetary', 'galaxy', 'cosmos'];
+let verboseLoggingEnabled = false;
+
+export function setVerboseLoggingEnabled(enabled: boolean): void {
+  verboseLoggingEnabled = enabled;
+}
 
 export function isVerboseLoggingEnabled(): boolean {
-  return loadAdvancedSettings(DEFAULT_SCALE_IDS).verboseLogging;
+  return verboseLoggingEnabled;
 }
 
 export function logInfo(message: string, payload?: unknown): void {

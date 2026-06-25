@@ -29,6 +29,9 @@ interface TimelineOptions {
   /** Called when the user picks a speed from the dropdown. */
   onSpeedChange?: (rate: number) => void;
 
+  /** Called when the user clicks the summary button. */
+  onSummaryClick?: () => void;
+
   /** Called when the user starts dragging the scrubber. */
   onScrubStart?: () => void;
 
@@ -56,6 +59,7 @@ export function createTimeline(
     onChange,
     onTogglePlay,
     onSpeedChange,
+    onSummaryClick,
     onScrubStart,
     onScrubEnd,
     initialSpeed = 1,
@@ -121,9 +125,18 @@ export function createTimeline(
   speedWrap.appendChild(speedBtn);
   speedWrap.appendChild(speedMenu);
 
+  const summaryBtn = document.createElement('button');
+
+  summaryBtn.className = 'timeline__summary-btn';
+  summaryBtn.type = 'button';
+  summaryBtn.setAttribute('aria-label', 'View run summary');
+  summaryBtn.textContent = '\u24D8';
+  summaryBtn.addEventListener('click', () => onSummaryClick?.());
+
   barRow.appendChild(playBtn);
   barRow.appendChild(slider);
   barRow.appendChild(speedWrap);
+  barRow.appendChild(summaryBtn);
 
   slider.addEventListener('input', () => {
     const position = parseInt(slider.value, 10) / 1000;

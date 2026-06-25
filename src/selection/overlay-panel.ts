@@ -13,6 +13,7 @@ import {
   type ThemeId,
   type ThemePickerController,
 } from './theme.ts';
+import { withBaseUrl } from '../shared/urls.ts';
 import {
   ADVANCED_SETTINGS_PASSWORD,
   type AdvancedSettings,
@@ -95,16 +96,22 @@ export function createOverlayPanel(
     <h2 class="config-overlay__title"></h2>
     <p class="config-overlay__subtitle"></p>
   `;
-  const titleEyebrow = titleBlock.querySelector('.config-overlay__eyebrow') as HTMLParagraphElement;
-  const titleText = titleBlock.querySelector('.config-overlay__title') as HTMLHeadingElement;
-  const titleSubtitle = titleBlock.querySelector('.config-overlay__subtitle') as HTMLParagraphElement;
+  const titleEyebrow = titleBlock.querySelector(
+    '.config-overlay__eyebrow',
+  ) as HTMLParagraphElement;
+  const titleText = titleBlock.querySelector(
+    '.config-overlay__title',
+  ) as HTMLHeadingElement;
+  const titleSubtitle = titleBlock.querySelector(
+    '.config-overlay__subtitle',
+  ) as HTMLParagraphElement;
 
   const closeButton = document.createElement('button');
 
   closeButton.className = 'config-overlay__close';
   closeButton.type = 'button';
-  closeButton.setAttribute('aria-label', 'Close overlay');
-  closeButton.textContent = '×';
+  closeButton.setAttribute('aria-label', 'Back');
+  closeButton.textContent = '←';
 
   header.appendChild(titleBlock);
   header.appendChild(closeButton);
@@ -417,8 +424,12 @@ export function createOverlayPanel(
         return;
       }
 
-      pendingAdvancedSettings.hiddenScaleIds = Array.from(visibilityInputs.keys()).filter(
-        (id) => !visibilityInputs.get(id)?.checked && id !== pendingAdvancedSettings.lockedScaleId,
+      pendingAdvancedSettings.hiddenScaleIds = Array.from(
+        visibilityInputs.keys(),
+      ).filter(
+        (id) =>
+          !visibilityInputs.get(id)?.checked &&
+          id !== pendingAdvancedSettings.lockedScaleId,
       );
       syncAdvancedControls();
     });
@@ -440,16 +451,22 @@ export function createOverlayPanel(
       titleSubtitle.textContent =
         options.simClass.parameterSubtitle ??
         "Adjust the parameters, inspect the setup, and press 'Run' when you're ready.";
+      mediaImage.src = options.simClass.placeholderImage;
+      mediaImage.alt = `${options.simClass.label} preview`;
     } else if (view === 'settings') {
       titleEyebrow.textContent = 'Interface';
       titleText.textContent = 'Adjust The Control Room';
       titleSubtitle.textContent =
         'Change the interface theme and manage exhibit-level options for this installation.';
+      mediaImage.src = withBaseUrl('assets/Cluster_Stuart.webp');
+      mediaImage.alt = 'Galaxy cluster simulation preview';
     } else {
       titleEyebrow.textContent = 'References';
       titleText.textContent = 'Project Sources And Attribution';
       titleSubtitle.textContent =
         'Review the datasets, imagery, and supporting materials behind this experience.';
+      mediaImage.src = withBaseUrl('assets/synthetic_hst_pretty_galaxy.webp');
+      mediaImage.alt = 'Synthetic galaxy image preview';
     }
 
     if (view === 'settings') {
@@ -543,10 +560,10 @@ export function createOverlayPanel(
       options.simClass = simClass;
       media.dataset.simClass = simClass.id;
       parameterEditor.setSimClass(simClass, values);
-      mediaImage.src = simClass.placeholderImage;
-      mediaImage.alt = `${simClass.label} preview`;
 
       if ((controls.dataset.view as OverlayPanelView) === 'parameters') {
+        mediaImage.src = simClass.placeholderImage;
+        mediaImage.alt = `${simClass.label} preview`;
         applyView('parameters');
       }
     },

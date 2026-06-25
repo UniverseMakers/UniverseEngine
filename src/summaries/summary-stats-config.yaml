@@ -10,124 +10,114 @@
 #   id             — built-in metric key or key in the run's run_summary.yaml
 #                    summaryMetrics map
 #   label          — override for the card title (falls back to metric label)
-#   value          — initial / fallback display value
+#   value          — fallback display value (shown when the metric is missing;
+#                    use -- to make absent data obvious)
 #   unit           — appended after the formatted value
 #   description    — explanatory text shown in a tap-to-open overlay
 #   target         — reference value used by result bars for similarity scoring
 #   value_scale    — multiply numeric values before formatting for display
 #   display_format — `integer`, `float`, or `scientific`
-#   precision      — decimal places or scientific significant figures
+#   precision      — decimal places (float mode only; ignored by compact/scientific)
 
 planetary:
   resources:
     - id: runtime
-      value: '0.00'
+      value: '--'
       unit: hours
       display_format: float
       precision: 2
-      description: How long the simulation took to run. Think of it like the render time for a CGI movie.
+      description: How long the simulation took to run.  Calculating how everything moves and affects each other takes a lot of work, even for a supercomputer!
     - id: carbonBurnt
-      value: '0.00'
-      unit: kg CO2
+      value: '--'
+      unit: kg CO₂
       display_format: float
       precision: 2
-      description: The carbon cost of running this simulation. Roughly the same as the emissions from a short-haul flight.
+      description: The carbon cost of running this simulation.  Roughly the same as the emissions from a short-haul flight.
     - id: computeUsed
-      value: 0 CPU-hrs / 0 GB
-      description: How much computer muscle the simulation needed to crunch all that physics.
+      value: '--'
+      description: How much internal computing time and memory the simulation needed to crunch all that physics.  Shared across all the CPUs working together in the supercomputer.
   results:
     - id: moon_mass
-      label: Moon mass
+      label: Moon-forming mass
       target: 1.0
-      value: '1.05'
-      unit: M⊕
+      value: '--'
+      unit: Lunar masses
       display_format: float
       precision: 2
-      description: How close you got to making the real Moon. Too small and the tides would be weak — too big and the night sky would be terrifying.
+      description: How big a moon was formed or could later form by growing out of orbiting debris.
     - id: earth_mass
-      label: Earth mass
+      label: Planet mass
       target: 1.0
-      value: '1.55'
-      unit: M⊕
+      value: '--'
+      unit: Earth masses
       display_format: float
       precision: 2
-      description: How close your Earth ended up to the one we actually live on.
+      description: How big the planet ended up after the impact.
     - id: spin
-      label: Earth-Moon system spin
+      label: System spin
       target: 1.0
-      value: '0.30'
+      value: '--'
+      unit: Earth—Moon system
       display_format: float
       precision: 3
-      description: How fast the Earth-Moon pair is spinning as a fraction of the real system.
-    - id: moon_iron
-      label: Moon iron
-      target: 1.0
-      value: '0.70'
-      display_format: float
-      precision: 2
-      description: How iron-poor your Moon turned out. The real Moon has surprisingly little iron in it — a clue about how it was born.
-    - id: proto_earth_in_moon
-      label: Proto-Earth in Moon
-      target: 1.0
-      value: '1.25'
-      display_format: float
-      precision: 2
-      description: How much of your Moon came from the early Earth versus the rogue object that smashed into it.
+      description: The combined 'angular momentum' of the spinning planet and anything in orbit, compared with the real system (3.4×10³⁴ kg m² / s).
   simulationStats:
     - id: similarityScore
       label: Similarity score
-      value: 100/100
-      description: A simple overall score showing how close this Moon-forming collision came to the target outcome.
+      value: '--'
+      description: How similar the planet—moon system after this impact would be to ours overall.
     - id: moon_iron_percent
-      label: Moon iron
-      value: '0'
+      label: Moon-forming iron
+      value: '--'
       unit: '%'
       display_format: float
       precision: 1
-      description: How closely the Moon's iron content matches the target value. Higher percentages are more Moon-like.
+      description: The fraction of the moon-forming material that is iron.  Our Moon is mostly rock with a very small iron core, around 2% of its mass.  Typical rocky planets like Earth are around 30% core and 70% mantle.
     - id: proto_earth_in_moon_percent
-      label: Proto-Earth Moon fraction
-      value: '0'
+      label: Moon-forming proto-Earth
+      value: '--'
       unit: '%'
       display_format: float
       precision: 1
-      description: How closely the proto-Earth contribution to the Moon matches the target value. Higher percentages are a better match.
-    - id: scenario_likelihood
+      description: What fraction of the moon-forming material came from the proto-Earth target rather than the impactor? Analysis of Moon and Earth rocks shows their makeup is very similar, but most impact scenarios struggle to mix together enough material to immediately explain this.
+    - id: likelihood
       label: Scenario likelihood
-      value: '100'
-      unit: '%'
-      display_format: integer
-      description: A simple numerical plausibility score for the chosen impact geometry. More extreme speeds or near head-on collisions score lower.
+      value: '--'
+      unit: ''
+      display_format: string
+      description: We only have one Moon like ours to study, and it's possible that its formation wasn't very likely!  However, impacts at very low or high angles, or very high speeds, are less likely.  Impacts at very low speeds might not even be possible in reality without something mysterious to slow down the impactor, but that doesn't stop us from simulating what could happen if it did.
   similarityScore:
-    value: 100/100
+    value: '--'
 
 galaxy:
   resources:
     - id: runtime
-      value: '0.00'
+      value: '--'
       unit: hours
       display_format: float
       precision: 2
-      description: How long the simulation took to run. Think of it like the render time for a CGI movie.
+      description: How long the simulation took to run.  Calculating how everything moves and affects each other takes a lot of work, even for a supercomputer!
     - id: carbonBurnt
-      value: '0.00'
-      unit: kg CO2
-      description: The carbon cost of running this simulation. Roughly the same as the emissions from a short-haul flight.
+      value: '--'
+      unit: kg CO₂
+      description: The carbon cost of running this simulation.  Roughly the same as the emissions from a short-haul flight.
     - id: computeUsed
-      value: 0 CPU-hrs / 0 GB
-      description: How much computer muscle the simulation needed to crunch all that physics.
+      value: '--'
+      description: How much internal computing time and memory the simulation needed to crunch all that physics.  Shared across all the CPUs working together in the supercomputer.
   results:
     - id: stellar_mass
       label: Stellar mass
       target: 6.1
+      value: '--'
       unit: Msun
       value_scale: 1.0e10
       display_format: compact
       precision: 3
-      description: How many stars your galaxy managed to make. Each solar mass is the weight of our own Sun.
+      description: How many stars your galaxy managed to make.  Each solar mass is the weight of our own Sun.
     - id: black_hole_mass
       label: Black hole mass
       target: 4.3
+      value: '--'
       unit: Msun
       value_scale: 1.0e6
       display_format: compact
@@ -136,91 +126,92 @@ galaxy:
     - id: galaxy_age
       label: Galaxy age
       target: 8.5
+      value: '--'
       unit: yrs
       value_scale: 1.0e9
-      description: How old the stars in your galaxy are on average. Older galaxies look redder and smoother; younger ones are bluer and more chaotic.
+      description: How old the stars in your galaxy are on average.  Older galaxies look redder and smoother; younger ones are bluer and more chaotic.
   simulationStats:
     - id: stellar_mass_msun
       label: Stellar mass
-      value: '0'
+      value: '--'
       unit: Msun
       display_format: compact
       precision: 3
-      description: How many stars your galaxy managed to make. Each solar mass is the weight of our own Sun.
+      description: How many stars your galaxy managed to make.  Each solar mass is the weight of our own Sun.
     - id: stellar_size_kpc
       label: Stellar size
-      value: '0'
+      value: '--'
       unit: kpc
       display_format: float
       precision: 2
       description: The size of your galaxy's star-lit disc from one edge to the other.
     - id: black_hole_mass_msun
       label: Black hole mass
-      value: '0'
+      value: '--'
       unit: Msun
       display_format: compact
       precision: 3
       description: The monster at the centre — how massive your galaxy's central black hole grew.
   similarityScore:
-    value: 100/100
+    value: '--'
 
 cosmos:
   resources:
     - id: runtime
-      value: '0.00'
+      value: '--'
       unit: hours
       display_format: float
       precision: 2
-      description: How long the simulation took to run. Think of it like the render time for a CGI movie.
+      description: How long the simulation took to run.  Calculating how everything moves and affects each other takes a lot of work, even for a supercomputer!
     - id: carbonBurnt
-      value: '0.00'
-      unit: kg CO2
+      value: '--'
+      unit: kg CO₂
       display_format: float
       precision: 2
-      description: The carbon cost of running this simulation. Roughly the same as the emissions from a short-haul flight.
+      description: The carbon cost of running this simulation.  Roughly the same as the emissions from a short-haul flight.
     - id: computeUsed
-      value: 0 CPU-hrs / 0 GB
-      description: How much computer muscle the simulation needed to crunch all that physics.
+      value: '--'
+      description: How much internal computing time and memory the simulation needed to crunch all that physics.  Shared across all the CPUs working together in the supercomputer.
   results:
-    - id: baryon_fraction
-      label: Baryon fraction
-      target: 1.0
-      value: '1.0'
+    - id: stellar_fraction
+      label: Stellar fraction
+      target: 0.007851
+      value: '--'
+      unit: '%'
+      value_scale: 100
       display_format: float
       precision: 2
-      description: How much ordinary matter your universe had compared with our own.
-    - id: black_hole_strength
-      label: Black hole strength
-      target: 1.0
-      value_scale: 8.80e7
+      description: What fraction of your universe's mass ended up locked inside stars.
+    - id: average_temperature_kelvin
+      label: Average gas temperature
+      target: 901647
+      value: '--'
       unit: K
       display_format: compact
-      precision: 3
-      description: How powerfully black holes heated and pushed on the surrounding gas.
-    - id: gravity_strength
-      label: Gravity
-      target: 1.0
-      value: '1.0'
-      display_format: float
-      precision: 2
-      description: How strong gravity was compared with our own universe.
+      description: The average temperature of gas across your universe.  Hotter gas means more energetic feedback from stars and black holes.
+    - id: nhalos
+      label: Galaxy halos
+      target: 1587
+      value: '--'
+      display_format: integer
+      description: How many galaxy-sized dark matter halos (above 10 billion solar masses) your universe managed to build.
   simulationStats:
     - id: stellar_mass_msun
       label: Stellar mass formed
-      value: '0'
+      value: '--'
       unit: Msun
       display_format: compact
       precision: 3
       description: How much star-stuff your universe managed to cook up across all of cosmic history.
     - id: number_of_black_holes
       label: Black holes formed
-      value: '0'
+      value: '--'
       display_format: integer
       description: How many black holes popped into existence over the course of your universe.
     - id: particlesUpdated
       label: Particles updated
-      value: '0'
+      value: '--'
       display_format: integer
       description: The sheer number of moving pieces the simulation had to keep track of every single frame.
   similarityScore:
-    value: 100/100
+    value: '--'
