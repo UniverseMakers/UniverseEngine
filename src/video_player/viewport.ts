@@ -10,12 +10,12 @@
  * the active video's initial buffer.
  *
  *   • The active video uses `preload="auto"` so the browser can fetch ahead.
- *   • `cacheSources()` fully downloads every view for the active run before
- *     the display is revealed.
+ *   • `prewarmSources()` runs detached `<video>` preloading + full-Blob
+ *     fetches for likely-next views *after* the active video is revealed.
  *   • `setSource()` silently substitutes a primed Blob URL for the remote
  *     URL, so the caller (app-shell) can stay simple and never worry about
  *     whether the video is local or remote.
- *   • `clearCachedSources()` revokes everything when the run changes,
+ *   • `clearPrewarmedSources()` revokes everything when the run changes,
  *     keeping memory and object-URL references clean.
  */
 
@@ -77,11 +77,20 @@ export interface ViewportController {
   /** Access the root viewport element. */
   getElement: () => HTMLElement;
 
-  /** Fully download and cache all sources for the active run. */
-  cacheSources: (sources: string[]) => Promise<void>;
+  /** Ask the browser to begin buffering a set of likely-next videos. */
+  prewarmSources: (sources: string[]) => void;
 
-  /** Drop every cached source for the previous run. */
-  clearCachedSources: () => void;
+  /** Pause alternate-view prewarming without discarding finished blob caches. */
+  suspendPrewarming: () => void;
+
+  /** Resume alternate-view prewarming for the most recently requested sources. */
+  resumePrewarming: () => void;
+
+  /** Drop any prewarmed video elements for the previous run. */
+  clearPrewarmedSources: () => void;
+
+  /** Return a pre-fetched blob URL if one was primed by prewarmSources. */
+  getPrewarmedBlobUrl: (src: string) => string | null;
 
   /** Capture the current video frame as a data URL, or null if unavailable. */
   captureFrame: () => string | null;
@@ -128,9 +137,11 @@ export function createViewport(
   let timeUpdateCallback: ((fraction: number) => void) | undefined;
   let endedCallback: (() => void) | undefined;
   let playStateCallback: ((isPaused: boolean) => void) | undefined;
-  const cachedBlobUrls = new Map<string, string>();
-  const cacheFetchControllers = new Map<string, AbortController>();
-  const cachePromises = new Map<string, Promise<void>>();
+  let wantedPrewarmSources = new Set<string>();
+  let prewarmingSuspended = false;
+  const prewarmedVideos = new Map<string, HTMLVideoElement>();
+  const prewarmedBlobUrls = new Map<string, string>();
+  const prewarmFetchControllers = new Map<string, AbortController>();
   let ownedObjectUrl: string | null = null;
   let lastFrameDataUrl: string | null = null;
   const frameCaptureCanvas = document.createElement('canvas');
@@ -172,10 +183,11 @@ export function createViewport(
   }
 
   function setSource(src: string, options: ViewportSourceOptions = {}): void {
-    const primedBlobUrl = cachedBlobUrls.get(src);
+    const primedBlobUrl = prewarmedBlobUrls.get(src);
 
     if (primedBlobUrl) {
-      options = { ...options, ownedObjectUrl: false };
+      prewarmedBlobUrls.delete(src);
+      options = { ...options, ownedObjectUrl: true };
 
       src = primedBlobUrl;
     }
@@ -353,70 +365,138 @@ export function createViewport(
     return false;
   }
 
-  async function cacheSources(sources: string[]): Promise<void> {
-    const uniqueSources = [...new Set(sources.filter(Boolean))];
+  function prewarmSources(sources: string[]): void {
+    wantedPrewarmSources = new Set(
+      sources.filter(Boolean).filter((src) => src !== video.currentSrc),
+    );
 
-    await Promise.all(uniqueSources.map((src) => cacheSource(src)));
+    if (!prewarmingSuspended) {
+      syncPrewarmedSources();
+    }
   }
 
-  function abortCacheFetches(): void {
-    for (const controller of cacheFetchControllers.values()) {
+  function suspendPrewarming(): void {
+    prewarmingSuspended = true;
+    stopDetachedPrewarmedVideos();
+    abortPrewarmFetches();
+  }
+
+  function resumePrewarming(): void {
+    if (!prewarmingSuspended) {
+      syncPrewarmedSources();
+
+      return;
+    }
+
+    prewarmingSuspended = false;
+    syncPrewarmedSources();
+  }
+
+  function syncPrewarmedSources(): void {
+    for (const [src, prewarmedVideo] of prewarmedVideos.entries()) {
+      if (wantedPrewarmSources.has(src)) {
+        continue;
+      }
+
+      prewarmedVideo.removeAttribute('src');
+      prewarmedVideo.load();
+      prewarmedVideos.delete(src);
+    }
+
+    for (const [src, controller] of prewarmFetchControllers.entries()) {
+      if (wantedPrewarmSources.has(src)) {
+        continue;
+      }
+
+      controller.abort();
+      prewarmFetchControllers.delete(src);
+    }
+
+    for (const src of wantedPrewarmSources) {
+      if (!prewarmedVideos.has(src)) {
+        const prewarmedVideo = document.createElement('video');
+
+        prewarmedVideo.preload = 'auto';
+        prewarmedVideo.muted = true;
+        prewarmedVideo.playsInline = true;
+        prewarmedVideo.src = src;
+        prewarmedVideo.load();
+        prewarmedVideos.set(src, prewarmedVideo);
+      }
+
+      if (prewarmedBlobUrls.has(src) || prewarmFetchControllers.has(src)) {
+        continue;
+      }
+
+      startPrewarmBlobFetch(src);
+    }
+  }
+
+  function stopDetachedPrewarmedVideos(): void {
+    for (const prewarmedVideo of prewarmedVideos.values()) {
+      prewarmedVideo.removeAttribute('src');
+      prewarmedVideo.load();
+    }
+
+    prewarmedVideos.clear();
+  }
+
+  function abortPrewarmFetches(): void {
+    for (const controller of prewarmFetchControllers.values()) {
       controller.abort();
     }
 
-    cacheFetchControllers.clear();
+    prewarmFetchControllers.clear();
   }
 
-  async function cacheSource(src: string): Promise<void> {
-    if (cachedBlobUrls.has(src)) {
-      return;
-    }
-
-    const inFlight = cachePromises.get(src);
-
-    if (inFlight) {
-      await inFlight;
-
-      return;
-    }
-
+  function startPrewarmBlobFetch(src: string): void {
     const controller = new AbortController();
-    const cachePromise = (async () => {
-      cacheFetchControllers.set(src, controller);
 
-      try {
-        const response = await fetch(src, { signal: controller.signal });
+    prewarmFetchControllers.set(src, controller);
 
+    const cacheBustedUrl = `${src}?_=${Date.now()}`;
+
+    void fetch(cacheBustedUrl, { signal: controller.signal })
+      .then(async (response) => {
         if (!response.ok) {
-          throw new Error(`Failed to cache video source: ${src}`);
+          return;
         }
 
         const blob = await response.blob();
 
-        if (!cachedBlobUrls.has(src)) {
-          cachedBlobUrls.set(src, URL.createObjectURL(blob));
-        }
-      } finally {
-        if (cacheFetchControllers.get(src) === controller) {
-          cacheFetchControllers.delete(src);
+        if (!wantedPrewarmSources.has(src)) {
+          return;
         }
 
-        cachePromises.delete(src);
-      }
-    })();
-
-    cachePromises.set(src, cachePromise);
-    await cachePromise;
+        prewarmedBlobUrls.set(src, URL.createObjectURL(blob));
+      })
+      .catch((error) => {
+        if (error instanceof DOMException && error.name === 'AbortError') {
+          return;
+        }
+      })
+      .finally(() => {
+        if (prewarmFetchControllers.get(src) === controller) {
+          prewarmFetchControllers.delete(src);
+        }
+      });
   }
 
-  function clearCachedSources(): void {
-    abortCacheFetches();
+  function clearPrewarmedSources(): void {
+    wantedPrewarmSources.clear();
+    prewarmingSuspended = false;
+    stopDetachedPrewarmedVideos();
+    abortPrewarmFetches();
 
-    for (const blobUrl of cachedBlobUrls.values()) {
+    for (const blobUrl of prewarmedBlobUrls.values()) {
       URL.revokeObjectURL(blobUrl);
     }
 
-    cachedBlobUrls.clear();
+    prewarmedBlobUrls.clear();
+  }
+
+  function getPrewarmedBlobUrl(src: string): string | null {
+    return prewarmedBlobUrls.get(src) ?? null;
   }
 
   function storeCurrentFrame(): void {
@@ -488,8 +568,11 @@ export function createViewport(
       playStateCallback = callback;
     },
     getElement: () => viewport,
-    cacheSources,
-    clearCachedSources,
+    prewarmSources,
+    suspendPrewarming,
+    resumePrewarming,
+    clearPrewarmedSources,
+    getPrewarmedBlobUrl,
     captureFrame,
   };
 }

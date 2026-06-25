@@ -64,8 +64,18 @@ import { trackRunSelection } from '../shared/track-run.ts';
 
 type AppMode = 'entry' | 'config' | 'initializing' | 'display';
 
+interface PreparedVideoSource {
+  src: string;
+  ownedObjectUrl: boolean;
+  shouldWaitForBuffer: boolean;
+}
+
+const ACTIVE_VIDEO_FULL_FETCH_MAX_BYTES = 50 * 1024 * 1024;
+const ACTIVE_VIDEO_BUFFER_SECONDS = 8;
+const ACTIVE_VIDEO_BUFFER_WAIT_MS = 6000;
 const ACTIVE_VIDEO_LOADED_DATA_WAIT_MS = 8000;
 const LOCAL_MANIFEST_MIN_TERMINAL_TIME_MAX_MS = 5000;
+const ALTERNATE_PREWARM_RESUME_DELAY_MS = 1200;
 const SCRUB_HUD_UPDATE_INTERVAL_MS = 100;
 
 /** Maps each cosmic scale to its default visual theme. */
@@ -355,6 +365,7 @@ export function createAppShell(app: HTMLElement): void {
   let pendingSeekFraction: number | null = null;
   let scheduledSeekRafId: number | null = null;
   let isPointerScrubbing = false;
+  let alternatePrewarmResumeTimer: number | null = null;
   let lastScrubHudUpdateAt = 0;
 
   function startScrubberLoop() {
@@ -419,9 +430,59 @@ export function createAppShell(app: HTMLElement): void {
     viewport.seekToFraction(fractionToSeek);
   }
 
+  function clearAlternatePrewarmResumeTimer(): void {
+    if (alternatePrewarmResumeTimer !== null) {
+      window.clearTimeout(alternatePrewarmResumeTimer);
+      alternatePrewarmResumeTimer = null;
+    }
+  }
+
+  function getAlternateViewUrls(): string[] {
+    if (!activeRunMatch?.views) {
+      return [];
+    }
+
+    const selectedViewId = resolveSelectedViewId(activeClass, activeRunMatch);
+
+    return Object.entries(activeRunMatch.views)
+      .filter(([viewId]) => viewId !== selectedViewId)
+      .map(([, url]) => url)
+      .filter(Boolean);
+  }
+
+  function suspendAlternatePrewarming(): void {
+    clearAlternatePrewarmResumeTimer();
+    viewport.suspendPrewarming();
+  }
+
+  function scheduleAlternatePrewarmingResume(
+    delayMs = ALTERNATE_PREWARM_RESUME_DELAY_MS,
+  ): void {
+    clearAlternatePrewarmResumeTimer();
+
+    if (isPointerScrubbing || viewport.isPaused()) {
+      return;
+    }
+
+    alternatePrewarmResumeTimer = window.setTimeout(
+      () => {
+        alternatePrewarmResumeTimer = null;
+
+        if (isPointerScrubbing || viewport.isPaused()) {
+          return;
+        }
+
+        viewport.resumePrewarming();
+        viewport.prewarmSources(getAlternateViewUrls());
+      },
+      Math.max(0, delayMs),
+    );
+  }
+
   function handleScrubStart(): void {
     isPointerScrubbing = true;
     lastScrubHudUpdateAt = 0;
+    suspendAlternatePrewarming();
   }
 
   function handleScrubEnd(): void {
@@ -431,6 +492,7 @@ export function createAppShell(app: HTMLElement): void {
     lastPlaybackSeconds =
       viewport.getPlaybackFraction() * viewport.getDurationSeconds();
     refreshDisplayData(lastPlaybackSeconds);
+    scheduleAlternatePrewarmingResume();
   }
 
   // Keep the timeline button in sync and start/stop the smooth scrubber loop.
@@ -439,8 +501,10 @@ export function createAppShell(app: HTMLElement): void {
 
     if (isPaused) {
       stopScrubberLoop();
+      suspendAlternatePrewarming();
     } else {
       startScrubberLoop();
+      scheduleAlternatePrewarmingResume(0);
     }
   });
 
@@ -951,8 +1015,10 @@ export function createAppShell(app: HTMLElement): void {
    * Start a new run for the active simulation class.
    *
    * The flow: find the nearest matching video in the manifest → load its live
-   * stats and metadata → download every view for the selected run behind the
-   * terminal boot sequence → reveal the fully local video set.
+   * stats and metadata → start full-fetching the active video AND prewarming
+   * alternate views, all behind the terminal boot sequence. During active
+   * scrubbing we temporarily suspend that background work, then resume it once
+   * playback has settled again.
    *
    * @returns void
    */
@@ -991,8 +1057,11 @@ export function createAppShell(app: HTMLElement): void {
       manifestSource: manifestController.getSource(),
       matchedRunId: match.runId,
     });
+
     const selectedViewUrl = getViewUrl(match, selectedViewId) ?? match.url;
-    const viewUrls = [match.url, ...Object.values(match.views ?? {})].filter(Boolean);
+    const alternateViewUrls = Object.entries(match.views ?? {})
+      .filter(([viewId]) => viewId !== selectedViewId)
+      .map(([, url]) => url);
 
     // Fire-and-forget the async data loads — they'll update the HUD when done.
     void loadActiveLiveStats(match.liveDataUrl, runRequestId);
@@ -1001,26 +1070,39 @@ export function createAppShell(app: HTMLElement): void {
     refreshViewSwitcher(selectedViewId);
     setMode('initializing');
 
+    const preparedSourcePromise = prepareActiveVideoSource(selectedViewUrl);
+
+    viewport.resumePrewarming();
+    viewport.prewarmSources(alternateViewUrls);
+
     const videoReady = (async (): Promise<void> => {
-      await viewport.cacheSources(viewUrls);
+      const preparedSource = await preparedSourcePromise;
 
       if (!runRequests.isCurrent(runRequestId)) {
         return;
       }
 
-      logInfo('Cached run video sources', {
-        simClassId: activeClass.id,
-        selectedViewUrl,
-        sourceCount: viewUrls.length,
-      });
+      logInfo(
+        `Prepared active video source: ${preparedSource.ownedObjectUrl ? 'FULL-FETCH' : 'PROGRESSIVE'}`,
+        { selectedViewUrl, waitsForBuffer: preparedSource.shouldWaitForBuffer },
+      );
 
-      viewport.setSource(selectedViewUrl);
+      viewport.setSource(preparedSource.src, {
+        ownedObjectUrl: preparedSource.ownedObjectUrl,
+      });
       viewport.pause();
 
       await viewport.waitForLoadedData(ACTIVE_VIDEO_LOADED_DATA_WAIT_MS);
 
       if (!runRequests.isCurrent(runRequestId)) {
         return;
+      }
+
+      if (preparedSource.shouldWaitForBuffer) {
+        await viewport.waitForBufferedAhead(
+          ACTIVE_VIDEO_BUFFER_SECONDS,
+          ACTIVE_VIDEO_BUFFER_WAIT_MS,
+        );
       }
     })();
 
@@ -1040,6 +1122,138 @@ export function createAppShell(app: HTMLElement): void {
     viewport.showMedia();
     void playViewportWithMutedFallback(viewport);
     setMode('display');
+  }
+
+  async function prepareActiveVideoSource(
+    videoUrl: string,
+  ): Promise<PreparedVideoSource> {
+    const contentLength = await probeContentLength(videoUrl);
+
+    if (
+      contentLength !== null &&
+      contentLength > 0 &&
+      contentLength <= ACTIVE_VIDEO_FULL_FETCH_MAX_BYTES
+    ) {
+      logInfo('Downloading active video behind loading overlay', {
+        videoUrl,
+        contentLength,
+      });
+
+      try {
+        const mediaResponse = await fetch(videoUrl);
+
+        if (!mediaResponse.ok) {
+          throw new Error(`Failed to download active video: ${videoUrl}`);
+        }
+
+        const blob = await mediaResponse.blob();
+
+        logInfo(`Active video full fetch complete: ${blob.size} bytes`, {
+          videoUrl,
+          blobType: blob.type,
+        });
+
+        return {
+          src: URL.createObjectURL(blob),
+          ownedObjectUrl: true,
+          shouldWaitForBuffer: false,
+        };
+      } catch (error) {
+        logWarn(
+          `Full-fetch FAILED; falling back to progressive: ${error instanceof Error ? error.message : String(error)}`,
+          {
+            videoUrl,
+          },
+        );
+      }
+    }
+
+    if (contentLength !== null) {
+      logInfo('Active video exceeds full-fetch threshold; using progressive load', {
+        videoUrl,
+        contentLength,
+        fullFetchMaxBytes: ACTIVE_VIDEO_FULL_FETCH_MAX_BYTES,
+      });
+    } else {
+      logInfo('Could not determine active video size; using progressive load', {
+        videoUrl,
+      });
+    }
+
+    logInfo('Using progressive active video load', { videoUrl });
+
+    return {
+      src: videoUrl,
+      ownedObjectUrl: false,
+      shouldWaitForBuffer: true,
+    };
+  }
+
+  async function probeContentLength(videoUrl: string): Promise<number | null> {
+    try {
+      const rangeResponse = await fetch(videoUrl, {
+        headers: { Range: 'bytes=0-0' },
+      });
+
+      logInfo('Probed active video size with range request', {
+        videoUrl,
+        ok: rangeResponse.ok,
+        status: rangeResponse.status,
+        contentLength: rangeResponse.headers.get('Content-Length'),
+        contentRange: rangeResponse.headers.get('Content-Range'),
+      });
+
+      const contentLength = parseContentLength(
+        rangeResponse.headers.get('Content-Length'),
+      );
+
+      if (contentLength !== null) {
+        return contentLength;
+      }
+
+      const sizeFromRange = parseContentRangeTotal(
+        rangeResponse.headers.get('Content-Range'),
+      );
+
+      if (sizeFromRange !== null) {
+        return sizeFromRange;
+      }
+
+      return null;
+    } catch (error) {
+      logWarn('Could not probe active video size', {
+        videoUrl,
+        error: error instanceof Error ? error.message : String(error),
+      });
+
+      return null;
+    }
+  }
+
+  function parseContentRangeTotal(header: string | null): number | null {
+    if (!header) {
+      return null;
+    }
+
+    const match = header.match(/bytes\s+\d+-\d+\/(\d+)/i);
+
+    if (!match) {
+      return null;
+    }
+
+    const parsed = Number(match[1]);
+
+    return Number.isFinite(parsed) && parsed > 0 ? parsed : null;
+  }
+
+  function parseContentLength(value: string | null): number | null {
+    if (!value) {
+      return null;
+    }
+
+    const parsed = Number(value);
+
+    return Number.isFinite(parsed) ? parsed : null;
   }
 
   /**
@@ -1227,6 +1441,7 @@ export function createAppShell(app: HTMLElement): void {
     lastPlaybackSeconds = 0;
     isPointerScrubbing = false;
     pendingSeekFraction = null;
+    clearAlternatePrewarmResumeTimer();
 
     if (scheduledSeekRafId !== null) {
       cancelAnimationFrame(scheduledSeekRafId);
@@ -1236,7 +1451,7 @@ export function createAppShell(app: HTMLElement): void {
     summaryOverlay.hide();
     viewSwitcher.hide();
     viewport.pause();
-    viewport.clearCachedSources();
+    viewport.clearPrewarmedSources();
     viewport.resetPlayback();
     timeline.setPosition(0);
   }
@@ -1248,8 +1463,8 @@ export function createAppShell(app: HTMLElement): void {
    * matter vs. gas density). Switching views should feel seamless — we preserve
    * the current seek position and autoplay state.
    *
-   * Every run view is fully cached before the loading overlay completes, so
-   * switching views should stay a local source swap with preserved position.
+   * Alternate views are prewarmed in the background and may already have a
+   * primed Blob URL by the time the user switches.
    *
    * @param viewId - Manifest/YAML view id.
    * @returns void
@@ -1283,6 +1498,14 @@ export function createAppShell(app: HTMLElement): void {
       seekFraction,
       autoplay: shouldAutoplay,
     });
+
+    viewport.prewarmSources(getAlternateViewUrls());
+
+    if (shouldAutoplay && !isPointerScrubbing) {
+      scheduleAlternatePrewarmingResume();
+    } else {
+      suspendAlternatePrewarming();
+    }
 
     refreshViewSwitcher(viewId);
     infoOverlay.classList.remove('is-visible');
