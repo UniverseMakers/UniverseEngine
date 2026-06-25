@@ -18,7 +18,7 @@ planetary:
 galaxy:
   label: Galaxy
   placeholderImage: assets/galaxy_example.webp
-  parameterSubtitle: Adjust the ingredients of a galaxy.  What does it take to grow a galaxy like our Milky Way?
+  parameterSubtitle: Discover how brighter and fainter galaxies are shaped by their local neighbourhood. Can you make a spiral galaxy, an elliptical galaxy and an irregular galaxy?
   views:
     - id: hst
       label: Hubble Space Telescope
