@@ -10,12 +10,12 @@
  * the active video's initial buffer.
  *
  *   • The active video uses `preload="auto"` so the browser can fetch ahead.
- *   • `prewarmSources()` runs detached `<video>` preloading + full-Blob
- *     fetches for likely-next views *after* the active video is revealed.
+ *   • `cacheSources()` fully downloads every view for the active run before
+ *     the display is revealed.
  *   • `setSource()` silently substitutes a primed Blob URL for the remote
  *     URL, so the caller (app-shell) can stay simple and never worry about
  *     whether the video is local or remote.
- *   • `clearPrewarmedSources()` revokes everything when the run changes,
+ *   • `clearCachedSources()` revokes everything when the run changes,
  *     keeping memory and object-URL references clean.
  */
 
@@ -77,44 +77,11 @@ export interface ViewportController {
   /** Access the root viewport element. */
   getElement: () => HTMLElement;
 
-  /** Ask the browser to begin buffering a set of likely-next videos.
-   *
-   *  This runs two strategies in parallel for every candidate URL:
-   *
-   *  1.  **Media-element preloading** — a detached `<video>` element whose
-   *      `preload="auto"` tells the browser to fetch and cache a useful
-   *      buffer window.  If the user later switches tabs, the browser's
-   *      media cache may serve the data directly.
-   *
-   *  2.  **Background blob pre-fetch** — a `fetch()` of the full file.  When
-   *      it completes the resulting Blob URL is stored so that
-   *      `setSource()` can swap it in silently, giving the viewport a
-   *      completely local media source with zero network activity on the
-   *      next seek or tab switch.
-   *
-   *  Pre-fetched blob URLs are automatically consumed and cleaned up by
-   *  `setSource()` (so the caller does not need to look them up) and are
-   *  revoked together when `clearPrewarmedSources()` runs.
-   *
-   *  ── Why both strategies? ──────────────────────────────────────────
-   *  Media-element preloading is fast to start and lets progressive
-   *  playback begin quickly.  Background blob pre-fetch eliminates
-   *  network reads and decode stalls entirely once the file is local.
-   *  Together they give the best chance of an instant tab switch
-   *  regardless of which strategy finishes first. */
-  prewarmSources: (sources: string[]) => void;
+  /** Fully download and cache all sources for the active run. */
+  cacheSources: (sources: string[]) => Promise<void>;
 
-  /** Pause alternate-view prewarming without discarding finished blob caches. */
-  suspendPrewarming: () => void;
-
-  /** Resume alternate-view prewarming for the most recently requested sources. */
-  resumePrewarming: () => void;
-
-  /** Drop any prewarmed video elements for the previous run. */
-  clearPrewarmedSources: () => void;
-
-  /** Return a pre-fetched blob URL if one was primed by prewarmSources. */
-  getPrewarmedBlobUrl: (src: string) => string | null;
+  /** Drop every cached source for the previous run. */
+  clearCachedSources: () => void;
 
   /** Capture the current video frame as a data URL, or null if unavailable. */
   captureFrame: () => string | null;
@@ -161,11 +128,9 @@ export function createViewport(
   let timeUpdateCallback: ((fraction: number) => void) | undefined;
   let endedCallback: (() => void) | undefined;
   let playStateCallback: ((isPaused: boolean) => void) | undefined;
-  let wantedPrewarmSources = new Set<string>();
-  let prewarmingSuspended = false;
-  const prewarmedVideos = new Map<string, HTMLVideoElement>();
-  const prewarmedBlobUrls = new Map<string, string>();
-  const prewarmFetchControllers = new Map<string, AbortController>();
+  const cachedBlobUrls = new Map<string, string>();
+  const cacheFetchControllers = new Map<string, AbortController>();
+  const cachePromises = new Map<string, Promise<void>>();
   let ownedObjectUrl: string | null = null;
   let lastFrameDataUrl: string | null = null;
   const frameCaptureCanvas = document.createElement('canvas');
@@ -207,18 +172,10 @@ export function createViewport(
   }
 
   function setSource(src: string, options: ViewportSourceOptions = {}): void {
-    // ── Blob-URL substitution ──────────────────────────────────────────
-    // If a background pre-fetch primed a local Blob URL for this remote
-    // source, substitute it now.  This is how tab switches and re-selects
-    // get instant local scrubbing without any special-case code in the
-    // callers.  The Blob URL is consumed on first use (removed from the
-    // cache) so that a subsequent call with the same remote source won't
-    // accidentally re-use a stale reference.
-    const primedBlobUrl = prewarmedBlobUrls.get(src);
+    const primedBlobUrl = cachedBlobUrls.get(src);
 
     if (primedBlobUrl) {
-      prewarmedBlobUrls.delete(src);
-      options = { ...options, ownedObjectUrl: true };
+      options = { ...options, ownedObjectUrl: false };
 
       src = primedBlobUrl;
     }
@@ -396,167 +353,70 @@ export function createViewport(
     return false;
   }
 
-  // ── Prewarm / background-fetch strategy ──────────────────────────────
-  //
-  // Alternate-video views are prewarmed *after* the active video has been
-  // revealed, so they never compete for bandwidth during the critical
-  // initial-buffering window.
-  //
-  // Prewarming runs two parallel strategies (see the interface doc above):
-  // detached <video> preloading + background Blob fetches.
-  //
-  // When `setSource()` is later called with a remote URL for which a Blob
-  // is already primed, the Blob URL is silently substituted.  That gives the
-  // viewport a fully local source — network-free scrubbing — with no extra
-  // work or delay in the tab-switch code path.
-  //
-  // ── Cleanup ──────────────────────────────────────────────────────────
-  // `clearPrewarmedSources()` revokes all tracked Blob URLs and resets the
-  // detached media elements so the next run starts from a clean state.
+  async function cacheSources(sources: string[]): Promise<void> {
+    const uniqueSources = [...new Set(sources.filter(Boolean))];
 
-  function prewarmSources(sources: string[]): void {
-    wantedPrewarmSources = new Set(
-      sources.filter(Boolean).filter((src) => src !== video.currentSrc),
-    );
+    await Promise.all(uniqueSources.map((src) => cacheSource(src)));
+  }
 
-    if (!prewarmingSuspended) {
-      syncPrewarmedSources();
+  function abortCacheFetches(): void {
+    for (const controller of cacheFetchControllers.values()) {
+      controller.abort();
     }
+
+    cacheFetchControllers.clear();
   }
 
-  function suspendPrewarming(): void {
-    prewarmingSuspended = true;
-    stopDetachedPrewarmedVideos();
-    abortPrewarmFetches();
-  }
+  async function cacheSource(src: string): Promise<void> {
+    if (cachedBlobUrls.has(src)) {
+      return;
+    }
 
-  function resumePrewarming(): void {
-    if (!prewarmingSuspended) {
-      syncPrewarmedSources();
+    const inFlight = cachePromises.get(src);
+
+    if (inFlight) {
+      await inFlight;
 
       return;
     }
 
-    prewarmingSuspended = false;
-    syncPrewarmedSources();
-  }
-
-  function syncPrewarmedSources(): void {
-    for (const [src, prewarmedVideo] of prewarmedVideos.entries()) {
-      if (wantedPrewarmSources.has(src)) {
-        continue;
-      }
-
-      prewarmedVideo.removeAttribute('src');
-      prewarmedVideo.load();
-      prewarmedVideos.delete(src);
-    }
-
-    for (const [src, controller] of prewarmFetchControllers.entries()) {
-      if (wantedPrewarmSources.has(src)) {
-        continue;
-      }
-
-      controller.abort();
-      prewarmFetchControllers.delete(src);
-    }
-
-    for (const src of wantedPrewarmSources) {
-      if (!prewarmedVideos.has(src)) {
-        const prewarmedVideo = document.createElement('video');
-
-        prewarmedVideo.preload = 'auto';
-        prewarmedVideo.muted = true;
-        prewarmedVideo.playsInline = true;
-        prewarmedVideo.src = src;
-        prewarmedVideo.load();
-        prewarmedVideos.set(src, prewarmedVideo);
-      }
-
-      if (prewarmedBlobUrls.has(src) || prewarmFetchControllers.has(src)) {
-        continue;
-      }
-
-      startPrewarmBlobFetch(src);
-    }
-  }
-
-  function stopDetachedPrewarmedVideos(): void {
-    for (const prewarmedVideo of prewarmedVideos.values()) {
-      prewarmedVideo.removeAttribute('src');
-      prewarmedVideo.load();
-    }
-
-    prewarmedVideos.clear();
-  }
-
-  function abortPrewarmFetches(): void {
-    for (const controller of prewarmFetchControllers.values()) {
-      controller.abort();
-    }
-
-    prewarmFetchControllers.clear();
-  }
-
-  function startPrewarmBlobFetch(src: string): void {
     const controller = new AbortController();
+    const cachePromise = (async () => {
+      cacheFetchControllers.set(src, controller);
 
-    prewarmFetchControllers.set(src, controller);
+      try {
+        const response = await fetch(src, { signal: controller.signal });
 
-    // Append a cache-busting query parameter so that Cloudflare's edge
-    // cache serves a fresh response with CORS headers.  Without a custom
-    // domain the dashboard cache-purge controls are unavailable.
-    const cacheBustedUrl = `${src}?_=${Date.now()}`;
-
-    void fetch(cacheBustedUrl, { signal: controller.signal })
-      .then(async (response) => {
         if (!response.ok) {
-          return;
+          throw new Error(`Failed to cache video source: ${src}`);
         }
 
         const blob = await response.blob();
 
-        if (!wantedPrewarmSources.has(src)) {
-          return;
+        if (!cachedBlobUrls.has(src)) {
+          cachedBlobUrls.set(src, URL.createObjectURL(blob));
+        }
+      } finally {
+        if (cacheFetchControllers.get(src) === controller) {
+          cacheFetchControllers.delete(src);
         }
 
-        prewarmedBlobUrls.set(src, URL.createObjectURL(blob));
-      })
-      .catch((error) => {
-        if (error instanceof DOMException && error.name === 'AbortError') {
-          return;
-        }
+        cachePromises.delete(src);
+      }
+    })();
 
-        // Background fetch failed — either CORS headers are still
-        // propagating through Cloudflare's cache or the preflight
-        // was rejected.  The <video>-element preload and the
-        // progressive path will handle this view.
-      })
-      .finally(() => {
-        if (prewarmFetchControllers.get(src) === controller) {
-          prewarmFetchControllers.delete(src);
-        }
-      });
+    cachePromises.set(src, cachePromise);
+    await cachePromise;
   }
 
-  function clearPrewarmedSources(): void {
-    // Reset detached <video> elements and revoke every background Blob URL
-    // so the next run starts with a clean prewarm cache and no leaked Blob
-    // references.
-    wantedPrewarmSources.clear();
-    prewarmingSuspended = false;
-    stopDetachedPrewarmedVideos();
-    abortPrewarmFetches();
+  function clearCachedSources(): void {
+    abortCacheFetches();
 
-    for (const blobUrl of prewarmedBlobUrls.values()) {
+    for (const blobUrl of cachedBlobUrls.values()) {
       URL.revokeObjectURL(blobUrl);
     }
 
-    prewarmedBlobUrls.clear();
-  }
-
-  function getPrewarmedBlobUrl(src: string): string | null {
-    return prewarmedBlobUrls.get(src) ?? null;
+    cachedBlobUrls.clear();
   }
 
   function storeCurrentFrame(): void {
@@ -628,11 +488,8 @@ export function createViewport(
       playStateCallback = callback;
     },
     getElement: () => viewport,
-    prewarmSources,
-    suspendPrewarming,
-    resumePrewarming,
-    clearPrewarmedSources,
-    getPrewarmedBlobUrl,
+    cacheSources,
+    clearCachedSources,
     captureFrame,
   };
 }
