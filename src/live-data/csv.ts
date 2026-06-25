@@ -1,3 +1,5 @@
+import { fetchWithOnlineAssetFallback } from '../shared/online-assets.ts';
+
 /**
  * Live-stat CSV loading and sampling.
  *
@@ -30,7 +32,7 @@ export const EMPTY_LIVE_STATS_DATASET: LiveStatsDataset = {
 export async function loadLiveStatsCsv(url: string): Promise<LiveStatsDataset> {
   // Treat a missing CSV as a hard failure here; the shell decides whether to
   // catch that and substitute an empty dataset for display purposes.
-  const response = await fetch(url);
+  const response = await fetchWithOnlineAssetFallback(url);
 
   if (!response.ok) {
     throw new Error(`Failed to load live stats CSV: ${url}`);

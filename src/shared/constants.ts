@@ -30,6 +30,10 @@ export const SUMMARY_OVERLAY = {
 export const ONLINE_MANIFEST_URL =
   'https://media.universemakers.org/engine/run-manifest.json';
 
+/** Backup manifest URL used when the primary media host is blocked. */
+export const ONLINE_MANIFEST_BACKUP_URL =
+  'https://pub-e00201311979473b8a30e279dcc56838.r2.dev/engine/run-manifest.json';
+
 /**
  * API endpoint for run-selection tracking.
  *

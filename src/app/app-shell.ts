@@ -60,6 +60,11 @@ import {
   logWarn,
   setVerboseLoggingEnabled,
 } from '../shared/logger.ts';
+import {
+  fetchWithOnlineAssetFallback,
+  getAssetHostInfo,
+  resolveOnlineAssetUrl,
+} from '../shared/online-assets.ts';
 import { trackRunSelection } from '../shared/track-run.ts';
 
 type AppMode = 'entry' | 'config' | 'initializing' | 'display';
@@ -446,7 +451,7 @@ export function createAppShell(app: HTMLElement): void {
 
     return Object.entries(activeRunMatch.views)
       .filter(([viewId]) => viewId !== selectedViewId)
-      .map(([, url]) => url)
+      .map(([, url]) => resolveOnlineAssetUrl(url))
       .filter(Boolean);
   }
 
@@ -1051,11 +1056,15 @@ export function createAppShell(app: HTMLElement): void {
     const selectedViewId = resolveSelectedViewId(activeClass, match);
     // Fire-and-forget tracking — never blocks playback.
 
+    const assetHostInfo = getAssetHostInfo(manifestController.getSource());
+
     trackRunSelection({
       simulationId: activeClass.id,
       parameters: values,
       manifestSource: manifestController.getSource(),
       matchedRunId: match.runId,
+      assetHostMode: assetHostInfo.mode,
+      assetHostBase: assetHostInfo.base,
     });
 
     const selectedViewUrl = getViewUrl(match, selectedViewId) ?? match.url;
@@ -1127,6 +1136,7 @@ export function createAppShell(app: HTMLElement): void {
   async function prepareActiveVideoSource(
     videoUrl: string,
   ): Promise<PreparedVideoSource> {
+    const resolvedVideoUrl = resolveOnlineAssetUrl(videoUrl);
     const contentLength = await probeContentLength(videoUrl);
 
     if (
@@ -1134,22 +1144,22 @@ export function createAppShell(app: HTMLElement): void {
       contentLength > 0 &&
       contentLength <= ACTIVE_VIDEO_FULL_FETCH_MAX_BYTES
     ) {
-      logInfo('Downloading active video behind loading overlay', {
-        videoUrl,
+        logInfo('Downloading active video behind loading overlay', {
+        videoUrl: resolvedVideoUrl,
         contentLength,
       });
 
       try {
-        const mediaResponse = await fetch(videoUrl);
+        const mediaResponse = await fetchWithOnlineAssetFallback(videoUrl);
 
         if (!mediaResponse.ok) {
-          throw new Error(`Failed to download active video: ${videoUrl}`);
+          throw new Error(`Failed to download active video: ${resolvedVideoUrl}`);
         }
 
         const blob = await mediaResponse.blob();
 
         logInfo(`Active video full fetch complete: ${blob.size} bytes`, {
-          videoUrl,
+          videoUrl: resolveOnlineAssetUrl(videoUrl),
           blobType: blob.type,
         });
 
@@ -1183,7 +1193,7 @@ export function createAppShell(app: HTMLElement): void {
     logInfo('Using progressive active video load', { videoUrl });
 
     return {
-      src: videoUrl,
+      src: resolveOnlineAssetUrl(videoUrl),
       ownedObjectUrl: false,
       shouldWaitForBuffer: true,
     };
@@ -1191,7 +1201,7 @@ export function createAppShell(app: HTMLElement): void {
 
   async function probeContentLength(videoUrl: string): Promise<number | null> {
     try {
-      const rangeResponse = await fetch(videoUrl, {
+      const rangeResponse = await fetchWithOnlineAssetFallback(videoUrl, {
         headers: { Range: 'bytes=0-0' },
       });
 
@@ -1479,7 +1489,7 @@ export function createAppShell(app: HTMLElement): void {
       return;
     }
 
-    const nextUrl = activeRunMatch.views[viewId];
+    const nextUrl = resolveOnlineAssetUrl(activeRunMatch.views[viewId]);
 
     if (!nextUrl) {
       return;

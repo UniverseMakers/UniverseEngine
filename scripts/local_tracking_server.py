@@ -36,12 +36,15 @@ CREATE TABLE IF NOT EXISTS run_selections (
     simulation_id TEXT NOT NULL,
     parameters_json TEXT NOT NULL,
     manifest_source TEXT NOT NULL,
-    matched_run_id TEXT
+    matched_run_id TEXT,
+    asset_host_mode TEXT,
+    asset_host_base TEXT
 );
 """
 
 VALID_SIMULATION_IDS = frozenset({"planetary", "galaxy", "cosmos"})
 VALID_MANIFEST_SOURCES = frozenset({"local", "online"})
+VALID_ASSET_HOST_MODES = frozenset({"local", "primary", "backup"})
 MAX_PARAMETER_COUNT = 16
 
 
@@ -84,6 +87,14 @@ def validate_payload(body: dict[str, Any]) -> str | None:
     if matched_run_id is not None and not isinstance(matched_run_id, str):
         return "matchedRunId must be a string or absent"
 
+    asset_host_mode = body.get("assetHostMode")
+    if not isinstance(asset_host_mode, str) or asset_host_mode not in VALID_ASSET_HOST_MODES:
+        return "Invalid assetHostMode"
+
+    asset_host_base = body.get("assetHostBase")
+    if asset_host_base is not None and not isinstance(asset_host_base, str):
+        return "assetHostBase must be a string or null"
+
     return None
 
 
@@ -95,20 +106,29 @@ def init_db(db_path: Path) -> sqlite3.Connection:
     db_path.parent.mkdir(parents=True, exist_ok=True)
     conn = sqlite3.connect(str(db_path))
     conn.execute(TABLE_SQL)
+    columns = {
+        row[1] for row in conn.execute("PRAGMA table_info(run_selections)").fetchall()
+    }
+    if "asset_host_mode" not in columns:
+        conn.execute("ALTER TABLE run_selections ADD COLUMN asset_host_mode TEXT")
+    if "asset_host_base" not in columns:
+        conn.execute("ALTER TABLE run_selections ADD COLUMN asset_host_base TEXT")
     conn.commit()
     return conn
 
 
 def insert_run(conn: sqlite3.Connection, payload: dict[str, Any]) -> None:
     conn.execute(
-        "INSERT INTO run_selections (created_at, simulation_id, parameters_json, manifest_source, matched_run_id) "
-        "VALUES (?, ?, ?, ?, ?)",
+        "INSERT INTO run_selections (created_at, simulation_id, parameters_json, manifest_source, matched_run_id, asset_host_mode, asset_host_base) "
+        "VALUES (?, ?, ?, ?, ?, ?, ?)",
         (
             datetime.now(timezone.utc).isoformat(),
             payload["simulationId"],
             json.dumps(payload["parameters"]),
             payload["manifestSource"],
             payload.get("matchedRunId"),
+            payload["assetHostMode"],
+            payload.get("assetHostBase"),
         ),
     )
     conn.commit()

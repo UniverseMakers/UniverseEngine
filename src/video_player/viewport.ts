@@ -1,3 +1,8 @@
+import {
+  fetchWithOnlineAssetFallback,
+  resolveOnlineAssetUrl,
+} from '../shared/online-assets.ts';
+
 /**
  * Viewport — full-page background layer for simulation media.
  *
@@ -419,7 +424,7 @@ export function createViewport(
         prewarmedVideo.preload = 'auto';
         prewarmedVideo.muted = true;
         prewarmedVideo.playsInline = true;
-        prewarmedVideo.src = src;
+        prewarmedVideo.src = resolveOnlineAssetUrl(src);
         prewarmedVideo.load();
         prewarmedVideos.set(src, prewarmedVideo);
       }
@@ -456,7 +461,7 @@ export function createViewport(
 
     const cacheBustedUrl = `${src}?_=${Date.now()}`;
 
-    void fetch(cacheBustedUrl, { signal: controller.signal })
+    void fetchWithOnlineAssetFallback(cacheBustedUrl, { signal: controller.signal })
       .then(async (response) => {
         if (!response.ok) {
           return;

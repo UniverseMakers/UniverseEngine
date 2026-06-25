@@ -11,6 +11,7 @@
  */
 
 import { parse } from 'yaml';
+import { fetchWithOnlineAssetFallback } from '../shared/online-assets.ts';
 
 export interface VideoRunMetadata {
   /** Simulation wall-clock time in seconds. */
@@ -63,7 +64,7 @@ export async function loadVideoRunMetadata(
   try {
     // Fetch the sidecar YAML.  A 404 is not an error — many placeholders won't
     // have one yet — so we return null and let the caller degrade gracefully.
-    const response = await fetch(url);
+    const response = await fetchWithOnlineAssetFallback(url);
 
     if (!response.ok) {
       return null;
@@ -115,7 +116,7 @@ async function loadRunParameterValues(url: string): Promise<Record<string, numbe
   try {
     // Parameter values live in a sibling YAML file so the summary can display
     // both aggregate run metrics and the exact parameters saved with that run.
-    const response = await fetch(getRunParametersUrl(url));
+    const response = await fetchWithOnlineAssetFallback(getRunParametersUrl(url));
 
     if (!response.ok) {
       return {};

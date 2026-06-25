@@ -89,7 +89,7 @@ def main() -> None:
     conn.row_factory = sqlite3.Row
 
     rows = conn.execute(
-        "SELECT id, created_at, simulation_id, parameters_json, manifest_source, matched_run_id "
+        "SELECT id, created_at, simulation_id, parameters_json, manifest_source, matched_run_id, asset_host_mode, asset_host_base "
         "FROM run_selections ORDER BY id ASC"
     ).fetchall()
 
@@ -108,11 +108,13 @@ def main() -> None:
 
     for i, row in enumerate(rows, 1):
         matched = f"'{row['matched_run_id']}'" if row["matched_run_id"] else "NULL"
+        asset_host_mode = f"'{row['asset_host_mode']}'" if row["asset_host_mode"] else "NULL"
+        asset_host_base = f"'{row['asset_host_base']}'" if row["asset_host_base"] else "NULL"
         insert_sql = (
             f"INSERT INTO run_selections "
-            f"(created_at, simulation_id, parameters_json, manifest_source, matched_run_id) "
+            f"(created_at, simulation_id, parameters_json, manifest_source, matched_run_id, asset_host_mode, asset_host_base) "
             f"VALUES ('{row['created_at']}', '{row['simulation_id']}', "
-            f"'{row['parameters_json']}', '{row['manifest_source']}', {matched})"
+            f"'{row['parameters_json']}', '{row['manifest_source']}', {matched}, {asset_host_mode}, {asset_host_base})"
         )
         batch.append(insert_sql)
         synced_ids.append(row["id"])

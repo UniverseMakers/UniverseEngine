@@ -7,10 +7,19 @@
 
 import type { SimParameter } from './simulation-catalog.ts';
 import { withBaseUrl } from '../shared/urls.ts';
-import { ONLINE_MANIFEST_URL } from '../shared/constants.ts';
+import {
+  ONLINE_MANIFEST_BACKUP_URL,
+  ONLINE_MANIFEST_URL,
+} from '../shared/constants.ts';
 import { getVideoMetadataUrl } from './video-run-metadata.ts';
 import type { ManifestSource } from '../shared/advanced-settings.ts';
 import { logInfo, logWarn } from '../shared/logger.ts';
+import {
+  clearOnlineAssetHosts,
+  configureOnlineAssetHosts,
+  resolveOnlineAssetUrl,
+  setPreferredOnlineAssetHostMode,
+} from '../shared/online-assets.ts';
 
 export interface VideoMatch {
   url: string;
@@ -23,6 +32,8 @@ export interface VideoMatch {
 
 interface RunManifest {
   version: number;
+  primaryBase?: string;
+  backupBase?: string;
   runs: RunManifestEntry[];
 }
 
@@ -66,6 +77,9 @@ export function createManifestController(
     setSource(nextSource) {
       if (nextSource === 'online') {
         manifestPromises.delete('online');
+        clearOnlineAssetHosts();
+      } else {
+        clearOnlineAssetHosts();
       }
 
       source = nextSource;
@@ -166,16 +180,17 @@ async function loadRunManifest(
   }
 
   const manifestPath = MANIFEST_PATHS[source];
-  const manifestPromise = fetch(withBaseUrl(manifestPath))
-    .then(async (response) => {
-      if (!response.ok) {
-        throw new Error(`Failed to load manifest: ${manifestPath}`);
-      }
+  const manifestPromise = (source === 'online'
+    ? loadOnlineManifest(manifestPath)
+    : fetch(withBaseUrl(manifestPath)).then(async (response) => {
+        if (!response.ok) {
+          throw new Error(`Failed to load manifest: ${manifestPath}`);
+        }
 
-      logInfo('Loaded manifest', { source, manifestPath });
+        logInfo('Loaded manifest', { source, manifestPath });
 
-      return (await response.json()) as RunManifest;
-    })
+        return (await response.json()) as RunManifest;
+      }))
     .catch((error) => {
       logWarn('Manifest unavailable', {
         source,
@@ -189,6 +204,42 @@ async function loadRunManifest(
   manifestPromises.set(source, manifestPromise);
 
   return manifestPromise;
+}
+
+async function loadOnlineManifest(manifestPath: string): Promise<RunManifest> {
+  const attempts = [manifestPath, ONLINE_MANIFEST_BACKUP_URL];
+
+  for (const attemptUrl of attempts) {
+    try {
+      const response = await fetch(attemptUrl);
+
+      if (!response.ok) {
+        continue;
+      }
+
+      const manifest = (await response.json()) as RunManifest;
+      const primaryBase = manifest.primaryBase ?? getManifestBase(ONLINE_MANIFEST_URL);
+      const backupBase = manifest.backupBase ?? getManifestBase(ONLINE_MANIFEST_BACKUP_URL);
+
+      configureOnlineAssetHosts(primaryBase, backupBase);
+      if (attemptUrl === ONLINE_MANIFEST_BACKUP_URL) {
+        setPreferredOnlineAssetHostMode('backup');
+      }
+
+      logInfo('Loaded manifest', {
+        source: 'online',
+        manifestPath: attemptUrl,
+        primaryBase,
+        backupBase,
+      });
+
+      return manifest;
+    } catch {
+      continue;
+    }
+  }
+
+  throw new Error(`Failed to load manifest: ${manifestPath}`);
 }
 
 /**
@@ -246,15 +297,29 @@ async function findManifestBackedRun(
   });
 
   return {
-    url: withBaseUrl(videoPath),
-    liveDataUrl: withBaseUrl(bestEntry.liveDataPath),
-    summaryUrl: withBaseUrl(bestEntry.summaryPath),
+    url: resolveManifestAssetUrl(source, videoPath),
+    liveDataUrl: resolveManifestAssetUrl(source, bestEntry.liveDataPath),
+    summaryUrl: resolveManifestAssetUrl(source, bestEntry.summaryPath),
     viewId,
     runId: bestEntry.runId,
     views: Object.fromEntries(
-      Object.entries(bestEntry.views).map(([key, path]) => [key, withBaseUrl(path)]),
+      Object.entries(bestEntry.views).map(([key, path]) => [key, resolveManifestAssetUrl(source, path)]),
     ),
   };
+}
+
+function resolveManifestAssetUrl(source: ManifestSource, pathOrUrl: string): string {
+  if (source === 'local') {
+    return withBaseUrl(pathOrUrl);
+  }
+
+  return resolveOnlineAssetUrl(pathOrUrl);
+}
+
+function getManifestBase(url: string): string {
+  const parsed = new URL(url);
+
+  return `${parsed.protocol}//${parsed.host}`;
 }
 
 /**

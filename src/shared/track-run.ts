@@ -6,6 +6,8 @@ interface TrackRunPayload {
   parameters: Record<string, number>;
   manifestSource: string;
   matchedRunId?: string;
+  assetHostMode: 'local' | 'primary' | 'backup';
+  assetHostBase: string | null;
 }
 
 export function trackRunSelection(payload: TrackRunPayload): void {

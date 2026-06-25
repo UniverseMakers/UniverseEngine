@@ -139,6 +139,7 @@ Set these environment variables first:
 ```bash
 export R2_BUCKET="YOUR_BUCKET"
 export R2_PUBLIC_BASE="https://YOUR_PUBLIC_R2_BASE"
+export R2_BACKUP_BASE="https://YOUR_BACKUP_R2_BASE"
 export R2_ACCOUNT_ID="YOUR_ACCOUNT_ID"
 export R2_ACCESS_KEY_ID="YOUR_ACCESS_KEY_ID"
 export R2_SECRET_ACCESS_KEY="YOUR_SECRET_ACCESS_KEY"

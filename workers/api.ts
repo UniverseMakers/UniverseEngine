@@ -3,10 +3,13 @@ interface RunSelectionPayload {
   parameters: Record<string, number>;
   manifestSource: string;
   matchedRunId?: string;
+  assetHostMode: 'local' | 'primary' | 'backup';
+  assetHostBase: string | null;
 }
 
 const VALID_SIMULATION_IDS = new Set(['planetary', 'galaxy', 'cosmos']);
 const VALID_MANIFEST_SOURCES = new Set(['local', 'online']);
+const VALID_ASSET_HOST_MODES = new Set(['local', 'primary', 'backup']);
 const MAX_PARAMETER_COUNT = 16;
 
 function isValidPayload(body: unknown): body is RunSelectionPayload {
@@ -42,6 +45,14 @@ function isValidPayload(body: unknown): body is RunSelectionPayload {
     return false;
   }
 
+  if (typeof p.assetHostMode !== 'string' || !VALID_ASSET_HOST_MODES.has(p.assetHostMode)) {
+    return false;
+  }
+
+  if (p.assetHostBase !== null && p.assetHostBase !== undefined && typeof p.assetHostBase !== 'string') {
+    return false;
+  }
+
   return true;
 }
 
@@ -72,11 +83,18 @@ export default {
       return new Response('Invalid payload', { status: 400 });
     }
 
-    const { simulationId, parameters, manifestSource, matchedRunId } = body;
+    const {
+      simulationId,
+      parameters,
+      manifestSource,
+      matchedRunId,
+      assetHostMode,
+      assetHostBase,
+    } = body;
 
     try {
       await env.DB.prepare(
-        'INSERT INTO run_selections (created_at, simulation_id, parameters_json, manifest_source, matched_run_id) VALUES (?, ?, ?, ?, ?)',
+        'INSERT INTO run_selections (created_at, simulation_id, parameters_json, manifest_source, matched_run_id, asset_host_mode, asset_host_base) VALUES (?, ?, ?, ?, ?, ?, ?)',
       )
         .bind(
           new Date().toISOString(),
@@ -84,6 +102,8 @@ export default {
           JSON.stringify(parameters),
           manifestSource,
           matchedRunId ?? null,
+          assetHostMode,
+          assetHostBase ?? null,
         )
         .run();
     } catch (error) {

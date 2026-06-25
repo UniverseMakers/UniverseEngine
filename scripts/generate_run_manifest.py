@@ -248,12 +248,18 @@ def build_manifest(
     args: argparse.Namespace,
 ) -> dict[str, object]:
     """Build the frontend run manifest from either local files or R2."""
-    manifest: dict[str, object] = {"version": 1, "runs": []}
-
     if not args.local:
+        manifest: dict[str, object] = {
+            "version": 1,
+            "primaryBase": _env_or_die("R2_PUBLIC_BASE").rstrip("/"),
+            "backupBase": _env_or_die("R2_BACKUP_BASE").rstrip("/"),
+            "runs": [],
+        }
         for entry in build_manifest_entries_from_r2(args):
             manifest["runs"].append(entry)  # type: ignore[union-attr]
         return manifest
+
+    manifest = {"version": 1, "runs": []}
 
     assets_root = resolve_local_assets_root(args)
     path_builder = build_path_builder(args)
@@ -338,12 +344,8 @@ def build_manifest_entries_from_r2(
             "ERROR: R2_BUCKET must be set when generating the online manifest."
         )
 
-    bucket_public_base = os.environ.get("R2_PUBLIC_BASE", "").strip().rstrip("/")
-    if not bucket_public_base:
-        raise SystemExit(
-            "ERROR: R2_PUBLIC_BASE must be set when generating the online manifest."
-        )
-    public_base = f"{bucket_public_base}/{R2_ENGINE_PREFIX}"
+    _env_or_die("R2_PUBLIC_BASE")
+    _env_or_die("R2_BACKUP_BASE")
 
     s3 = create_r2_client(
         _env_or_die("R2_ACCOUNT_ID"),
@@ -361,7 +363,6 @@ def build_manifest_entries_from_r2(
                 run_id=run_id,
                 object_keys=runs[run_id],
                 object_prefix=R2_ENGINE_PREFIX,
-                public_base=public_base,
                 bucket=bucket,
                 s3=s3,
             )
@@ -377,7 +378,6 @@ def build_manifest_entry_from_r2(
     run_id: str,
     object_keys: list[str],
     object_prefix: str,
-    public_base: str,
     bucket: str,
     s3: Any,
 ) -> dict[str, Any] | None:
@@ -396,7 +396,7 @@ def build_manifest_entry_from_r2(
     parameter_key = f"{run_root}parameters.yaml"
 
     view_paths = {
-        infer_view_id(Path(video_key)): to_public_object_url(public_base, video_key)
+        infer_view_id(Path(video_key)): to_manifest_asset_path(object_prefix, video_key)
         for video_key in video_keys
     }
     default_view = pick_default_view(view_paths)
@@ -414,8 +414,8 @@ def build_manifest_entry_from_r2(
             bucket=bucket,
             s3=s3,
         ),
-        "liveDataPath": to_public_object_url(public_base, live_data_key),
-        "summaryPath": to_public_object_url(public_base, summary_key),
+        "liveDataPath": to_manifest_asset_path(object_prefix, live_data_key),
+        "summaryPath": to_manifest_asset_path(object_prefix, summary_key),
         "defaultView": default_view,
         "views": view_paths,
     }
@@ -637,6 +637,15 @@ def list_r2_run_objects(
 def to_public_object_url(public_base: str, object_key: str) -> str:
     """Join a public base URL to a relative object key."""
     return f"{public_base}/{object_key.lstrip('/')}"
+
+
+def to_manifest_asset_path(prefix: str, object_key: str) -> str:
+    """Return a host-agnostic manifest path rooted at the public engine prefix."""
+    prefix = prefix.strip("/")
+    object_key = object_key.lstrip("/")
+    if prefix:
+        return f"/{prefix}/{object_key}"
+    return f"/{object_key}"
 
 
 def to_r2_object_key(prefix: str, object_key: str) -> str:
