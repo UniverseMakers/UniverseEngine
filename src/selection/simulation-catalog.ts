@@ -27,10 +27,12 @@ export interface SimParameter {
   description?: string;
   valueScale?: number;
   displayUnit?: string;
-  displayFormat?: 'fixed' | 'scientific' | 'compact';
+  displayFormat?: 'fixed' | 'scientific' | 'compact' | 'qualitative';
   displaySignificantFigures?: number;
   /** When true the slider thumb moves on a log10 scale. */
   logScale?: boolean;
+  /** Ordered qualitative labels shown instead of numeric values on the slider. */
+  qualiLabels?: string[];
 }
 
 export interface SimulationMetadata {
@@ -65,7 +67,7 @@ export interface StatDisplayConfig {
   scaleWithTime?: boolean;
   integer?: boolean;
   valueScale?: number;
-  displayFormat?: 'integer' | 'float' | 'scientific' | 'compact';
+  displayFormat?: 'integer' | 'float' | 'scientific' | 'compact' | 'qualitative';
   precision?: number;
 }
 
@@ -112,9 +114,10 @@ interface RawParameterConfig {
   description?: string;
   value_scale?: number;
   display_unit?: string;
-  display_format?: 'fixed' | 'scientific' | 'compact';
+  display_format?: 'fixed' | 'scientific' | 'compact' | 'qualitative';
   display_significant_figures?: number;
   log_scale?: boolean;
+  quali_labels?: string[];
 }
 
 interface RawStatsConfig {
@@ -155,7 +158,7 @@ interface RawStatDisplayConfig {
   scale_with_time?: boolean;
   integer?: boolean;
   value_scale?: number;
-  display_format?: 'integer' | 'float' | 'scientific' | 'compact';
+  display_format?: 'integer' | 'float' | 'scientific' | 'compact' | 'qualitative';
   precision?: number;
 }
 
@@ -192,20 +195,26 @@ export const SIMULATION_CLASSES: SimulationClass[] = Object.entries(catalog).map
         liveStats: liveStats.map(normalizeStatConfig),
       },
       parameters: Object.entries(rawParams).map(([parameterId, parameter]) => {
-        const step = parameter.step ?? inferParameterStep(parameter.min, parameter.max);
-        // Parameters no longer carry authored defaults in YAML. We keep one
-        // internal midpoint fallback so partially populated value maps still
-        // render and match runs deterministically.
-        const fallbackValue = parameter.log_scale
-          ? Math.sqrt(parameter.min * parameter.max)
-          : midpoint(parameter.min, parameter.max);
+        const quali = parameter.quali_labels;
+        const isQualitative = quali !== undefined && quali.length > 0;
+
+        const resolvedMin = isQualitative ? 0 : parameter.min;
+        const resolvedMax = isQualitative ? quali!.length - 1 : parameter.max;
+        const step = isQualitative
+          ? 1
+          : (parameter.step ?? inferParameterStep(parameter.min, parameter.max));
+        const fallbackValue = isQualitative
+          ? Math.floor(quali!.length / 2)
+          : (parameter.log_scale
+              ? Math.sqrt(parameter.min * parameter.max)
+              : midpoint(parameter.min, parameter.max));
 
         return {
           id: parameterId,
           label: parameter.label,
           unit: parameter.unit ?? '',
-          min: parameter.min,
-          max: parameter.max,
+          min: resolvedMin,
+          max: resolvedMax,
           step,
           fallbackValue,
           description: parameter.description,
@@ -214,6 +223,7 @@ export const SIMULATION_CLASSES: SimulationClass[] = Object.entries(catalog).map
           displayFormat: parameter.display_format,
           displaySignificantFigures: parameter.display_significant_figures,
           logScale: parameter.log_scale,
+          qualiLabels: quali,
         };
       }),
       views: (entry.views ?? []).map((view) => ({

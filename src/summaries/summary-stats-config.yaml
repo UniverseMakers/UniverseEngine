@@ -105,31 +105,16 @@ galaxy:
       value: '--'
       description: How much internal computing time and memory the simulation needed to crunch all that physics.  Shared across all the CPUs working together in the supercomputer.
   results:
-    - id: stellar_mass
-      label: Stellar mass
-      target: 6.1
+    - id: crowding
+      label: Neighbourhood
+      target: 1
       value: '--'
-      unit: Msun
-      value_scale: 1.0e10
-      display_format: compact
-      precision: 3
-      description: How many stars your galaxy managed to make.  Each solar mass is the weight of our own Sun.
-    - id: black_hole_mass
-      label: Black hole mass
-      target: 4.3
+      description: Are you making a galaxy that stays far away from others, is part of a group of galaxies, or joins a huge cluster of galaxies?  Merging with other galaxies is more common in a more crowded neighbourhood.
+    - id: mass_rank
+      label: Luminosity
+      target: 3
       value: '--'
-      unit: Msun
-      value_scale: 1.0e6
-      display_format: compact
-      precision: 3
-      description: The monster at the centre — how massive your galaxy's central black hole grew.
-    - id: galaxy_age
-      label: Galaxy age
-      target: 8.5
-      value: '--'
-      unit: yrs
-      value_scale: 1.0e9
-      description: How old the stars in your galaxy are on average.  Older galaxies look redder and smoother; younger ones are bluer and more chaotic.
+      description: How bright is the galaxy you're making?  Brighter galaxies usually have more stars, are bigger and are more massive.
   simulationStats:
     - id: stellar_mass_msun
       label: Stellar mass

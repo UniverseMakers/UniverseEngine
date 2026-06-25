@@ -191,13 +191,17 @@ export function formatParameterValue(
   step: number,
   options: {
     scale?: number;
-    format?: 'fixed' | 'scientific' | 'compact';
+    format?: 'fixed' | 'scientific' | 'compact' | 'qualitative';
     significantFigures?: number;
   } = {},
 ): string {
   const scale = options.scale ?? 1;
   const scaledValue = value * scale;
   const scaledStep = step * scale;
+
+  if (options.format === 'qualitative') {
+    return String(Math.round(value));
+  }
 
   if (options.format === 'compact' || options.format === 'scientific') {
     return formatCompactNumber(scaledValue);

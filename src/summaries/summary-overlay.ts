@@ -735,11 +735,14 @@ export function createSummaryOverlay(
           label.className = 'res-card__label';
           label.textContent = param.label;
           value.className = 'res-card__value';
-          const formatted = formatParameterValue(rawValue, param.step, {
-            scale: param.valueScale,
-            format: param.displayFormat,
-            significantFigures: param.displaySignificantFigures,
-          });
+          const formatted =
+            param.displayFormat === 'qualitative' && param.qualiLabels
+              ? param.qualiLabels[Math.round(rawValue)] ?? '--'
+              : formatParameterValue(rawValue, param.step, {
+                  scale: param.valueScale,
+                  format: param.displayFormat,
+                  significantFigures: param.displaySignificantFigures,
+                });
 
           // Parameters always show the player's chosen values, not the matched
           // run's nearest-neighbor values. That keeps the summary faithful to

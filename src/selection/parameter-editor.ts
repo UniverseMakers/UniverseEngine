@@ -122,10 +122,17 @@ export function createParameterEditor(
     name.textContent = param.label;
 
     const displayUnit = param.displayUnit ?? param.unit;
+    const isQualitative = param.displayFormat === 'qualitative' && param.qualiLabels && param.qualiLabels.length > 0;
+
     const range = document.createElement('span');
 
     range.className = 'param-card__range';
-    range.textContent = `${withUnit(formatParameterValue(param.min, param.step, { scale: param.valueScale, format: param.displayFormat, significantFigures: param.displaySignificantFigures }), displayUnit)} \u2013 ${withUnit(formatParameterValue(param.max, param.step, { scale: param.valueScale, format: param.displayFormat, significantFigures: param.displaySignificantFigures }), displayUnit)}`;
+    if (isQualitative) {
+      const labels = param.qualiLabels!;
+      range.textContent = `${labels[0]} \u2013 ${labels[labels.length - 1]}`;
+    } else {
+      range.textContent = `${withUnit(formatParameterValue(param.min, param.step, { scale: param.valueScale, format: param.displayFormat, significantFigures: param.displaySignificantFigures }), displayUnit)} \u2013 ${withUnit(formatParameterValue(param.max, param.step, { scale: param.valueScale, format: param.displayFormat, significantFigures: param.displaySignificantFigures }), displayUnit)}`;
+    }
 
     header.appendChild(name);
     header.appendChild(range);
@@ -135,16 +142,26 @@ export function createParameterEditor(
     slider.className = 'param-card__slider';
     slider.type = 'range';
 
-    const sliderMin = param.logScale ? Math.log10(param.min) : param.min;
-    const sliderMax = param.logScale ? Math.log10(param.max) : param.max;
     const rawValue = values[param.id] ?? param.fallbackValue;
 
-    slider.min = String(sliderMin);
-    slider.max = String(sliderMax);
-    slider.step = param.logScale ? '0.001' : String(param.step);
-    slider.value = String(
-      param.logScale ? Math.log10(Math.max(rawValue, Number.MIN_VALUE)) : rawValue,
-    );
+    if (isQualitative) {
+      const labelCount = param.qualiLabels!.length;
+
+      slider.min = '0';
+      slider.max = String(labelCount - 1);
+      slider.step = '1';
+      slider.value = String(Math.round(rawValue));
+    } else {
+      const sliderMin = param.logScale ? Math.log10(param.min) : param.min;
+      const sliderMax = param.logScale ? Math.log10(param.max) : param.max;
+
+      slider.min = String(sliderMin);
+      slider.max = String(sliderMax);
+      slider.step = param.logScale ? '0.001' : String(param.step);
+      slider.value = String(
+        param.logScale ? Math.log10(Math.max(rawValue, Number.MIN_VALUE)) : rawValue,
+      );
+    }
     slider.setAttribute('aria-label', param.label);
 
     const readout = document.createElement('span');
@@ -152,22 +169,35 @@ export function createParameterEditor(
     readout.className = 'res-card__value';
 
     function sync(raw: number): void {
-      const value = param.logScale ? 10 ** raw : raw;
+      if (isQualitative) {
+        const index = Math.round(raw);
+        const labels = param.qualiLabels!;
 
-      values[param.id] = value;
-      slider.value = String(raw);
-      slider.style.setProperty(
-        '--fill',
-        `${calculateFill(raw, sliderMin, sliderMax)}%`,
-      );
-      readout.textContent = withUnit(
-        formatParameterValue(value, param.step, {
-          scale: param.valueScale,
-          format: param.displayFormat,
-          significantFigures: param.displaySignificantFigures,
-        }),
-        displayUnit,
-      );
+        values[param.id] = index;
+        slider.value = String(index);
+        slider.style.setProperty(
+          '--fill',
+          `${calculateFill(index, 0, labels.length - 1)}%`,
+        );
+        readout.textContent = labels[index] ?? String(index);
+      } else {
+        const value = param.logScale ? 10 ** raw : raw;
+
+        values[param.id] = value;
+        slider.value = String(raw);
+        slider.style.setProperty(
+          '--fill',
+          `${calculateFill(raw, parseFloat(slider.min), parseFloat(slider.max))}%`,
+        );
+        readout.textContent = withUnit(
+          formatParameterValue(value, param.step, {
+            scale: param.valueScale,
+            format: param.displayFormat,
+            significantFigures: param.displaySignificantFigures,
+          }),
+          displayUnit,
+        );
+      }
       emitChange();
     }
 
@@ -178,22 +208,33 @@ export function createParameterEditor(
     slider.addEventListener('pointerdown', (e) => e.stopPropagation());
     slider.addEventListener('click', (e) => e.stopPropagation());
 
-    const initialSliderVal = param.logScale
-      ? Math.log10(Math.max(rawValue, Number.MIN_VALUE))
-      : rawValue;
+    if (isQualitative) {
+      const index = Math.round(rawValue);
+      const labels = param.qualiLabels!;
 
-    slider.style.setProperty(
-      '--fill',
-      `${calculateFill(initialSliderVal, sliderMin, sliderMax)}%`,
-    );
-    readout.textContent = withUnit(
-      formatParameterValue(rawValue, param.step, {
-        scale: param.valueScale,
-        format: param.displayFormat,
-        significantFigures: param.displaySignificantFigures,
-      }),
-      displayUnit,
-    );
+      slider.style.setProperty(
+        '--fill',
+        `${calculateFill(index, 0, labels.length - 1)}%`,
+      );
+      readout.textContent = labels[index] ?? String(index);
+    } else {
+      const initialSliderVal = param.logScale
+        ? Math.log10(Math.max(rawValue, Number.MIN_VALUE))
+        : rawValue;
+
+      slider.style.setProperty(
+        '--fill',
+        `${calculateFill(initialSliderVal, parseFloat(slider.min), parseFloat(slider.max))}%`,
+      );
+      readout.textContent = withUnit(
+        formatParameterValue(rawValue, param.step, {
+          scale: param.valueScale,
+          format: param.displayFormat,
+          significantFigures: param.displaySignificantFigures,
+        }),
+        displayUnit,
+      );
+    }
 
     if (param.description) {
       card.classList.add('res-card--has-info');

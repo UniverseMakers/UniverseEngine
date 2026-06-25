@@ -891,39 +891,21 @@ button {
   color: var(--text-muted);
 }
 
-.timeline__audio-slider-wrap {
-  position: absolute;
-  left: 50%;
-  bottom: calc(100% + 0.46rem);
-  display: grid;
-  place-items: center;
-  width: 3rem;
-  height: 9.5rem;
-  border: 1px solid var(--line-strong);
-  background: rgba(6, 9, 12, 0.96);
-  box-shadow: var(--shadow-ambient);
-  opacity: 0;
-  pointer-events: none;
-  transform: translate(-50%, 0.35rem);
-  transition:
-    opacity 0.16s ease,
-    transform 0.16s ease;
+.timeline__audio-icon {
+  width: 1.15rem;
+  height: 1.15rem;
 }
 
-.timeline__audio.open .timeline__audio-slider-wrap {
-  opacity: 1;
-  pointer-events: auto;
-  transform: translate(-50%, 0);
+.timeline__audio-mute-x {
+  display: none;
 }
 
-.timeline__audio-slider {
-  appearance: slider-vertical;
-  -webkit-appearance: slider-vertical;
-  writing-mode: vertical-lr;
-  direction: rtl;
-  width: 1.2rem;
-  height: 7.5rem;
-  background: rgba(34, 211, 238, 0.18);
+.timeline__audio-btn.is-muted .timeline__audio-mute-x {
+  display: block;
+}
+
+.timeline__audio-btn.is-muted .timeline__audio-waves {
+  display: none;
 }
 
 .timeline__slider {

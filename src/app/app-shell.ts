@@ -360,7 +360,6 @@ export function createAppShell(app: HTMLElement): void {
     },
     onTogglePlay: handleTogglePlay,
     onAudioToggle: handleAudioToggle,
-    onAudioVolumeChange: handleAudioVolumeChange,
     onSpeedChange: handleSpeedChange,
     onSummaryClick: handleShowSummary,
     onScrubStart() {
@@ -380,7 +379,6 @@ export function createAppShell(app: HTMLElement): void {
   timeline.setPlaying(!viewport.isPaused());
   timeline.setAudioVisible(false);
   timeline.setMuted(audioMuted);
-  timeline.setVolume(audioVolume);
 
   runAudio.addEventListener('loadedmetadata', () => {
     syncAudioToViewport(true);
@@ -1042,12 +1040,6 @@ export function createAppShell(app: HTMLElement): void {
 
   function handleAudioToggle(): void {
     audioMuted = !audioMuted;
-    syncRunAudioPlayback();
-  }
-
-  function handleAudioVolumeChange(volume: number): void {
-    audioVolume = Math.max(0, Math.min(1, volume));
-    audioMuted = audioVolume <= 0 ? true : false;
     syncRunAudioPlayback();
   }
 
@@ -1875,7 +1867,6 @@ export function createAppShell(app: HTMLElement): void {
     runAudio.muted = audioMuted;
     runAudio.volume = audioVolume;
     timeline.setMuted(audioMuted);
-    timeline.setVolume(audioVolume);
   }
 
   function refreshAudioControlVisibility(): void {
@@ -1883,7 +1874,6 @@ export function createAppShell(app: HTMLElement): void {
       doesActiveViewSupportAudio() && activeAudioAvailable && Boolean(activeAudioUrl),
     );
     timeline.setMuted(audioMuted);
-    timeline.setVolume(audioVolume);
   }
 
   function syncAudioToViewport(force = false): void {

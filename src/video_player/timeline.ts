@@ -1,9 +1,10 @@
 /**
  * Display-mode timeline scrubber with playback controls.
  *
- * Renders a thin translucent control bar containing a play/pause button, a
- * range-input scrubber, and a playback-speed selector. All callbacks are
- * delegated to the shell so the timeline stays stateless.
+ * Renders a thin translucent control bar containing a mute button, a
+ * play/pause button, a range-input scrubber, and a playback-speed
+ * selector. All callbacks are delegated to the shell so the timeline
+ * stays stateless.
  */
 
 export interface TimelineController {
@@ -16,14 +17,11 @@ export interface TimelineController {
   /** Update the speed selector label. */
   setSpeed: (rate: number) => void;
 
-  /** Show or hide the audio control. */
+  /** Show or hide the audio mute control. */
   setAudioVisible: (visible: boolean) => void;
 
   /** Update the mute button visual state. */
   setMuted: (muted: boolean) => void;
-
-  /** Update the audio volume slider. */
-  setVolume: (volume: number) => void;
 }
 
 export type TimelineChangeCallback = (position: number) => void;
@@ -41,11 +39,8 @@ interface TimelineOptions {
   /** Called when the user clicks the summary button. */
   onSummaryClick?: () => void;
 
-  /** Called when the user clicks the audio button. */
+  /** Called when the user clicks the audio mute button. */
   onAudioToggle?: () => void;
-
-  /** Called when the user drags the audio slider. */
-  onAudioVolumeChange?: (volume: number) => void;
 
   /** Called when the user starts dragging the scrubber. */
   onScrubStart?: () => void;
@@ -76,7 +71,6 @@ export function createTimeline(
     onSpeedChange,
     onSummaryClick,
     onAudioToggle,
-    onAudioVolumeChange,
     onScrubStart,
     onScrubEnd,
     initialSpeed = 1,
@@ -86,17 +80,9 @@ export function createTimeline(
 
   timeline.className = 'timeline';
 
-  // ── Top row: play button | scrubber | speed selector ──────────────────
   const barRow = document.createElement('div');
 
   barRow.className = 'timeline__bar-row';
-
-  const playBtn = document.createElement('button');
-
-  playBtn.className = 'timeline__play-btn';
-  playBtn.type = 'button';
-  playBtn.setAttribute('aria-label', 'Toggle playback');
-  playBtn.addEventListener('click', () => onTogglePlay?.());
 
   const audioWrap = document.createElement('div');
 
@@ -107,51 +93,17 @@ export function createTimeline(
   audioBtn.className = 'timeline__audio-btn';
   audioBtn.type = 'button';
   audioBtn.setAttribute('aria-label', 'Toggle audio mute');
+  audioBtn.innerHTML = createSpeakerSvg();
+  audioBtn.addEventListener('click', () => onAudioToggle?.());
 
-  const audioSliderWrap = document.createElement('div');
-
-  audioSliderWrap.className = 'timeline__audio-slider-wrap';
-
-  const audioSlider = document.createElement('input');
-
-  audioSlider.className = 'timeline__audio-slider';
-  audioSlider.type = 'range';
-  audioSlider.min = '0';
-  audioSlider.max = '100';
-  audioSlider.step = '1';
-  audioSlider.value = '75';
-  audioSlider.setAttribute('aria-label', 'Audio volume');
-  audioSliderWrap.appendChild(audioSlider);
   audioWrap.appendChild(audioBtn);
-  audioWrap.appendChild(audioSliderWrap);
 
-  let showAudioSliderTimer: number | null = null;
-  let suppressAudioToggleClick = false;
+  const playBtn = document.createElement('button');
 
-  audioBtn.addEventListener('pointerdown', () => {
-    showAudioSliderTimer = window.setTimeout(() => {
-      audioWrap.classList.add('open');
-      suppressAudioToggleClick = true;
-      showAudioSliderTimer = null;
-    }, 250);
-  });
-  audioBtn.addEventListener('pointerup', clearAudioSliderTimer);
-  audioBtn.addEventListener('pointercancel', clearAudioSliderTimer);
-  audioBtn.addEventListener('pointerleave', clearAudioSliderTimer);
-  audioBtn.addEventListener('click', () => {
-    if (suppressAudioToggleClick) {
-      suppressAudioToggleClick = false;
-
-      return;
-    }
-
-    onAudioToggle?.();
-  });
-  audioSlider.addEventListener('input', () => {
-    const volume = parseInt(audioSlider.value, 10) / 100;
-
-    onAudioVolumeChange?.(volume);
-  });
+  playBtn.className = 'timeline__play-btn';
+  playBtn.type = 'button';
+  playBtn.setAttribute('aria-label', 'Toggle playback');
+  playBtn.addEventListener('click', () => onTogglePlay?.());
 
   const slider = document.createElement('input');
 
@@ -220,25 +172,17 @@ export function createTimeline(
 
   slider.addEventListener('pointerdown', () => onScrubStart?.());
   slider.addEventListener('pointerup', () => onScrubEnd?.());
-  // pointerup may not fire if the pointer leaves the slider; `change` catches
-  // the release in those cases.
   slider.addEventListener('change', () => onScrubEnd?.());
 
-  // Dismiss the speed dropdown when the user clicks anywhere outside it.
   document.addEventListener('click', (event) => {
     if (!speedWrap.contains(event.target as Node)) {
       speedWrap.classList.remove('open');
-    }
-
-    if (!audioWrap.contains(event.target as Node)) {
-      audioWrap.classList.remove('open');
     }
   });
 
   timeline.appendChild(barRow);
   container.appendChild(timeline);
 
-  // Prime the initial speed label.
   setSpeedLabel(initialSpeed);
 
   return {
@@ -259,19 +203,10 @@ export function createTimeline(
     setAudioVisible(visible: boolean) {
       audioWrap.hidden = !visible;
       audioWrap.classList.toggle('is-hidden', !visible);
-      if (!visible) {
-        audioWrap.classList.remove('open');
-      }
     },
     setMuted(muted: boolean) {
-      audioBtn.textContent = muted ? '🔇' : '🔊';
       audioBtn.classList.toggle('is-muted', muted);
       audioBtn.setAttribute('aria-label', muted ? 'Unmute audio' : 'Mute audio');
-    },
-    setVolume(volume: number) {
-      const clamped = Math.max(0, Math.min(1, volume));
-
-      audioSlider.value = String(Math.round(clamped * 100));
     },
   };
 
@@ -282,15 +217,22 @@ export function createTimeline(
       child.classList.toggle('is-active', child.textContent === formatSpeed(rate));
     }
   }
-
-  function clearAudioSliderTimer() {
-    if (showAudioSliderTimer !== null) {
-      window.clearTimeout(showAudioSliderTimer);
-      showAudioSliderTimer = null;
-    }
-  }
 }
 
 function formatSpeed(rate: number): string {
   return `x${rate}`;
+}
+
+function createSpeakerSvg(): string {
+  return `
+    <svg class="timeline__audio-icon" viewBox="0 0 24 24" fill="none"
+         stroke="currentColor" stroke-width="1.5"
+         stroke-linecap="round" stroke-linejoin="round"
+         aria-hidden="true">
+      <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" />
+      <path class="timeline__audio-waves" d="M15.54 8.46a5 5 0 0 1 0 7.07" />
+      <path class="timeline__audio-waves" d="M19.07 4.93a10 10 0 0 1 0 14.14" />
+      <line class="timeline__audio-mute-x" x1="3" y1="3" x2="21" y2="21"
+            stroke="currentColor" stroke-width="2" />
+    </svg>`;
 }

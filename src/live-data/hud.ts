@@ -99,15 +99,20 @@ function buildAvailableMetrics(
       parameter.id,
       {
         label: parameter.label,
-        value: formatParameterValue(
-          values[parameter.id] ?? parameter.fallbackValue,
-          parameter.step,
-          {
-            scale: parameter.valueScale,
-            format: parameter.displayFormat,
-            significantFigures: parameter.displaySignificantFigures,
-          },
-        ),
+        value:
+          parameter.displayFormat === 'qualitative' && parameter.qualiLabels
+            ? parameter.qualiLabels[
+                Math.round(values[parameter.id] ?? parameter.fallbackValue)
+              ] ?? '--'
+            : formatParameterValue(
+                values[parameter.id] ?? parameter.fallbackValue,
+                parameter.step,
+                {
+                  scale: parameter.valueScale,
+                  format: parameter.displayFormat,
+                  significantFigures: parameter.displaySignificantFigures,
+                },
+              ),
       },
     ]),
   ) as Record<string, { label: string; value: string }>;

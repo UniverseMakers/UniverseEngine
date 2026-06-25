@@ -29,27 +29,20 @@ planetary:
     redHigh: Far too high.  This impact drove the planet to spin super fast, with massive amounts of material flying around in orbit.
 
 galaxy:
-  stellar_mass:
-    greenLow: Very close.  Your galaxy built just a fraction fewer stars than the Milky Way.
-    greenHigh: Very close.  Your galaxy built just a fraction more stars than the Milky Way.
-    amberLow: A bit low.  Your galaxy made fewer stars than the Milky Way, so it would look smaller and dimmer in the sky.
-    amberHigh: A bit high.  Your galaxy made more stars than the Milky Way, so it would be a brighter, busier place.
-    redLow: Far too low.  This galaxy is a shadow of the Milky Way — far fewer stars than the real thing.
-    redHigh: Far too high.  This galaxy is absolutely bursting with stars, far more than the Milky Way.
-  black_hole_mass:
-    greenLow: Very close.  The black hole at the centre is just a fraction lighter than the one in the Milky Way.
-    greenHigh: Very close.  The black hole at the centre is just a fraction heavier than the one in the Milky Way.
-    amberLow: A bit low.  Your central black hole is smaller than the Milky Way's — it's still hungry.
-    amberHigh: A bit high.  Your central black hole is bigger than the Milky Way's — it's been feasting.
-    redLow: Far too low.  The supermassive black hole at your galaxy's heart is surprisingly small.
-    redHigh: Far too high.  The central black hole is enormous — far larger than the Milky Way's Sagittarius A*.
-  galaxy_age:
-    greenLow: Very close.  The stars in your galaxy are just a touch younger, on average, than the Milky Way's.
-    greenHigh: Very close.  The stars in your galaxy are just a touch older, on average, than the Milky Way's.
-    amberLow: A bit young.  Most of the stars in your galaxy formed later than in the Milky Way.
-    amberHigh: A bit old.  Most of the stars in your galaxy formed earlier than in the Milky Way.
-    redLow: Far too young.  Your galaxy is dominated by freshly-minted stars — it's practically a newborn.
-    redHigh: Far too old.  Your galaxy is full of ancient stars that formed very early on.
+  crowding:
+    greenLow: Very close.  Your galaxy lives in a neighbourhood just a little sparser than the Milky Way's.
+    greenHigh: Very close.  Your galaxy lives in a neighbourhood just a little busier than the Milky Way's.
+    amberLow: A bit sparse.  Your galaxy has fewer neighbours than the Milky Way — it may not experience many mergers.
+    amberHigh: A bit crowded.  Your galaxy has more neighbours than the Milky Way — it may experience more frequent interactions.
+    redLow: Far too sparse.  Your galaxy is almost completely isolated — it will have very few encounters with other galaxies.
+    redHigh: Far too crowded.  Your galaxy is in an extremely dense environment — it will be constantly interacting with other galaxies.
+  mass_rank:
+    greenLow: Very close.  Your galaxy is just a touch dimmer, on average, than the Milky Way.
+    greenHigh: Very close.  Your galaxy is just a touch brighter, on average, than the Milky Way.
+    amberLow: A bit dim.  Your galaxy is noticeably fainter than the Milky Way — it probably has fewer stars.
+    amberHigh: A bit bright.  Your galaxy is noticeably more luminous than the Milky Way — it likely has more stars.
+    redLow: Far too dim.  Your galaxy is unusually faint — it may be a small dwarf galaxy.
+    redHigh: Far too bright.  Your galaxy is exceptionally luminous — it rivals the brightest galaxies in the Universe.
 
 cosmos:
   stellar_fraction:
