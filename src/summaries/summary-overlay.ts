@@ -778,7 +778,7 @@ export function createSummaryOverlay(
           const descPanel = document.createElement('div');
 
           descPanel.className = 'sci-section panel';
-          descPanel.style.cssText = 'flex:0 1 auto; min-height:0; overflow-y:auto;';
+          descPanel.style.cssText = 'flex:0 1 auto; min-width:0;';
 
           const descHeading = document.createElement('p');
 
