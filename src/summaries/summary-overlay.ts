@@ -720,11 +720,55 @@ export function createSummaryOverlay(
 
         bottomRow.className = 'sci-bottom-row';
 
-        bottomRow.appendChild(buildParamSection(simClass, values));
+        const leftColumn = document.createElement('div');
+
+        leftColumn.style.cssText = 'display:flex; flex-direction:column; gap:1.25rem;';
+
+        leftColumn.appendChild(
+          buildParamSection(simClass, values),
+        );
+
+        const morphologyLabel =
+          checklist.find((item) => item.id === (currentMorphology ?? '').toLowerCase())?.label ??
+          currentMorphology;
+
+        if (morphologyLabel) {
+          const morphPanel = document.createElement('div');
+
+          morphPanel.className = 'sci-section panel param-section';
+
+          const morphHeading = document.createElement('p');
+
+          morphHeading.className = 'sci-section__title';
+          morphHeading.textContent = 'Galaxy Morphology';
+
+          const morphCard = document.createElement('div');
+
+          morphCard.className = 'res-card res-card--has-info';
+
+          const morphValue = document.createElement('span');
+
+          morphValue.className = 'res-card__value';
+          morphValue.textContent = morphologyLabel;
+
+          morphCard.appendChild(morphValue);
+          morphCard.addEventListener('click', () =>
+            openCardModal(
+              'Galaxy Morphology',
+              checklist.find((item) => item.id === (currentMorphology ?? '').toLowerCase())?.description ??
+                `This galaxy is classified as "${morphologyLabel}".`,
+            ),
+          );
+          morphPanel.appendChild(morphHeading);
+          morphPanel.appendChild(morphCard);
+          leftColumn.appendChild(morphPanel);
+        }
+
+        bottomRow.appendChild(leftColumn);
 
         const rightColumn = document.createElement('div');
 
-        rightColumn.className = 'summary-side-column';
+        rightColumn.style.cssText = 'flex:1; display:flex; flex-direction:column; gap:1.25rem; min-width:0; min-height:0;';
 
         const descriptionText = runMetadata?.summaryMetrics?.description?.value ?? null;
 
@@ -732,6 +776,7 @@ export function createSummaryOverlay(
           const descPanel = document.createElement('div');
 
           descPanel.className = 'sci-section panel';
+          descPanel.style.cssText = 'flex:0 1 auto; min-height:0; overflow-y:auto;';
 
           const descHeading = document.createElement('p');
 
@@ -751,31 +796,17 @@ export function createSummaryOverlay(
         const huntPanel = document.createElement('div');
 
         huntPanel.className = 'sci-section panel';
+        huntPanel.style.cssText = 'flex:1; min-height:0;';
 
         const huntHeading = document.createElement('p');
 
         huntHeading.className = 'sci-section__title';
         huntHeading.textContent = 'Morphology Scavenger Hunt';
 
-        const huntRow = document.createElement('div');
-
-        huntRow.className = 'galaxy-summary__hunt-row';
-
-        const currentMorphologyLabel =
-          checklist.find((item) => item.id === (currentMorphology ?? '').toLowerCase())?.label ??
-          currentMorphology;
-
-        const currentOutput = document.createElement('div');
-
-        currentOutput.className = 'galaxy-summary__current';
-        currentOutput.innerHTML = `
-          <span class="galaxy-summary__current-label">This galaxy</span>
-          <span class="galaxy-summary__current-value">${currentMorphologyLabel ?? '--'}</span>
-        `;
-
         const huntGrid = document.createElement('div');
 
         huntGrid.className = 'galaxy-summary__checklist';
+        huntGrid.style.cssText = 'flex:1; align-items:center;';
 
         const allFound = foundMorphologies.size >= checklist.length;
 
@@ -796,11 +827,8 @@ export function createSummaryOverlay(
           huntGrid.appendChild(box);
         }
 
-        huntRow.appendChild(currentOutput);
-        huntRow.appendChild(huntGrid);
-
         huntPanel.appendChild(huntHeading);
-        huntPanel.appendChild(huntRow);
+        huntPanel.appendChild(huntGrid);
 
         if (allFound) {
           huntCompleteAtClose = true;

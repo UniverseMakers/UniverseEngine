@@ -142,10 +142,13 @@ galaxy:
   morphologyChecklist:
     - id: spiral
       label: Spiral
+      description: A rotating disc of stars with graceful spiral arms winding outward from a bright centre.  The Milky Way is a spiral galaxy, and so are most of the large galaxies in our local Universe.
     - id: elliptical
       label: Elliptical
+      description: A smooth, rounded ball of stars with very little gas or dust.  Elliptical galaxies are often the result of major mergers between two or more galaxies, and they contain mostly older, redder stars.
     - id: irregular
       label: Irregular
+      description: A galaxy with no clear shape — no spiral arms, no smooth oval.  Irregular galaxies are often smaller, chaotic systems that have been disturbed by interactions, or are still in the early stages of assembling themselves.
 
 cosmos:
   resources:

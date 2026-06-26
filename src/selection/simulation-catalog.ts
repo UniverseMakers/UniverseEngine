@@ -38,6 +38,7 @@ export interface SimParameter {
 export interface MorphologyChecklistItem {
   id: string;
   label: string;
+  description?: string;
 }
 
 export interface SimulationMetadata {
