@@ -17,6 +17,7 @@ planetary:
     min: 0.05
     max: 0.35
     step: 0.01
+    primary: false
   impactor_velocity:
     label: Impact Speed
     description: How fast was the impactor travelling when it hit?  Faster collisions are more violent, ejecting more and hotter debris.
@@ -24,6 +25,7 @@ planetary:
     min: 8.5
     max: 30
     step: 0.1
+    primary: false
   impactor_angle:
     label: Impact Angle
     description: Was the impact head-on, or grazing at a high angle?  A direct hit blasts material straight out, while a sideswipe can spray the debris out into a disk, or even escape as a hit and run.
@@ -31,6 +33,7 @@ planetary:
     min: 0
     max: 65
     step: 1
+    primary: true
 
 galaxy:
   crowding:
@@ -44,6 +47,7 @@ galaxy:
     display_format: qualitative
     min: -0.5
     max: 3.5
+    primary: true
   mass_rank:
     label: Luminosity
     description: How bright is the galaxy you're making? Brighter galaxies usually have more stars, are bigger and are more massive.
@@ -57,6 +61,7 @@ galaxy:
     display_format: qualitative
     min: -0.5
     max: 5.5
+    primary: true
 
 cosmos:
   baryon_fraction:
@@ -67,6 +72,7 @@ cosmos:
     max: 4
     step: 0.01
     value_scale: 0.159
+    primary: true
   black_hole_strength:
     label: Black Hole Strength
     description: How powerfully do black holes push back?  As gas spirals inward it heats to millions of degrees.  Some of that energy blasts back out as fierce winds or jets, shutting down star formation across entire galaxies.
@@ -78,6 +84,7 @@ cosmos:
     display_format: compact
     display_significant_figures: 3
     log_scale: true
+    primary: true
   gravity_strength:
     label: Gravity
     description: What if gravity were stronger — or weaker?  Turn it up and the cosmic web forms faster, pulling galaxies into tighter clumps.  Turn it down and the Universe stays smoother and emptier for longer.
@@ -88,3 +95,4 @@ cosmos:
     value_scale: 9.81
     display_significant_figures: 2
     log_scale: true
+    primary: true

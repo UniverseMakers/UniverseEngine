@@ -268,20 +268,16 @@ async function findManifestBackedRun(
     return null;
   }
 
-  let bestEntry = runs[0];
-  let bestDistance = getEntryDistance(bestEntry, params, values);
+  const best = findBestEntry(runs, params, values);
 
-  for (const entry of runs.slice(1)) {
-    const distance = getEntryDistance(entry, params, values);
-
-    if (distance < bestDistance) {
-      bestEntry = entry;
-      bestDistance = distance;
-    }
+  if (!best) {
+    return null;
   }
 
-  const viewId = bestEntry.defaultView ?? Object.keys(bestEntry.views)[0];
-  const videoPath = bestEntry.views[viewId];
+  const bestDistance = getEntryDistance(best, params, values);
+
+  const viewId = best.defaultView ?? Object.keys(best.views)[0];
+  const videoPath = best.views[viewId];
 
   if (!videoPath) {
     return null;
@@ -290,7 +286,7 @@ async function findManifestBackedRun(
   logInfo('Selected manifest-backed run', {
     simClassId,
     source,
-    runId: bestEntry.runId,
+    runId: best.runId,
     selectedValues: values,
     distance: bestDistance,
     viewId,
@@ -298,12 +294,12 @@ async function findManifestBackedRun(
 
   return {
     url: resolveManifestAssetUrl(source, videoPath),
-    liveDataUrl: resolveManifestAssetUrl(source, bestEntry.liveDataPath),
-    summaryUrl: resolveManifestAssetUrl(source, bestEntry.summaryPath),
+    liveDataUrl: resolveManifestAssetUrl(source, best.liveDataPath),
+    summaryUrl: resolveManifestAssetUrl(source, best.summaryPath),
     viewId,
-    runId: bestEntry.runId,
+    runId: best.runId,
     views: Object.fromEntries(
-      Object.entries(bestEntry.views).map(([key, path]) => [key, resolveManifestAssetUrl(source, path)]),
+      Object.entries(best.views).map(([key, path]) => [key, resolveManifestAssetUrl(source, path)]),
     ),
   };
 }
@@ -337,12 +333,21 @@ function getEntryDistance(
   entry: RunManifestEntry,
   params: SimParameter[],
   values: Record<string, number>,
+  useParams?: Set<string>,
 ): number {
   if (params.length === 0) {
     return 0;
   }
 
-  const total = params.reduce((sum, parameter) => {
+  const filtered = useParams
+    ? params.filter((parameter) => useParams.has(parameter.id))
+    : params;
+
+  if (filtered.length === 0) {
+    return 0;
+  }
+
+  const total = filtered.reduce((sum, parameter) => {
     const selected = values[parameter.id] ?? parameter.fallbackValue;
     const candidate = entry.parameters?.[parameter.id] ?? parameter.fallbackValue;
     const range = Math.max(parameter.max - parameter.min, 1e-9);
@@ -350,5 +355,79 @@ function getEntryDistance(
     return sum + Math.abs(selected - candidate) / range;
   }, 0);
 
-  return total / params.length;
+  return total / filtered.length;
+}
+
+function findBestEntry(
+  runs: RunManifestEntry[],
+  params: SimParameter[],
+  values: Record<string, number>,
+): RunManifestEntry | null {
+  if (runs.length === 0) {
+    return null;
+  }
+
+  const primaryIds = new Set(
+    params.filter((p) => p.primary !== false).map((p) => p.id),
+  );
+  const hasNonPrimary = params.some((p) => p.primary === false);
+
+  // Single-stage search when every parameter is primary.
+  if (!hasNonPrimary) {
+    return findClosest(runs, params, values);
+  }
+
+  // Two-stage: find the best primary-axis distance first, then refine
+  // among all candidates that are within a tiny tolerance of that best
+  // primary distance.
+  const bestPrimary = findClosest(runs, params, values, primaryIds);
+
+  if (!bestPrimary) {
+    return null;
+  }
+
+  const bestPrimaryDistance = getEntryDistance(
+    bestPrimary,
+    params,
+    values,
+    primaryIds,
+  );
+
+  // Tolerance avoids excluding runs with identical primary-axis scores
+  // due to floating-point noise.
+  const primaryTolerance = 1e-6;
+  const candidates = runs.filter((entry) => {
+    const distance = getEntryDistance(entry, params, values, primaryIds);
+
+    return Math.abs(distance - bestPrimaryDistance) <= primaryTolerance;
+  });
+
+  // Among the candidates that are equally good on primary axes,
+  // pick the one closest on all parameters.
+  return findClosest(candidates, params, values);
+}
+
+function findClosest(
+  runs: RunManifestEntry[],
+  params: SimParameter[],
+  values: Record<string, number>,
+  useParams?: Set<string>,
+): RunManifestEntry | null {
+  if (runs.length === 0) {
+    return null;
+  }
+
+  let bestEntry = runs[0];
+  let bestDistance = getEntryDistance(bestEntry, params, values, useParams);
+
+  for (const entry of runs.slice(1)) {
+    const distance = getEntryDistance(entry, params, values, useParams);
+
+    if (distance < bestDistance) {
+      bestEntry = entry;
+      bestDistance = distance;
+    }
+  }
+
+  return bestEntry;
 }

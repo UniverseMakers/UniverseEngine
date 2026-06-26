@@ -33,6 +33,8 @@ export interface SimParameter {
   logScale?: boolean;
   /** Ordered qualitative labels shown instead of numeric values on the slider. */
   qualiLabels?: string[];
+  /** When false, this parameter is deprioritised in nearest-run matching. */
+  primary?: boolean;
 }
 
 export interface MorphologyChecklistItem {
@@ -125,6 +127,7 @@ interface RawParameterConfig {
   display_significant_figures?: number;
   log_scale?: boolean;
   quali_labels?: string[];
+  primary?: boolean;
 }
 
 interface RawStatsConfig {
@@ -233,6 +236,7 @@ export const SIMULATION_CLASSES: SimulationClass[] = Object.entries(catalog).map
           displaySignificantFigures: parameter.display_significant_figures,
           logScale: parameter.log_scale,
           qualiLabels: quali,
+          primary: parameter.primary ?? true,
         };
       }),
       views: (entry.views ?? []).map((view) => ({
