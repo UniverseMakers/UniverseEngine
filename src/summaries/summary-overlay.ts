@@ -848,7 +848,7 @@ export function createSummaryOverlay(
 
           doneBanner.className = 'galaxy-summary__done';
           doneBanner.textContent =
-            "\u2605 Well done! You've discovered all the galaxy types! \u2605";
+            "\u2605 You've discovered all of the galaxy types. Well done! \u2605";
           huntPanel.appendChild(doneBanner);
         }
 
