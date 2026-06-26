@@ -141,6 +141,7 @@ export function createAppShell(app: HTMLElement): void {
   let audioMuted = advancedSettings.audioMutedByDefault;
   let audioVolume = advancedSettings.defaultAudioVolume;
   let audioProbeNonce = 0;
+  const knownAvailableAudioUrls = new Set<string>();
 
   // Manifest-backed run selection for the currently loaded simulation.
   let activeRunMatch: VideoMatch | null = null;
@@ -1812,6 +1813,14 @@ export function createAppShell(app: HTMLElement): void {
     runRequestId: number,
   ): Promise<void> {
     const audioUrl = getRunAudioUrl(summaryUrl);
+    const resolvedAudioUrl = resolveOnlineAssetUrl(audioUrl);
+
+    if (knownAvailableAudioUrls.has(resolvedAudioUrl)) {
+      activateRunAudio(resolvedAudioUrl);
+
+      return;
+    }
+
     const probeNonce = ++audioProbeNonce;
     const available = await doesAudioTrackExist(audioUrl);
 
@@ -1825,7 +1834,12 @@ export function createAppShell(app: HTMLElement): void {
       return;
     }
 
-    activeAudioUrl = resolveOnlineAssetUrl(audioUrl);
+    knownAvailableAudioUrls.add(resolvedAudioUrl);
+    activateRunAudio(resolvedAudioUrl);
+  }
+
+  function activateRunAudio(resolvedAudioUrl: string): void {
+    activeAudioUrl = resolvedAudioUrl;
     activeAudioAvailable = true;
 
     if (runAudio.src !== activeAudioUrl) {
