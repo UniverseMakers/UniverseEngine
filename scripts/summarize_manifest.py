@@ -1,9 +1,14 @@
 #!/usr/bin/env python3
-"""Print a readable summary of a run manifest.
+"""Print a readable summary of a run manifest and optionally generate plots.
 
 Usage:
 
     python3 scripts/summarize_manifest.py public/assets/local-manifest.json
+    python3 scripts/summarize_manifest.py public/assets/local-manifest.json --plots plots/
+
+The ``--plots`` flag produces one sub-directory per simulation family containing:
+  - ``histograms.png``  — one histogram per parameter, side-by-side.
+  - ``scatter.png``     — pairwise scatter matrix (corner plot) of all parameters.
 """
 
 from __future__ import annotations
@@ -14,10 +19,21 @@ from collections import Counter, defaultdict
 from pathlib import Path
 from typing import Any
 
+import yaml
+
+REPO_ROOT = Path(__file__).resolve().parent.parent
+PARAM_INFO_PATH = REPO_ROOT / "src" / "selection" / "parameter-info.yaml"
+
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("manifest", type=Path, help="Path to manifest JSON file")
+    parser.add_argument(
+        "--plots",
+        type=Path,
+        default=None,
+        help="Directory to write summary plots into.",
+    )
     return parser.parse_args()
 
 
@@ -30,6 +46,8 @@ def main() -> None:
     if not isinstance(runs, list):
         raise SystemExit("Manifest 'runs' field must be a list")
 
+    param_limits = load_param_limits()
+
     scale_counts: Counter[str] = Counter()
     video_counts_by_scale: Counter[str] = Counter()
     video_counts_by_type: Counter[str] = Counter()
@@ -38,6 +56,10 @@ def main() -> None:
     parameter_counts: Counter[int] = Counter()
     runs_missing_default_view = 0
     duplicate_run_ids: Counter[str] = Counter()
+    params_by_scale: dict[str, dict[str, list[float]]] = defaultdict(
+        lambda: defaultdict(list),
+    )
+    range_violations: list[tuple[str, str, str, float, float, float]] = []
 
     total_videos = 0
 
@@ -56,6 +78,17 @@ def main() -> None:
 
         if isinstance(parameters, dict):
             parameter_counts[len(parameters)] += 1
+            limits = param_limits.get(simulation_id, {})
+            for key, value in parameters.items():
+                if isinstance(value, (int, float)):
+                    params_by_scale[simulation_id][key].append(float(value))
+                    param_range = limits.get(key)
+                    if param_range:
+                        min_val, max_val = param_range
+                        if value < min_val or value > max_val:
+                            range_violations.append(
+                                (simulation_id, run_id, key, value, min_val, max_val),
+                            )
 
         if not isinstance(views, dict):
             continue
@@ -74,7 +107,7 @@ def main() -> None:
             runs_missing_default_view += 1
 
     duplicate_run_ids = Counter(
-        {run_id: count for run_id, count in duplicate_run_ids.items() if count > 1}
+        {run_id: count for run_id, count in duplicate_run_ids.items() if count > 1},
     )
 
     print(f"Manifest: {manifest_path}")
@@ -119,6 +152,18 @@ def main() -> None:
         for run_id, count in sorted(duplicate_run_ids.items()):
             print(f"- {run_id}: {count} entries")
 
+    if range_violations:
+        print()
+        print(f"PARAMETER RANGE VIOLATIONS ({len(range_violations)} found)")
+        print("  These parameters lie outside the limits defined in parameter-info.yaml:")
+        print()
+        for scale, run_id, param, value, min_val, max_val in range_violations:
+            direction = "below" if value < min_val else "above"
+            print(f"  {scale}/{run_id}  {param}={value}  ({direction} [{min_val}, {max_val}])")
+
+    if args.plots:
+        generate_plots(args.plots, params_by_scale)
+
 
 def load_manifest(path: Path) -> dict[str, Any]:
     if not path.exists():
@@ -131,6 +176,137 @@ def load_manifest(path: Path) -> dict[str, Any]:
         raise SystemExit("Manifest root must be a JSON object")
 
     return data
+
+
+def load_param_limits() -> dict[str, dict[str, tuple[float, float]]]:
+    """Parse parameter-info.yaml and return {scale: {param_id: (min, max)}}."""
+    if not PARAM_INFO_PATH.exists():
+        print(f"Warning: {PARAM_INFO_PATH} not found — skipping range checks")
+        return {}
+
+    raw = yaml.safe_load(PARAM_INFO_PATH.read_text(encoding="utf-8"))
+    limits: dict[str, dict[str, tuple[float, float]]] = {}
+
+    for scale, params in raw.items():
+        if not isinstance(params, dict):
+            continue
+        scale_limits: dict[str, tuple[float, float]] = {}
+        for param_id, param_def in params.items():
+            if not isinstance(param_def, dict):
+                continue
+            if "min" in param_def and "max" in param_def:
+                scale_limits[param_id] = (
+                    float(param_def["min"]),
+                    float(param_def["max"]),
+                )
+        if scale_limits:
+            limits[scale] = scale_limits
+
+    return limits
+
+
+def generate_plots(
+    out_dir: Path,
+    params_by_scale: dict[str, dict[str, list[float]]],
+) -> None:
+    """Write histogram and scatter plots for each simulation family."""
+    try:
+        import matplotlib.pyplot as plt  # noqa: F811
+    except ImportError:
+        raise SystemExit(
+            "matplotlib is required for plot generation.  "
+            "Install it with: pip install matplotlib",
+        )
+
+    out_dir.mkdir(parents=True, exist_ok=True)
+
+    for scale, param_map in sorted(params_by_scale.items()):
+        if not param_map:
+            continue
+
+        param_names = sorted(param_map.keys())
+        scale_dir = out_dir / scale
+        scale_dir.mkdir(parents=True, exist_ok=True)
+
+        # ── Histograms ──────────────────────────────────────────────────
+        cols = min(len(param_names), 3)
+        rows = (len(param_names) + cols - 1) // cols
+        fig, axes = plt.subplots(
+            rows,
+            cols,
+            figsize=(cols * 4.5, rows * 3.5),
+            squeeze=False,
+        )
+
+        for idx, name in enumerate(param_names):
+            ax = axes[idx // cols][idx % cols]
+            values = param_map[name]
+            ax.hist(values, bins=min(len(set(values)), 20), edgecolor="white", alpha=0.75)
+            ax.set_title(name.replace("_", " ").title(), fontsize=11)
+            ax.set_xlabel("Value")
+            ax.set_ylabel("Count")
+
+        # Hide unused subplot slots.
+        for idx in range(len(param_names), rows * cols):
+            axes[idx // cols][idx % cols].set_visible(False)
+
+        fig.suptitle(f"{scale.title()} — Parameter Histograms", fontsize=13, y=1.02)
+        fig.tight_layout()
+        hist_path = scale_dir / "histograms.png"
+        fig.savefig(hist_path, dpi=120, bbox_inches="tight")
+        plt.close(fig)
+        print(f"  wrote {hist_path}")
+
+        # ── Scatter matrix (corner plot) ────────────────────────────────
+        if len(param_names) < 2:
+            continue
+
+        n = len(param_names)
+        fig, axes = plt.subplots(
+            n,
+            n,
+            figsize=(n * 3.5, n * 3.5),
+            squeeze=False,
+        )
+
+        for row in range(n):
+            for col in range(n):
+                ax = axes[row][col]
+                ax.tick_params(labelsize=7)
+
+                if col > row:
+                    ax.set_visible(False)
+                elif col == row:
+                    # Diagonal: histogram of single parameter.
+                    values = param_map[param_names[row]]
+                    ax.hist(
+                        values,
+                        bins=min(len(set(values)), 15),
+                        edgecolor="white",
+                        alpha=0.75,
+                    )
+                    if row == n - 1:
+                        ax.set_xlabel(param_names[row].replace("_", " ").title(), fontsize=8)
+                else:
+                    # Lower triangle: scatter of param[col] vs param[row].
+                    x_vals = param_map[param_names[col]]
+                    y_vals = param_map[param_names[row]]
+                    ax.scatter(x_vals, y_vals, s=12, alpha=0.6, edgecolors="none")
+                    if row == n - 1:
+                        ax.set_xlabel(param_names[col].replace("_", " ").title(), fontsize=8)
+                    if col == 0:
+                        ax.set_ylabel(param_names[row].replace("_", " ").title(), fontsize=8)
+
+        fig.suptitle(
+            f"{scale.title()} — Parameter Scatter Matrix",
+            fontsize=13,
+            y=1.02,
+        )
+        fig.tight_layout()
+        scatter_path = scale_dir / "scatter.png"
+        fig.savefig(scatter_path, dpi=120, bbox_inches="tight")
+        plt.close(fig)
+        print(f"  wrote {scatter_path}")
 
 
 if __name__ == "__main__":
