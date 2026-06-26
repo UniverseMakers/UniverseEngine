@@ -62,10 +62,11 @@ galaxy:
       live_key: StellarMassWithinR200_Msun
     - id: stellar_size
       value: 0.0
-      unit: kpc
+      unit: ly
       label: Stellar Size
       live: true
       live_key: StellarHalfMassRadius_kpc
+      value_scale: 3261.56
     - id: black_hole_mass
       value: '0'
       unit: Msun
