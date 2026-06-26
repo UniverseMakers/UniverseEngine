@@ -2837,12 +2837,6 @@ button {
     transform: none;
   }
 
-  .display-chrome__top-right {
-    top: 1rem;
-    right: 1.25rem;
-    bottom: auto;
-  }
-
   .display-chrome__center-status {
     display: grid;
     place-items: center;
@@ -2928,7 +2922,7 @@ button {
   }
 
   .display-chrome__top-right {
-    top: 1.6rem;
+    top: 4rem;
     right: 1.25rem;
     bottom: auto;
   }
