@@ -35,13 +35,17 @@ import sys
 import time
 from pathlib import Path
 from typing import Any
-from urllib.parse import urlparse
-from urllib.request import urlopen
+from urllib.parse import urljoin, urlparse
+from urllib.request import Request, urlopen
 
 
 PUBLIC_ASSETS = Path("public/assets")
 DEFAULT_MANIFEST = PUBLIC_ASSETS / "run-manifest.json"
 CHUNK_SIZE = 8 * 1024 * 1024  # 8 MiB
+DEFAULT_HTTP_HEADERS = {
+    "User-Agent": "UniverseEngineAssetDownloader/1.0 (+https://github.com/UniverseMakers)",
+    "Accept": "*/*",
+}
 
 
 def parse_args() -> argparse.Namespace:
@@ -68,6 +72,11 @@ def parse_args() -> argparse.Namespace:
         action="store_true",
         help="Print what would be downloaded without touching disk",
     )
+    parser.add_argument(
+        "--max-runs",
+        type=int,
+        help="Only include the first N matching runs (useful for testing)",
+    )
     return parser.parse_args()
 
 
@@ -88,10 +97,14 @@ def run_output_path(entry: dict[str, Any], assets_dir: Path) -> Path:
 
 
 def collect_downloads(
-    manifest: dict[str, Any], simulation: str | None, assets_dir: Path
+    manifest: dict[str, Any], simulation: str | None, assets_dir: Path, max_runs: int | None
 ) -> list[dict[str, str]]:
     """Build an ordered list of {url, dest_path} download tasks."""
     tasks: list[dict[str, str]] = []
+    primary_base = normalize_base_url(manifest.get("primaryBase"))
+    backup_base = normalize_base_url(manifest.get("backupBase"))
+
+    matched_runs = 0
 
     for entry in manifest["runs"]:
         sim = entry.get("simulationId", "")
@@ -102,13 +115,18 @@ def collect_downloads(
         if not run:
             continue
 
+        matched_runs += 1
+        if max_runs is not None and matched_runs > max_runs:
+            break
+
         base = run_output_path(entry, assets_dir)
 
         # ── summary YAML ───────────────────────────────────────────────
         summary_url = entry.get("summaryPath", "")
         if summary_url:
             tasks.append({
-                "url": summary_url,
+                "url": resolve_asset_url(summary_url, primary_base),
+                "backup_url": resolve_asset_url(summary_url, backup_base),
                 "dest": str(base / "run_summary.yaml"),
             })
 
@@ -116,7 +134,8 @@ def collect_downloads(
         live_url = entry.get("liveDataPath", "")
         if live_url:
             tasks.append({
-                "url": live_url,
+                "url": resolve_asset_url(live_url, primary_base),
+                "backup_url": resolve_asset_url(live_url, backup_base),
                 "dest": str(base / "live_data_table.csv"),
             })
 
@@ -124,7 +143,8 @@ def collect_downloads(
         params_url = entry.get("paramsPath", "")
         if params_url:
             tasks.append({
-                "url": params_url,
+                "url": resolve_asset_url(params_url, primary_base),
+                "backup_url": resolve_asset_url(params_url, backup_base),
                 "dest": str(base / "parameters.yaml"),
             })
 
@@ -132,11 +152,27 @@ def collect_downloads(
         for view_id, video_url in entry.get("views", {}).items():
             filename = urlparse(video_url).path.rsplit("/", 1)[-1]
             tasks.append({
-                "url": video_url,
+                "url": resolve_asset_url(video_url, primary_base),
+                "backup_url": resolve_asset_url(video_url, backup_base),
                 "dest": str(base / "animations" / filename),
             })
 
     return tasks
+
+
+def normalize_base_url(value: Any) -> str | None:
+    if not isinstance(value, str) or not value:
+        return None
+    return value.rstrip("/") + "/"
+
+
+def resolve_asset_url(path_or_url: str, primary_base: str | None) -> str:
+    parsed = urlparse(path_or_url)
+    if parsed.scheme and parsed.netloc:
+        return path_or_url
+    if path_or_url.startswith("/") and primary_base:
+        return urljoin(primary_base, path_or_url.lstrip("/"))
+    return path_or_url
 
 
 def format_size(num_bytes: int) -> str:
@@ -148,7 +184,7 @@ def format_size(num_bytes: int) -> str:
     return f"{num_bytes:.1f} TB"
 
 
-def download_file(url: str, dest: str, dry_run: bool) -> bool:
+def download_file(url: str, dest: str, dry_run: bool, backup_url: str | None = None) -> bool:
     """Download one file.  Returns True on success (or dry-run)."""
     dest_path = Path(dest)
     dest_path.parent.mkdir(parents=True, exist_ok=True)
@@ -161,31 +197,44 @@ def download_file(url: str, dest: str, dry_run: bool) -> bool:
     if dest_path.exists() and dest_path.stat().st_size > 0:
         return True
 
-    try:
-        with urlopen(url) as response:
-            length = response.headers.get("Content-Length")
-            total = int(length) if length else None
-            downloaded = 0
-            start = time.monotonic()
+    candidates = [url]
+    if backup_url and backup_url != url:
+        candidates.append(backup_url)
 
-            with dest_path.open("wb") as out:
-                while True:
-                    chunk = response.read(CHUNK_SIZE)
-                    if not chunk:
-                        break
-                    out.write(chunk)
-                    downloaded += len(chunk)
+    for index, candidate in enumerate(candidates):
+        try:
+            request = Request(candidate, headers=DEFAULT_HTTP_HEADERS)
+            with urlopen(request) as response:
+                length = response.headers.get("Content-Length")
+                total = int(length) if length else None
+                downloaded = 0
+                start = time.monotonic()
 
-            elapsed = time.monotonic() - start
-            rate = (downloaded / elapsed / 1_048_576) if elapsed > 0 else 0
-            msg = f"  {format_size(downloaded)}"
-            if total and total > 0:
-                msg += f" / {format_size(total)}"
-            print(f"{msg}  {rate:.0f} MiB/s  {url.rsplit('/', 1)[-1]}")
-            return True
-    except Exception as exc:
-        print(f"  FAILED  {url}  ({exc})", file=sys.stderr)
-        return False
+                with dest_path.open("wb") as out:
+                    while True:
+                        chunk = response.read(CHUNK_SIZE)
+                        if not chunk:
+                            break
+                        out.write(chunk)
+                        downloaded += len(chunk)
+
+                elapsed = time.monotonic() - start
+                rate = (downloaded / elapsed / 1_048_576) if elapsed > 0 else 0
+                msg = f"  {format_size(downloaded)}"
+                if total and total > 0:
+                    msg += f" / {format_size(total)}"
+                suffix = " (backup)" if index > 0 else ""
+                print(f"{msg}  {rate:.0f} MiB/s  {candidate.rsplit('/', 1)[-1]}{suffix}")
+                return True
+        except Exception as exc:
+            if index == len(candidates) - 1:
+                print(f"  FAILED  {candidate}  ({exc})", file=sys.stderr)
+                if dest_path.exists() and dest_path.stat().st_size == 0:
+                    dest_path.unlink(missing_ok=True)
+                return False
+            continue
+
+    return False
 
 
 def main() -> None:
@@ -193,7 +242,10 @@ def main() -> None:
     manifest = load_manifest(args.manifest.expanduser().resolve())
     assets_dir = args.assets_dir.expanduser().resolve()
 
-    tasks = collect_downloads(manifest, args.simulation, assets_dir)
+    if args.max_runs is not None and args.max_runs <= 0:
+        raise SystemExit("--max-runs must be a positive integer")
+
+    tasks = collect_downloads(manifest, args.simulation, assets_dir, args.max_runs)
 
     if not tasks:
         sim_msg = f" for '{args.simulation}'" if args.simulation else ""
@@ -210,7 +262,12 @@ def main() -> None:
     failed = 0
 
     for task in tasks:
-        ok = download_file(task["url"], task["dest"], args.dry_run)
+        ok = download_file(
+            task["url"],
+            task["dest"],
+            args.dry_run,
+            task.get("backup_url"),
+        )
         if ok:
             succeeded += 1
         else:
