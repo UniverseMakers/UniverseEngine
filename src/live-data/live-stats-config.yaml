@@ -78,12 +78,6 @@ galaxy:
       label: SFR
       live: true
       live_key: StarFormationRateWithinR200_Msun_per_yr
-    - id: galaxy_age
-      value: 0.0
-      unit: yrs
-      label: Mass-Weighted Age
-      live: true
-      live_key: StellarMassWeightedAge_yr
 
 cosmos:
   liveStats:
