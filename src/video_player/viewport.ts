@@ -527,9 +527,7 @@ export function createViewport(
   }
 
   function captureFrame(): string | null {
-    if (!lastFrameDataUrl) {
-      storeCurrentFrame();
-    }
+    storeCurrentFrame();
 
     return lastFrameDataUrl;
   }

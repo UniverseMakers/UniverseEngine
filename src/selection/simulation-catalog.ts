@@ -41,6 +41,7 @@ export interface MorphologyChecklistItem {
   id: string;
   label: string;
   description?: string;
+  hint?: string;
 }
 
 export interface SimulationMetadata {

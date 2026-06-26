@@ -826,15 +826,12 @@ export function createSummaryOverlay(
             </span>
             <span class="galaxy-summary__check-label">${item.label}</span>
           `;
-	  if (item.hint) {
+          if (item.hint) {
             box.classList.add('res-card--has-info');
-	    box.addEventListener('click', () =>
-              openCardModal(
-                item.label,
-                item.hint,
-              ),
+            box.addEventListener('click', () =>
+              openCardModal(item.label, item.hint!),
             );
-	  }
+          }
           huntGrid.appendChild(box);
         }
 
