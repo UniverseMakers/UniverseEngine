@@ -222,8 +222,18 @@ export function createAppShell(app: HTMLElement): void {
       height="169"
       decoding="async"
     />
+    <img
+      class="swift-logo__image-compact"
+      src="${withBaseUrl('assets/credits/swift-logo-compact.webp')}"
+      alt="SWIFT"
+      width="478"
+      height="169"
+      decoding="async"
+    />
   `;
   app.appendChild(swiftLogo);
+  
+  const swiftLogoCompact = document.createElement('div');
 
   // Synthesizer logo – shown only for the galaxy family's HST tab.
   const synthLogo = document.createElement('div');
@@ -233,6 +243,12 @@ export function createAppShell(app: HTMLElement): void {
     <img
       class="synth-logo__image"
       src="${withBaseUrl('assets/credits/synthesizer_banner.webp')}"
+      alt="Synthesizer"
+      decoding="async"
+    />
+    <img
+      class="synth-logo__image-compact"
+      src="${withBaseUrl('assets/credits/synthesizer_banner_compact.webp')}"
       alt="Synthesizer"
       decoding="async"
     />
