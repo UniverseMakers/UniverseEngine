@@ -168,6 +168,13 @@ function createViewIcon(iconId?: string): SVGSVGElement | null {
         <path d="M13.1 13.5 16.4 16.9"></path>
         <path d="M8.8 17.2 16.2 17.8"></path>
       `);
+    case 'line-trace':
+      return createSvg(`
+        <path d="M3.5 14.5h3l2.2-5 2.8 9 2.4-6 1.8 2.5H20.5"></path>
+        <path d="M3.5 19.5h17"></path>
+        <circle cx="8.7" cy="9.5" r="0.9" fill="currentColor" stroke="none"></circle>
+        <circle cx="11.5" cy="18.5" r="0.9" fill="currentColor" stroke="none"></circle>
+      `);
     default:
       return null;
   }

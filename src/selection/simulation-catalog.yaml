@@ -30,6 +30,11 @@ galaxy:
       icon: large-scale-structure
       audio: true
       description: Zoom out to see the grand architecture of your galaxy — vast streams of gas funnelling in to sustain the galaxy's star formation along the hidden skeleton of dark matter that holds everything together.
+    - id: line_trace
+      label: Line Trace
+      icon: line-trace
+      audio: true
+      description: The sounds you are hearing denote different processes. This tab allows you to follow the sonification as it happens.  The harp-like notes denote the intensity of star formation, the wind-like sound maps to energy flowing out of the galaxy, and the Geiger-counter clicks indicate periods of strong supermassive black hole accretion.
 
 cosmos:
   label: Cosmos
