@@ -20,7 +20,7 @@
  *
  * 1. **Primary stage** — find every run that is closest on the primary axes.
  * 2. **Refinement stage** — among those candidates, pick the run closest on
- *    all parameters (primary + non-primary).
+ *    non-primary parameters only.
  *
  * When every parameter is primary the algorithm degrades to a single-pass
  * Euclidean search, which is identical to the original behaviour.
@@ -94,8 +94,8 @@ export function getEntryDistance(
  *
  * When at least one parameter has ``primary: false`` the search first
  * narrows to runs that are equally close on primary parameters only,
- * then picks the best among them on all parameters.  When every parameter
- * is primary the search is a single-pass Euclidean scan.
+ * then picks the best among them on non-primary parameters only.  When every
+ * parameter is primary the search is a single-pass Euclidean scan.
  *
  * @param runs   - Available run entries.
  * @param params - Parameter schemas.
@@ -113,6 +113,9 @@ export function findBestEntry(
 
   const primaryIds = new Set(
     params.filter((p) => p.primary !== false).map((p) => p.id),
+  );
+  const secondaryIds = new Set(
+    params.filter((p) => p.primary === false).map((p) => p.id),
   );
   const hasNonPrimary = params.some((p) => p.primary === false);
 
@@ -147,8 +150,8 @@ export function findBestEntry(
   });
 
   // Among the candidates that are equally good on primary axes,
-  // pick the one closest on all parameters.
-  return findClosest(candidates, params, values);
+  // pick the one closest on non-primary axes only.
+  return findClosest(candidates, params, values, secondaryIds);
 }
 
 /**
