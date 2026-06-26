@@ -22,7 +22,7 @@ planetary:
     label: Impact Speed
     description: How fast was the impactor travelling when it hit?  Faster collisions are more violent, ejecting more and hotter debris.
     unit: km/s
-    min: 8.5
+    min: 6.7
     max: 30
     step: 0.1
     primary: false
@@ -51,7 +51,7 @@ galaxy:
   mass_rank:
     label: Luminosity
     description: How bright is the galaxy you're making? Brighter galaxies usually have more stars, are bigger and are more massive.
-    quali_labels: 
+    quali_labels:
       - faintest
       - fainter
       - faint
