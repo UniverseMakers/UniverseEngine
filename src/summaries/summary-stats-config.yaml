@@ -126,8 +126,9 @@ galaxy:
     - id: stellar_size_kpc
       label: Stellar size
       value: '--'
-      unit: kpc
-      display_format: float
+      unit: ly
+      value_scale: 3261.56
+      display_format: compact
       precision: 2
       description: The size of your galaxy's star-lit disc from one edge to the other.
     - id: galaxy_age
