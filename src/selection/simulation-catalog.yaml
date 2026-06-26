@@ -25,6 +25,10 @@ galaxy:
       icon: hubble-space-telescope
       audio: true
       description: See your galaxy as the Hubble Space Telescope would — a luminous swirl of billions of stars.  Brighter regions trace where the most stars were born while dark lanes mark the dust (complex molecules and tiny grains) that blocks starlight.
+    - id: turntable
+      label: 360 View
+      icon: turntable
+      description: A rotating view of the galaxy at the present day, showing the final state you created from every angle.
     - id: sph_plus_hst
       label: Large Scale Structure
       icon: large-scale-structure

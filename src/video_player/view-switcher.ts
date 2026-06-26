@@ -155,6 +155,15 @@ function createViewIcon(iconId?: string): SVGSVGElement | null {
         <path d="M14.9 16 17 19.5"></path>
         <path d="M6.3 19.5h11.4"></path>
       `);
+    case 'turntable':
+      return createSvg(`
+        <ellipse cx="12" cy="17.2" rx="7.6" ry="1.8"></ellipse>
+        <path d="M12 6.2v6.4"></path>
+        <path d="m12 6.2-2.6 2"></path>
+        <path d="m12 6.2 2.6 2"></path>
+        <path d="M12 12.6l-2.6-2"></path>
+        <path d="M12 12.6l2.6-2"></path>
+      `);
     case 'large-scale-structure':
       return createSvg(`
         <circle cx="6" cy="7" r="1.4"></circle>
