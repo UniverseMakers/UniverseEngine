@@ -232,8 +232,6 @@ export function createAppShell(app: HTMLElement): void {
     />
   `;
   app.appendChild(swiftLogo);
-  
-  const swiftLogoCompact = document.createElement('div');
 
   // Synthesizer logo – shown only for the galaxy family's HST tab.
   const synthLogo = document.createElement('div');

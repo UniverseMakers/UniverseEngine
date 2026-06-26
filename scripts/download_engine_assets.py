@@ -140,7 +140,7 @@ def collect_downloads(
             })
 
         # ── parameter YAML (if present) ────────────────────────────────
-        params_url = entry.get("paramsPath", "")
+        params_url = entry.get("paramsPath") or derive_params_url(entry.get("summaryPath", ""))
         if params_url:
             tasks.append({
                 "url": resolve_asset_url(params_url, primary_base),
@@ -173,6 +173,13 @@ def resolve_asset_url(path_or_url: str, primary_base: str | None) -> str:
     if path_or_url.startswith("/") and primary_base:
         return urljoin(primary_base, path_or_url.lstrip("/"))
     return path_or_url
+
+
+def derive_params_url(summary_path: str) -> str:
+    if not isinstance(summary_path, str) or not summary_path:
+        return ""
+
+    return summary_path.replace("run_summary.yaml", "parameters.yaml")
 
 
 def format_size(num_bytes: int) -> str:

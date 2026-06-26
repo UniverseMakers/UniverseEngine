@@ -315,6 +315,7 @@ def build_manifest_entry(
 
     live_data_path = run_dir / "live_data_table.csv"
     run_summary_yaml = run_dir / "run_summary.yaml"
+    parameters_yaml = run_dir / "parameters.yaml"
 
     view_paths = {
         infer_view_id(video): path_builder(video)
@@ -322,7 +323,7 @@ def build_manifest_entry(
     }
     default_view = pick_default_view(view_paths)
 
-    return {
+    entry = {
         "simulationId": simulation_id,
         "runId": run_dir.name,
         "parameters": parse_run_parameters(simulation_id, run_dir),
@@ -331,6 +332,11 @@ def build_manifest_entry(
         "defaultView": default_view,
         "views": view_paths,
     }
+
+    if parameters_yaml.exists():
+        entry["paramsPath"] = path_builder(parameters_yaml)
+
+    return entry
 
 
 def build_manifest_entries_from_r2(
@@ -401,7 +407,7 @@ def build_manifest_entry_from_r2(
     }
     default_view = pick_default_view(view_paths)
 
-    return {
+    entry = {
         "simulationId": simulation_id,
         "runId": run_id,
         "parameters": parse_r2_run_parameters(
@@ -419,6 +425,11 @@ def build_manifest_entry_from_r2(
         "defaultView": default_view,
         "views": view_paths,
     }
+
+    if parameter_key in object_keys:
+        entry["paramsPath"] = to_manifest_asset_path(object_prefix, parameter_key)
+
+    return entry
 
 
 def parse_run_parameters(
