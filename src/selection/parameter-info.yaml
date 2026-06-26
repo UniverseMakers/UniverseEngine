@@ -14,7 +14,7 @@ planetary:
     label: Impactor Mass
     description: How big was the object that smashed into the young Earth?  A more massive impactor could spray out more debris — and perhaps a bigger Moon.
     unit: Earth masses
-    min: 0.05
+    min: 0.01
     max: 0.35
     step: 0.01
     primary: false
@@ -23,7 +23,7 @@ planetary:
     description: How fast was the impactor travelling when it hit?  Faster collisions are more violent, ejecting more and hotter debris.
     unit: km/s
     min: 6.7
-    max: 30
+    max: 31
     step: 0.1
     primary: false
   impactor_angle:
