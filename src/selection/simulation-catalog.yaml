@@ -14,6 +14,23 @@ planetary:
   label: Planetary
   placeholderImage: assets/planetary-parameter-overlay.webp
   parameterSubtitle: Set up your collision scenario to explore how varied the outcomes of giant impacts can be.  What parameters lead to the formation of a Moon like ours, a debris disk from which it could grow, or something dramatically different?
+  views:
+    - id: houdini
+      label: Cinematic render
+      icon: icon_houdini
+      description: View the data of your simulated impact, rendered in 3D perspective, as rock and iron material gets pushed and shocked by immense pressure, and pulled and disrupted by strong gravity.  \n\nThe colour, glow, and opacity of the visualised material are set directly by the simulation data.  Although, if we could see a real impact this close up, there would be a lot more thick dust that blocks the view than shown here.
+    - id: material
+      label: Material
+      icon: icon_material
+      description: See how materials mix at this planetary scale, with a cut-away view of your impact simulation.  The material is coloured to show the target-planet's metal core in purple, its rocky mantle in orange, the impactor's core in blue, and its mantle in yellow.  \n\nThe main panel shows a top-down view, with a zoomed-out panel in the upper left.  The lower left panel shows a side-on view.
+    - id: temperature
+      label: Temperature
+      icon: icon_temperature
+      description: See how hot a planet gets when shocked and rocked by a giant impact, with a cut-away view of your impact simulation, with the material coloured to show the temperature.  \n\nThe main panel shows a top-down view, with a zoomed-out panel in the upper left.  The lower left panel shows a side-on view.
+    - id: pressure
+      label: Pressure
+      icon: icon_pressure
+      description: Inspect the collosal pressures reached inside a planet and how the shock wave travels through from a giant impact, with a cut-away view of your impact simulation, with the material coloured to show the pressure.  \n\nThe main panel shows a top-down view, with a zoomed-out panel in the upper left.  The lower left panel shows a side-on view.
 
 galaxy:
   label: Galaxy
