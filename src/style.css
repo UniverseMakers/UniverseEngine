@@ -3536,6 +3536,21 @@ button {
   display: block;
 }
 
+.swift-logo__image-compact {
+  width: auto;
+  height: 8vh;
+  display: none;
+}
+
+@media (max-width: 750px) {
+    .swift-logo__image {
+	display: none;
+    }
+    .swift-logo__image-compact {
+	display: block;
+    }
+}
+
 /* ── Synthesizer logo (bottom-right, galaxy HST tab only) ─────────────── */
 
 .synth-logo {
@@ -3558,6 +3573,24 @@ button {
   width: 24vh;
   height: auto;
   display: block;
+}
+
+.synth-logo__image-compact {
+  width: auto;
+  height: 8vh;
+  display: none;
+}
+
+@media (max-width: 750px) {
+    .synth-logo__image {
+	display: none;
+    }
+    .synth-logo__image-compact {
+	display: block;
+    }
+    .synth-logo {
+	bottom: 1.5rem;
+    }
 }
 
 /* ── Fullscreen ───────────────────────────────────────────────────────────── */
