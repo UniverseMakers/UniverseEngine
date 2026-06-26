@@ -725,7 +725,7 @@ export function createSummaryOverlay(
         leftColumn.style.cssText = 'display:flex; flex-direction:column; gap:1.25rem;';
 
         leftColumn.appendChild(
-          buildParamSection(simClass, values),
+          buildParamSection(simClass, values, openCardModal),
         );
 
         const morphologyLabel =
@@ -852,7 +852,7 @@ export function createSummaryOverlay(
 
         bottomRow.className = 'sci-bottom-row';
 
-        bottomRow.appendChild(buildParamSection(simClass, values));
+        bottomRow.appendChild(buildParamSection(simClass, values, openCardModal));
 
         const sciSection = document.createElement('div');
         const sciHeader = document.createElement('div');
@@ -934,6 +934,7 @@ function selectMetric(
 function buildParamSection(
   simClass: SimulationClass,
   values: Record<string, number>,
+  onInfo?: (title: string, description: string) => void,
 ): HTMLElement {
   const section = document.createElement('div');
 
@@ -953,13 +954,19 @@ function buildParamSection(
     const value = document.createElement('span');
 
     card.className = 'res-card';
+    if (param.description && onInfo) {
+      card.classList.add('res-card--has-info');
+      card.addEventListener('click', () =>
+        onInfo(param.label, param.description!),
+      );
+    }
 
     label.className = 'res-card__label';
     label.textContent = param.label;
     value.className = 'res-card__value';
     const formatted =
       param.displayFormat === 'qualitative' && param.qualiLabels
-        ? (param.qualiLabels[Math.round(rawValue)] ?? '--')
+        ? param.qualiLabels[Math.round(rawValue)] ?? '--'
         : formatParameterValue(rawValue, param.step, {
             scale: param.valueScale,
             format: param.displayFormat,
