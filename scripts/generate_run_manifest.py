@@ -38,7 +38,7 @@ SKIP_NAMES = frozenset({".DS_Store", "__pycache__", ".ipynb_checkpoints"})
 
 VIDEO_EXTENSIONS = frozenset({".mp4", ".webm", ".mov", ".mkv"})
 
-METADATA_EXTENSIONS = frozenset({".csv", ".yaml", ".yml", ".json", ".txt", ".html"})
+METADATA_EXTENSIONS = frozenset({".csv", ".yaml", ".yml", ".json", ".txt", ".html", ".wav"})
 
 STATIC_EXTENSIONS = frozenset({".png", ".jpg", ".jpeg", ".webp", ".svg"})
 

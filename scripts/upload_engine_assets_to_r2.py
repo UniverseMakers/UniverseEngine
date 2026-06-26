@@ -74,7 +74,7 @@ except ImportError:
 
     SKIP_NAMES = frozenset({".DS_Store", "__pycache__", ".ipynb_checkpoints"})
     VIDEO_EXTENSIONS = frozenset({".mp4", ".webm", ".mov", ".mkv"})
-    METADATA_EXTENSIONS = frozenset({".csv", ".yaml", ".yml", ".json", ".txt", ".html"})
+    METADATA_EXTENSIONS = frozenset({".csv", ".yaml", ".yml", ".json", ".txt", ".html", ".wav"})
     STATIC_EXTENSIONS = frozenset({".png", ".jpg", ".jpeg", ".webp", ".svg"})
     DEFAULT_THEMES = ("cosmos", "galaxy", "planetary")
 
@@ -104,6 +104,7 @@ CONTENT_TYPE_MAP: dict[str, str] = {
     ".jpeg": "image/jpeg",
     ".webp": "image/webp",
     ".svg":  "image/svg+xml",
+    ".wav":  "audio/wav",
 }
 
 # ---------------------------------------------------------------------------
@@ -157,7 +158,7 @@ def _get_cache_control(file_path: Path, remote_key: str) -> str:
     if remote_key.endswith("/manifest.json") or remote_key.endswith("/run-manifest.json"):
         return CACHE_MANIFEST
     ext = file_path.suffix.lower()
-    if ext in VIDEO_EXTENSIONS or ext in STATIC_EXTENSIONS:
+    if ext in VIDEO_EXTENSIONS or ext in STATIC_EXTENSIONS or ext == ".wav":
         return CACHE_IMMUTABLE
     return CACHE_MODERATE
 
