@@ -45,7 +45,7 @@ export function withUnit(value: string, unit?: string): string {
  *
  * Values are auto-scaled to their natural magnitude tier:
  *   < 1,000          → "123" (or "123.5" with one decimal)
- *   1,000 – 999,999  → "1.23K"
+ *   1,000 – 999,999  → "1.23k"
  *   1M – 999M        → "1.23M"
  *   1B – 999B        → "1.23B"
  *   ≥ 1T             → "1.23T" / "12.3T" / "1,230T" (stays in trillions)
@@ -66,7 +66,7 @@ export function formatCompactNumber(value: number): string {
   }
 
   if (abs < 1_000_000) {
-    return `${sign}${formatSmall(value / 1_000)}K`;
+    return `${sign}${formatSmall(value / 1_000)}k`;
   }
 
   if (abs < 1_000_000_000) {

@@ -190,7 +190,7 @@ function selectMetric(
 /**
  * Apply optional numeric scaling/rounding to a resolved stat value.
  *
- * Live numeric values are formatted compactly (K / M / B suffixes) so the
+ * Live numeric values are formatted compactly (k / M / B suffixes) so the
  * HUD panel stays readable and stable. Static placeholder strings pass
  * through unchanged.
  */
