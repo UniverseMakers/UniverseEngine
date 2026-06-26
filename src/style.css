@@ -2152,6 +2152,17 @@ button {
   background: rgba(0, 0, 0, 0.2);
 }
 
+.config-overlay__chartermark {
+  position: absolute;
+  top: 1.25rem;
+  left: 1.25rem;
+  width: 7rem;
+  height: auto;
+  z-index: 1;
+  opacity: 0.9;
+  pointer-events: none;
+}
+
 .config-overlay__media-copy {
   position: relative;
   z-index: 1;

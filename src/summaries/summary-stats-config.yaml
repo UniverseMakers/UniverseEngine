@@ -21,21 +21,24 @@
 
 planetary:
   resources:
-    - id: runtime
+    - &resource_runtime
+      id: runtime
       value: '--'
       unit: hours
       display_format: float
       precision: 2
       description: How long the simulation took to run.  Calculating how everything moves and affects each other takes a lot of work, even for a supercomputer!
-    - id: carbonBurnt
+    - &resource_carbon_burnt
+      id: carbonBurnt
       value: '--'
       unit: kg CO₂
       display_format: float
       precision: 2
-      description: The estimated carbon footprint of this run.  Carbon dioxide is a major driver of climate change, and supercomputer-driven research at this scale has real environmental costs that must be considered when planning our research.
-    - id: computeUsed
+      description: The estimated carbon footprint of this run.  Carbon dioxide is a major driver of climate change, and supercomputer-driven research at this scale has real environmental costs that must be considered when we plan our research.
+    - &resource_compute_used
+      id: computeUsed
       value: '--'
-      description: How much internal computing time and memory the simulation needed to crunch all that physics.  Shared across all the CPUs working together in the supercomputer.
+      description: How much computing time and memory the simulation needed to crunch all that physics. A CPU-hour is one hour of work for a single CPU core, 2 CPU cores working for 2 hours would be 4 CPU-hours. With a supercomputer you can have thousands or tens of thousands of CPU cores working together, so a simulation can take a few hours to run but use tens of thousands of CPU-hours to do it.
   results:
     - id: moon_mass
       label: Moon-forming mass
@@ -91,19 +94,9 @@ planetary:
 
 galaxy:
   resources:
-    - id: runtime
-      value: '--'
-      unit: hours
-      display_format: float
-      precision: 2
-      description: How long the simulation took to run.  Calculating how everything moves and affects each other takes a lot of work, even for a supercomputer!
-    - id: carbonBurnt
-      value: '--'
-      unit: kg CO₂
-      description: The estimated carbon footprint of this run.  Carbon dioxide is a major driver of climate change, and supercomputer-driven research at this scale has real environmental costs that must be considered when planning our research.
-    - id: computeUsed
-      value: '--'
-      description: How much internal computing time and memory the simulation needed to crunch all that physics.  Shared across all the CPUs working together in the supercomputer.
+    - *resource_runtime
+    - *resource_carbon_burnt
+    - *resource_compute_used
   results:
     - id: crowding
       label: Neighbourhood
@@ -163,21 +156,9 @@ galaxy:
 
 cosmos:
   resources:
-    - id: runtime
-      value: '--'
-      unit: hours
-      display_format: float
-      precision: 2
-      description: How long the simulation took to run.  Calculating how everything moves and affects each other takes a lot of work, even for a supercomputer!
-    - id: carbonBurnt
-      value: '--'
-      unit: kg CO₂
-      display_format: float
-      precision: 2
-      description: The estimated carbon footprint of this run.  Carbon dioxide is a major driver of climate change, and supercomputer-driven research at this scale has real environmental costs that must be considered when planning our research.
-    - id: computeUsed
-      value: '--'
-      description: How much internal computing time and memory the simulation needed to crunch all that physics.  Shared across all the CPUs working together in the supercomputer.
+    - *resource_runtime
+    - *resource_carbon_burnt
+    - *resource_compute_used
   results:
     - id: stellar_fraction
       label: Stellar fraction
