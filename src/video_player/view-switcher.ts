@@ -118,6 +118,43 @@ function createViewIcon(iconId?: string): SVGSVGElement | null {
   // View ids map to tiny inline SVGs so we keep this feature self-contained and
   // do not need a separate icon asset pipeline.
   switch (iconId) {
+    case 'icon_houdini':
+      return createSvg(`
+        <circle cx="8" cy="11" r="3.1"></circle>
+        <path d="M11 11h2.2"></path>
+        <path d="M14.3 11 18.8 7.3"></path>
+        <path d="M14.3 11 19 14.3"></path>
+        <path d="M14.3 11 17.4 18"></path>
+        <circle cx="19.5" cy="7" r="1"></circle>
+        <circle cx="19.6" cy="14.7" r="1"></circle>
+        <circle cx="17.6" cy="18.7" r="1"></circle>
+      `);
+    case 'icon_material':
+      return createSvg(`
+        <circle cx="12" cy="12" r="7.2"></circle>
+        <path d="M12 4.8v14.4"></path>
+        <path d="M12 12 18.2 8.4"></path>
+        <path d="M12 12 18.2 15.6"></path>
+        <circle cx="12" cy="12" r="2.2"></circle>
+      `);
+    case 'icon_temperature':
+      return createSvg(`
+        <path d="M10.6 6.2a2 2 0 0 1 4 0v7a4.3 4.3 0 1 1-4 0Z"></path>
+        <path d="M12.6 9v7"></path>
+        <path d="M14.8 6.8h3.6"></path>
+        <path d="M16.6 5v3.6"></path>
+        <circle cx="12.6" cy="17.6" r="1.5" fill="currentColor" stroke="none"></circle>
+      `);
+    case 'icon_pressure':
+      return createSvg(`
+        <circle cx="12" cy="12" r="7.3"></circle>
+        <path d="M12 12 16.8 7.8"></path>
+        <path d="M12 7.4v1.8"></path>
+        <path d="M16.6 12h-1.8"></path>
+        <path d="M12 16.6v-1.8"></path>
+        <path d="M7.4 12h1.8"></path>
+        <circle cx="12" cy="12" r="1.2" fill="currentColor" stroke="none"></circle>
+      `);
     case 'dark-matter':
       return createSvg(`
         <circle cx="12" cy="12" r="6.5"></circle>
