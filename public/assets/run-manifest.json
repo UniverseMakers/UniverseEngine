@@ -1784,7 +1784,8 @@
       "defaultView": "hst",
       "views": {
         "hst": "/engine/galaxy/track0/animations/HST.mp4",
-        "sph_plus_hst": "/engine/galaxy/track0/animations/SPH_plus_HST.mp4"
+        "sph_plus_hst": "/engine/galaxy/track0/animations/SPH_plus_HST.mp4",
+        "line_trace": "/engine/galaxy/track0/animations/line_trace.mp4"
       }
     },
     {
@@ -1799,7 +1800,8 @@
       "defaultView": "hst",
       "views": {
         "hst": "/engine/galaxy/track1/animations/HST.mp4",
-        "sph_plus_hst": "/engine/galaxy/track1/animations/SPH_plus_HST.mp4"
+        "sph_plus_hst": "/engine/galaxy/track1/animations/SPH_plus_HST.mp4",
+        "line_trace": "/engine/galaxy/track1/animations/line_trace.mp4"
       }
     },
     {
@@ -1814,7 +1816,8 @@
       "defaultView": "hst",
       "views": {
         "hst": "/engine/galaxy/track1041/animations/HST.mp4",
-        "sph_plus_hst": "/engine/galaxy/track1041/animations/SPH_plus_HST.mp4"
+        "sph_plus_hst": "/engine/galaxy/track1041/animations/SPH_plus_HST.mp4",
+        "line_trace": "/engine/galaxy/track1041/animations/line_trace.mp4"
       }
     },
     {
@@ -1829,7 +1832,8 @@
       "defaultView": "hst",
       "views": {
         "hst": "/engine/galaxy/track11/animations/HST.mp4",
-        "sph_plus_hst": "/engine/galaxy/track11/animations/SPH_plus_HST.mp4"
+        "sph_plus_hst": "/engine/galaxy/track11/animations/SPH_plus_HST.mp4",
+        "line_trace": "/engine/galaxy/track11/animations/line_trace.mp4"
       }
     },
     {
@@ -1844,7 +1848,8 @@
       "defaultView": "hst",
       "views": {
         "hst": "/engine/galaxy/track15380/animations/HST.mp4",
-        "sph_plus_hst": "/engine/galaxy/track15380/animations/SPH_plus_HST.mp4"
+        "sph_plus_hst": "/engine/galaxy/track15380/animations/SPH_plus_HST.mp4",
+        "line_trace": "/engine/galaxy/track15380/animations/line_trace.mp4"
       }
     },
     {
@@ -1859,7 +1864,8 @@
       "defaultView": "hst",
       "views": {
         "hst": "/engine/galaxy/track18632/animations/HST.mp4",
-        "sph_plus_hst": "/engine/galaxy/track18632/animations/SPH_plus_HST.mp4"
+        "sph_plus_hst": "/engine/galaxy/track18632/animations/SPH_plus_HST.mp4",
+        "line_trace": "/engine/galaxy/track18632/animations/line_trace.mp4"
       }
     },
     {
@@ -1874,7 +1880,8 @@
       "defaultView": "hst",
       "views": {
         "hst": "/engine/galaxy/track21/animations/HST.mp4",
-        "sph_plus_hst": "/engine/galaxy/track21/animations/SPH_plus_HST.mp4"
+        "sph_plus_hst": "/engine/galaxy/track21/animations/SPH_plus_HST.mp4",
+        "line_trace": "/engine/galaxy/track21/animations/line_trace.mp4"
       }
     },
     {
@@ -1886,9 +1893,11 @@
       },
       "liveDataPath": "/engine/galaxy/track2294/live_data_table.csv",
       "summaryPath": "/engine/galaxy/track2294/run_summary.yaml",
-      "defaultView": "sph_plus_hst",
+      "defaultView": "hst",
       "views": {
-        "sph_plus_hst": "/engine/galaxy/track2294/animations/SPH_plus_HST.mp4"
+        "hst": "/engine/galaxy/track2294/animations/HST.mp4",
+        "sph_plus_hst": "/engine/galaxy/track2294/animations/SPH_plus_HST.mp4",
+        "line_trace": "/engine/galaxy/track2294/animations/line_trace.mp4"
       }
     },
     {
@@ -1903,7 +1912,8 @@
       "defaultView": "hst",
       "views": {
         "hst": "/engine/galaxy/track2320/animations/HST.mp4",
-        "sph_plus_hst": "/engine/galaxy/track2320/animations/SPH_plus_HST.mp4"
+        "sph_plus_hst": "/engine/galaxy/track2320/animations/SPH_plus_HST.mp4",
+        "line_trace": "/engine/galaxy/track2320/animations/line_trace.mp4"
       }
     },
     {
@@ -1918,7 +1928,8 @@
       "defaultView": "hst",
       "views": {
         "hst": "/engine/galaxy/track26582/animations/HST.mp4",
-        "sph_plus_hst": "/engine/galaxy/track26582/animations/SPH_plus_HST.mp4"
+        "sph_plus_hst": "/engine/galaxy/track26582/animations/SPH_plus_HST.mp4",
+        "line_trace": "/engine/galaxy/track26582/animations/line_trace.mp4"
       }
     },
     {
@@ -1933,7 +1944,8 @@
       "defaultView": "hst",
       "views": {
         "hst": "/engine/galaxy/track2673/animations/HST.mp4",
-        "sph_plus_hst": "/engine/galaxy/track2673/animations/SPH_plus_HST.mp4"
+        "sph_plus_hst": "/engine/galaxy/track2673/animations/SPH_plus_HST.mp4",
+        "line_trace": "/engine/galaxy/track2673/animations/line_trace.mp4"
       }
     },
     {
@@ -1945,9 +1957,11 @@
       },
       "liveDataPath": "/engine/galaxy/track28/live_data_table.csv",
       "summaryPath": "/engine/galaxy/track28/run_summary.yaml",
-      "defaultView": "sph_plus_hst",
+      "defaultView": "hst",
       "views": {
-        "sph_plus_hst": "/engine/galaxy/track28/animations/SPH_plus_HST.mp4"
+        "hst": "/engine/galaxy/track28/animations/HST.mp4",
+        "sph_plus_hst": "/engine/galaxy/track28/animations/SPH_plus_HST.mp4",
+        "line_trace": "/engine/galaxy/track28/animations/line_trace.mp4"
       }
     },
     {
@@ -1959,9 +1973,11 @@
       },
       "liveDataPath": "/engine/galaxy/track28880/live_data_table.csv",
       "summaryPath": "/engine/galaxy/track28880/run_summary.yaml",
-      "defaultView": "sph_plus_hst",
+      "defaultView": "hst",
       "views": {
-        "sph_plus_hst": "/engine/galaxy/track28880/animations/SPH_plus_HST.mp4"
+        "hst": "/engine/galaxy/track28880/animations/HST.mp4",
+        "sph_plus_hst": "/engine/galaxy/track28880/animations/SPH_plus_HST.mp4",
+        "line_trace": "/engine/galaxy/track28880/animations/line_trace.mp4"
       }
     },
     {
@@ -1973,9 +1989,11 @@
       },
       "liveDataPath": "/engine/galaxy/track308/live_data_table.csv",
       "summaryPath": "/engine/galaxy/track308/run_summary.yaml",
-      "defaultView": "sph_plus_hst",
+      "defaultView": "hst",
       "views": {
-        "sph_plus_hst": "/engine/galaxy/track308/animations/SPH_plus_HST.mp4"
+        "hst": "/engine/galaxy/track308/animations/HST.mp4",
+        "sph_plus_hst": "/engine/galaxy/track308/animations/SPH_plus_HST.mp4",
+        "line_trace": "/engine/galaxy/track308/animations/line_trace.mp4"
       }
     },
     {
@@ -1987,9 +2005,11 @@
       },
       "liveDataPath": "/engine/galaxy/track33088/live_data_table.csv",
       "summaryPath": "/engine/galaxy/track33088/run_summary.yaml",
-      "defaultView": "sph_plus_hst",
+      "defaultView": "hst",
       "views": {
-        "sph_plus_hst": "/engine/galaxy/track33088/animations/SPH_plus_HST.mp4"
+        "hst": "/engine/galaxy/track33088/animations/HST.mp4",
+        "sph_plus_hst": "/engine/galaxy/track33088/animations/SPH_plus_HST.mp4",
+        "line_trace": "/engine/galaxy/track33088/animations/line_trace.mp4"
       }
     },
     {
@@ -2004,7 +2024,8 @@
       "defaultView": "hst",
       "views": {
         "hst": "/engine/galaxy/track4298/animations/HST.mp4",
-        "sph_plus_hst": "/engine/galaxy/track4298/animations/SPH_plus_HST.mp4"
+        "sph_plus_hst": "/engine/galaxy/track4298/animations/SPH_plus_HST.mp4",
+        "line_trace": "/engine/galaxy/track4298/animations/line_trace.mp4"
       }
     },
     {
@@ -2016,9 +2037,11 @@
       },
       "liveDataPath": "/engine/galaxy/track4567/live_data_table.csv",
       "summaryPath": "/engine/galaxy/track4567/run_summary.yaml",
-      "defaultView": "sph_plus_hst",
+      "defaultView": "hst",
       "views": {
-        "sph_plus_hst": "/engine/galaxy/track4567/animations/SPH_plus_HST.mp4"
+        "hst": "/engine/galaxy/track4567/animations/HST.mp4",
+        "sph_plus_hst": "/engine/galaxy/track4567/animations/SPH_plus_HST.mp4",
+        "line_trace": "/engine/galaxy/track4567/animations/line_trace.mp4"
       }
     },
     {
@@ -2033,7 +2056,8 @@
       "defaultView": "hst",
       "views": {
         "hst": "/engine/galaxy/track47/animations/HST.mp4",
-        "sph_plus_hst": "/engine/galaxy/track47/animations/SPH_plus_HST.mp4"
+        "sph_plus_hst": "/engine/galaxy/track47/animations/SPH_plus_HST.mp4",
+        "line_trace": "/engine/galaxy/track47/animations/line_trace.mp4"
       }
     },
     {
@@ -2047,7 +2071,9 @@
       "summaryPath": "/engine/galaxy/track492/run_summary.yaml",
       "defaultView": "hst",
       "views": {
-        "hst": "/engine/galaxy/track492/animations/HST.mp4"
+        "hst": "/engine/galaxy/track492/animations/HST.mp4",
+        "sph_plus_hst": "/engine/galaxy/track492/animations/SPH_plus_HST.mp4",
+        "line_trace": "/engine/galaxy/track492/animations/line_trace.mp4"
       }
     },
     {
@@ -2062,7 +2088,8 @@
       "defaultView": "hst",
       "views": {
         "hst": "/engine/galaxy/track5158/animations/HST.mp4",
-        "sph_plus_hst": "/engine/galaxy/track5158/animations/SPH_plus_HST.mp4"
+        "sph_plus_hst": "/engine/galaxy/track5158/animations/SPH_plus_HST.mp4",
+        "line_trace": "/engine/galaxy/track5158/animations/line_trace.mp4"
       }
     },
     {
@@ -2077,7 +2104,8 @@
       "defaultView": "hst",
       "views": {
         "hst": "/engine/galaxy/track516/animations/HST.mp4",
-        "sph_plus_hst": "/engine/galaxy/track516/animations/SPH_plus_HST.mp4"
+        "sph_plus_hst": "/engine/galaxy/track516/animations/SPH_plus_HST.mp4",
+        "line_trace": "/engine/galaxy/track516/animations/line_trace.mp4"
       }
     },
     {
@@ -2089,9 +2117,11 @@
       },
       "liveDataPath": "/engine/galaxy/track6438/live_data_table.csv",
       "summaryPath": "/engine/galaxy/track6438/run_summary.yaml",
-      "defaultView": "sph_plus_hst",
+      "defaultView": "hst",
       "views": {
-        "sph_plus_hst": "/engine/galaxy/track6438/animations/SPH_plus_HST.mp4"
+        "hst": "/engine/galaxy/track6438/animations/HST.mp4",
+        "sph_plus_hst": "/engine/galaxy/track6438/animations/SPH_plus_HST.mp4",
+        "line_trace": "/engine/galaxy/track6438/animations/line_trace.mp4"
       }
     },
     {
@@ -2103,9 +2133,11 @@
       },
       "liveDataPath": "/engine/galaxy/track738/live_data_table.csv",
       "summaryPath": "/engine/galaxy/track738/run_summary.yaml",
-      "defaultView": "sph_plus_hst",
+      "defaultView": "hst",
       "views": {
-        "sph_plus_hst": "/engine/galaxy/track738/animations/SPH_plus_HST.mp4"
+        "hst": "/engine/galaxy/track738/animations/HST.mp4",
+        "sph_plus_hst": "/engine/galaxy/track738/animations/SPH_plus_HST.mp4",
+        "line_trace": "/engine/galaxy/track738/animations/line_trace.mp4"
       }
     },
     {
@@ -2120,7 +2152,8 @@
       "defaultView": "hst",
       "views": {
         "hst": "/engine/galaxy/track82/animations/HST.mp4",
-        "sph_plus_hst": "/engine/galaxy/track82/animations/SPH_plus_HST.mp4"
+        "sph_plus_hst": "/engine/galaxy/track82/animations/SPH_plus_HST.mp4",
+        "line_trace": "/engine/galaxy/track82/animations/line_trace.mp4"
       }
     },
     {
