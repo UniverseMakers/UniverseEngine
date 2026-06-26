@@ -22,6 +22,7 @@ from typing import Any
 import yaml
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
+PUBLIC_ROOT = REPO_ROOT / "public"
 PARAM_INFO_PATH = REPO_ROOT / "src" / "selection" / "parameter-info.yaml"
 
 
@@ -60,6 +61,7 @@ def main() -> None:
         lambda: defaultdict(list),
     )
     range_violations: list[tuple[str, str, str, float, float, float]] = []
+    missing_assets: list[tuple[str, str, str, str]] = []
 
     total_videos = 0
 
@@ -92,6 +94,17 @@ def main() -> None:
 
         if not isinstance(views, dict):
             continue
+
+        missing_assets.extend(
+            collect_missing_assets(
+                manifest_path=manifest_path,
+                simulation_id=simulation_id,
+                run_id=run_id,
+                live_data_path=run.get("liveDataPath"),
+                summary_path=run.get("summaryPath"),
+                views=views,
+            )
+        )
 
         view_count = len(views)
         total_videos += view_count
@@ -161,6 +174,14 @@ def main() -> None:
             direction = "below" if value < min_val else "above"
             print(f"  {scale}/{run_id}  {param}={value}  ({direction} [{min_val}, {max_val}])")
 
+    if missing_assets:
+        print()
+        print(f"MISSING MANIFEST ASSETS ({len(missing_assets)} found)")
+        print("  These manifest entries point to files that do not exist locally:")
+        print()
+        for scale, run_id, asset_kind, asset_path in missing_assets:
+            print(f"  {scale}/{run_id}  {asset_kind}: {asset_path}")
+
     if args.plots:
         generate_plots(args.plots, params_by_scale)
 
@@ -203,6 +224,45 @@ def load_param_limits() -> dict[str, dict[str, tuple[float, float]]]:
             limits[scale] = scale_limits
 
     return limits
+
+
+def collect_missing_assets(
+    *,
+    manifest_path: Path,
+    simulation_id: str,
+    run_id: str,
+    live_data_path: Any,
+    summary_path: Any,
+    views: dict[Any, Any],
+) -> list[tuple[str, str, str, str]]:
+    missing: list[tuple[str, str, str, str]] = []
+
+    for asset_kind, asset_path in (
+        ("liveDataPath", live_data_path),
+        ("summaryPath", summary_path),
+    ):
+        if isinstance(asset_path, str) and not resolve_manifest_path(manifest_path, asset_path).exists():
+            missing.append((simulation_id, run_id, asset_kind, asset_path))
+
+    for view_id, view_path in views.items():
+        if not isinstance(view_path, str):
+            continue
+        if not resolve_manifest_path(manifest_path, view_path).exists():
+            missing.append((simulation_id, run_id, f"view:{view_id}", view_path))
+
+    return missing
+
+
+def resolve_manifest_path(manifest_path: Path, asset_path: str) -> Path:
+    candidate = Path(asset_path)
+
+    if candidate.is_absolute():
+        return candidate
+
+    if candidate.parts and candidate.parts[0] == "assets":
+        return PUBLIC_ROOT / candidate
+
+    return manifest_path.parent / candidate
 
 
 def generate_plots(

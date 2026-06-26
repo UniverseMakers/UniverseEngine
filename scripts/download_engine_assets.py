@@ -188,13 +188,10 @@ def download_file(url: str, dest: str, dry_run: bool, backup_url: str | None = N
     """Download one file.  Returns True on success (or dry-run)."""
     dest_path = Path(dest)
     dest_path.parent.mkdir(parents=True, exist_ok=True)
+    tmp_path = dest_path.with_name(f"{dest_path.name}.part")
 
     if dry_run:
         print(f"  [DRY-RUN] {url}")
-        return True
-
-    # Skip if the file already exists and is non-empty.
-    if dest_path.exists() and dest_path.stat().st_size > 0:
         return True
 
     candidates = [url]
@@ -203,6 +200,14 @@ def download_file(url: str, dest: str, dry_run: bool, backup_url: str | None = N
 
     for index, candidate in enumerate(candidates):
         try:
+            existing_size = dest_path.stat().st_size if dest_path.exists() else 0
+            remote_size = fetch_remote_size(candidate)
+
+            if existing_size > 0 and remote_size is not None and existing_size == remote_size:
+                return True
+            if existing_size > 0 and remote_size is None:
+                return True
+
             request = Request(candidate, headers=DEFAULT_HTTP_HEADERS)
             with urlopen(request) as response:
                 length = response.headers.get("Content-Length")
@@ -210,13 +215,22 @@ def download_file(url: str, dest: str, dry_run: bool, backup_url: str | None = N
                 downloaded = 0
                 start = time.monotonic()
 
-                with dest_path.open("wb") as out:
+                tmp_path.unlink(missing_ok=True)
+
+                with tmp_path.open("wb") as out:
                     while True:
                         chunk = response.read(CHUNK_SIZE)
                         if not chunk:
                             break
                         out.write(chunk)
                         downloaded += len(chunk)
+
+                if total is not None and downloaded != total:
+                    raise IOError(
+                        f"downloaded size mismatch: expected {total} bytes, got {downloaded}"
+                    )
+
+                tmp_path.replace(dest_path)
 
                 elapsed = time.monotonic() - start
                 rate = (downloaded / elapsed / 1_048_576) if elapsed > 0 else 0
@@ -227,6 +241,7 @@ def download_file(url: str, dest: str, dry_run: bool, backup_url: str | None = N
                 print(f"{msg}  {rate:.0f} MiB/s  {candidate.rsplit('/', 1)[-1]}{suffix}")
                 return True
         except Exception as exc:
+            tmp_path.unlink(missing_ok=True)
             if index == len(candidates) - 1:
                 print(f"  FAILED  {candidate}  ({exc})", file=sys.stderr)
                 if dest_path.exists() and dest_path.stat().st_size == 0:
@@ -235,6 +250,23 @@ def download_file(url: str, dest: str, dry_run: bool, backup_url: str | None = N
             continue
 
     return False
+
+
+def fetch_remote_size(url: str) -> int | None:
+    """Return the remote Content-Length when available."""
+    request = Request(url, headers=DEFAULT_HTTP_HEADERS, method="HEAD")
+    with urlopen(request) as response:
+        length = response.headers.get("Content-Length")
+
+    if not length:
+        return None
+
+    try:
+        size = int(length)
+    except ValueError:
+        return None
+
+    return size if size >= 0 else None
 
 
 def main() -> None:
