@@ -6,6 +6,10 @@
  */
 
 import type { SimParameter } from './simulation-catalog.ts';
+import {
+  findBestEntry,
+  getEntryDistance,
+} from './ngp_parameter_search.ts';
 import { withBaseUrl } from '../shared/urls.ts';
 import {
   ONLINE_MANIFEST_BACKUP_URL,
@@ -268,7 +272,7 @@ async function findManifestBackedRun(
     return null;
   }
 
-  const best = findBestEntry(runs, params, values);
+  const best = findBestEntry(runs, params, values) as RunManifestEntry | null;
 
   if (!best) {
     return null;
@@ -324,110 +328,10 @@ function getManifestBase(url: string): string {
  * Each parameter is normalized to its own range (0..1). Final distance is
  * the mean across all parameters. 0 = perfect match.
  *
+ * This is a thin wrapper around the shared implementation in ngp_parameter_search.ts.
+ *
  * @param entry - Manifest run entry.
  * @param params - Parameter definitions.
  * @param values - Current user values.
  * @returns Mean normalized distance (lower is better).
  */
-function getEntryDistance(
-  entry: RunManifestEntry,
-  params: SimParameter[],
-  values: Record<string, number>,
-  useParams?: Set<string>,
-): number {
-  if (params.length === 0) {
-    return 0;
-  }
-
-  const filtered = useParams
-    ? params.filter((parameter) => useParams.has(parameter.id))
-    : params;
-
-  if (filtered.length === 0) {
-    return 0;
-  }
-
-  const total = filtered.reduce((sum, parameter) => {
-    const selected = values[parameter.id] ?? parameter.fallbackValue;
-    const candidate = entry.parameters?.[parameter.id] ?? parameter.fallbackValue;
-    const range = Math.max(parameter.max - parameter.min, 1e-9);
-
-    return sum + Math.abs(selected - candidate) / range;
-  }, 0);
-
-  return total / filtered.length;
-}
-
-function findBestEntry(
-  runs: RunManifestEntry[],
-  params: SimParameter[],
-  values: Record<string, number>,
-): RunManifestEntry | null {
-  if (runs.length === 0) {
-    return null;
-  }
-
-  const primaryIds = new Set(
-    params.filter((p) => p.primary !== false).map((p) => p.id),
-  );
-  const hasNonPrimary = params.some((p) => p.primary === false);
-
-  // Single-stage search when every parameter is primary.
-  if (!hasNonPrimary) {
-    return findClosest(runs, params, values);
-  }
-
-  // Two-stage: find the best primary-axis distance first, then refine
-  // among all candidates that are within a tiny tolerance of that best
-  // primary distance.
-  const bestPrimary = findClosest(runs, params, values, primaryIds);
-
-  if (!bestPrimary) {
-    return null;
-  }
-
-  const bestPrimaryDistance = getEntryDistance(
-    bestPrimary,
-    params,
-    values,
-    primaryIds,
-  );
-
-  // Tolerance avoids excluding runs with identical primary-axis scores
-  // due to floating-point noise.
-  const primaryTolerance = 1e-6;
-  const candidates = runs.filter((entry) => {
-    const distance = getEntryDistance(entry, params, values, primaryIds);
-
-    return Math.abs(distance - bestPrimaryDistance) <= primaryTolerance;
-  });
-
-  // Among the candidates that are equally good on primary axes,
-  // pick the one closest on all parameters.
-  return findClosest(candidates, params, values);
-}
-
-function findClosest(
-  runs: RunManifestEntry[],
-  params: SimParameter[],
-  values: Record<string, number>,
-  useParams?: Set<string>,
-): RunManifestEntry | null {
-  if (runs.length === 0) {
-    return null;
-  }
-
-  let bestEntry = runs[0];
-  let bestDistance = getEntryDistance(bestEntry, params, values, useParams);
-
-  for (const entry of runs.slice(1)) {
-    const distance = getEntryDistance(entry, params, values, useParams);
-
-    if (distance < bestDistance) {
-      bestEntry = entry;
-      bestDistance = distance;
-    }
-  }
-
-  return bestEntry;
-}
