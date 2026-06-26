@@ -1414,10 +1414,8 @@ export function createAppShell(app: HTMLElement): void {
 
     const isDisplay = app.dataset.mode === 'display';
     const isGalaxy = activeClass.id === 'galaxy';
-    const resolvedViewId = resolveSelectedViewId(activeClass, activeRunMatch);
-    const isHst = resolvedViewId === 'hst';
 
-    setElementVisibility(synthLogo, isDisplay && isGalaxy && isHst);
+    setElementVisibility(synthLogo, isDisplay && isGalaxy);
   }
 
   /**
