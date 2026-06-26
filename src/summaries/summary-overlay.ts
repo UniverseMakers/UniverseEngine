@@ -711,9 +711,11 @@ export function createSummaryOverlay(
         // ── Galaxy summary: params on left, description + hunt on right ──
         const currentMorphology =
           runMetadata?.summaryMetrics?.morphology?.value ?? null;
+        const normalizedMorphology = currentMorphology?.toLowerCase() ?? null;
+        const checklistIds = new Set(checklist.map((item) => item.id));
 
-        if (currentMorphology) {
-          foundMorphologies.add(currentMorphology.toLowerCase());
+        if (normalizedMorphology && checklistIds.has(normalizedMorphology)) {
+          foundMorphologies.add(normalizedMorphology);
         }
 
         const bottomRow = document.createElement('div');
@@ -729,7 +731,7 @@ export function createSummaryOverlay(
         );
 
         const morphologyLabel =
-          checklist.find((item) => item.id === (currentMorphology ?? '').toLowerCase())?.label ??
+          checklist.find((item) => item.id === normalizedMorphology)?.label ??
           currentMorphology;
 
         if (morphologyLabel) {
@@ -808,7 +810,7 @@ export function createSummaryOverlay(
         huntGrid.className = 'galaxy-summary__checklist';
         huntGrid.style.cssText = 'flex:1; align-items:center;';
 
-        const allFound = foundMorphologies.size >= checklist.length;
+        const allFound = checklist.every((item) => foundMorphologies.has(item.id));
 
         for (const item of checklist) {
           const box = document.createElement('div');
