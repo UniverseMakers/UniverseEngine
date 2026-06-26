@@ -130,6 +130,13 @@ galaxy:
       display_format: float
       precision: 2
       description: The size of your galaxy's star-lit disc from one edge to the other.
+    - id: galaxy_age
+      label: Galaxy age
+      value: '--'
+      unit: yrs
+      value_scale: 1.0e9
+      display_format: compact
+      description: The average age of the stars in this galaxy.  Older galaxies tend to look redder and smoother, while younger ones are bluer and more chaotic.
     - id: black_hole_mass_msun
       label: Black hole mass
       value: '--'
