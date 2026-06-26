@@ -19,7 +19,7 @@ planetary:
     amberLow: A bit light.  A little too much was lost in the collision, leaving Earth slightly underweight.
     amberHigh: A bit heavy.  A little too much material merged with the planet, leaving Earth slightly overweight.
     redLow: Far too light.  This impact stripped away too much material, or not enough material was added, leaving a planet far smaller than our Earth.
-    redHigh: Far too heavy.  Lots of material was added with very little removed, so thia planet ends up far more massive than our Earth.
+    redHigh: Far too heavy.  Lots of material was added with very little removed, so this planet ends up far more massive than our Earth.
   Spin of Earth-Moon system:
     greenLow: Spot on.  The system "angular momentum" is slightly lower than the real one — well within range.
     greenHigh: Spot on.  The system "angular momentum" is slightly higher than the real one — well within range.
@@ -28,6 +28,30 @@ planetary:
     redLow: Far too low.  This impact gave the planet hardly any spin, with not much material in orbit — unlike our fairly fast-spinning and high-orbiting early Earth and Moon.
     redHigh: Far too high.  This impact drove the planet to spin super fast, with massive amounts of material flying around in orbit.
 
+cosmos:
+  stellar_fraction:
+    greenLow: Very close.  Your universe locked just a slightly smaller fraction of its mass into stars than ours.
+    greenHigh: Very close.  Your universe locked just a slightly larger fraction of its mass into stars than ours.
+    amberLow: A bit low.  Your universe turned less of its raw material into stars, leaving it a bit darker and emptier.
+    amberHigh: A bit high.  Your universe was a bit more efficient at forging gas into stars than our own.
+    redLow: Far too low.  Your universe struggled to form stars — most of the mass is still drifting around as gas.
+    redHigh: Far too high.  Your universe is bursting with stars — it converted far more mass into starlight than ours.
+  average_temperature_kelvin:
+    greenLow: Very close.  The gas in your universe is just a shade cooler than in ours.
+    greenHigh: Very close.  The gas in your universe is just a shade warmer than in ours.
+    amberLow: A bit cool.  Your gas is cooler than expected — less energetic feedback from black holes and supernovae heating things up.
+    amberHigh: A bit hot.  Your gas is warmer than average — more energetic black holes and stars are heating up the cosmos.
+    redLow: Far too cool.  The gas in your universe is very cold — there is barely any energetic feedback happening at all.
+    redHigh: Far too hot.  The gas is scorching — black holes and stars are pumping so much energy that normal galaxy growth is disrupted.
+  nhalos:
+    greenLow: Very close.  Your universe built just a fraction fewer galaxy-sized dark matter halos than ours.
+    greenHigh: Very close.  Your universe built just a fraction more galaxy-sized dark matter halos than ours.
+    amberLow: A bit low.  Fewer galaxy-sized dark matter clumps formed — your universe needed a bit more time or stronger gravity to pull them together.
+    amberHigh: A bit high.  More galaxy-sized dark matter clumps popped up than in ours — structure formation was a little more eager.
+    redLow: Far too low.  Very few galaxy halos managed to form — structures barely clumped together.
+    redHigh: Far too high.  Galaxy halos are everywhere — your universe is absolutely teeming with dark matter structures.
+
+# Unused! Galaxy uses a scavenger hunt checklist instead of similarity bars
 galaxy:
   crowding:
     greenLow: Very close.  Your galaxy lives in a neighbourhood just a little sparser than the Milky Way's.
@@ -43,26 +67,3 @@ galaxy:
     amberHigh: A bit bright.  Your galaxy is noticeably more luminous than the Milky Way — it likely has more stars.
     redLow: Far too dim.  Your galaxy is unusually faint — it may be a small dwarf galaxy.
     redHigh: Far too bright.  Your galaxy is exceptionally luminous — it rivals the brightest galaxies in the Universe.
-
-cosmos:
-  stellar_fraction:
-    greenLow: Very close.  Your universe locked just a slightly smaller fraction of its mass into stars than ours.
-    greenHigh: Very close.  Your universe locked just a slightly larger fraction of its mass into stars than ours.
-    amberLow: A bit low.  Your universe turned less of its raw material into stars, leaving it a bit darker and emptier.
-    amberHigh: A bit high.  Your universe was a bit more efficient at cooking gas into stars than our own.
-    redLow: Far too low.  Your universe struggled to form stars — most of the mass is still drifting around as gas.
-    redHigh: Far too high.  Your universe is bursting with stars — it converted far more mass into starlight than ours.
-  average_temperature_kelvin:
-    greenLow: Very close.  The gas in your universe is just a shade cooler, on average, than in ours.
-    greenHigh: Very close.  The gas in your universe is just a shade warmer, on average, than in ours.
-    amberLow: A bit cool.  Your gas is cooler than expected — less energetic feedback from black holes and supernovae heating things up.
-    amberHigh: A bit hot.  Your gas is warmer than average — more energetic black holes and stars are heating up the cosmos.
-    redLow: Far too cool.  The gas in your universe is very cold — there is barely any energetic feedback happening at all.
-    redHigh: Far too hot.  The gas is scorching — black holes and stars are pumping so much energy that normal galaxy growth is disrupted.
-  nhalos:
-    greenLow: Very close.  Your universe built just a fraction fewer galaxy-sized dark matter halos than ours.
-    greenHigh: Very close.  Your universe built just a fraction more galaxy-sized dark matter halos than ours.
-    amberLow: A bit low.  Fewer galaxy-sized dark matter clumps formed — your universe needed a bit more time or stronger gravity to pull them together.
-    amberHigh: A bit high.  More galaxy-sized dark matter clumps popped up than in ours — structure formation was a little more eager.
-    redLow: Far too low.  Very few galaxy halos managed to form — structures barely clumped together.
-    redHigh: Far too high.  Galaxy halos are everywhere — your universe is absolutely teeming with dark matter structures.

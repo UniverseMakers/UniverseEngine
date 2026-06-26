@@ -79,6 +79,14 @@ export function createOverlayPanel(
   `;
   media.prepend(mediaImage);
 
+  const charterMark = document.createElement('img');
+
+  charterMark.className = 'config-overlay__chartermark';
+  charterMark.src = withBaseUrl('assets/credits/des9400-chartermark.webp');
+  charterMark.alt = 'DES9400 SSE 2026 Chartermark';
+  charterMark.decoding = 'async';
+  media.appendChild(charterMark);
+
   const controls = document.createElement('div');
 
   controls.className = 'config-overlay__controls';

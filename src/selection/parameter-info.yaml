@@ -12,7 +12,7 @@
 planetary:
   impactor_mass:
     label: Impactor Mass
-    description: How big was the object that smashed into the young Earth?  A more massive impactor could spray out more debris — and perhaps a bigger Moon.
+    description: How big was the object that smashed into the young Earth?  A more massive impactor could spray out more debris — and perhaps result in a bigger Moon.
     unit: Earth masses
     min: 0.01
     max: 0.35
@@ -20,7 +20,7 @@ planetary:
     primary: false
   impactor_velocity:
     label: Impact Speed
-    description: How fast was the impactor travelling when it hit?  Faster collisions are more violent, ejecting more and hotter debris.
+    description: How fast was the impactor traveling when it hit?  Faster collisions are more violent, ejecting more and hotter debris.
     unit: km/s
     min: 6.7
     max: 31
@@ -66,7 +66,7 @@ galaxy:
 cosmos:
   baryon_fraction:
     label: Baryon Fraction
-    description: How much of the Universe is made of ordinary stuff — the atoms that form stars, planets, and you?  Turn this up and there's more gas to make galaxies; turn it down and dark matter dominates.
+    description: How much of the Universe is made of ordinary "stuff" — the atoms that form stars, planets, and you?  Turn this up and there's more gas to make galaxies; turn it down and dark matter dominates.
     unit: ''
     min: 0.10
     max: 4
@@ -75,7 +75,7 @@ cosmos:
     primary: true
   black_hole_strength:
     label: Black Hole Strength
-    description: How powerfully do black holes push back?  As gas spirals inward it heats to millions of degrees.  Some of that energy blasts back out as fierce winds or jets, shutting down star formation across entire galaxies.
+    description: How powerfully do black holes push back?  As gas spirals inward it heats to millions of degrees and then some.  Some of that energy blasts back out as fierce winds or jets, shutting down star formation across entire galaxies.
     unit: 'K'
     min: 0.01
     max: 50.0

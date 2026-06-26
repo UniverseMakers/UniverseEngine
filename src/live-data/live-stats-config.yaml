@@ -76,7 +76,7 @@ galaxy:
     - id: star_formation_rate
       value: 0.0
       unit: Msun/yr
-      label: SFR
+      label: Star Formation Rate
       live: true
       live_key: StarFormationRateWithinR200_Msun_per_yr
 
