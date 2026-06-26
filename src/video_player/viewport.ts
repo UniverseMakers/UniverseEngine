@@ -2,6 +2,7 @@ import {
   fetchWithOnlineAssetFallback,
   resolveOnlineAssetUrl,
 } from '../shared/online-assets.ts';
+import { withQueryParam } from '../shared/urls.ts';
 
 /**
  * Viewport — full-page background layer for simulation media.
@@ -459,7 +460,7 @@ export function createViewport(
 
     prewarmFetchControllers.set(src, controller);
 
-    const cacheBustedUrl = `${src}?_=${Date.now()}`;
+    const cacheBustedUrl = withQueryParam(src, '_', `${Date.now()}`);
 
     void fetchWithOnlineAssetFallback(cacheBustedUrl, { signal: controller.signal })
       .then(async (response) => {

@@ -12,7 +12,7 @@ from pathlib import Path
 from generate_run_manifest import ONLINE_MANIFEST_PATH, _env_or_die, create_r2_client
 
 
-CACHE_MANIFEST = "public, max-age=300"
+CACHE_MANIFEST = "no-store, max-age=0"
 
 
 def parse_args() -> argparse.Namespace:

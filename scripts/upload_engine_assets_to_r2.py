@@ -112,7 +112,7 @@ CONTENT_TYPE_MAP: dict[str, str] = {
 # ---------------------------------------------------------------------------
 CACHE_IMMUTABLE = "public, max-age=31536000, immutable"
 CACHE_MODERATE  = "public, max-age=3600"
-CACHE_MANIFEST  = "public, max-age=300"
+CACHE_MANIFEST  = "no-store, max-age=0"
 
 
 # ===========================================================================

@@ -10,7 +10,7 @@ import {
   findBestEntry,
   getEntryDistance,
 } from './ngp_parameter_search.ts';
-import { withBaseUrl } from '../shared/urls.ts';
+import { withBaseUrl, withQueryParam } from '../shared/urls.ts';
 import {
   ONLINE_MANIFEST_BACKUP_URL,
   ONLINE_MANIFEST_URL,
@@ -73,32 +73,32 @@ export function createManifestController(
 ): ManifestController {
   let source = initialSource;
   const manifestPromises = new Map<ManifestSource, Promise<RunManifest>>();
+  const manifestCacheKeys = new Map<ManifestSource, string>();
 
   return {
     getSource() {
       return source;
     },
     setSource(nextSource) {
-      if (nextSource === 'online') {
-        manifestPromises.delete('online');
-        clearOnlineAssetHosts();
-      } else {
-        clearOnlineAssetHosts();
-      }
+      manifestPromises.delete(nextSource);
+      manifestCacheKeys.delete(nextSource);
+      clearOnlineAssetHosts();
 
       source = nextSource;
       logInfo('Manifest source updated', { source: nextSource });
     },
     resetCache() {
       manifestPromises.clear();
+      manifestCacheKeys.clear();
     },
     async preloadActiveManifest() {
-      await loadRunManifest(source, manifestPromises);
+      await loadRunManifest(source, manifestPromises, manifestCacheKeys);
     },
     async findNearestVideo(simClassId, params, values) {
       const manifestMatch = await findManifestBackedRun(
         source,
         manifestPromises,
+        manifestCacheKeys,
         simClassId,
         params,
         values,
@@ -176,6 +176,7 @@ export function getLocalPlaceholderStats(simClassId: string): string {
 async function loadRunManifest(
   source: ManifestSource,
   manifestPromises: Map<ManifestSource, Promise<RunManifest>>,
+  manifestCacheKeys: Map<ManifestSource, string>,
 ): Promise<RunManifest> {
   const cached = manifestPromises.get(source);
 
@@ -186,7 +187,7 @@ async function loadRunManifest(
   const manifestPath = MANIFEST_PATHS[source];
   const manifestPromise = (source === 'online'
     ? loadOnlineManifest(manifestPath)
-    : fetch(withBaseUrl(manifestPath)).then(async (response) => {
+    : fetch(withBaseUrl(manifestPath), { cache: 'no-store' }).then(async (response) => {
         if (!response.ok) {
           throw new Error(`Failed to load manifest: ${manifestPath}`);
         }
@@ -195,7 +196,14 @@ async function loadRunManifest(
 
         return (await response.json()) as RunManifest;
       }))
+    .then((manifest) => {
+      manifestCacheKeys.set(source, createManifestCacheKey());
+
+      return manifest;
+    })
     .catch((error) => {
+      manifestCacheKeys.delete(source);
+
       logWarn('Manifest unavailable', {
         source,
         manifestPath,
@@ -215,7 +223,7 @@ async function loadOnlineManifest(manifestPath: string): Promise<RunManifest> {
 
   for (const attemptUrl of attempts) {
     try {
-      const response = await fetch(attemptUrl);
+      const response = await fetch(attemptUrl, { cache: 'no-store' });
 
       if (!response.ok) {
         continue;
@@ -259,11 +267,12 @@ async function loadOnlineManifest(manifestPath: string): Promise<RunManifest> {
 async function findManifestBackedRun(
   source: ManifestSource,
   manifestPromises: Map<ManifestSource, Promise<RunManifest>>,
+  manifestCacheKeys: Map<ManifestSource, string>,
   simClassId: string,
   params: SimParameter[],
   values: Record<string, number>,
 ): Promise<VideoMatch | null> {
-  const manifest = await loadRunManifest(source, manifestPromises);
+  const manifest = await loadRunManifest(source, manifestPromises, manifestCacheKeys);
   const runs = manifest.runs.filter((entry) => entry.simulationId === simClassId);
 
   if (runs.length === 0) {
@@ -297,23 +306,37 @@ async function findManifestBackedRun(
   });
 
   return {
-    url: resolveManifestAssetUrl(source, videoPath),
-    liveDataUrl: resolveManifestAssetUrl(source, best.liveDataPath),
-    summaryUrl: resolveManifestAssetUrl(source, best.summaryPath),
+    url: resolveManifestAssetUrl(source, videoPath, manifestCacheKeys),
+    liveDataUrl: resolveManifestAssetUrl(source, best.liveDataPath, manifestCacheKeys),
+    summaryUrl: resolveManifestAssetUrl(source, best.summaryPath, manifestCacheKeys),
     viewId,
     runId: best.runId,
     views: Object.fromEntries(
-      Object.entries(best.views).map(([key, path]) => [key, resolveManifestAssetUrl(source, path)]),
+      Object.entries(best.views).map(([key, path]) => [
+        key,
+        resolveManifestAssetUrl(source, path, manifestCacheKeys),
+      ]),
     ),
   };
 }
 
-function resolveManifestAssetUrl(source: ManifestSource, pathOrUrl: string): string {
-  if (source === 'local') {
-    return withBaseUrl(pathOrUrl);
+function resolveManifestAssetUrl(
+  source: ManifestSource,
+  pathOrUrl: string,
+  manifestCacheKeys: Map<ManifestSource, string>,
+): string {
+  const baseUrl = source === 'local' ? withBaseUrl(pathOrUrl) : resolveOnlineAssetUrl(pathOrUrl);
+  const manifestCacheKey = manifestCacheKeys.get(source);
+
+  if (!manifestCacheKey) {
+    return baseUrl;
   }
 
-  return resolveOnlineAssetUrl(pathOrUrl);
+  return withQueryParam(baseUrl, '_manifest', manifestCacheKey);
+}
+
+function createManifestCacheKey(): string {
+  return `${Date.now()}`;
 }
 
 function getManifestBase(url: string): string {

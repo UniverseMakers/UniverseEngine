@@ -31,3 +31,25 @@ export function withBaseUrl(path: string): string {
 
   return `${normalizedBase}${normalizedPath}`;
 }
+
+/**
+ * Append or replace a query param while preserving any hash fragment.
+ */
+export function withQueryParam(url: string, key: string, value: string): string {
+  const hashIndex = url.indexOf('#');
+  const base = hashIndex >= 0 ? url.slice(0, hashIndex) : url;
+  const hash = hashIndex >= 0 ? url.slice(hashIndex) : '';
+  const pattern = new RegExp(`([?&])${escapeRegex(key)}=[^&#]*`);
+
+  if (pattern.test(base)) {
+    return `${base.replace(pattern, `$1${key}=${encodeURIComponent(value)}`)}${hash}`;
+  }
+
+  const separator = base.includes('?') ? '&' : '?';
+
+  return `${base}${separator}${key}=${encodeURIComponent(value)}${hash}`;
+}
+
+function escapeRegex(value: string): string {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
