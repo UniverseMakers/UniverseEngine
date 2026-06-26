@@ -1082,6 +1082,7 @@ button {
   font-family: var(--font-mono);
   font-size: 0.82rem;
   line-height: 1.55;
+  white-space: pre-line;
 }
 
 .view-info-overlay__close {

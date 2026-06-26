@@ -120,40 +120,34 @@ function createViewIcon(iconId?: string): SVGSVGElement | null {
   switch (iconId) {
     case 'icon_houdini':
       return createSvg(`
-        <circle cx="8" cy="11" r="3.1"></circle>
-        <path d="M11 11h2.2"></path>
-        <path d="M14.3 11 18.8 7.3"></path>
-        <path d="M14.3 11 19 14.3"></path>
-        <path d="M14.3 11 17.4 18"></path>
-        <circle cx="19.5" cy="7" r="1"></circle>
-        <circle cx="19.6" cy="14.7" r="1"></circle>
-        <circle cx="17.6" cy="18.7" r="1"></circle>
+        <rect x="4.5" y="8" width="9.8" height="8" rx="1.2"></rect>
+        <path d="M14.3 10.1 19.5 7.3v9.4l-5.2-2.8Z"></path>
+        <circle cx="8" cy="7" r="1.4"></circle>
+        <circle cx="11.3" cy="7" r="1.4"></circle>
       `);
     case 'icon_material':
       return createSvg(`
-        <circle cx="12" cy="12" r="7.2"></circle>
-        <path d="M12 4.8v14.4"></path>
-        <path d="M12 12 18.2 8.4"></path>
-        <path d="M12 12 18.2 15.6"></path>
-        <circle cx="12" cy="12" r="2.2"></circle>
+        <path d="M12 4.6a7.4 7.4 0 1 0 7.4 7.4"></path>
+        <path d="M12 12V4.6"></path>
+        <path d="M12 12h7.4"></path>
+        <path d="M12 8.8a3.2 3.2 0 0 1 3.2 3.2"></path>
+        <path d="M12 12V8.8"></path>
+        <path d="M12 12h3.2"></path>
       `);
     case 'icon_temperature':
       return createSvg(`
-        <path d="M10.6 6.2a2 2 0 0 1 4 0v7a4.3 4.3 0 1 1-4 0Z"></path>
-        <path d="M12.6 9v7"></path>
-        <path d="M14.8 6.8h3.6"></path>
-        <path d="M16.6 5v3.6"></path>
-        <circle cx="12.6" cy="17.6" r="1.5" fill="currentColor" stroke="none"></circle>
+        <path d="M10.8 6.2a2.2 2.2 0 0 1 4.4 0v7.1a4.2 4.2 0 1 1-4.4 0Z"></path>
+        <path d="M13 8.3v7.1"></path>
+        <circle cx="13" cy="17.5" r="1.6" fill="currentColor" stroke="none"></circle>
       `);
     case 'icon_pressure':
       return createSvg(`
-        <circle cx="12" cy="12" r="7.3"></circle>
-        <path d="M12 12 16.8 7.8"></path>
-        <path d="M12 7.4v1.8"></path>
-        <path d="M16.6 12h-1.8"></path>
-        <path d="M12 16.6v-1.8"></path>
-        <path d="M7.4 12h1.8"></path>
-        <circle cx="12" cy="12" r="1.2" fill="currentColor" stroke="none"></circle>
+        <path d="M5.2 16a6.8 6.8 0 1 1 13.6 0"></path>
+        <path d="M12 9.2v2"></path>
+        <path d="M8.2 10.8 9.4 12"></path>
+        <path d="M15.8 10.8 14.6 12"></path>
+        <path d="M12 16 16.4 11.8"></path>
+        <circle cx="12" cy="16" r="1.2" fill="currentColor" stroke="none"></circle>
       `);
     case 'dark-matter':
       return createSvg(`

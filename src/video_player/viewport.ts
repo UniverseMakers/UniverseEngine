@@ -130,6 +130,10 @@ export function createViewport(
   const video = document.createElement('video');
 
   video.className = 'viewport__media is-empty';
+  // Summary capture draws the video into a canvas. Mark the media element as
+  // CORS-enabled up front so progressively loaded cross-origin assets remain
+  // readable when the host serves the required CORS headers.
+  video.crossOrigin = 'anonymous';
   video.src = initialSrc;
   video.loop = false;
   video.muted = true;
@@ -423,6 +427,7 @@ export function createViewport(
         const prewarmedVideo = document.createElement('video');
 
         prewarmedVideo.preload = 'auto';
+        prewarmedVideo.crossOrigin = 'anonymous';
         prewarmedVideo.muted = true;
         prewarmedVideo.playsInline = true;
         prewarmedVideo.src = resolveOnlineAssetUrl(src);
@@ -517,14 +522,20 @@ export function createViewport(
 
     frameCaptureCanvas.width = video.videoWidth;
     frameCaptureCanvas.height = video.videoHeight;
-    frameCaptureContext.drawImage(
-      video,
-      0,
-      0,
-      frameCaptureCanvas.width,
-      frameCaptureCanvas.height,
-    );
-    lastFrameDataUrl = frameCaptureCanvas.toDataURL('image/jpeg', 0.85);
+
+    try {
+      frameCaptureContext.drawImage(
+        video,
+        0,
+        0,
+        frameCaptureCanvas.width,
+        frameCaptureCanvas.height,
+      );
+      lastFrameDataUrl = frameCaptureCanvas.toDataURL('image/jpeg', 0.85);
+    } catch {
+      // A failed thumbnail capture should never block the summary overlay.
+      lastFrameDataUrl = null;
+    }
   }
 
   function captureFrame(): string | null {
