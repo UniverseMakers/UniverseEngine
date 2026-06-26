@@ -54,7 +54,6 @@ interface RunManifestEntry {
 export interface ManifestController {
   getSource: () => ManifestSource;
   setSource: (source: ManifestSource) => void;
-  resetCache: () => void;
   preloadActiveManifest: () => Promise<void>;
   findNearestVideo: (
     simClassId: string,
@@ -86,10 +85,6 @@ export function createManifestController(
 
       source = nextSource;
       logInfo('Manifest source updated', { source: nextSource });
-    },
-    resetCache() {
-      manifestPromises.clear();
-      manifestCacheKeys.clear();
     },
     async preloadActiveManifest() {
       await loadRunManifest(source, manifestPromises, manifestCacheKeys);
