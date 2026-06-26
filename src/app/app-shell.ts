@@ -219,16 +219,12 @@ export function createAppShell(app: HTMLElement): void {
       class="swift-logo__image"
       src="${withBaseUrl('assets/credits/swift-logo.webp')}"
       alt="SWIFT"
-      width="478"
-      height="169"
       decoding="async"
     />
     <img
       class="swift-logo__image-compact"
       src="${withBaseUrl('assets/credits/swift-logo-compact.webp')}"
       alt="SWIFT"
-      width="478"
-      height="169"
       decoding="async"
     />
   `;

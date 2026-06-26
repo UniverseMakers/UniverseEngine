@@ -2832,6 +2832,10 @@ button {
     left: 1rem;
   }
 
+  .entry-overlay__actions {
+      padding: 0px 0px 80px 0px;
+  }
+
   .display-chrome__left-center {
     top: 5.25rem;
     left: 1rem;
@@ -3374,7 +3378,8 @@ button {
   }
 
   .view-switcher__info {
-    max-width: 2.2rem;
+    max-width: 3.2rem;
+    max-height: 3.2rem;
   }
 
   .view-switcher__info svg {
