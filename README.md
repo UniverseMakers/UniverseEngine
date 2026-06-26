@@ -4,6 +4,17 @@ A web app for displaying and interacting with simulation videos spread across a 
 
 ## Quick Start
 
+For the full local experience:
+
+```bash
+npm install
+npm run local
+```
+
+Open `http://localhost:5173`.
+
+For cloud-only browsing without local assets or local tracking:
+
 ```bash
 npm install
 npm run dev
@@ -25,7 +36,10 @@ workflows, see **[Running Locally](./running_locally.md)**.
 | Command | What it does |
 |---|---|
 | `npm install` | Install dependencies |
+| `npm run local` | One-command local launcher |
 | `npm run dev` | Start dev server |
+| `npm run dev:local` | Start dev server forced to local manifest mode |
+| `npm run setup:local` | Download assets and generate local manifest |
 | `npm run generate:run-manifest` | Regenerate `public/assets/local-manifest.json` |
 | `npm run build` | Production build |
 | `npm run format` | Format source files |
@@ -52,7 +66,7 @@ Current default behavior:
 - the app defaults to `online` manifest mode
 - online manifest mode fetches the bucket-hosted `run-manifest.json` from the fixed URL in `src/shared/constants.ts`
 - `local` manifest mode is still available in Advanced Settings as an explicit fallback override
-- the manifest-source choice is not persisted, so each fresh boot starts from the default again
+- `npm run dev:local` forces local manifest mode regardless of previously saved browser settings
 
 ## Current UI Structure
 
@@ -128,6 +142,23 @@ python3 scripts/generate_run_manifest.py --local --output "public/assets/local-m
 This writes:
 
 - `public/assets/local-manifest.json`
+
+### Local Setup Shortcut
+
+To prepare local assets if needed, start local tracking, and launch the app in
+local-manifest mode with one command:
+
+```bash
+npm run local
+```
+
+Lower-level helpers remain available when you want more control:
+
+```bash
+npm run setup:local
+npm run dev:local
+npm run tracking:server
+```
 
 ### 3. Refresh the online manifest
 

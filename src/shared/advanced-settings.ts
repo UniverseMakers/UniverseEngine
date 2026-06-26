@@ -10,13 +10,14 @@ export interface AdvancedSettings {
 }
 
 const STORAGE_KEY = 'universe-engine-advanced-settings';
+const FORCED_MANIFEST_SOURCE = getForcedManifestSource();
 
 export const ADVANCED_SETTINGS_PASSWORD = 'RSSSE26UM_Engine';
 
 export function getDefaultAdvancedSettings(): AdvancedSettings {
   return {
     lockedScaleId: null,
-    manifestSource: 'online',
+    manifestSource: FORCED_MANIFEST_SOURCE ?? 'online',
     verboseLogging: false,
     hiddenScaleIds: [],
     audioMutedByDefault: true,
@@ -67,10 +68,10 @@ export function normalizeAdvancedSettings(
 ): AdvancedSettings {
   const defaults = getDefaultAdvancedSettings();
   const validScaleIds = new Set(scaleIds);
-  const manifestSource =
-    settings.manifestSource === 'online' || settings.manifestSource === 'local'
+  const manifestSource = FORCED_MANIFEST_SOURCE ??
+    (settings.manifestSource === 'online' || settings.manifestSource === 'local'
       ? settings.manifestSource
-      : defaults.manifestSource;
+      : defaults.manifestSource);
   const lockedScaleId =
     typeof settings.lockedScaleId === 'string' && validScaleIds.has(settings.lockedScaleId)
       ? settings.lockedScaleId
@@ -124,4 +125,10 @@ export function getVisibleScaleIds(
   const visible = scaleIds.filter((scaleId) => !hidden.has(scaleId));
 
   return visible.length > 0 ? visible : scaleIds.slice(0, 1);
+}
+
+function getForcedManifestSource(): ManifestSource | null {
+  const value = import.meta.env.VITE_MANIFEST_SOURCE;
+
+  return value === 'local' || value === 'online' ? value : null;
 }

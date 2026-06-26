@@ -57,6 +57,21 @@ brew install ffmpeg
 sudo apt install ffmpeg
 ```
 
+## Quick start
+
+For the full local experience, start here:
+
+```bash
+npm install
+npm run local
+```
+
+Open `http://localhost:5173`.
+
+`npm run local` downloads assets and generates `public/assets/local-manifest.json`
+if needed, starts local tracking, and launches the app in forced local-manifest
+mode.
+
 ## Quick start (with cloud assets)
 
 If you just want to browse the simulation runs that are already hosted online,
@@ -76,45 +91,65 @@ streams assets from the Cloudflare R2 bucket.
 
 ## Full local setup (with offline assets)
 
-For a fully offline experience — or if you want to work with a specific subset
-of runs — follow these steps from a fresh clone.
+The recommended command is still:
 
-### 1. Clone and install
+```bash
+npm run local
+```
+
+This one command:
+
+1. downloads assets and generates `public/assets/local-manifest.json` if needed
+2. starts the local tracking server and creates `local_tracking.db` if needed
+3. starts Vite in forced local-manifest mode
+
+Use the lower-level commands below only if you want more control over individual steps.
+
+## Manual local commands
+
+### Clone and install
 
 ```bash
 git clone <repo-url> && cd UniverseEngine
 npm install
 ```
 
-### 2. Download simulation assets
+### Prepare assets and manifest
 
-Pull the file tree you want from the cloud into your local `public/assets/`
-directory:
+One-step asset setup:
 
 ```bash
-npm run download:assets          # all three families (planetary, galaxy, cosmos)
+npm run setup:local
+```
+
+Or, if you want finer control:
+
+```bash
+npm run download:assets          # all three families
 npm run download:cosmos          # cosmos only
+npm run generate:run-manifest    # regenerate local manifest
 ```
 
-This reads `public/assets/run-manifest.json` (the online manifest) and
-downloads every referenced video, CSV, and YAML file.  Files that already
-exist locally are skipped, so you can run it again to grab only what's new.
+This reads `public/assets/run-manifest.json` and downloads every referenced
+video, CSV, and YAML file. Files that already exist locally are skipped.
 
-If you already have assets in `public/assets/` that you copied manually,
-skip this step.
-
-### 3. Generate the local manifest
-
-The manifest tells the frontend which runs exist and where their files live:
+### Start just the frontend in local-manifest mode
 
 ```bash
-npm run generate:run-manifest
+npm run dev:local
 ```
 
-This writes `public/assets/local-manifest.json`.  Re-run it whenever you add
-or remove run directories under `public/assets/`.
+This forces the app to use `public/assets/local-manifest.json` on startup.
 
-### 4. (Optional) Refresh run summaries
+### Start just the tracking server
+
+```bash
+npm run tracking:server
+```
+
+This writes run selections to `local_tracking.db`.
+
+### (Optional) Refresh run summaries
 
 If CSV data or video files have changed and you need up-to-date
 `run_summary.yaml` files for every run:
@@ -125,29 +160,18 @@ python3 scripts/generate_run_summaries.py
 
 Requires `ffprobe`.
 
-### 5. Switch to local manifest mode
+### Manual UI fallback
 
-The app defaults to **online** manifest mode.  To use your downloaded assets:
+If you start with plain `npm run dev`, the app defaults to **online** manifest
+mode unless you change it manually:
 
 1. Start the dev server: `npm run dev`
 2. Open Settings (burger menu → Settings)
 3. Click the **Advanced Settings** toggle and enter the password: `RSSSE26UM_Engine`
 4. Set **Manifest Source** to `local`
 
-This setting is not persisted — you'll need to switch it again on each fresh
-boot.
-
 > **Tip:** You can verify the switch worked by checking the browser console
 > for `Manifest source: local` messages.
-
-### 6. Start the dev server
-
-```bash
-npm run dev
-```
-
-Open `http://localhost:5173`.  You should now have video playback, live
-telemetry, and end-of-run summaries all working from local files.
 
 ## Local tracking
 
@@ -155,17 +179,17 @@ When you select a run and press "Let's Go", the app sends a tracking POST with
 the chosen parameters.  In production this goes to a Cloudflare Worker that
 writes to a D1 database.  We can replicate that locally.
 
-### Start the tracking server
+`npm run local` starts this for you automatically.
 
-In a **separate terminal** alongside `npm run dev`:
+If you are running the pieces manually, start the tracking server in a separate
+terminal:
 
 ```bash
 npm run tracking:server
 ```
 
 This starts a small Python HTTP server on `http://127.0.0.1:8765` that receives
-`POST /api/track-run` and writes each selection to `local_tracking.db` (a
-SQLite file at the repo root, gitignored).
+`POST /api/track-run` and writes each selection to `local_tracking.db`.
 
 In dev mode, Vite proxies `/api/track-run` to this server automatically, so
 your parameter selections are recorded without any manual configuration.

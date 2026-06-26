@@ -6,6 +6,8 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "dev:local": "vite --mode localmanifest",
+    "local": "python3 scripts/run_local.py",
     "build": "tsc && vite build",
     "lint": "eslint \"src/**/*.ts\"",
     "lint:fix": "eslint --fix \"src/**/*.ts\"",
@@ -13,6 +15,7 @@
     "generate:run-manifest": "python3 scripts/generate_run_manifest.py --local",
     "download:assets": "python3 scripts/download_engine_assets.py",
     "download:cosmos": "python3 scripts/download_engine_assets.py --simulation cosmos",
+    "setup:local": "python3 scripts/download_engine_assets.py && python3 scripts/generate_run_manifest.py --local",
     "tracking:server": "python3 scripts/local_tracking_server.py",
     "tracking:sync": "python3 scripts/sync_tracking_to_d1.py",
     "format": "prettier --write \"src/**/*.{ts,css,yaml,yml}\" \"*.{md,json}\"",

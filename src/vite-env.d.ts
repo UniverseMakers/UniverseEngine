@@ -1,5 +1,9 @@
 /// <reference types="vite/client" />
 
+interface ImportMetaEnv {
+  readonly VITE_MANIFEST_SOURCE?: 'local' | 'online';
+}
+
 /**
  * Module declaration for importing `.yaml` files as raw strings.
  *
