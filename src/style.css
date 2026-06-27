@@ -1939,6 +1939,15 @@ button {
   flex: 1 1 auto;
 }
 
+@media (width < 750px) {
+    .sci-bottom-row {
+	flex-direction: column;
+    }
+    .sci-section {
+	max-width: unset;;
+    }
+}
+
 .sci-bottom-row .sci-bars {
   flex: 1 1 auto;
   justify-content: space-evenly;
