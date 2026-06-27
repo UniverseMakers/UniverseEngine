@@ -2963,6 +2963,12 @@ button {
     max-width: calc(100vw - 2rem);
   }
 
+  @media (width < 750px) {
+      .data-panel {
+	  display: none;
+      }
+  }
+
   .display-chrome__bottom {
     right: 1.5rem;
     bottom: 1rem;
