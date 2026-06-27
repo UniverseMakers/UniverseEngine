@@ -316,6 +316,7 @@ def build_manifest_entry(
     live_data_path = run_dir / "live_data_table.csv"
     run_summary_yaml = run_dir / "run_summary.yaml"
     parameters_yaml = run_dir / "parameters.yaml"
+    audio_track = run_dir / "audio_track.wav"
 
     view_paths = {
         infer_view_id(video): path_builder(video)
@@ -335,6 +336,9 @@ def build_manifest_entry(
 
     if parameters_yaml.exists():
         entry["paramsPath"] = path_builder(parameters_yaml)
+
+    if audio_track.exists():
+        entry["audioPath"] = path_builder(audio_track)
 
     return entry
 
@@ -400,6 +404,7 @@ def build_manifest_entry_from_r2(
     live_data_key = f"{run_root}live_data_table.csv"
     summary_key = f"{run_root}run_summary.yaml"
     parameter_key = f"{run_root}parameters.yaml"
+    audio_key = f"{run_root}audio_track.wav"
 
     view_paths = {
         infer_view_id(Path(video_key)): to_manifest_asset_path(object_prefix, video_key)
@@ -428,6 +433,9 @@ def build_manifest_entry_from_r2(
 
     if parameter_key in object_keys:
         entry["paramsPath"] = to_manifest_asset_path(object_prefix, parameter_key)
+
+    if audio_key in object_keys:
+        entry["audioPath"] = to_manifest_asset_path(object_prefix, audio_key)
 
     return entry
 

@@ -1137,7 +1137,7 @@ export function createAppShell(app: HTMLElement): void {
     // Fire-and-forget the async data loads — they'll update the HUD when done.
     void loadActiveLiveStats(match.liveDataUrl, runRequestId);
     void loadActiveRunMetadata(match.summaryUrl, runRequestId);
-    void loadActiveRunAudio(match.summaryUrl, runRequestId);
+    void loadActiveRunAudio(match.summaryUrl, runRequestId, match.audioUrl);
     viewport.setMuted(true);
     refreshViewSwitcher(selectedViewId);
     refreshAudioControlVisibility();
@@ -1826,16 +1826,21 @@ export function createAppShell(app: HTMLElement): void {
     return activeClass.views.some((view) => view.id === selectedViewId && view.audio);
   }
 
-  function getRunAudioUrl(summaryUrl: string): string {
+  function getRunAudioUrl(summaryUrl: string, audioUrl?: string): string {
+    if (audioUrl) {
+      return audioUrl;
+    }
+
     return summaryUrl.replace(/run_summary\.yaml($|\?)/, 'audio_track.wav$1');
   }
 
   async function loadActiveRunAudio(
     summaryUrl: string,
     runRequestId: number,
+    audioUrl?: string,
   ): Promise<void> {
-    const audioUrl = getRunAudioUrl(summaryUrl);
-    const resolvedAudioUrl = resolveOnlineAssetUrl(audioUrl);
+    const resolvedAudioPath = getRunAudioUrl(summaryUrl, audioUrl);
+    const resolvedAudioUrl = resolveOnlineAssetUrl(resolvedAudioPath);
 
     if (knownAvailableAudioUrls.has(resolvedAudioUrl)) {
       activateRunAudio(resolvedAudioUrl);
@@ -1844,7 +1849,7 @@ export function createAppShell(app: HTMLElement): void {
     }
 
     const probeNonce = ++audioProbeNonce;
-    const available = await doesAudioTrackExist(audioUrl);
+      const available = await doesAudioTrackExist(resolvedAudioPath);
 
     if (!runRequests.isCurrent(runRequestId) || probeNonce !== audioProbeNonce) {
       return;

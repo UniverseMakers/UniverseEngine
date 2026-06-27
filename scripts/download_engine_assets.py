@@ -214,6 +214,19 @@ def collect_downloads(
                 )
             )
 
+        # ── optional audio track ────────────────────────────────────────
+        audio_url = entry.get("audioPath") or derive_audio_url(entry.get("summaryPath", ""))
+        if audio_url:
+            tasks.append(
+                build_download_task(
+                    entry=entry,
+                    url=resolve_asset_url(audio_url, primary_base),
+                    backup_url=resolve_asset_url(audio_url, backup_base),
+                    dest=base / "audio_track.wav",
+                    asset_kind="audio",
+                )
+            )
+
         # ── view videos ────────────────────────────────────────────────
         for view_id, video_url in entry.get("views", {}).items():
             filename = urlparse(video_url).path.rsplit("/", 1)[-1]
@@ -251,6 +264,13 @@ def derive_params_url(summary_path: str) -> str:
         return ""
 
     return summary_path.replace("run_summary.yaml", "parameters.yaml")
+
+
+def derive_audio_url(summary_path: str) -> str:
+    if not isinstance(summary_path, str) or not summary_path:
+        return ""
+
+    return summary_path.replace("run_summary.yaml", "audio_track.wav")
 
 
 def format_size(num_bytes: int) -> str:
