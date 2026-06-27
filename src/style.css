@@ -3249,7 +3249,7 @@ button {
     min-height: 0;
     overflow: hidden;
     gap: 1.75rem;
-    padding-top: 2.2rem;
+    padding-top: 3.5rem;
     padding-bottom: calc(2.2rem + env(safe-area-inset-bottom));
   }
 
@@ -3311,7 +3311,27 @@ button {
   }
 
   .param-card__range {
-    display: block;
+      display: block;
+  }
+
+  .param-card__header {
+      display: grid;
+      grid-template-columns: auto auto;
+      justify-content: space-between;
+      row-gap: 0px;
+      column-gap: 10rem;
+  }
+  .param-card__header span:nth-child(1) {
+      grid-row: 1;
+      grid-column: 1;
+  }
+  .param-card__header span:nth-child(3) {
+      grid-row: 1;
+      grid-column: 2;
+  }
+  .param-card__header span:nth-child(2) {
+      grid-row: 2;
+      grid-column: span 2;
   }
 
   .param-card .res-card__value {
@@ -3343,6 +3363,7 @@ button {
   .run-button {
     width: 100%;
     max-width: none;
+    padding: 1.2rem;
   }
 
   .display-chrome__top-left {
