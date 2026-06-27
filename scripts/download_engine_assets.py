@@ -215,7 +215,7 @@ def collect_downloads(
             )
 
         # ── optional audio track ────────────────────────────────────────
-        audio_url = entry.get("audioPath") or derive_audio_url(entry.get("summaryPath", ""))
+        audio_url = entry.get("audioPath")
         if audio_url:
             tasks.append(
                 build_download_task(
@@ -264,13 +264,6 @@ def derive_params_url(summary_path: str) -> str:
         return ""
 
     return summary_path.replace("run_summary.yaml", "parameters.yaml")
-
-
-def derive_audio_url(summary_path: str) -> str:
-    if not isinstance(summary_path, str) or not summary_path:
-        return ""
-
-    return summary_path.replace("run_summary.yaml", "audio_track.wav")
 
 
 def format_size(num_bytes: int) -> str:
