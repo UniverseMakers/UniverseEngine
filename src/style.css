@@ -832,9 +832,10 @@ button {
 	max-width: 60%;
     }
 }
-@media (width < 1024px) {
+/* @media (width <= 1368px) and (orientation: portrait) { */
+@media (width <= 1600px) and (orientation: portrait) {
     .timeline {
-	margin: 5rem auto;
+	margin: 15% auto;
 	max-width: unset;
     }
 }
@@ -3041,7 +3042,7 @@ button {
   }
 }
 
-@media (width < 750px) {
+@media (width < 750px), (height < 450px) {
     .data-panel {
 	display: none;
     }
@@ -3486,7 +3487,6 @@ button {
   .view-switcher__button {
     flex: 1;
     min-width: 7.98rem;
-    max-height: 1.8rem;
     gap: 0.6rem;
     padding: 0.55rem 0.77rem;
     font-size: 0.64rem;
@@ -3626,6 +3626,18 @@ button {
   .data-panel__metrics {
     max-height: min(14.5rem, calc(100dvh - 10rem));
   }
+}
+
+@media (height <=750px) and (orientation: landscape) {
+    .view-switcher__button {
+	flex: 1;
+	min-width: 7.98rem;
+	max-height: 1.8rem;
+	gap: 0.6rem;
+	padding: 0.55rem 0.77rem;
+	font-size: 0.64rem;
+	letter-spacing: 0.14em;
+    }
 }
 
 /* ── SWIFT logo (bottom-right corner) ─────────────────────────────────── */
