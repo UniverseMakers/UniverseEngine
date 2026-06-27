@@ -827,6 +827,30 @@ button {
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
 }
+@media (width < 1560px) {
+    .timeline {
+	max-width: 60%;
+    }
+}
+@media (width < 1024px) {
+    .timeline {
+	margin: 5rem auto;
+	max-width: unset;
+    }
+}
+
+@media (width < 750px) {
+    .timeline {
+	max-width: 80%;
+	margin: 0 auto;
+    }
+}
+@media (width < 525px) {
+    .timeline {
+	max-width: 100%;
+	margin: 5rem auto;
+    }
+}
 
 .timeline__bar-row {
   display: flex;
@@ -2982,10 +3006,6 @@ button {
     right: 1.5rem;
     bottom: 1rem;
     left: 1.5rem;
-  }
-
-  .timeline {
-    width: 100%;
   }
 
   .terminal {
