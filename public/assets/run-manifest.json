@@ -2901,7 +2901,8 @@
         "line_trace": "/engine/galaxy/track0/animations/line_trace.mp4",
         "turntable": "/engine/galaxy/track0/animations/turntable.mp4"
       },
-      "paramsPath": "/engine/galaxy/track0/parameters.yaml"
+      "paramsPath": "/engine/galaxy/track0/parameters.yaml",
+      "audioPath": "/engine/galaxy/track0/audio_track.wav"
     },
     {
       "simulationId": "galaxy",
@@ -2919,7 +2920,8 @@
         "line_trace": "/engine/galaxy/track1/animations/line_trace.mp4",
         "turntable": "/engine/galaxy/track1/animations/turntable.mp4"
       },
-      "paramsPath": "/engine/galaxy/track1/parameters.yaml"
+      "paramsPath": "/engine/galaxy/track1/parameters.yaml",
+      "audioPath": "/engine/galaxy/track1/audio_track.wav"
     },
     {
       "simulationId": "galaxy",
@@ -2937,7 +2939,8 @@
         "line_trace": "/engine/galaxy/track1041/animations/line_trace.mp4",
         "turntable": "/engine/galaxy/track1041/animations/turntable.mp4"
       },
-      "paramsPath": "/engine/galaxy/track1041/parameters.yaml"
+      "paramsPath": "/engine/galaxy/track1041/parameters.yaml",
+      "audioPath": "/engine/galaxy/track1041/audio_track.wav"
     },
     {
       "simulationId": "galaxy",
@@ -2955,7 +2958,8 @@
         "line_trace": "/engine/galaxy/track11/animations/line_trace.mp4",
         "turntable": "/engine/galaxy/track11/animations/turntable.mp4"
       },
-      "paramsPath": "/engine/galaxy/track11/parameters.yaml"
+      "paramsPath": "/engine/galaxy/track11/parameters.yaml",
+      "audioPath": "/engine/galaxy/track11/audio_track.wav"
     },
     {
       "simulationId": "galaxy",
@@ -2973,7 +2977,8 @@
         "line_trace": "/engine/galaxy/track15380/animations/line_trace.mp4",
         "turntable": "/engine/galaxy/track15380/animations/turntable.mp4"
       },
-      "paramsPath": "/engine/galaxy/track15380/parameters.yaml"
+      "paramsPath": "/engine/galaxy/track15380/parameters.yaml",
+      "audioPath": "/engine/galaxy/track15380/audio_track.wav"
     },
     {
       "simulationId": "galaxy",
@@ -2991,7 +2996,8 @@
         "line_trace": "/engine/galaxy/track18632/animations/line_trace.mp4",
         "turntable": "/engine/galaxy/track18632/animations/turntable.mp4"
       },
-      "paramsPath": "/engine/galaxy/track18632/parameters.yaml"
+      "paramsPath": "/engine/galaxy/track18632/parameters.yaml",
+      "audioPath": "/engine/galaxy/track18632/audio_track.wav"
     },
     {
       "simulationId": "galaxy",
@@ -3009,7 +3015,8 @@
         "line_trace": "/engine/galaxy/track21/animations/line_trace.mp4",
         "turntable": "/engine/galaxy/track21/animations/turntable.mp4"
       },
-      "paramsPath": "/engine/galaxy/track21/parameters.yaml"
+      "paramsPath": "/engine/galaxy/track21/parameters.yaml",
+      "audioPath": "/engine/galaxy/track21/audio_track.wav"
     },
     {
       "simulationId": "galaxy",
@@ -3027,7 +3034,8 @@
         "line_trace": "/engine/galaxy/track2294/animations/line_trace.mp4",
         "turntable": "/engine/galaxy/track2294/animations/turntable.mp4"
       },
-      "paramsPath": "/engine/galaxy/track2294/parameters.yaml"
+      "paramsPath": "/engine/galaxy/track2294/parameters.yaml",
+      "audioPath": "/engine/galaxy/track2294/audio_track.wav"
     },
     {
       "simulationId": "galaxy",
@@ -3045,7 +3053,8 @@
         "line_trace": "/engine/galaxy/track2320/animations/line_trace.mp4",
         "turntable": "/engine/galaxy/track2320/animations/turntable.mp4"
       },
-      "paramsPath": "/engine/galaxy/track2320/parameters.yaml"
+      "paramsPath": "/engine/galaxy/track2320/parameters.yaml",
+      "audioPath": "/engine/galaxy/track2320/audio_track.wav"
     },
     {
       "simulationId": "galaxy",
@@ -3063,7 +3072,8 @@
         "line_trace": "/engine/galaxy/track26582/animations/line_trace.mp4",
         "turntable": "/engine/galaxy/track26582/animations/turntable.mp4"
       },
-      "paramsPath": "/engine/galaxy/track26582/parameters.yaml"
+      "paramsPath": "/engine/galaxy/track26582/parameters.yaml",
+      "audioPath": "/engine/galaxy/track26582/audio_track.wav"
     },
     {
       "simulationId": "galaxy",
@@ -3081,7 +3091,8 @@
         "line_trace": "/engine/galaxy/track2673/animations/line_trace.mp4",
         "turntable": "/engine/galaxy/track2673/animations/turntable.mp4"
       },
-      "paramsPath": "/engine/galaxy/track2673/parameters.yaml"
+      "paramsPath": "/engine/galaxy/track2673/parameters.yaml",
+      "audioPath": "/engine/galaxy/track2673/audio_track.wav"
     },
     {
       "simulationId": "galaxy",
@@ -3099,7 +3110,8 @@
         "line_trace": "/engine/galaxy/track28/animations/line_trace.mp4",
         "turntable": "/engine/galaxy/track28/animations/turntable.mp4"
       },
-      "paramsPath": "/engine/galaxy/track28/parameters.yaml"
+      "paramsPath": "/engine/galaxy/track28/parameters.yaml",
+      "audioPath": "/engine/galaxy/track28/audio_track.wav"
     },
     {
       "simulationId": "galaxy",
@@ -3117,7 +3129,8 @@
         "line_trace": "/engine/galaxy/track28880/animations/line_trace.mp4",
         "turntable": "/engine/galaxy/track28880/animations/turntable.mp4"
       },
-      "paramsPath": "/engine/galaxy/track28880/parameters.yaml"
+      "paramsPath": "/engine/galaxy/track28880/parameters.yaml",
+      "audioPath": "/engine/galaxy/track28880/audio_track.wav"
     },
     {
       "simulationId": "galaxy",
@@ -3135,7 +3148,8 @@
         "line_trace": "/engine/galaxy/track308/animations/line_trace.mp4",
         "turntable": "/engine/galaxy/track308/animations/turntable.mp4"
       },
-      "paramsPath": "/engine/galaxy/track308/parameters.yaml"
+      "paramsPath": "/engine/galaxy/track308/parameters.yaml",
+      "audioPath": "/engine/galaxy/track308/audio_track.wav"
     },
     {
       "simulationId": "galaxy",
@@ -3153,7 +3167,8 @@
         "line_trace": "/engine/galaxy/track33088/animations/line_trace.mp4",
         "turntable": "/engine/galaxy/track33088/animations/turntable.mp4"
       },
-      "paramsPath": "/engine/galaxy/track33088/parameters.yaml"
+      "paramsPath": "/engine/galaxy/track33088/parameters.yaml",
+      "audioPath": "/engine/galaxy/track33088/audio_track.wav"
     },
     {
       "simulationId": "galaxy",
@@ -3171,7 +3186,8 @@
         "line_trace": "/engine/galaxy/track4298/animations/line_trace.mp4",
         "turntable": "/engine/galaxy/track4298/animations/turntable.mp4"
       },
-      "paramsPath": "/engine/galaxy/track4298/parameters.yaml"
+      "paramsPath": "/engine/galaxy/track4298/parameters.yaml",
+      "audioPath": "/engine/galaxy/track4298/audio_track.wav"
     },
     {
       "simulationId": "galaxy",
@@ -3189,7 +3205,8 @@
         "line_trace": "/engine/galaxy/track4567/animations/line_trace.mp4",
         "turntable": "/engine/galaxy/track4567/animations/turntable.mp4"
       },
-      "paramsPath": "/engine/galaxy/track4567/parameters.yaml"
+      "paramsPath": "/engine/galaxy/track4567/parameters.yaml",
+      "audioPath": "/engine/galaxy/track4567/audio_track.wav"
     },
     {
       "simulationId": "galaxy",
@@ -3207,7 +3224,8 @@
         "line_trace": "/engine/galaxy/track47/animations/line_trace.mp4",
         "turntable": "/engine/galaxy/track47/animations/turntable.mp4"
       },
-      "paramsPath": "/engine/galaxy/track47/parameters.yaml"
+      "paramsPath": "/engine/galaxy/track47/parameters.yaml",
+      "audioPath": "/engine/galaxy/track47/audio_track.wav"
     },
     {
       "simulationId": "galaxy",
@@ -3225,7 +3243,8 @@
         "line_trace": "/engine/galaxy/track492/animations/line_trace.mp4",
         "turntable": "/engine/galaxy/track492/animations/turntable.mp4"
       },
-      "paramsPath": "/engine/galaxy/track492/parameters.yaml"
+      "paramsPath": "/engine/galaxy/track492/parameters.yaml",
+      "audioPath": "/engine/galaxy/track492/audio_track.wav"
     },
     {
       "simulationId": "galaxy",
@@ -3243,7 +3262,8 @@
         "line_trace": "/engine/galaxy/track5158/animations/line_trace.mp4",
         "turntable": "/engine/galaxy/track5158/animations/turntable.mp4"
       },
-      "paramsPath": "/engine/galaxy/track5158/parameters.yaml"
+      "paramsPath": "/engine/galaxy/track5158/parameters.yaml",
+      "audioPath": "/engine/galaxy/track5158/audio_track.wav"
     },
     {
       "simulationId": "galaxy",
@@ -3261,7 +3281,8 @@
         "line_trace": "/engine/galaxy/track516/animations/line_trace.mp4",
         "turntable": "/engine/galaxy/track516/animations/turntable.mp4"
       },
-      "paramsPath": "/engine/galaxy/track516/parameters.yaml"
+      "paramsPath": "/engine/galaxy/track516/parameters.yaml",
+      "audioPath": "/engine/galaxy/track516/audio_track.wav"
     },
     {
       "simulationId": "galaxy",
@@ -3279,7 +3300,8 @@
         "line_trace": "/engine/galaxy/track6438/animations/line_trace.mp4",
         "turntable": "/engine/galaxy/track6438/animations/turntable.mp4"
       },
-      "paramsPath": "/engine/galaxy/track6438/parameters.yaml"
+      "paramsPath": "/engine/galaxy/track6438/parameters.yaml",
+      "audioPath": "/engine/galaxy/track6438/audio_track.wav"
     },
     {
       "simulationId": "galaxy",
@@ -3297,7 +3319,8 @@
         "line_trace": "/engine/galaxy/track738/animations/line_trace.mp4",
         "turntable": "/engine/galaxy/track738/animations/turntable.mp4"
       },
-      "paramsPath": "/engine/galaxy/track738/parameters.yaml"
+      "paramsPath": "/engine/galaxy/track738/parameters.yaml",
+      "audioPath": "/engine/galaxy/track738/audio_track.wav"
     },
     {
       "simulationId": "galaxy",
@@ -3315,7 +3338,8 @@
         "line_trace": "/engine/galaxy/track82/animations/line_trace.mp4",
         "turntable": "/engine/galaxy/track82/animations/turntable.mp4"
       },
-      "paramsPath": "/engine/galaxy/track82/parameters.yaml"
+      "paramsPath": "/engine/galaxy/track82/parameters.yaml",
+      "audioPath": "/engine/galaxy/track82/audio_track.wav"
     },
     {
       "simulationId": "cosmos",
