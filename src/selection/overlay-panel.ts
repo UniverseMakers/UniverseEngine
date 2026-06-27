@@ -26,6 +26,7 @@ export interface OverlayPanelController {
   setTheme: (theme: ThemeId) => void;
   setView: (view: OverlayPanelView) => void;
   setAdvancedSettings: (settings: AdvancedSettings) => void;
+  setBackVisible: (visible: boolean) => void;
 }
 
 export type OverlayPanelView = 'parameters' | 'settings' | 'credits';
@@ -75,9 +76,13 @@ export function createOverlayPanel(
   media.innerHTML = `
     <div class="config-overlay__media-copy">
       <h1 class="config-overlay__headline">Universe \n Engine</h1>
+      <p class="config-overlay__media-subtitle"></p>
     </div>
   `;
   media.prepend(mediaImage);
+  const mediaSubtitle = media.querySelector(
+    '.config-overlay__media-subtitle',
+  ) as HTMLParagraphElement;
 
   const charterMark = document.createElement('img');
 
@@ -416,6 +421,7 @@ export function createOverlayPanel(
 
   let pendingAdvancedSettings = cloneAdvancedSettings(options.advancedSettings);
   let advancedState: 'closed' | 'auth' | 'open' = 'closed';
+  let parameterBackVisible = !options.advancedSettings.lockedScaleId;
 
   const parameterEditor = createParameterEditor(
     parametersHost,
@@ -501,6 +507,7 @@ export function createOverlayPanel(
 
   applyView(options.initialView ?? 'parameters');
   syncAdvancedControls();
+  setBackVisible(parameterBackVisible);
 
   function applyView(view: OverlayPanelView): void {
     controls.dataset.view = view;
@@ -511,6 +518,8 @@ export function createOverlayPanel(
       titleSubtitle.textContent =
         options.simClass.parameterSubtitle ??
         "Adjust the parameters, inspect the setup, and press 'Run' when you're ready.";
+      mediaSubtitle.textContent = options.simClass.label;
+      mediaSubtitle.hidden = false;
       mediaImage.src = options.simClass.placeholderImage;
       mediaImage.alt = `${options.simClass.label} preview`;
     } else if (view === 'settings') {
@@ -518,6 +527,8 @@ export function createOverlayPanel(
       titleText.textContent = 'Adjust The Control Room';
       titleSubtitle.textContent =
         'Change the interface theme and manage exhibit-level options for this installation.';
+      mediaSubtitle.textContent = '';
+      mediaSubtitle.hidden = true;
       mediaImage.src = withBaseUrl('assets/Cluster_Stuart.webp');
       mediaImage.alt = 'Galaxy cluster simulation preview';
     } else {
@@ -525,17 +536,20 @@ export function createOverlayPanel(
       titleText.textContent = 'Project Sources And Attribution';
       titleSubtitle.textContent =
         'Review the datasets, imagery, and supporting materials behind this experience.';
+      mediaSubtitle.textContent = '';
+      mediaSubtitle.hidden = true;
       mediaImage.src = withBaseUrl('assets/synthetic_hst_pretty_galaxy.webp');
       mediaImage.alt = 'Synthetic galaxy image preview';
     }
 
     if (view === 'settings') {
       footerButton.textContent = 'Apply';
-    } else if (view === 'credits') {
-      footerButton.textContent = 'Close';
     } else {
       footerButton.textContent = 'Run Simulation';
     }
+
+    footer.hidden = view === 'credits';
+    syncCloseButton();
   }
 
   function syncAdvancedControls(): void {
@@ -596,17 +610,27 @@ export function createOverlayPanel(
     audioVolumeValue.textContent = `${Math.round(Number(audioVolumeInput.value))}%`;
   }
 
+  function syncCloseButton(): void {
+    const activeView = controls.dataset.view as OverlayPanelView;
+    const showCloseButton =
+      activeView === 'settings' || activeView === 'credits' || parameterBackVisible;
+
+    closeButton.hidden = !showCloseButton;
+    closeButton.classList.toggle('is-hidden', !showCloseButton);
+    closeButton.setAttribute('aria-label', activeView === 'parameters' ? 'Back' : 'Close');
+    closeButton.textContent = activeView === 'parameters' ? '←' : '×';
+  }
+
+  function setBackVisible(visible: boolean): void {
+    parameterBackVisible = visible;
+    syncCloseButton();
+  }
+
   footerButton.addEventListener('click', () => {
     const activeView = controls.dataset.view as OverlayPanelView;
 
     if (activeView === 'settings') {
       options.onApplySettings(cloneAdvancedSettings(pendingAdvancedSettings));
-
-      return;
-    }
-
-    if (activeView === 'credits') {
-      options.onClose();
 
       return;
     }
@@ -651,6 +675,7 @@ export function createOverlayPanel(
       syncAdvancedControls();
       resetAdvancedPanel();
     },
+    setBackVisible,
   };
 }
 

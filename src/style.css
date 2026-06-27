@@ -2166,7 +2166,10 @@ button {
 .config-overlay__media-copy {
   position: relative;
   z-index: 1;
-  max-width: 15rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+  max-width: 18rem;
 }
 
 .config-overlay__headline,
@@ -2182,6 +2185,18 @@ button {
   font-size: 2.15rem;
   font-weight: 700;
   letter-spacing: 0.08em;
+}
+
+.config-overlay__media-subtitle {
+  margin: 0;
+  color: var(--text-primary);
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  font-weight: 700;
+  line-height: 1.05;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  text-wrap: balance;
 }
 
 .config-overlay__settings-copy {
@@ -2238,6 +2253,10 @@ button {
   gap: 0.35rem;
   flex: 1;
   min-width: 0;
+}
+
+.config-overlay__controls[data-view='parameters'] .config-overlay__eyebrow {
+  display: none;
 }
 
 .config-overlay__title {
@@ -2307,6 +2326,10 @@ button {
 /* Credits view hides everything except the credits section itself. */
 .config-overlay__controls[data-view='credits'] [data-section='parameters'],
 .config-overlay__controls[data-view='credits'] [data-section='settings'] {
+  display: none;
+}
+
+.config-overlay__controls[data-view='credits'] .config-overlay__footer {
   display: none;
 }
 
@@ -3227,6 +3250,10 @@ button {
   .config-overlay__title-block {
     grid-column: 1;
     grid-row: 1;
+  }
+
+  .config-overlay__controls[data-view='parameters'] .config-overlay__eyebrow {
+    display: block;
   }
 
   .config-overlay__title {
