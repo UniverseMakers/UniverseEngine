@@ -2169,6 +2169,13 @@ button {
   pointer-events: none;
 }
 
+@media (width <= 1024px) {
+    .config-overlay__chartermark {
+	left: unset;
+	right: 1.25rem;
+    }
+}
+
 .config-overlay__media-copy {
   position: relative;
   z-index: 1;
