@@ -945,6 +945,36 @@ button {
   background: rgba(34, 211, 238, 0.18);
 }
 
+@media (width < 525px) {
+    .timeline__bar-row {
+	display: grid;
+	grid-template-columns: auto auto;
+	justify-content: stretch;
+	row-gap: 1rem;
+	column-gap: 1rem;
+    }
+    .timeline__play-btn {
+	grid-row: 2;
+	justify-self: center;
+    }
+    .timeline__audio {
+	grid-row: 2;
+	justify-self: left;
+    }
+    .timeline__speed {
+	grid-row: 2;
+	justify-self: center;
+    }
+    .timeline__summary-btn {
+	grid-row: 2;
+	justify-self: right;
+    }
+    .timeline__slider {
+	grid-row: 1;
+	grid-column: span 4;
+    }
+}
+
 .timeline__slider::-webkit-slider-thumb {
   appearance: none;
   width: 1.19rem;
@@ -2996,12 +3026,6 @@ button {
     max-width: calc(100vw - 2rem);
   }
 
-  @media (width < 750px) {
-      .data-panel {
-	  display: none;
-      }
-  }
-
   .display-chrome__bottom {
     right: 1.5rem;
     bottom: 1rem;
@@ -3011,6 +3035,12 @@ button {
   .terminal {
     width: min(46rem, calc(100vw - 2rem));
   }
+}
+
+@media (width < 750px) {
+    .data-panel {
+	display: none;
+    }
 }
 
 @media (width <= 720px) {
