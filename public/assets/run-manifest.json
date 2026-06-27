@@ -17,10 +17,27 @@
       "views": {
         "houdini": "/engine/planetary/pE65_Th35_b00v10_3e6/animations/houdini.mp4",
         "material": "/engine/planetary/pE65_Th35_b00v10_3e6/animations/material.mp4",
-        "pressure": "/engine/planetary/pE65_Th35_b00v10_3e6/animations/pressure.mp4",
         "temperature": "/engine/planetary/pE65_Th35_b00v10_3e6/animations/temperature.mp4"
       },
       "paramsPath": "/engine/planetary/pE65_Th35_b00v10_3e6/parameters.yaml"
+    },
+    {
+      "simulationId": "planetary",
+      "runId": "pE65_Th35_b00v15_3e6_hmp1",
+      "parameters": {
+        "impactor_mass": 0.35,
+        "impactor_velocity": 12.9,
+        "impactor_angle": 0.0
+      },
+      "liveDataPath": "/engine/planetary/pE65_Th35_b00v15_3e6_hmp1/live_data_table.csv",
+      "summaryPath": "/engine/planetary/pE65_Th35_b00v15_3e6_hmp1/run_summary.yaml",
+      "defaultView": "houdini",
+      "views": {
+        "houdini": "/engine/planetary/pE65_Th35_b00v15_3e6_hmp1/animations/houdini.mp4",
+        "material": "/engine/planetary/pE65_Th35_b00v15_3e6_hmp1/animations/material.mp4",
+        "temperature": "/engine/planetary/pE65_Th35_b00v15_3e6_hmp1/animations/temperature.mp4"
+      },
+      "paramsPath": "/engine/planetary/pE65_Th35_b00v15_3e6_hmp1/parameters.yaml"
     },
     {
       "simulationId": "planetary",
@@ -36,7 +53,6 @@
       "views": {
         "houdini": "/engine/planetary/pE65_Th35_b00v20_3e6_hmp1/animations/houdini.mp4",
         "material": "/engine/planetary/pE65_Th35_b00v20_3e6_hmp1/animations/material.mp4",
-        "pressure": "/engine/planetary/pE65_Th35_b00v20_3e6_hmp1/animations/pressure.mp4",
         "temperature": "/engine/planetary/pE65_Th35_b00v20_3e6_hmp1/animations/temperature.mp4"
       },
       "paramsPath": "/engine/planetary/pE65_Th35_b00v20_3e6_hmp1/parameters.yaml"
@@ -55,10 +71,28 @@
       "views": {
         "houdini": "/engine/planetary/pE65_Th35_b00v30_3e6_hmp1/animations/houdini.mp4",
         "material": "/engine/planetary/pE65_Th35_b00v30_3e6_hmp1/animations/material.mp4",
-        "pressure": "/engine/planetary/pE65_Th35_b00v30_3e6_hmp1/animations/pressure.mp4",
         "temperature": "/engine/planetary/pE65_Th35_b00v30_3e6_hmp1/animations/temperature.mp4"
       },
       "paramsPath": "/engine/planetary/pE65_Th35_b00v30_3e6_hmp1/parameters.yaml"
+    },
+    {
+      "simulationId": "planetary",
+      "runId": "pE65_Th35_b00v85_3e6",
+      "parameters": {
+        "impactor_mass": 0.35,
+        "impactor_velocity": 7.3,
+        "impactor_angle": 0.0
+      },
+      "liveDataPath": "/engine/planetary/pE65_Th35_b00v85_3e6/live_data_table.csv",
+      "summaryPath": "/engine/planetary/pE65_Th35_b00v85_3e6/run_summary.yaml",
+      "defaultView": "houdini",
+      "views": {
+        "houdini": "/engine/planetary/pE65_Th35_b00v85_3e6/animations/houdini.mp4",
+        "material": "/engine/planetary/pE65_Th35_b00v85_3e6/animations/material.mp4",
+        "pe65_th35_b00v85_3e6_p_mp4_tmp": "/engine/planetary/pE65_Th35_b00v85_3e6/animations/pE65_Th35_b00v85_3e6_P.mp4.tmp.mp4",
+        "temperature": "/engine/planetary/pE65_Th35_b00v85_3e6/animations/temperature.mp4"
+      },
+      "paramsPath": "/engine/planetary/pE65_Th35_b00v85_3e6/parameters.yaml"
     },
     {
       "simulationId": "planetary",
@@ -74,10 +108,27 @@
       "views": {
         "houdini": "/engine/planetary/pE65_Th35_b20v10_3e6/animations/houdini.mp4",
         "material": "/engine/planetary/pE65_Th35_b20v10_3e6/animations/material.mp4",
-        "pressure": "/engine/planetary/pE65_Th35_b20v10_3e6/animations/pressure.mp4",
         "temperature": "/engine/planetary/pE65_Th35_b20v10_3e6/animations/temperature.mp4"
       },
       "paramsPath": "/engine/planetary/pE65_Th35_b20v10_3e6/parameters.yaml"
+    },
+    {
+      "simulationId": "planetary",
+      "runId": "pE65_Th35_b20v15_3e6",
+      "parameters": {
+        "impactor_mass": 0.35,
+        "impactor_velocity": 12.9,
+        "impactor_angle": 20.0
+      },
+      "liveDataPath": "/engine/planetary/pE65_Th35_b20v15_3e6/live_data_table.csv",
+      "summaryPath": "/engine/planetary/pE65_Th35_b20v15_3e6/run_summary.yaml",
+      "defaultView": "houdini",
+      "views": {
+        "houdini": "/engine/planetary/pE65_Th35_b20v15_3e6/animations/houdini.mp4",
+        "material": "/engine/planetary/pE65_Th35_b20v15_3e6/animations/material.mp4",
+        "temperature": "/engine/planetary/pE65_Th35_b20v15_3e6/animations/temperature.mp4"
+      },
+      "paramsPath": "/engine/planetary/pE65_Th35_b20v15_3e6/parameters.yaml"
     },
     {
       "simulationId": "planetary",
@@ -93,7 +144,6 @@
       "views": {
         "houdini": "/engine/planetary/pE65_Th35_b20v20_3e6_hmp1/animations/houdini.mp4",
         "material": "/engine/planetary/pE65_Th35_b20v20_3e6_hmp1/animations/material.mp4",
-        "pressure": "/engine/planetary/pE65_Th35_b20v20_3e6_hmp1/animations/pressure.mp4",
         "temperature": "/engine/planetary/pE65_Th35_b20v20_3e6_hmp1/animations/temperature.mp4"
       },
       "paramsPath": "/engine/planetary/pE65_Th35_b20v20_3e6_hmp1/parameters.yaml"
@@ -112,10 +162,27 @@
       "views": {
         "houdini": "/engine/planetary/pE65_Th35_b20v30_3e6_hmp1/animations/houdini.mp4",
         "material": "/engine/planetary/pE65_Th35_b20v30_3e6_hmp1/animations/material.mp4",
-        "pressure": "/engine/planetary/pE65_Th35_b20v30_3e6_hmp1/animations/pressure.mp4",
         "temperature": "/engine/planetary/pE65_Th35_b20v30_3e6_hmp1/animations/temperature.mp4"
       },
       "paramsPath": "/engine/planetary/pE65_Th35_b20v30_3e6_hmp1/parameters.yaml"
+    },
+    {
+      "simulationId": "planetary",
+      "runId": "pE65_Th35_b20v85_3e6",
+      "parameters": {
+        "impactor_mass": 0.35,
+        "impactor_velocity": 7.3,
+        "impactor_angle": 20.0
+      },
+      "liveDataPath": "/engine/planetary/pE65_Th35_b20v85_3e6/live_data_table.csv",
+      "summaryPath": "/engine/planetary/pE65_Th35_b20v85_3e6/run_summary.yaml",
+      "defaultView": "houdini",
+      "views": {
+        "houdini": "/engine/planetary/pE65_Th35_b20v85_3e6/animations/houdini.mp4",
+        "material": "/engine/planetary/pE65_Th35_b20v85_3e6/animations/material.mp4",
+        "temperature": "/engine/planetary/pE65_Th35_b20v85_3e6/animations/temperature.mp4"
+      },
+      "paramsPath": "/engine/planetary/pE65_Th35_b20v85_3e6/parameters.yaml"
     },
     {
       "simulationId": "planetary",
@@ -131,10 +198,27 @@
       "views": {
         "houdini": "/engine/planetary/pE65_Th35_b30v10_3e6/animations/houdini.mp4",
         "material": "/engine/planetary/pE65_Th35_b30v10_3e6/animations/material.mp4",
-        "pressure": "/engine/planetary/pE65_Th35_b30v10_3e6/animations/pressure.mp4",
         "temperature": "/engine/planetary/pE65_Th35_b30v10_3e6/animations/temperature.mp4"
       },
       "paramsPath": "/engine/planetary/pE65_Th35_b30v10_3e6/parameters.yaml"
+    },
+    {
+      "simulationId": "planetary",
+      "runId": "pE65_Th35_b30v15_3e6",
+      "parameters": {
+        "impactor_mass": 0.35,
+        "impactor_velocity": 12.9,
+        "impactor_angle": 30.0
+      },
+      "liveDataPath": "/engine/planetary/pE65_Th35_b30v15_3e6/live_data_table.csv",
+      "summaryPath": "/engine/planetary/pE65_Th35_b30v15_3e6/run_summary.yaml",
+      "defaultView": "houdini",
+      "views": {
+        "houdini": "/engine/planetary/pE65_Th35_b30v15_3e6/animations/houdini.mp4",
+        "material": "/engine/planetary/pE65_Th35_b30v15_3e6/animations/material.mp4",
+        "temperature": "/engine/planetary/pE65_Th35_b30v15_3e6/animations/temperature.mp4"
+      },
+      "paramsPath": "/engine/planetary/pE65_Th35_b30v15_3e6/parameters.yaml"
     },
     {
       "simulationId": "planetary",
@@ -150,7 +234,6 @@
       "views": {
         "houdini": "/engine/planetary/pE65_Th35_b30v20_3e6_hmp1/animations/houdini.mp4",
         "material": "/engine/planetary/pE65_Th35_b30v20_3e6_hmp1/animations/material.mp4",
-        "pressure": "/engine/planetary/pE65_Th35_b30v20_3e6_hmp1/animations/pressure.mp4",
         "temperature": "/engine/planetary/pE65_Th35_b30v20_3e6_hmp1/animations/temperature.mp4"
       },
       "paramsPath": "/engine/planetary/pE65_Th35_b30v20_3e6_hmp1/parameters.yaml"
@@ -169,10 +252,27 @@
       "views": {
         "houdini": "/engine/planetary/pE65_Th35_b30v30_3e6_hmp1/animations/houdini.mp4",
         "material": "/engine/planetary/pE65_Th35_b30v30_3e6_hmp1/animations/material.mp4",
-        "pressure": "/engine/planetary/pE65_Th35_b30v30_3e6_hmp1/animations/pressure.mp4",
         "temperature": "/engine/planetary/pE65_Th35_b30v30_3e6_hmp1/animations/temperature.mp4"
       },
       "paramsPath": "/engine/planetary/pE65_Th35_b30v30_3e6_hmp1/parameters.yaml"
+    },
+    {
+      "simulationId": "planetary",
+      "runId": "pE65_Th35_b30v85_3e6",
+      "parameters": {
+        "impactor_mass": 0.35,
+        "impactor_velocity": 7.3,
+        "impactor_angle": 30.0
+      },
+      "liveDataPath": "/engine/planetary/pE65_Th35_b30v85_3e6/live_data_table.csv",
+      "summaryPath": "/engine/planetary/pE65_Th35_b30v85_3e6/run_summary.yaml",
+      "defaultView": "houdini",
+      "views": {
+        "houdini": "/engine/planetary/pE65_Th35_b30v85_3e6/animations/houdini.mp4",
+        "material": "/engine/planetary/pE65_Th35_b30v85_3e6/animations/material.mp4",
+        "temperature": "/engine/planetary/pE65_Th35_b30v85_3e6/animations/temperature.mp4"
+      },
+      "paramsPath": "/engine/planetary/pE65_Th35_b30v85_3e6/parameters.yaml"
     },
     {
       "simulationId": "planetary",
@@ -188,10 +288,27 @@
       "views": {
         "houdini": "/engine/planetary/pE65_Th35_b35v10_3e6/animations/houdini.mp4",
         "material": "/engine/planetary/pE65_Th35_b35v10_3e6/animations/material.mp4",
-        "pressure": "/engine/planetary/pE65_Th35_b35v10_3e6/animations/pressure.mp4",
         "temperature": "/engine/planetary/pE65_Th35_b35v10_3e6/animations/temperature.mp4"
       },
       "paramsPath": "/engine/planetary/pE65_Th35_b35v10_3e6/parameters.yaml"
+    },
+    {
+      "simulationId": "planetary",
+      "runId": "pE65_Th35_b35v15_3e6",
+      "parameters": {
+        "impactor_mass": 0.35,
+        "impactor_velocity": 12.9,
+        "impactor_angle": 35.0
+      },
+      "liveDataPath": "/engine/planetary/pE65_Th35_b35v15_3e6/live_data_table.csv",
+      "summaryPath": "/engine/planetary/pE65_Th35_b35v15_3e6/run_summary.yaml",
+      "defaultView": "houdini",
+      "views": {
+        "houdini": "/engine/planetary/pE65_Th35_b35v15_3e6/animations/houdini.mp4",
+        "material": "/engine/planetary/pE65_Th35_b35v15_3e6/animations/material.mp4",
+        "temperature": "/engine/planetary/pE65_Th35_b35v15_3e6/animations/temperature.mp4"
+      },
+      "paramsPath": "/engine/planetary/pE65_Th35_b35v15_3e6/parameters.yaml"
     },
     {
       "simulationId": "planetary",
@@ -207,7 +324,6 @@
       "views": {
         "houdini": "/engine/planetary/pE65_Th35_b35v20_3e6_hmp1/animations/houdini.mp4",
         "material": "/engine/planetary/pE65_Th35_b35v20_3e6_hmp1/animations/material.mp4",
-        "pressure": "/engine/planetary/pE65_Th35_b35v20_3e6_hmp1/animations/pressure.mp4",
         "temperature": "/engine/planetary/pE65_Th35_b35v20_3e6_hmp1/animations/temperature.mp4"
       },
       "paramsPath": "/engine/planetary/pE65_Th35_b35v20_3e6_hmp1/parameters.yaml"
@@ -226,10 +342,27 @@
       "views": {
         "houdini": "/engine/planetary/pE65_Th35_b35v30_3e6_hmp1/animations/houdini.mp4",
         "material": "/engine/planetary/pE65_Th35_b35v30_3e6_hmp1/animations/material.mp4",
-        "pressure": "/engine/planetary/pE65_Th35_b35v30_3e6_hmp1/animations/pressure.mp4",
         "temperature": "/engine/planetary/pE65_Th35_b35v30_3e6_hmp1/animations/temperature.mp4"
       },
       "paramsPath": "/engine/planetary/pE65_Th35_b35v30_3e6_hmp1/parameters.yaml"
+    },
+    {
+      "simulationId": "planetary",
+      "runId": "pE65_Th35_b35v85_3e6",
+      "parameters": {
+        "impactor_mass": 0.35,
+        "impactor_velocity": 7.3,
+        "impactor_angle": 35.0
+      },
+      "liveDataPath": "/engine/planetary/pE65_Th35_b35v85_3e6/live_data_table.csv",
+      "summaryPath": "/engine/planetary/pE65_Th35_b35v85_3e6/run_summary.yaml",
+      "defaultView": "houdini",
+      "views": {
+        "houdini": "/engine/planetary/pE65_Th35_b35v85_3e6/animations/houdini.mp4",
+        "material": "/engine/planetary/pE65_Th35_b35v85_3e6/animations/material.mp4",
+        "temperature": "/engine/planetary/pE65_Th35_b35v85_3e6/animations/temperature.mp4"
+      },
+      "paramsPath": "/engine/planetary/pE65_Th35_b35v85_3e6/parameters.yaml"
     },
     {
       "simulationId": "planetary",
@@ -245,10 +378,45 @@
       "views": {
         "houdini": "/engine/planetary/pE65_Th35_b40v10_3e6/animations/houdini.mp4",
         "material": "/engine/planetary/pE65_Th35_b40v10_3e6/animations/material.mp4",
-        "pressure": "/engine/planetary/pE65_Th35_b40v10_3e6/animations/pressure.mp4",
         "temperature": "/engine/planetary/pE65_Th35_b40v10_3e6/animations/temperature.mp4"
       },
       "paramsPath": "/engine/planetary/pE65_Th35_b40v10_3e6/parameters.yaml"
+    },
+    {
+      "simulationId": "planetary",
+      "runId": "pE65_Th35_b40v15_3e6",
+      "parameters": {
+        "impactor_mass": 0.35,
+        "impactor_velocity": 12.9,
+        "impactor_angle": 40.0
+      },
+      "liveDataPath": "/engine/planetary/pE65_Th35_b40v15_3e6/live_data_table.csv",
+      "summaryPath": "/engine/planetary/pE65_Th35_b40v15_3e6/run_summary.yaml",
+      "defaultView": "houdini",
+      "views": {
+        "houdini": "/engine/planetary/pE65_Th35_b40v15_3e6/animations/houdini.mp4",
+        "material": "/engine/planetary/pE65_Th35_b40v15_3e6/animations/material.mp4",
+        "temperature": "/engine/planetary/pE65_Th35_b40v15_3e6/animations/temperature.mp4"
+      },
+      "paramsPath": "/engine/planetary/pE65_Th35_b40v15_3e6/parameters.yaml"
+    },
+    {
+      "simulationId": "planetary",
+      "runId": "pE65_Th35_b40v20_3e6_hmp1",
+      "parameters": {
+        "impactor_mass": 0.35,
+        "impactor_velocity": 17.3,
+        "impactor_angle": 40.0
+      },
+      "liveDataPath": "/engine/planetary/pE65_Th35_b40v20_3e6_hmp1/live_data_table.csv",
+      "summaryPath": "/engine/planetary/pE65_Th35_b40v20_3e6_hmp1/run_summary.yaml",
+      "defaultView": "houdini",
+      "views": {
+        "houdini": "/engine/planetary/pE65_Th35_b40v20_3e6_hmp1/animations/houdini.mp4",
+        "material": "/engine/planetary/pE65_Th35_b40v20_3e6_hmp1/animations/material.mp4",
+        "temperature": "/engine/planetary/pE65_Th35_b40v20_3e6_hmp1/animations/temperature.mp4"
+      },
+      "paramsPath": "/engine/planetary/pE65_Th35_b40v20_3e6_hmp1/parameters.yaml"
     },
     {
       "simulationId": "planetary",
@@ -264,10 +432,27 @@
       "views": {
         "houdini": "/engine/planetary/pE65_Th35_b40v30_3e6_hmp1/animations/houdini.mp4",
         "material": "/engine/planetary/pE65_Th35_b40v30_3e6_hmp1/animations/material.mp4",
-        "pressure": "/engine/planetary/pE65_Th35_b40v30_3e6_hmp1/animations/pressure.mp4",
         "temperature": "/engine/planetary/pE65_Th35_b40v30_3e6_hmp1/animations/temperature.mp4"
       },
       "paramsPath": "/engine/planetary/pE65_Th35_b40v30_3e6_hmp1/parameters.yaml"
+    },
+    {
+      "simulationId": "planetary",
+      "runId": "pE65_Th35_b40v85_3e6",
+      "parameters": {
+        "impactor_mass": 0.35,
+        "impactor_velocity": 7.3,
+        "impactor_angle": 40.0
+      },
+      "liveDataPath": "/engine/planetary/pE65_Th35_b40v85_3e6/live_data_table.csv",
+      "summaryPath": "/engine/planetary/pE65_Th35_b40v85_3e6/run_summary.yaml",
+      "defaultView": "houdini",
+      "views": {
+        "houdini": "/engine/planetary/pE65_Th35_b40v85_3e6/animations/houdini.mp4",
+        "material": "/engine/planetary/pE65_Th35_b40v85_3e6/animations/material.mp4",
+        "temperature": "/engine/planetary/pE65_Th35_b40v85_3e6/animations/temperature.mp4"
+      },
+      "paramsPath": "/engine/planetary/pE65_Th35_b40v85_3e6/parameters.yaml"
     },
     {
       "simulationId": "planetary",
@@ -283,10 +468,45 @@
       "views": {
         "houdini": "/engine/planetary/pE65_Th35_b45v10_3e6/animations/houdini.mp4",
         "material": "/engine/planetary/pE65_Th35_b45v10_3e6/animations/material.mp4",
-        "pressure": "/engine/planetary/pE65_Th35_b45v10_3e6/animations/pressure.mp4",
         "temperature": "/engine/planetary/pE65_Th35_b45v10_3e6/animations/temperature.mp4"
       },
       "paramsPath": "/engine/planetary/pE65_Th35_b45v10_3e6/parameters.yaml"
+    },
+    {
+      "simulationId": "planetary",
+      "runId": "pE65_Th35_b45v15_3e6",
+      "parameters": {
+        "impactor_mass": 0.35,
+        "impactor_velocity": 12.9,
+        "impactor_angle": 45.0
+      },
+      "liveDataPath": "/engine/planetary/pE65_Th35_b45v15_3e6/live_data_table.csv",
+      "summaryPath": "/engine/planetary/pE65_Th35_b45v15_3e6/run_summary.yaml",
+      "defaultView": "houdini",
+      "views": {
+        "houdini": "/engine/planetary/pE65_Th35_b45v15_3e6/animations/houdini.mp4",
+        "material": "/engine/planetary/pE65_Th35_b45v15_3e6/animations/material.mp4",
+        "temperature": "/engine/planetary/pE65_Th35_b45v15_3e6/animations/temperature.mp4"
+      },
+      "paramsPath": "/engine/planetary/pE65_Th35_b45v15_3e6/parameters.yaml"
+    },
+    {
+      "simulationId": "planetary",
+      "runId": "pE65_Th35_b45v20_3e6_hmp1",
+      "parameters": {
+        "impactor_mass": 0.35,
+        "impactor_velocity": 17.3,
+        "impactor_angle": 45.0
+      },
+      "liveDataPath": "/engine/planetary/pE65_Th35_b45v20_3e6_hmp1/live_data_table.csv",
+      "summaryPath": "/engine/planetary/pE65_Th35_b45v20_3e6_hmp1/run_summary.yaml",
+      "defaultView": "houdini",
+      "views": {
+        "houdini": "/engine/planetary/pE65_Th35_b45v20_3e6_hmp1/animations/houdini.mp4",
+        "material": "/engine/planetary/pE65_Th35_b45v20_3e6_hmp1/animations/material.mp4",
+        "temperature": "/engine/planetary/pE65_Th35_b45v20_3e6_hmp1/animations/temperature.mp4"
+      },
+      "paramsPath": "/engine/planetary/pE65_Th35_b45v20_3e6_hmp1/parameters.yaml"
     },
     {
       "simulationId": "planetary",
@@ -302,10 +522,27 @@
       "views": {
         "houdini": "/engine/planetary/pE65_Th35_b45v30_3e6_hmp1/animations/houdini.mp4",
         "material": "/engine/planetary/pE65_Th35_b45v30_3e6_hmp1/animations/material.mp4",
-        "pressure": "/engine/planetary/pE65_Th35_b45v30_3e6_hmp1/animations/pressure.mp4",
         "temperature": "/engine/planetary/pE65_Th35_b45v30_3e6_hmp1/animations/temperature.mp4"
       },
       "paramsPath": "/engine/planetary/pE65_Th35_b45v30_3e6_hmp1/parameters.yaml"
+    },
+    {
+      "simulationId": "planetary",
+      "runId": "pE65_Th35_b45v85_3e6",
+      "parameters": {
+        "impactor_mass": 0.35,
+        "impactor_velocity": 7.3,
+        "impactor_angle": 45.0
+      },
+      "liveDataPath": "/engine/planetary/pE65_Th35_b45v85_3e6/live_data_table.csv",
+      "summaryPath": "/engine/planetary/pE65_Th35_b45v85_3e6/run_summary.yaml",
+      "defaultView": "houdini",
+      "views": {
+        "houdini": "/engine/planetary/pE65_Th35_b45v85_3e6/animations/houdini.mp4",
+        "material": "/engine/planetary/pE65_Th35_b45v85_3e6/animations/material.mp4",
+        "temperature": "/engine/planetary/pE65_Th35_b45v85_3e6/animations/temperature.mp4"
+      },
+      "paramsPath": "/engine/planetary/pE65_Th35_b45v85_3e6/parameters.yaml"
     },
     {
       "simulationId": "planetary",
@@ -321,10 +558,45 @@
       "views": {
         "houdini": "/engine/planetary/pE65_Th35_b50v10_3e6/animations/houdini.mp4",
         "material": "/engine/planetary/pE65_Th35_b50v10_3e6/animations/material.mp4",
-        "pressure": "/engine/planetary/pE65_Th35_b50v10_3e6/animations/pressure.mp4",
         "temperature": "/engine/planetary/pE65_Th35_b50v10_3e6/animations/temperature.mp4"
       },
       "paramsPath": "/engine/planetary/pE65_Th35_b50v10_3e6/parameters.yaml"
+    },
+    {
+      "simulationId": "planetary",
+      "runId": "pE65_Th35_b50v15_3e6",
+      "parameters": {
+        "impactor_mass": 0.35,
+        "impactor_velocity": 12.9,
+        "impactor_angle": 50.0
+      },
+      "liveDataPath": "/engine/planetary/pE65_Th35_b50v15_3e6/live_data_table.csv",
+      "summaryPath": "/engine/planetary/pE65_Th35_b50v15_3e6/run_summary.yaml",
+      "defaultView": "houdini",
+      "views": {
+        "houdini": "/engine/planetary/pE65_Th35_b50v15_3e6/animations/houdini.mp4",
+        "material": "/engine/planetary/pE65_Th35_b50v15_3e6/animations/material.mp4",
+        "temperature": "/engine/planetary/pE65_Th35_b50v15_3e6/animations/temperature.mp4"
+      },
+      "paramsPath": "/engine/planetary/pE65_Th35_b50v15_3e6/parameters.yaml"
+    },
+    {
+      "simulationId": "planetary",
+      "runId": "pE65_Th35_b50v20_3e6_hmp1",
+      "parameters": {
+        "impactor_mass": 0.35,
+        "impactor_velocity": 17.3,
+        "impactor_angle": 50.0
+      },
+      "liveDataPath": "/engine/planetary/pE65_Th35_b50v20_3e6_hmp1/live_data_table.csv",
+      "summaryPath": "/engine/planetary/pE65_Th35_b50v20_3e6_hmp1/run_summary.yaml",
+      "defaultView": "houdini",
+      "views": {
+        "houdini": "/engine/planetary/pE65_Th35_b50v20_3e6_hmp1/animations/houdini.mp4",
+        "material": "/engine/planetary/pE65_Th35_b50v20_3e6_hmp1/animations/material.mp4",
+        "temperature": "/engine/planetary/pE65_Th35_b50v20_3e6_hmp1/animations/temperature.mp4"
+      },
+      "paramsPath": "/engine/planetary/pE65_Th35_b50v20_3e6_hmp1/parameters.yaml"
     },
     {
       "simulationId": "planetary",
@@ -340,10 +612,45 @@
       "views": {
         "houdini": "/engine/planetary/pE65_Th35_b50v30_3e6_hmp1/animations/houdini.mp4",
         "material": "/engine/planetary/pE65_Th35_b50v30_3e6_hmp1/animations/material.mp4",
-        "pressure": "/engine/planetary/pE65_Th35_b50v30_3e6_hmp1/animations/pressure.mp4",
         "temperature": "/engine/planetary/pE65_Th35_b50v30_3e6_hmp1/animations/temperature.mp4"
       },
       "paramsPath": "/engine/planetary/pE65_Th35_b50v30_3e6_hmp1/parameters.yaml"
+    },
+    {
+      "simulationId": "planetary",
+      "runId": "pE65_Th35_b50v85_3e6",
+      "parameters": {
+        "impactor_mass": 0.35,
+        "impactor_velocity": 7.3,
+        "impactor_angle": 50.0
+      },
+      "liveDataPath": "/engine/planetary/pE65_Th35_b50v85_3e6/live_data_table.csv",
+      "summaryPath": "/engine/planetary/pE65_Th35_b50v85_3e6/run_summary.yaml",
+      "defaultView": "houdini",
+      "views": {
+        "houdini": "/engine/planetary/pE65_Th35_b50v85_3e6/animations/houdini.mp4",
+        "material": "/engine/planetary/pE65_Th35_b50v85_3e6/animations/material.mp4",
+        "temperature": "/engine/planetary/pE65_Th35_b50v85_3e6/animations/temperature.mp4"
+      },
+      "paramsPath": "/engine/planetary/pE65_Th35_b50v85_3e6/parameters.yaml"
+    },
+    {
+      "simulationId": "planetary",
+      "runId": "pE65_Th35_b60v10_3e6",
+      "parameters": {
+        "impactor_mass": 0.35,
+        "impactor_velocity": 8.6,
+        "impactor_angle": 60.0
+      },
+      "liveDataPath": "/engine/planetary/pE65_Th35_b60v10_3e6/live_data_table.csv",
+      "summaryPath": "/engine/planetary/pE65_Th35_b60v10_3e6/run_summary.yaml",
+      "defaultView": "houdini",
+      "views": {
+        "houdini": "/engine/planetary/pE65_Th35_b60v10_3e6/animations/houdini.mp4",
+        "material": "/engine/planetary/pE65_Th35_b60v10_3e6/animations/material.mp4",
+        "temperature": "/engine/planetary/pE65_Th35_b60v10_3e6/animations/temperature.mp4"
+      },
+      "paramsPath": "/engine/planetary/pE65_Th35_b60v10_3e6/parameters.yaml"
     },
     {
       "simulationId": "planetary",
@@ -359,10 +666,27 @@
       "views": {
         "houdini": "/engine/planetary/pE65_Th35_b60v15_3e6/animations/houdini.mp4",
         "material": "/engine/planetary/pE65_Th35_b60v15_3e6/animations/material.mp4",
-        "pressure": "/engine/planetary/pE65_Th35_b60v15_3e6/animations/pressure.mp4",
         "temperature": "/engine/planetary/pE65_Th35_b60v15_3e6/animations/temperature.mp4"
       },
       "paramsPath": "/engine/planetary/pE65_Th35_b60v15_3e6/parameters.yaml"
+    },
+    {
+      "simulationId": "planetary",
+      "runId": "pE65_Th35_b60v20_3e6_hmp1",
+      "parameters": {
+        "impactor_mass": 0.35,
+        "impactor_velocity": 17.3,
+        "impactor_angle": 60.0
+      },
+      "liveDataPath": "/engine/planetary/pE65_Th35_b60v20_3e6_hmp1/live_data_table.csv",
+      "summaryPath": "/engine/planetary/pE65_Th35_b60v20_3e6_hmp1/run_summary.yaml",
+      "defaultView": "houdini",
+      "views": {
+        "houdini": "/engine/planetary/pE65_Th35_b60v20_3e6_hmp1/animations/houdini.mp4",
+        "material": "/engine/planetary/pE65_Th35_b60v20_3e6_hmp1/animations/material.mp4",
+        "temperature": "/engine/planetary/pE65_Th35_b60v20_3e6_hmp1/animations/temperature.mp4"
+      },
+      "paramsPath": "/engine/planetary/pE65_Th35_b60v20_3e6_hmp1/parameters.yaml"
     },
     {
       "simulationId": "planetary",
@@ -378,10 +702,27 @@
       "views": {
         "houdini": "/engine/planetary/pE65_Th35_b60v30_3e6_hmp1/animations/houdini.mp4",
         "material": "/engine/planetary/pE65_Th35_b60v30_3e6_hmp1/animations/material.mp4",
-        "pressure": "/engine/planetary/pE65_Th35_b60v30_3e6_hmp1/animations/pressure.mp4",
         "temperature": "/engine/planetary/pE65_Th35_b60v30_3e6_hmp1/animations/temperature.mp4"
       },
       "paramsPath": "/engine/planetary/pE65_Th35_b60v30_3e6_hmp1/parameters.yaml"
+    },
+    {
+      "simulationId": "planetary",
+      "runId": "pE65_Th35_b60v85_3e6",
+      "parameters": {
+        "impactor_mass": 0.35,
+        "impactor_velocity": 7.3,
+        "impactor_angle": 60.0
+      },
+      "liveDataPath": "/engine/planetary/pE65_Th35_b60v85_3e6/live_data_table.csv",
+      "summaryPath": "/engine/planetary/pE65_Th35_b60v85_3e6/run_summary.yaml",
+      "defaultView": "houdini",
+      "views": {
+        "houdini": "/engine/planetary/pE65_Th35_b60v85_3e6/animations/houdini.mp4",
+        "material": "/engine/planetary/pE65_Th35_b60v85_3e6/animations/material.mp4",
+        "temperature": "/engine/planetary/pE65_Th35_b60v85_3e6/animations/temperature.mp4"
+      },
+      "paramsPath": "/engine/planetary/pE65_Th35_b60v85_3e6/parameters.yaml"
     },
     {
       "simulationId": "planetary",
@@ -397,7 +738,6 @@
       "views": {
         "houdini": "/engine/planetary/pE75_Th25_b00v10_3e6/animations/houdini.mp4",
         "material": "/engine/planetary/pE75_Th25_b00v10_3e6/animations/material.mp4",
-        "pressure": "/engine/planetary/pE75_Th25_b00v10_3e6/animations/pressure.mp4",
         "temperature": "/engine/planetary/pE75_Th25_b00v10_3e6/animations/temperature.mp4"
       },
       "paramsPath": "/engine/planetary/pE75_Th25_b00v10_3e6/parameters.yaml"
@@ -416,7 +756,6 @@
       "views": {
         "houdini": "/engine/planetary/pE75_Th25_b00v15_3e6/animations/houdini.mp4",
         "material": "/engine/planetary/pE75_Th25_b00v15_3e6/animations/material.mp4",
-        "pressure": "/engine/planetary/pE75_Th25_b00v15_3e6/animations/pressure.mp4",
         "temperature": "/engine/planetary/pE75_Th25_b00v15_3e6/animations/temperature.mp4"
       },
       "paramsPath": "/engine/planetary/pE75_Th25_b00v15_3e6/parameters.yaml"
@@ -435,7 +774,6 @@
       "views": {
         "houdini": "/engine/planetary/pE75_Th25_b00v20_3e6_hmp1/animations/houdini.mp4",
         "material": "/engine/planetary/pE75_Th25_b00v20_3e6_hmp1/animations/material.mp4",
-        "pressure": "/engine/planetary/pE75_Th25_b00v20_3e6_hmp1/animations/pressure.mp4",
         "temperature": "/engine/planetary/pE75_Th25_b00v20_3e6_hmp1/animations/temperature.mp4"
       },
       "paramsPath": "/engine/planetary/pE75_Th25_b00v20_3e6_hmp1/parameters.yaml"
@@ -454,10 +792,27 @@
       "views": {
         "houdini": "/engine/planetary/pE75_Th25_b00v30_3e6_hmp1/animations/houdini.mp4",
         "material": "/engine/planetary/pE75_Th25_b00v30_3e6_hmp1/animations/material.mp4",
-        "pressure": "/engine/planetary/pE75_Th25_b00v30_3e6_hmp1/animations/pressure.mp4",
         "temperature": "/engine/planetary/pE75_Th25_b00v30_3e6_hmp1/animations/temperature.mp4"
       },
       "paramsPath": "/engine/planetary/pE75_Th25_b00v30_3e6_hmp1/parameters.yaml"
+    },
+    {
+      "simulationId": "planetary",
+      "runId": "pE75_Th25_b00v85_3e6",
+      "parameters": {
+        "impactor_mass": 0.25,
+        "impactor_velocity": 7.4,
+        "impactor_angle": 0.0
+      },
+      "liveDataPath": "/engine/planetary/pE75_Th25_b00v85_3e6/live_data_table.csv",
+      "summaryPath": "/engine/planetary/pE75_Th25_b00v85_3e6/run_summary.yaml",
+      "defaultView": "houdini",
+      "views": {
+        "houdini": "/engine/planetary/pE75_Th25_b00v85_3e6/animations/houdini.mp4",
+        "material": "/engine/planetary/pE75_Th25_b00v85_3e6/animations/material.mp4",
+        "temperature": "/engine/planetary/pE75_Th25_b00v85_3e6/animations/temperature.mp4"
+      },
+      "paramsPath": "/engine/planetary/pE75_Th25_b00v85_3e6/parameters.yaml"
     },
     {
       "simulationId": "planetary",
@@ -473,7 +828,6 @@
       "views": {
         "houdini": "/engine/planetary/pE75_Th25_b20v10_3e6/animations/houdini.mp4",
         "material": "/engine/planetary/pE75_Th25_b20v10_3e6/animations/material.mp4",
-        "pressure": "/engine/planetary/pE75_Th25_b20v10_3e6/animations/pressure.mp4",
         "temperature": "/engine/planetary/pE75_Th25_b20v10_3e6/animations/temperature.mp4"
       },
       "paramsPath": "/engine/planetary/pE75_Th25_b20v10_3e6/parameters.yaml"
@@ -492,7 +846,6 @@
       "views": {
         "houdini": "/engine/planetary/pE75_Th25_b20v15_3e6/animations/houdini.mp4",
         "material": "/engine/planetary/pE75_Th25_b20v15_3e6/animations/material.mp4",
-        "pressure": "/engine/planetary/pE75_Th25_b20v15_3e6/animations/pressure.mp4",
         "temperature": "/engine/planetary/pE75_Th25_b20v15_3e6/animations/temperature.mp4"
       },
       "paramsPath": "/engine/planetary/pE75_Th25_b20v15_3e6/parameters.yaml"
@@ -511,7 +864,6 @@
       "views": {
         "houdini": "/engine/planetary/pE75_Th25_b20v20_3e6_hmp1/animations/houdini.mp4",
         "material": "/engine/planetary/pE75_Th25_b20v20_3e6_hmp1/animations/material.mp4",
-        "pressure": "/engine/planetary/pE75_Th25_b20v20_3e6_hmp1/animations/pressure.mp4",
         "temperature": "/engine/planetary/pE75_Th25_b20v20_3e6_hmp1/animations/temperature.mp4"
       },
       "paramsPath": "/engine/planetary/pE75_Th25_b20v20_3e6_hmp1/parameters.yaml"
@@ -530,10 +882,27 @@
       "views": {
         "houdini": "/engine/planetary/pE75_Th25_b20v30_3e6_hmp1/animations/houdini.mp4",
         "material": "/engine/planetary/pE75_Th25_b20v30_3e6_hmp1/animations/material.mp4",
-        "pressure": "/engine/planetary/pE75_Th25_b20v30_3e6_hmp1/animations/pressure.mp4",
         "temperature": "/engine/planetary/pE75_Th25_b20v30_3e6_hmp1/animations/temperature.mp4"
       },
       "paramsPath": "/engine/planetary/pE75_Th25_b20v30_3e6_hmp1/parameters.yaml"
+    },
+    {
+      "simulationId": "planetary",
+      "runId": "pE75_Th25_b20v85_3e6",
+      "parameters": {
+        "impactor_mass": 0.25,
+        "impactor_velocity": 7.4,
+        "impactor_angle": 20.0
+      },
+      "liveDataPath": "/engine/planetary/pE75_Th25_b20v85_3e6/live_data_table.csv",
+      "summaryPath": "/engine/planetary/pE75_Th25_b20v85_3e6/run_summary.yaml",
+      "defaultView": "houdini",
+      "views": {
+        "houdini": "/engine/planetary/pE75_Th25_b20v85_3e6/animations/houdini.mp4",
+        "material": "/engine/planetary/pE75_Th25_b20v85_3e6/animations/material.mp4",
+        "temperature": "/engine/planetary/pE75_Th25_b20v85_3e6/animations/temperature.mp4"
+      },
+      "paramsPath": "/engine/planetary/pE75_Th25_b20v85_3e6/parameters.yaml"
     },
     {
       "simulationId": "planetary",
@@ -549,7 +918,6 @@
       "views": {
         "houdini": "/engine/planetary/pE75_Th25_b30v10_3e6/animations/houdini.mp4",
         "material": "/engine/planetary/pE75_Th25_b30v10_3e6/animations/material.mp4",
-        "pressure": "/engine/planetary/pE75_Th25_b30v10_3e6/animations/pressure.mp4",
         "temperature": "/engine/planetary/pE75_Th25_b30v10_3e6/animations/temperature.mp4"
       },
       "paramsPath": "/engine/planetary/pE75_Th25_b30v10_3e6/parameters.yaml"
@@ -568,7 +936,6 @@
       "views": {
         "houdini": "/engine/planetary/pE75_Th25_b30v15_3e6/animations/houdini.mp4",
         "material": "/engine/planetary/pE75_Th25_b30v15_3e6/animations/material.mp4",
-        "pressure": "/engine/planetary/pE75_Th25_b30v15_3e6/animations/pressure.mp4",
         "temperature": "/engine/planetary/pE75_Th25_b30v15_3e6/animations/temperature.mp4"
       },
       "paramsPath": "/engine/planetary/pE75_Th25_b30v15_3e6/parameters.yaml"
@@ -587,7 +954,6 @@
       "views": {
         "houdini": "/engine/planetary/pE75_Th25_b30v20_3e6_hmp1/animations/houdini.mp4",
         "material": "/engine/planetary/pE75_Th25_b30v20_3e6_hmp1/animations/material.mp4",
-        "pressure": "/engine/planetary/pE75_Th25_b30v20_3e6_hmp1/animations/pressure.mp4",
         "temperature": "/engine/planetary/pE75_Th25_b30v20_3e6_hmp1/animations/temperature.mp4"
       },
       "paramsPath": "/engine/planetary/pE75_Th25_b30v20_3e6_hmp1/parameters.yaml"
@@ -606,10 +972,27 @@
       "views": {
         "houdini": "/engine/planetary/pE75_Th25_b30v30_3e6_hmp1/animations/houdini.mp4",
         "material": "/engine/planetary/pE75_Th25_b30v30_3e6_hmp1/animations/material.mp4",
-        "pressure": "/engine/planetary/pE75_Th25_b30v30_3e6_hmp1/animations/pressure.mp4",
         "temperature": "/engine/planetary/pE75_Th25_b30v30_3e6_hmp1/animations/temperature.mp4"
       },
       "paramsPath": "/engine/planetary/pE75_Th25_b30v30_3e6_hmp1/parameters.yaml"
+    },
+    {
+      "simulationId": "planetary",
+      "runId": "pE75_Th25_b30v85_3e6",
+      "parameters": {
+        "impactor_mass": 0.25,
+        "impactor_velocity": 7.4,
+        "impactor_angle": 30.0
+      },
+      "liveDataPath": "/engine/planetary/pE75_Th25_b30v85_3e6/live_data_table.csv",
+      "summaryPath": "/engine/planetary/pE75_Th25_b30v85_3e6/run_summary.yaml",
+      "defaultView": "houdini",
+      "views": {
+        "houdini": "/engine/planetary/pE75_Th25_b30v85_3e6/animations/houdini.mp4",
+        "material": "/engine/planetary/pE75_Th25_b30v85_3e6/animations/material.mp4",
+        "temperature": "/engine/planetary/pE75_Th25_b30v85_3e6/animations/temperature.mp4"
+      },
+      "paramsPath": "/engine/planetary/pE75_Th25_b30v85_3e6/parameters.yaml"
     },
     {
       "simulationId": "planetary",
@@ -625,7 +1008,6 @@
       "views": {
         "houdini": "/engine/planetary/pE75_Th25_b35v10_3e6/animations/houdini.mp4",
         "material": "/engine/planetary/pE75_Th25_b35v10_3e6/animations/material.mp4",
-        "pressure": "/engine/planetary/pE75_Th25_b35v10_3e6/animations/pressure.mp4",
         "temperature": "/engine/planetary/pE75_Th25_b35v10_3e6/animations/temperature.mp4"
       },
       "paramsPath": "/engine/planetary/pE75_Th25_b35v10_3e6/parameters.yaml"
@@ -644,7 +1026,6 @@
       "views": {
         "houdini": "/engine/planetary/pE75_Th25_b35v15_3e6/animations/houdini.mp4",
         "material": "/engine/planetary/pE75_Th25_b35v15_3e6/animations/material.mp4",
-        "pressure": "/engine/planetary/pE75_Th25_b35v15_3e6/animations/pressure.mp4",
         "temperature": "/engine/planetary/pE75_Th25_b35v15_3e6/animations/temperature.mp4"
       },
       "paramsPath": "/engine/planetary/pE75_Th25_b35v15_3e6/parameters.yaml"
@@ -663,7 +1044,6 @@
       "views": {
         "houdini": "/engine/planetary/pE75_Th25_b35v20_3e6_hmp1/animations/houdini.mp4",
         "material": "/engine/planetary/pE75_Th25_b35v20_3e6_hmp1/animations/material.mp4",
-        "pressure": "/engine/planetary/pE75_Th25_b35v20_3e6_hmp1/animations/pressure.mp4",
         "temperature": "/engine/planetary/pE75_Th25_b35v20_3e6_hmp1/animations/temperature.mp4"
       },
       "paramsPath": "/engine/planetary/pE75_Th25_b35v20_3e6_hmp1/parameters.yaml"
@@ -682,10 +1062,27 @@
       "views": {
         "houdini": "/engine/planetary/pE75_Th25_b35v30_3e6_hmp1/animations/houdini.mp4",
         "material": "/engine/planetary/pE75_Th25_b35v30_3e6_hmp1/animations/material.mp4",
-        "pressure": "/engine/planetary/pE75_Th25_b35v30_3e6_hmp1/animations/pressure.mp4",
         "temperature": "/engine/planetary/pE75_Th25_b35v30_3e6_hmp1/animations/temperature.mp4"
       },
       "paramsPath": "/engine/planetary/pE75_Th25_b35v30_3e6_hmp1/parameters.yaml"
+    },
+    {
+      "simulationId": "planetary",
+      "runId": "pE75_Th25_b35v85_3e6",
+      "parameters": {
+        "impactor_mass": 0.25,
+        "impactor_velocity": 7.4,
+        "impactor_angle": 35.0
+      },
+      "liveDataPath": "/engine/planetary/pE75_Th25_b35v85_3e6/live_data_table.csv",
+      "summaryPath": "/engine/planetary/pE75_Th25_b35v85_3e6/run_summary.yaml",
+      "defaultView": "houdini",
+      "views": {
+        "houdini": "/engine/planetary/pE75_Th25_b35v85_3e6/animations/houdini.mp4",
+        "material": "/engine/planetary/pE75_Th25_b35v85_3e6/animations/material.mp4",
+        "temperature": "/engine/planetary/pE75_Th25_b35v85_3e6/animations/temperature.mp4"
+      },
+      "paramsPath": "/engine/planetary/pE75_Th25_b35v85_3e6/parameters.yaml"
     },
     {
       "simulationId": "planetary",
@@ -701,7 +1098,6 @@
       "views": {
         "houdini": "/engine/planetary/pE75_Th25_b40v10_3e6/animations/houdini.mp4",
         "material": "/engine/planetary/pE75_Th25_b40v10_3e6/animations/material.mp4",
-        "pressure": "/engine/planetary/pE75_Th25_b40v10_3e6/animations/pressure.mp4",
         "temperature": "/engine/planetary/pE75_Th25_b40v10_3e6/animations/temperature.mp4"
       },
       "paramsPath": "/engine/planetary/pE75_Th25_b40v10_3e6/parameters.yaml"
@@ -720,7 +1116,6 @@
       "views": {
         "houdini": "/engine/planetary/pE75_Th25_b40v15_3e6/animations/houdini.mp4",
         "material": "/engine/planetary/pE75_Th25_b40v15_3e6/animations/material.mp4",
-        "pressure": "/engine/planetary/pE75_Th25_b40v15_3e6/animations/pressure.mp4",
         "temperature": "/engine/planetary/pE75_Th25_b40v15_3e6/animations/temperature.mp4"
       },
       "paramsPath": "/engine/planetary/pE75_Th25_b40v15_3e6/parameters.yaml"
@@ -739,7 +1134,6 @@
       "views": {
         "houdini": "/engine/planetary/pE75_Th25_b40v20_3e6_hmp1/animations/houdini.mp4",
         "material": "/engine/planetary/pE75_Th25_b40v20_3e6_hmp1/animations/material.mp4",
-        "pressure": "/engine/planetary/pE75_Th25_b40v20_3e6_hmp1/animations/pressure.mp4",
         "temperature": "/engine/planetary/pE75_Th25_b40v20_3e6_hmp1/animations/temperature.mp4"
       },
       "paramsPath": "/engine/planetary/pE75_Th25_b40v20_3e6_hmp1/parameters.yaml"
@@ -758,10 +1152,27 @@
       "views": {
         "houdini": "/engine/planetary/pE75_Th25_b40v30_3e6_hmp1/animations/houdini.mp4",
         "material": "/engine/planetary/pE75_Th25_b40v30_3e6_hmp1/animations/material.mp4",
-        "pressure": "/engine/planetary/pE75_Th25_b40v30_3e6_hmp1/animations/pressure.mp4",
         "temperature": "/engine/planetary/pE75_Th25_b40v30_3e6_hmp1/animations/temperature.mp4"
       },
       "paramsPath": "/engine/planetary/pE75_Th25_b40v30_3e6_hmp1/parameters.yaml"
+    },
+    {
+      "simulationId": "planetary",
+      "runId": "pE75_Th25_b40v85_3e6",
+      "parameters": {
+        "impactor_mass": 0.25,
+        "impactor_velocity": 7.4,
+        "impactor_angle": 40.0
+      },
+      "liveDataPath": "/engine/planetary/pE75_Th25_b40v85_3e6/live_data_table.csv",
+      "summaryPath": "/engine/planetary/pE75_Th25_b40v85_3e6/run_summary.yaml",
+      "defaultView": "houdini",
+      "views": {
+        "houdini": "/engine/planetary/pE75_Th25_b40v85_3e6/animations/houdini.mp4",
+        "material": "/engine/planetary/pE75_Th25_b40v85_3e6/animations/material.mp4",
+        "temperature": "/engine/planetary/pE75_Th25_b40v85_3e6/animations/temperature.mp4"
+      },
+      "paramsPath": "/engine/planetary/pE75_Th25_b40v85_3e6/parameters.yaml"
     },
     {
       "simulationId": "planetary",
@@ -777,7 +1188,6 @@
       "views": {
         "houdini": "/engine/planetary/pE75_Th25_b45v10_3e6/animations/houdini.mp4",
         "material": "/engine/planetary/pE75_Th25_b45v10_3e6/animations/material.mp4",
-        "pressure": "/engine/planetary/pE75_Th25_b45v10_3e6/animations/pressure.mp4",
         "temperature": "/engine/planetary/pE75_Th25_b45v10_3e6/animations/temperature.mp4"
       },
       "paramsPath": "/engine/planetary/pE75_Th25_b45v10_3e6/parameters.yaml"
@@ -796,7 +1206,6 @@
       "views": {
         "houdini": "/engine/planetary/pE75_Th25_b45v15_3e6/animations/houdini.mp4",
         "material": "/engine/planetary/pE75_Th25_b45v15_3e6/animations/material.mp4",
-        "pressure": "/engine/planetary/pE75_Th25_b45v15_3e6/animations/pressure.mp4",
         "temperature": "/engine/planetary/pE75_Th25_b45v15_3e6/animations/temperature.mp4"
       },
       "paramsPath": "/engine/planetary/pE75_Th25_b45v15_3e6/parameters.yaml"
@@ -815,7 +1224,6 @@
       "views": {
         "houdini": "/engine/planetary/pE75_Th25_b45v20_3e6_hmp1/animations/houdini.mp4",
         "material": "/engine/planetary/pE75_Th25_b45v20_3e6_hmp1/animations/material.mp4",
-        "pressure": "/engine/planetary/pE75_Th25_b45v20_3e6_hmp1/animations/pressure.mp4",
         "temperature": "/engine/planetary/pE75_Th25_b45v20_3e6_hmp1/animations/temperature.mp4"
       },
       "paramsPath": "/engine/planetary/pE75_Th25_b45v20_3e6_hmp1/parameters.yaml"
@@ -834,10 +1242,27 @@
       "views": {
         "houdini": "/engine/planetary/pE75_Th25_b45v30_3e6_hmp1/animations/houdini.mp4",
         "material": "/engine/planetary/pE75_Th25_b45v30_3e6_hmp1/animations/material.mp4",
-        "pressure": "/engine/planetary/pE75_Th25_b45v30_3e6_hmp1/animations/pressure.mp4",
         "temperature": "/engine/planetary/pE75_Th25_b45v30_3e6_hmp1/animations/temperature.mp4"
       },
       "paramsPath": "/engine/planetary/pE75_Th25_b45v30_3e6_hmp1/parameters.yaml"
+    },
+    {
+      "simulationId": "planetary",
+      "runId": "pE75_Th25_b45v85_3e6",
+      "parameters": {
+        "impactor_mass": 0.25,
+        "impactor_velocity": 7.4,
+        "impactor_angle": 45.0
+      },
+      "liveDataPath": "/engine/planetary/pE75_Th25_b45v85_3e6/live_data_table.csv",
+      "summaryPath": "/engine/planetary/pE75_Th25_b45v85_3e6/run_summary.yaml",
+      "defaultView": "houdini",
+      "views": {
+        "houdini": "/engine/planetary/pE75_Th25_b45v85_3e6/animations/houdini.mp4",
+        "material": "/engine/planetary/pE75_Th25_b45v85_3e6/animations/material.mp4",
+        "temperature": "/engine/planetary/pE75_Th25_b45v85_3e6/animations/temperature.mp4"
+      },
+      "paramsPath": "/engine/planetary/pE75_Th25_b45v85_3e6/parameters.yaml"
     },
     {
       "simulationId": "planetary",
@@ -853,7 +1278,6 @@
       "views": {
         "houdini": "/engine/planetary/pE75_Th25_b50v10_3e6/animations/houdini.mp4",
         "material": "/engine/planetary/pE75_Th25_b50v10_3e6/animations/material.mp4",
-        "pressure": "/engine/planetary/pE75_Th25_b50v10_3e6/animations/pressure.mp4",
         "temperature": "/engine/planetary/pE75_Th25_b50v10_3e6/animations/temperature.mp4"
       },
       "paramsPath": "/engine/planetary/pE75_Th25_b50v10_3e6/parameters.yaml"
@@ -872,7 +1296,6 @@
       "views": {
         "houdini": "/engine/planetary/pE75_Th25_b50v15_3e6/animations/houdini.mp4",
         "material": "/engine/planetary/pE75_Th25_b50v15_3e6/animations/material.mp4",
-        "pressure": "/engine/planetary/pE75_Th25_b50v15_3e6/animations/pressure.mp4",
         "temperature": "/engine/planetary/pE75_Th25_b50v15_3e6/animations/temperature.mp4"
       },
       "paramsPath": "/engine/planetary/pE75_Th25_b50v15_3e6/parameters.yaml"
@@ -891,7 +1314,6 @@
       "views": {
         "houdini": "/engine/planetary/pE75_Th25_b50v20_3e6_hmp1/animations/houdini.mp4",
         "material": "/engine/planetary/pE75_Th25_b50v20_3e6_hmp1/animations/material.mp4",
-        "pressure": "/engine/planetary/pE75_Th25_b50v20_3e6_hmp1/animations/pressure.mp4",
         "temperature": "/engine/planetary/pE75_Th25_b50v20_3e6_hmp1/animations/temperature.mp4"
       },
       "paramsPath": "/engine/planetary/pE75_Th25_b50v20_3e6_hmp1/parameters.yaml"
@@ -910,10 +1332,27 @@
       "views": {
         "houdini": "/engine/planetary/pE75_Th25_b50v30_3e6_hmp1/animations/houdini.mp4",
         "material": "/engine/planetary/pE75_Th25_b50v30_3e6_hmp1/animations/material.mp4",
-        "pressure": "/engine/planetary/pE75_Th25_b50v30_3e6_hmp1/animations/pressure.mp4",
         "temperature": "/engine/planetary/pE75_Th25_b50v30_3e6_hmp1/animations/temperature.mp4"
       },
       "paramsPath": "/engine/planetary/pE75_Th25_b50v30_3e6_hmp1/parameters.yaml"
+    },
+    {
+      "simulationId": "planetary",
+      "runId": "pE75_Th25_b50v85_3e6",
+      "parameters": {
+        "impactor_mass": 0.25,
+        "impactor_velocity": 7.4,
+        "impactor_angle": 50.0
+      },
+      "liveDataPath": "/engine/planetary/pE75_Th25_b50v85_3e6/live_data_table.csv",
+      "summaryPath": "/engine/planetary/pE75_Th25_b50v85_3e6/run_summary.yaml",
+      "defaultView": "houdini",
+      "views": {
+        "houdini": "/engine/planetary/pE75_Th25_b50v85_3e6/animations/houdini.mp4",
+        "material": "/engine/planetary/pE75_Th25_b50v85_3e6/animations/material.mp4",
+        "temperature": "/engine/planetary/pE75_Th25_b50v85_3e6/animations/temperature.mp4"
+      },
+      "paramsPath": "/engine/planetary/pE75_Th25_b50v85_3e6/parameters.yaml"
     },
     {
       "simulationId": "planetary",
@@ -929,7 +1368,6 @@
       "views": {
         "houdini": "/engine/planetary/pE75_Th25_b60v10_3e6/animations/houdini.mp4",
         "material": "/engine/planetary/pE75_Th25_b60v10_3e6/animations/material.mp4",
-        "pressure": "/engine/planetary/pE75_Th25_b60v10_3e6/animations/pressure.mp4",
         "temperature": "/engine/planetary/pE75_Th25_b60v10_3e6/animations/temperature.mp4"
       },
       "paramsPath": "/engine/planetary/pE75_Th25_b60v10_3e6/parameters.yaml"
@@ -948,7 +1386,6 @@
       "views": {
         "houdini": "/engine/planetary/pE75_Th25_b60v15_3e6/animations/houdini.mp4",
         "material": "/engine/planetary/pE75_Th25_b60v15_3e6/animations/material.mp4",
-        "pressure": "/engine/planetary/pE75_Th25_b60v15_3e6/animations/pressure.mp4",
         "temperature": "/engine/planetary/pE75_Th25_b60v15_3e6/animations/temperature.mp4"
       },
       "paramsPath": "/engine/planetary/pE75_Th25_b60v15_3e6/parameters.yaml"
@@ -967,7 +1404,6 @@
       "views": {
         "houdini": "/engine/planetary/pE75_Th25_b60v20_3e6_hmp1/animations/houdini.mp4",
         "material": "/engine/planetary/pE75_Th25_b60v20_3e6_hmp1/animations/material.mp4",
-        "pressure": "/engine/planetary/pE75_Th25_b60v20_3e6_hmp1/animations/pressure.mp4",
         "temperature": "/engine/planetary/pE75_Th25_b60v20_3e6_hmp1/animations/temperature.mp4"
       },
       "paramsPath": "/engine/planetary/pE75_Th25_b60v20_3e6_hmp1/parameters.yaml"
@@ -986,10 +1422,27 @@
       "views": {
         "houdini": "/engine/planetary/pE75_Th25_b60v30_3e6_hmp1/animations/houdini.mp4",
         "material": "/engine/planetary/pE75_Th25_b60v30_3e6_hmp1/animations/material.mp4",
-        "pressure": "/engine/planetary/pE75_Th25_b60v30_3e6_hmp1/animations/pressure.mp4",
         "temperature": "/engine/planetary/pE75_Th25_b60v30_3e6_hmp1/animations/temperature.mp4"
       },
       "paramsPath": "/engine/planetary/pE75_Th25_b60v30_3e6_hmp1/parameters.yaml"
+    },
+    {
+      "simulationId": "planetary",
+      "runId": "pE75_Th25_b60v85_3e6",
+      "parameters": {
+        "impactor_mass": 0.25,
+        "impactor_velocity": 7.4,
+        "impactor_angle": 60.0
+      },
+      "liveDataPath": "/engine/planetary/pE75_Th25_b60v85_3e6/live_data_table.csv",
+      "summaryPath": "/engine/planetary/pE75_Th25_b60v85_3e6/run_summary.yaml",
+      "defaultView": "houdini",
+      "views": {
+        "houdini": "/engine/planetary/pE75_Th25_b60v85_3e6/animations/houdini.mp4",
+        "material": "/engine/planetary/pE75_Th25_b60v85_3e6/animations/material.mp4",
+        "temperature": "/engine/planetary/pE75_Th25_b60v85_3e6/animations/temperature.mp4"
+      },
+      "paramsPath": "/engine/planetary/pE75_Th25_b60v85_3e6/parameters.yaml"
     },
     {
       "simulationId": "planetary",
@@ -1005,7 +1458,6 @@
       "views": {
         "houdini": "/engine/planetary/pE887_Th133_b00v10_3e6/animations/houdini.mp4",
         "material": "/engine/planetary/pE887_Th133_b00v10_3e6/animations/material.mp4",
-        "pressure": "/engine/planetary/pE887_Th133_b00v10_3e6/animations/pressure.mp4",
         "temperature": "/engine/planetary/pE887_Th133_b00v10_3e6/animations/temperature.mp4"
       },
       "paramsPath": "/engine/planetary/pE887_Th133_b00v10_3e6/parameters.yaml"
@@ -1024,7 +1476,6 @@
       "views": {
         "houdini": "/engine/planetary/pE887_Th133_b00v15_3e6/animations/houdini.mp4",
         "material": "/engine/planetary/pE887_Th133_b00v15_3e6/animations/material.mp4",
-        "pressure": "/engine/planetary/pE887_Th133_b00v15_3e6/animations/pressure.mp4",
         "temperature": "/engine/planetary/pE887_Th133_b00v15_3e6/animations/temperature.mp4"
       },
       "paramsPath": "/engine/planetary/pE887_Th133_b00v15_3e6/parameters.yaml"
@@ -1043,7 +1494,6 @@
       "views": {
         "houdini": "/engine/planetary/pE887_Th133_b00v20_3e6/animations/houdini.mp4",
         "material": "/engine/planetary/pE887_Th133_b00v20_3e6/animations/material.mp4",
-        "pressure": "/engine/planetary/pE887_Th133_b00v20_3e6/animations/pressure.mp4",
         "temperature": "/engine/planetary/pE887_Th133_b00v20_3e6/animations/temperature.mp4"
       },
       "paramsPath": "/engine/planetary/pE887_Th133_b00v20_3e6/parameters.yaml"
@@ -1062,10 +1512,27 @@
       "views": {
         "houdini": "/engine/planetary/pE887_Th133_b00v30_3e6_hmp1/animations/houdini.mp4",
         "material": "/engine/planetary/pE887_Th133_b00v30_3e6_hmp1/animations/material.mp4",
-        "pressure": "/engine/planetary/pE887_Th133_b00v30_3e6_hmp1/animations/pressure.mp4",
         "temperature": "/engine/planetary/pE887_Th133_b00v30_3e6_hmp1/animations/temperature.mp4"
       },
       "paramsPath": "/engine/planetary/pE887_Th133_b00v30_3e6_hmp1/parameters.yaml"
+    },
+    {
+      "simulationId": "planetary",
+      "runId": "pE887_Th133_b00v85_3e6",
+      "parameters": {
+        "impactor_mass": 0.15,
+        "impactor_velocity": 7.7,
+        "impactor_angle": 0.0
+      },
+      "liveDataPath": "/engine/planetary/pE887_Th133_b00v85_3e6/live_data_table.csv",
+      "summaryPath": "/engine/planetary/pE887_Th133_b00v85_3e6/run_summary.yaml",
+      "defaultView": "houdini",
+      "views": {
+        "houdini": "/engine/planetary/pE887_Th133_b00v85_3e6/animations/houdini.mp4",
+        "material": "/engine/planetary/pE887_Th133_b00v85_3e6/animations/material.mp4",
+        "temperature": "/engine/planetary/pE887_Th133_b00v85_3e6/animations/temperature.mp4"
+      },
+      "paramsPath": "/engine/planetary/pE887_Th133_b00v85_3e6/parameters.yaml"
     },
     {
       "simulationId": "planetary",
@@ -1081,7 +1548,6 @@
       "views": {
         "houdini": "/engine/planetary/pE887_Th133_b20v10_3e6/animations/houdini.mp4",
         "material": "/engine/planetary/pE887_Th133_b20v10_3e6/animations/material.mp4",
-        "pressure": "/engine/planetary/pE887_Th133_b20v10_3e6/animations/pressure.mp4",
         "temperature": "/engine/planetary/pE887_Th133_b20v10_3e6/animations/temperature.mp4"
       },
       "paramsPath": "/engine/planetary/pE887_Th133_b20v10_3e6/parameters.yaml"
@@ -1100,10 +1566,27 @@
       "views": {
         "houdini": "/engine/planetary/pE887_Th133_b20v15_3e6/animations/houdini.mp4",
         "material": "/engine/planetary/pE887_Th133_b20v15_3e6/animations/material.mp4",
-        "pressure": "/engine/planetary/pE887_Th133_b20v15_3e6/animations/pressure.mp4",
         "temperature": "/engine/planetary/pE887_Th133_b20v15_3e6/animations/temperature.mp4"
       },
       "paramsPath": "/engine/planetary/pE887_Th133_b20v15_3e6/parameters.yaml"
+    },
+    {
+      "simulationId": "planetary",
+      "runId": "pE887_Th133_b20v20_3e6",
+      "parameters": {
+        "impactor_mass": 0.15,
+        "impactor_velocity": 18.0,
+        "impactor_angle": 20.0
+      },
+      "liveDataPath": "/engine/planetary/pE887_Th133_b20v20_3e6/live_data_table.csv",
+      "summaryPath": "/engine/planetary/pE887_Th133_b20v20_3e6/run_summary.yaml",
+      "defaultView": "houdini",
+      "views": {
+        "houdini": "/engine/planetary/pE887_Th133_b20v20_3e6/animations/houdini.mp4",
+        "material": "/engine/planetary/pE887_Th133_b20v20_3e6/animations/material.mp4",
+        "temperature": "/engine/planetary/pE887_Th133_b20v20_3e6/animations/temperature.mp4"
+      },
+      "paramsPath": "/engine/planetary/pE887_Th133_b20v20_3e6/parameters.yaml"
     },
     {
       "simulationId": "planetary",
@@ -1119,10 +1602,27 @@
       "views": {
         "houdini": "/engine/planetary/pE887_Th133_b20v30_3e6_hmp1/animations/houdini.mp4",
         "material": "/engine/planetary/pE887_Th133_b20v30_3e6_hmp1/animations/material.mp4",
-        "pressure": "/engine/planetary/pE887_Th133_b20v30_3e6_hmp1/animations/pressure.mp4",
         "temperature": "/engine/planetary/pE887_Th133_b20v30_3e6_hmp1/animations/temperature.mp4"
       },
       "paramsPath": "/engine/planetary/pE887_Th133_b20v30_3e6_hmp1/parameters.yaml"
+    },
+    {
+      "simulationId": "planetary",
+      "runId": "pE887_Th133_b20v85_3e6",
+      "parameters": {
+        "impactor_mass": 0.15,
+        "impactor_velocity": 7.7,
+        "impactor_angle": 20.0
+      },
+      "liveDataPath": "/engine/planetary/pE887_Th133_b20v85_3e6/live_data_table.csv",
+      "summaryPath": "/engine/planetary/pE887_Th133_b20v85_3e6/run_summary.yaml",
+      "defaultView": "houdini",
+      "views": {
+        "houdini": "/engine/planetary/pE887_Th133_b20v85_3e6/animations/houdini.mp4",
+        "material": "/engine/planetary/pE887_Th133_b20v85_3e6/animations/material.mp4",
+        "temperature": "/engine/planetary/pE887_Th133_b20v85_3e6/animations/temperature.mp4"
+      },
+      "paramsPath": "/engine/planetary/pE887_Th133_b20v85_3e6/parameters.yaml"
     },
     {
       "simulationId": "planetary",
@@ -1138,7 +1638,6 @@
       "views": {
         "houdini": "/engine/planetary/pE887_Th133_b30v10_3e6/animations/houdini.mp4",
         "material": "/engine/planetary/pE887_Th133_b30v10_3e6/animations/material.mp4",
-        "pressure": "/engine/planetary/pE887_Th133_b30v10_3e6/animations/pressure.mp4",
         "temperature": "/engine/planetary/pE887_Th133_b30v10_3e6/animations/temperature.mp4"
       },
       "paramsPath": "/engine/planetary/pE887_Th133_b30v10_3e6/parameters.yaml"
@@ -1157,7 +1656,6 @@
       "views": {
         "houdini": "/engine/planetary/pE887_Th133_b30v15_3e6/animations/houdini.mp4",
         "material": "/engine/planetary/pE887_Th133_b30v15_3e6/animations/material.mp4",
-        "pressure": "/engine/planetary/pE887_Th133_b30v15_3e6/animations/pressure.mp4",
         "temperature": "/engine/planetary/pE887_Th133_b30v15_3e6/animations/temperature.mp4"
       },
       "paramsPath": "/engine/planetary/pE887_Th133_b30v15_3e6/parameters.yaml"
@@ -1176,7 +1674,6 @@
       "views": {
         "houdini": "/engine/planetary/pE887_Th133_b30v20_3e6_hmp1/animations/houdini.mp4",
         "material": "/engine/planetary/pE887_Th133_b30v20_3e6_hmp1/animations/material.mp4",
-        "pressure": "/engine/planetary/pE887_Th133_b30v20_3e6_hmp1/animations/pressure.mp4",
         "temperature": "/engine/planetary/pE887_Th133_b30v20_3e6_hmp1/animations/temperature.mp4"
       },
       "paramsPath": "/engine/planetary/pE887_Th133_b30v20_3e6_hmp1/parameters.yaml"
@@ -1195,10 +1692,27 @@
       "views": {
         "houdini": "/engine/planetary/pE887_Th133_b30v30_3e6_hmp1/animations/houdini.mp4",
         "material": "/engine/planetary/pE887_Th133_b30v30_3e6_hmp1/animations/material.mp4",
-        "pressure": "/engine/planetary/pE887_Th133_b30v30_3e6_hmp1/animations/pressure.mp4",
         "temperature": "/engine/planetary/pE887_Th133_b30v30_3e6_hmp1/animations/temperature.mp4"
       },
       "paramsPath": "/engine/planetary/pE887_Th133_b30v30_3e6_hmp1/parameters.yaml"
+    },
+    {
+      "simulationId": "planetary",
+      "runId": "pE887_Th133_b30v85_3e6",
+      "parameters": {
+        "impactor_mass": 0.15,
+        "impactor_velocity": 7.7,
+        "impactor_angle": 30.0
+      },
+      "liveDataPath": "/engine/planetary/pE887_Th133_b30v85_3e6/live_data_table.csv",
+      "summaryPath": "/engine/planetary/pE887_Th133_b30v85_3e6/run_summary.yaml",
+      "defaultView": "houdini",
+      "views": {
+        "houdini": "/engine/planetary/pE887_Th133_b30v85_3e6/animations/houdini.mp4",
+        "material": "/engine/planetary/pE887_Th133_b30v85_3e6/animations/material.mp4",
+        "temperature": "/engine/planetary/pE887_Th133_b30v85_3e6/animations/temperature.mp4"
+      },
+      "paramsPath": "/engine/planetary/pE887_Th133_b30v85_3e6/parameters.yaml"
     },
     {
       "simulationId": "planetary",
@@ -1214,7 +1728,6 @@
       "views": {
         "houdini": "/engine/planetary/pE887_Th133_b35v10_3e6/animations/houdini.mp4",
         "material": "/engine/planetary/pE887_Th133_b35v10_3e6/animations/material.mp4",
-        "pressure": "/engine/planetary/pE887_Th133_b35v10_3e6/animations/pressure.mp4",
         "temperature": "/engine/planetary/pE887_Th133_b35v10_3e6/animations/temperature.mp4"
       },
       "paramsPath": "/engine/planetary/pE887_Th133_b35v10_3e6/parameters.yaml"
@@ -1233,7 +1746,6 @@
       "views": {
         "houdini": "/engine/planetary/pE887_Th133_b35v15_3e6/animations/houdini.mp4",
         "material": "/engine/planetary/pE887_Th133_b35v15_3e6/animations/material.mp4",
-        "pressure": "/engine/planetary/pE887_Th133_b35v15_3e6/animations/pressure.mp4",
         "temperature": "/engine/planetary/pE887_Th133_b35v15_3e6/animations/temperature.mp4"
       },
       "paramsPath": "/engine/planetary/pE887_Th133_b35v15_3e6/parameters.yaml"
@@ -1252,7 +1764,6 @@
       "views": {
         "houdini": "/engine/planetary/pE887_Th133_b35v20_3e6/animations/houdini.mp4",
         "material": "/engine/planetary/pE887_Th133_b35v20_3e6/animations/material.mp4",
-        "pressure": "/engine/planetary/pE887_Th133_b35v20_3e6/animations/pressure.mp4",
         "temperature": "/engine/planetary/pE887_Th133_b35v20_3e6/animations/temperature.mp4"
       },
       "paramsPath": "/engine/planetary/pE887_Th133_b35v20_3e6/parameters.yaml"
@@ -1271,10 +1782,27 @@
       "views": {
         "houdini": "/engine/planetary/pE887_Th133_b35v30_3e6_hmp1/animations/houdini.mp4",
         "material": "/engine/planetary/pE887_Th133_b35v30_3e6_hmp1/animations/material.mp4",
-        "pressure": "/engine/planetary/pE887_Th133_b35v30_3e6_hmp1/animations/pressure.mp4",
         "temperature": "/engine/planetary/pE887_Th133_b35v30_3e6_hmp1/animations/temperature.mp4"
       },
       "paramsPath": "/engine/planetary/pE887_Th133_b35v30_3e6_hmp1/parameters.yaml"
+    },
+    {
+      "simulationId": "planetary",
+      "runId": "pE887_Th133_b35v85_3e6",
+      "parameters": {
+        "impactor_mass": 0.15,
+        "impactor_velocity": 7.7,
+        "impactor_angle": 35.0
+      },
+      "liveDataPath": "/engine/planetary/pE887_Th133_b35v85_3e6/live_data_table.csv",
+      "summaryPath": "/engine/planetary/pE887_Th133_b35v85_3e6/run_summary.yaml",
+      "defaultView": "houdini",
+      "views": {
+        "houdini": "/engine/planetary/pE887_Th133_b35v85_3e6/animations/houdini.mp4",
+        "material": "/engine/planetary/pE887_Th133_b35v85_3e6/animations/material.mp4",
+        "temperature": "/engine/planetary/pE887_Th133_b35v85_3e6/animations/temperature.mp4"
+      },
+      "paramsPath": "/engine/planetary/pE887_Th133_b35v85_3e6/parameters.yaml"
     },
     {
       "simulationId": "planetary",
@@ -1290,7 +1818,6 @@
       "views": {
         "houdini": "/engine/planetary/pE887_Th133_b40v10_3e6/animations/houdini.mp4",
         "material": "/engine/planetary/pE887_Th133_b40v10_3e6/animations/material.mp4",
-        "pressure": "/engine/planetary/pE887_Th133_b40v10_3e6/animations/pressure.mp4",
         "temperature": "/engine/planetary/pE887_Th133_b40v10_3e6/animations/temperature.mp4"
       },
       "paramsPath": "/engine/planetary/pE887_Th133_b40v10_3e6/parameters.yaml"
@@ -1309,7 +1836,6 @@
       "views": {
         "houdini": "/engine/planetary/pE887_Th133_b40v15_3e6/animations/houdini.mp4",
         "material": "/engine/planetary/pE887_Th133_b40v15_3e6/animations/material.mp4",
-        "pressure": "/engine/planetary/pE887_Th133_b40v15_3e6/animations/pressure.mp4",
         "temperature": "/engine/planetary/pE887_Th133_b40v15_3e6/animations/temperature.mp4"
       },
       "paramsPath": "/engine/planetary/pE887_Th133_b40v15_3e6/parameters.yaml"
@@ -1328,7 +1854,6 @@
       "views": {
         "houdini": "/engine/planetary/pE887_Th133_b40v20_3e6/animations/houdini.mp4",
         "material": "/engine/planetary/pE887_Th133_b40v20_3e6/animations/material.mp4",
-        "pressure": "/engine/planetary/pE887_Th133_b40v20_3e6/animations/pressure.mp4",
         "temperature": "/engine/planetary/pE887_Th133_b40v20_3e6/animations/temperature.mp4"
       },
       "paramsPath": "/engine/planetary/pE887_Th133_b40v20_3e6/parameters.yaml"
@@ -1347,10 +1872,27 @@
       "views": {
         "houdini": "/engine/planetary/pE887_Th133_b40v30_3e6_hmp1/animations/houdini.mp4",
         "material": "/engine/planetary/pE887_Th133_b40v30_3e6_hmp1/animations/material.mp4",
-        "pressure": "/engine/planetary/pE887_Th133_b40v30_3e6_hmp1/animations/pressure.mp4",
         "temperature": "/engine/planetary/pE887_Th133_b40v30_3e6_hmp1/animations/temperature.mp4"
       },
       "paramsPath": "/engine/planetary/pE887_Th133_b40v30_3e6_hmp1/parameters.yaml"
+    },
+    {
+      "simulationId": "planetary",
+      "runId": "pE887_Th133_b40v85_3e6",
+      "parameters": {
+        "impactor_mass": 0.15,
+        "impactor_velocity": 7.7,
+        "impactor_angle": 40.0
+      },
+      "liveDataPath": "/engine/planetary/pE887_Th133_b40v85_3e6/live_data_table.csv",
+      "summaryPath": "/engine/planetary/pE887_Th133_b40v85_3e6/run_summary.yaml",
+      "defaultView": "houdini",
+      "views": {
+        "houdini": "/engine/planetary/pE887_Th133_b40v85_3e6/animations/houdini.mp4",
+        "material": "/engine/planetary/pE887_Th133_b40v85_3e6/animations/material.mp4",
+        "temperature": "/engine/planetary/pE887_Th133_b40v85_3e6/animations/temperature.mp4"
+      },
+      "paramsPath": "/engine/planetary/pE887_Th133_b40v85_3e6/parameters.yaml"
     },
     {
       "simulationId": "planetary",
@@ -1366,7 +1908,6 @@
       "views": {
         "houdini": "/engine/planetary/pE887_Th133_b45v10_3e6/animations/houdini.mp4",
         "material": "/engine/planetary/pE887_Th133_b45v10_3e6/animations/material.mp4",
-        "pressure": "/engine/planetary/pE887_Th133_b45v10_3e6/animations/pressure.mp4",
         "temperature": "/engine/planetary/pE887_Th133_b45v10_3e6/animations/temperature.mp4"
       },
       "paramsPath": "/engine/planetary/pE887_Th133_b45v10_3e6/parameters.yaml"
@@ -1385,7 +1926,6 @@
       "views": {
         "houdini": "/engine/planetary/pE887_Th133_b45v15_3e6/animations/houdini.mp4",
         "material": "/engine/planetary/pE887_Th133_b45v15_3e6/animations/material.mp4",
-        "pressure": "/engine/planetary/pE887_Th133_b45v15_3e6/animations/pressure.mp4",
         "temperature": "/engine/planetary/pE887_Th133_b45v15_3e6/animations/temperature.mp4"
       },
       "paramsPath": "/engine/planetary/pE887_Th133_b45v15_3e6/parameters.yaml"
@@ -1404,7 +1944,6 @@
       "views": {
         "houdini": "/engine/planetary/pE887_Th133_b45v20_3e6/animations/houdini.mp4",
         "material": "/engine/planetary/pE887_Th133_b45v20_3e6/animations/material.mp4",
-        "pressure": "/engine/planetary/pE887_Th133_b45v20_3e6/animations/pressure.mp4",
         "temperature": "/engine/planetary/pE887_Th133_b45v20_3e6/animations/temperature.mp4"
       },
       "paramsPath": "/engine/planetary/pE887_Th133_b45v20_3e6/parameters.yaml"
@@ -1423,10 +1962,27 @@
       "views": {
         "houdini": "/engine/planetary/pE887_Th133_b45v30_3e6_hmp1/animations/houdini.mp4",
         "material": "/engine/planetary/pE887_Th133_b45v30_3e6_hmp1/animations/material.mp4",
-        "pressure": "/engine/planetary/pE887_Th133_b45v30_3e6_hmp1/animations/pressure.mp4",
         "temperature": "/engine/planetary/pE887_Th133_b45v30_3e6_hmp1/animations/temperature.mp4"
       },
       "paramsPath": "/engine/planetary/pE887_Th133_b45v30_3e6_hmp1/parameters.yaml"
+    },
+    {
+      "simulationId": "planetary",
+      "runId": "pE887_Th133_b45v85_3e6",
+      "parameters": {
+        "impactor_mass": 0.15,
+        "impactor_velocity": 7.7,
+        "impactor_angle": 45.0
+      },
+      "liveDataPath": "/engine/planetary/pE887_Th133_b45v85_3e6/live_data_table.csv",
+      "summaryPath": "/engine/planetary/pE887_Th133_b45v85_3e6/run_summary.yaml",
+      "defaultView": "houdini",
+      "views": {
+        "houdini": "/engine/planetary/pE887_Th133_b45v85_3e6/animations/houdini.mp4",
+        "material": "/engine/planetary/pE887_Th133_b45v85_3e6/animations/material.mp4",
+        "temperature": "/engine/planetary/pE887_Th133_b45v85_3e6/animations/temperature.mp4"
+      },
+      "paramsPath": "/engine/planetary/pE887_Th133_b45v85_3e6/parameters.yaml"
     },
     {
       "simulationId": "planetary",
@@ -1442,7 +1998,6 @@
       "views": {
         "houdini": "/engine/planetary/pE887_Th133_b50v10_3e6/animations/houdini.mp4",
         "material": "/engine/planetary/pE887_Th133_b50v10_3e6/animations/material.mp4",
-        "pressure": "/engine/planetary/pE887_Th133_b50v10_3e6/animations/pressure.mp4",
         "temperature": "/engine/planetary/pE887_Th133_b50v10_3e6/animations/temperature.mp4"
       },
       "paramsPath": "/engine/planetary/pE887_Th133_b50v10_3e6/parameters.yaml"
@@ -1461,7 +2016,6 @@
       "views": {
         "houdini": "/engine/planetary/pE887_Th133_b50v15_3e6/animations/houdini.mp4",
         "material": "/engine/planetary/pE887_Th133_b50v15_3e6/animations/material.mp4",
-        "pressure": "/engine/planetary/pE887_Th133_b50v15_3e6/animations/pressure.mp4",
         "temperature": "/engine/planetary/pE887_Th133_b50v15_3e6/animations/temperature.mp4"
       },
       "paramsPath": "/engine/planetary/pE887_Th133_b50v15_3e6/parameters.yaml"
@@ -1480,7 +2034,6 @@
       "views": {
         "houdini": "/engine/planetary/pE887_Th133_b50v20_3e6/animations/houdini.mp4",
         "material": "/engine/planetary/pE887_Th133_b50v20_3e6/animations/material.mp4",
-        "pressure": "/engine/planetary/pE887_Th133_b50v20_3e6/animations/pressure.mp4",
         "temperature": "/engine/planetary/pE887_Th133_b50v20_3e6/animations/temperature.mp4"
       },
       "paramsPath": "/engine/planetary/pE887_Th133_b50v20_3e6/parameters.yaml"
@@ -1499,10 +2052,27 @@
       "views": {
         "houdini": "/engine/planetary/pE887_Th133_b50v30_3e6_hmp1/animations/houdini.mp4",
         "material": "/engine/planetary/pE887_Th133_b50v30_3e6_hmp1/animations/material.mp4",
-        "pressure": "/engine/planetary/pE887_Th133_b50v30_3e6_hmp1/animations/pressure.mp4",
         "temperature": "/engine/planetary/pE887_Th133_b50v30_3e6_hmp1/animations/temperature.mp4"
       },
       "paramsPath": "/engine/planetary/pE887_Th133_b50v30_3e6_hmp1/parameters.yaml"
+    },
+    {
+      "simulationId": "planetary",
+      "runId": "pE887_Th133_b50v85_3e6",
+      "parameters": {
+        "impactor_mass": 0.15,
+        "impactor_velocity": 7.7,
+        "impactor_angle": 50.0
+      },
+      "liveDataPath": "/engine/planetary/pE887_Th133_b50v85_3e6/live_data_table.csv",
+      "summaryPath": "/engine/planetary/pE887_Th133_b50v85_3e6/run_summary.yaml",
+      "defaultView": "houdini",
+      "views": {
+        "houdini": "/engine/planetary/pE887_Th133_b50v85_3e6/animations/houdini.mp4",
+        "material": "/engine/planetary/pE887_Th133_b50v85_3e6/animations/material.mp4",
+        "temperature": "/engine/planetary/pE887_Th133_b50v85_3e6/animations/temperature.mp4"
+      },
+      "paramsPath": "/engine/planetary/pE887_Th133_b50v85_3e6/parameters.yaml"
     },
     {
       "simulationId": "planetary",
@@ -1518,7 +2088,6 @@
       "views": {
         "houdini": "/engine/planetary/pE887_Th133_b60v10_3e6/animations/houdini.mp4",
         "material": "/engine/planetary/pE887_Th133_b60v10_3e6/animations/material.mp4",
-        "pressure": "/engine/planetary/pE887_Th133_b60v10_3e6/animations/pressure.mp4",
         "temperature": "/engine/planetary/pE887_Th133_b60v10_3e6/animations/temperature.mp4"
       },
       "paramsPath": "/engine/planetary/pE887_Th133_b60v10_3e6/parameters.yaml"
@@ -1537,7 +2106,6 @@
       "views": {
         "houdini": "/engine/planetary/pE887_Th133_b60v15_3e6/animations/houdini.mp4",
         "material": "/engine/planetary/pE887_Th133_b60v15_3e6/animations/material.mp4",
-        "pressure": "/engine/planetary/pE887_Th133_b60v15_3e6/animations/pressure.mp4",
         "temperature": "/engine/planetary/pE887_Th133_b60v15_3e6/animations/temperature.mp4"
       },
       "paramsPath": "/engine/planetary/pE887_Th133_b60v15_3e6/parameters.yaml"
@@ -1556,7 +2124,6 @@
       "views": {
         "houdini": "/engine/planetary/pE887_Th133_b60v20_3e6/animations/houdini.mp4",
         "material": "/engine/planetary/pE887_Th133_b60v20_3e6/animations/material.mp4",
-        "pressure": "/engine/planetary/pE887_Th133_b60v20_3e6/animations/pressure.mp4",
         "temperature": "/engine/planetary/pE887_Th133_b60v20_3e6/animations/temperature.mp4"
       },
       "paramsPath": "/engine/planetary/pE887_Th133_b60v20_3e6/parameters.yaml"
@@ -1575,10 +2142,27 @@
       "views": {
         "houdini": "/engine/planetary/pE887_Th133_b60v30_3e6_hmp1/animations/houdini.mp4",
         "material": "/engine/planetary/pE887_Th133_b60v30_3e6_hmp1/animations/material.mp4",
-        "pressure": "/engine/planetary/pE887_Th133_b60v30_3e6_hmp1/animations/pressure.mp4",
         "temperature": "/engine/planetary/pE887_Th133_b60v30_3e6_hmp1/animations/temperature.mp4"
       },
       "paramsPath": "/engine/planetary/pE887_Th133_b60v30_3e6_hmp1/parameters.yaml"
+    },
+    {
+      "simulationId": "planetary",
+      "runId": "pE887_Th133_b60v85_3e6",
+      "parameters": {
+        "impactor_mass": 0.15,
+        "impactor_velocity": 7.7,
+        "impactor_angle": 60.0
+      },
+      "liveDataPath": "/engine/planetary/pE887_Th133_b60v85_3e6/live_data_table.csv",
+      "summaryPath": "/engine/planetary/pE887_Th133_b60v85_3e6/run_summary.yaml",
+      "defaultView": "houdini",
+      "views": {
+        "houdini": "/engine/planetary/pE887_Th133_b60v85_3e6/animations/houdini.mp4",
+        "material": "/engine/planetary/pE887_Th133_b60v85_3e6/animations/material.mp4",
+        "temperature": "/engine/planetary/pE887_Th133_b60v85_3e6/animations/temperature.mp4"
+      },
+      "paramsPath": "/engine/planetary/pE887_Th133_b60v85_3e6/parameters.yaml"
     },
     {
       "simulationId": "planetary",
@@ -1594,7 +2178,6 @@
       "views": {
         "houdini": "/engine/planetary/pE95_Th05_b00v10_3e6/animations/houdini.mp4",
         "material": "/engine/planetary/pE95_Th05_b00v10_3e6/animations/material.mp4",
-        "pressure": "/engine/planetary/pE95_Th05_b00v10_3e6/animations/pressure.mp4",
         "temperature": "/engine/planetary/pE95_Th05_b00v10_3e6/animations/temperature.mp4"
       },
       "paramsPath": "/engine/planetary/pE95_Th05_b00v10_3e6/parameters.yaml"
@@ -1613,7 +2196,6 @@
       "views": {
         "houdini": "/engine/planetary/pE95_Th05_b00v15_3e6/animations/houdini.mp4",
         "material": "/engine/planetary/pE95_Th05_b00v15_3e6/animations/material.mp4",
-        "pressure": "/engine/planetary/pE95_Th05_b00v15_3e6/animations/pressure.mp4",
         "temperature": "/engine/planetary/pE95_Th05_b00v15_3e6/animations/temperature.mp4"
       },
       "paramsPath": "/engine/planetary/pE95_Th05_b00v15_3e6/parameters.yaml"
@@ -1632,7 +2214,6 @@
       "views": {
         "houdini": "/engine/planetary/pE95_Th05_b00v20_3e6/animations/houdini.mp4",
         "material": "/engine/planetary/pE95_Th05_b00v20_3e6/animations/material.mp4",
-        "pressure": "/engine/planetary/pE95_Th05_b00v20_3e6/animations/pressure.mp4",
         "temperature": "/engine/planetary/pE95_Th05_b00v20_3e6/animations/temperature.mp4"
       },
       "paramsPath": "/engine/planetary/pE95_Th05_b00v20_3e6/parameters.yaml"
@@ -1651,10 +2232,27 @@
       "views": {
         "houdini": "/engine/planetary/pE95_Th05_b00v30_3e6/animations/houdini.mp4",
         "material": "/engine/planetary/pE95_Th05_b00v30_3e6/animations/material.mp4",
-        "pressure": "/engine/planetary/pE95_Th05_b00v30_3e6/animations/pressure.mp4",
         "temperature": "/engine/planetary/pE95_Th05_b00v30_3e6/animations/temperature.mp4"
       },
       "paramsPath": "/engine/planetary/pE95_Th05_b00v30_3e6/parameters.yaml"
+    },
+    {
+      "simulationId": "planetary",
+      "runId": "pE95_Th05_b00v85_3e6",
+      "parameters": {
+        "impactor_mass": 0.05,
+        "impactor_velocity": 7.9,
+        "impactor_angle": 0.0
+      },
+      "liveDataPath": "/engine/planetary/pE95_Th05_b00v85_3e6/live_data_table.csv",
+      "summaryPath": "/engine/planetary/pE95_Th05_b00v85_3e6/run_summary.yaml",
+      "defaultView": "houdini",
+      "views": {
+        "houdini": "/engine/planetary/pE95_Th05_b00v85_3e6/animations/houdini.mp4",
+        "material": "/engine/planetary/pE95_Th05_b00v85_3e6/animations/material.mp4",
+        "temperature": "/engine/planetary/pE95_Th05_b00v85_3e6/animations/temperature.mp4"
+      },
+      "paramsPath": "/engine/planetary/pE95_Th05_b00v85_3e6/parameters.yaml"
     },
     {
       "simulationId": "planetary",
@@ -1670,7 +2268,6 @@
       "views": {
         "houdini": "/engine/planetary/pE95_Th05_b20v10_3e6/animations/houdini.mp4",
         "material": "/engine/planetary/pE95_Th05_b20v10_3e6/animations/material.mp4",
-        "pressure": "/engine/planetary/pE95_Th05_b20v10_3e6/animations/pressure.mp4",
         "temperature": "/engine/planetary/pE95_Th05_b20v10_3e6/animations/temperature.mp4"
       },
       "paramsPath": "/engine/planetary/pE95_Th05_b20v10_3e6/parameters.yaml"
@@ -1689,7 +2286,6 @@
       "views": {
         "houdini": "/engine/planetary/pE95_Th05_b20v15_3e6/animations/houdini.mp4",
         "material": "/engine/planetary/pE95_Th05_b20v15_3e6/animations/material.mp4",
-        "pressure": "/engine/planetary/pE95_Th05_b20v15_3e6/animations/pressure.mp4",
         "temperature": "/engine/planetary/pE95_Th05_b20v15_3e6/animations/temperature.mp4"
       },
       "paramsPath": "/engine/planetary/pE95_Th05_b20v15_3e6/parameters.yaml"
@@ -1708,7 +2304,6 @@
       "views": {
         "houdini": "/engine/planetary/pE95_Th05_b20v20_3e6/animations/houdini.mp4",
         "material": "/engine/planetary/pE95_Th05_b20v20_3e6/animations/material.mp4",
-        "pressure": "/engine/planetary/pE95_Th05_b20v20_3e6/animations/pressure.mp4",
         "temperature": "/engine/planetary/pE95_Th05_b20v20_3e6/animations/temperature.mp4"
       },
       "paramsPath": "/engine/planetary/pE95_Th05_b20v20_3e6/parameters.yaml"
@@ -1727,10 +2322,27 @@
       "views": {
         "houdini": "/engine/planetary/pE95_Th05_b20v30_3e6/animations/houdini.mp4",
         "material": "/engine/planetary/pE95_Th05_b20v30_3e6/animations/material.mp4",
-        "pressure": "/engine/planetary/pE95_Th05_b20v30_3e6/animations/pressure.mp4",
         "temperature": "/engine/planetary/pE95_Th05_b20v30_3e6/animations/temperature.mp4"
       },
       "paramsPath": "/engine/planetary/pE95_Th05_b20v30_3e6/parameters.yaml"
+    },
+    {
+      "simulationId": "planetary",
+      "runId": "pE95_Th05_b20v85_3e6",
+      "parameters": {
+        "impactor_mass": 0.05,
+        "impactor_velocity": 7.9,
+        "impactor_angle": 20.0
+      },
+      "liveDataPath": "/engine/planetary/pE95_Th05_b20v85_3e6/live_data_table.csv",
+      "summaryPath": "/engine/planetary/pE95_Th05_b20v85_3e6/run_summary.yaml",
+      "defaultView": "houdini",
+      "views": {
+        "houdini": "/engine/planetary/pE95_Th05_b20v85_3e6/animations/houdini.mp4",
+        "material": "/engine/planetary/pE95_Th05_b20v85_3e6/animations/material.mp4",
+        "temperature": "/engine/planetary/pE95_Th05_b20v85_3e6/animations/temperature.mp4"
+      },
+      "paramsPath": "/engine/planetary/pE95_Th05_b20v85_3e6/parameters.yaml"
     },
     {
       "simulationId": "planetary",
@@ -1746,7 +2358,6 @@
       "views": {
         "houdini": "/engine/planetary/pE95_Th05_b30v10_3e6/animations/houdini.mp4",
         "material": "/engine/planetary/pE95_Th05_b30v10_3e6/animations/material.mp4",
-        "pressure": "/engine/planetary/pE95_Th05_b30v10_3e6/animations/pressure.mp4",
         "temperature": "/engine/planetary/pE95_Th05_b30v10_3e6/animations/temperature.mp4"
       },
       "paramsPath": "/engine/planetary/pE95_Th05_b30v10_3e6/parameters.yaml"
@@ -1765,7 +2376,6 @@
       "views": {
         "houdini": "/engine/planetary/pE95_Th05_b30v15_3e6/animations/houdini.mp4",
         "material": "/engine/planetary/pE95_Th05_b30v15_3e6/animations/material.mp4",
-        "pressure": "/engine/planetary/pE95_Th05_b30v15_3e6/animations/pressure.mp4",
         "temperature": "/engine/planetary/pE95_Th05_b30v15_3e6/animations/temperature.mp4"
       },
       "paramsPath": "/engine/planetary/pE95_Th05_b30v15_3e6/parameters.yaml"
@@ -1784,7 +2394,6 @@
       "views": {
         "houdini": "/engine/planetary/pE95_Th05_b30v20_3e6/animations/houdini.mp4",
         "material": "/engine/planetary/pE95_Th05_b30v20_3e6/animations/material.mp4",
-        "pressure": "/engine/planetary/pE95_Th05_b30v20_3e6/animations/pressure.mp4",
         "temperature": "/engine/planetary/pE95_Th05_b30v20_3e6/animations/temperature.mp4"
       },
       "paramsPath": "/engine/planetary/pE95_Th05_b30v20_3e6/parameters.yaml"
@@ -1803,10 +2412,27 @@
       "views": {
         "houdini": "/engine/planetary/pE95_Th05_b30v30_3e6/animations/houdini.mp4",
         "material": "/engine/planetary/pE95_Th05_b30v30_3e6/animations/material.mp4",
-        "pressure": "/engine/planetary/pE95_Th05_b30v30_3e6/animations/pressure.mp4",
         "temperature": "/engine/planetary/pE95_Th05_b30v30_3e6/animations/temperature.mp4"
       },
       "paramsPath": "/engine/planetary/pE95_Th05_b30v30_3e6/parameters.yaml"
+    },
+    {
+      "simulationId": "planetary",
+      "runId": "pE95_Th05_b30v85_3e6",
+      "parameters": {
+        "impactor_mass": 0.05,
+        "impactor_velocity": 7.9,
+        "impactor_angle": 30.0
+      },
+      "liveDataPath": "/engine/planetary/pE95_Th05_b30v85_3e6/live_data_table.csv",
+      "summaryPath": "/engine/planetary/pE95_Th05_b30v85_3e6/run_summary.yaml",
+      "defaultView": "houdini",
+      "views": {
+        "houdini": "/engine/planetary/pE95_Th05_b30v85_3e6/animations/houdini.mp4",
+        "material": "/engine/planetary/pE95_Th05_b30v85_3e6/animations/material.mp4",
+        "temperature": "/engine/planetary/pE95_Th05_b30v85_3e6/animations/temperature.mp4"
+      },
+      "paramsPath": "/engine/planetary/pE95_Th05_b30v85_3e6/parameters.yaml"
     },
     {
       "simulationId": "planetary",
@@ -1822,7 +2448,6 @@
       "views": {
         "houdini": "/engine/planetary/pE95_Th05_b35v10_3e6/animations/houdini.mp4",
         "material": "/engine/planetary/pE95_Th05_b35v10_3e6/animations/material.mp4",
-        "pressure": "/engine/planetary/pE95_Th05_b35v10_3e6/animations/pressure.mp4",
         "temperature": "/engine/planetary/pE95_Th05_b35v10_3e6/animations/temperature.mp4"
       },
       "paramsPath": "/engine/planetary/pE95_Th05_b35v10_3e6/parameters.yaml"
@@ -1841,7 +2466,6 @@
       "views": {
         "houdini": "/engine/planetary/pE95_Th05_b35v15_3e6/animations/houdini.mp4",
         "material": "/engine/planetary/pE95_Th05_b35v15_3e6/animations/material.mp4",
-        "pressure": "/engine/planetary/pE95_Th05_b35v15_3e6/animations/pressure.mp4",
         "temperature": "/engine/planetary/pE95_Th05_b35v15_3e6/animations/temperature.mp4"
       },
       "paramsPath": "/engine/planetary/pE95_Th05_b35v15_3e6/parameters.yaml"
@@ -1860,7 +2484,6 @@
       "views": {
         "houdini": "/engine/planetary/pE95_Th05_b35v20_3e6/animations/houdini.mp4",
         "material": "/engine/planetary/pE95_Th05_b35v20_3e6/animations/material.mp4",
-        "pressure": "/engine/planetary/pE95_Th05_b35v20_3e6/animations/pressure.mp4",
         "temperature": "/engine/planetary/pE95_Th05_b35v20_3e6/animations/temperature.mp4"
       },
       "paramsPath": "/engine/planetary/pE95_Th05_b35v20_3e6/parameters.yaml"
@@ -1879,10 +2502,27 @@
       "views": {
         "houdini": "/engine/planetary/pE95_Th05_b35v30_3e6/animations/houdini.mp4",
         "material": "/engine/planetary/pE95_Th05_b35v30_3e6/animations/material.mp4",
-        "pressure": "/engine/planetary/pE95_Th05_b35v30_3e6/animations/pressure.mp4",
         "temperature": "/engine/planetary/pE95_Th05_b35v30_3e6/animations/temperature.mp4"
       },
       "paramsPath": "/engine/planetary/pE95_Th05_b35v30_3e6/parameters.yaml"
+    },
+    {
+      "simulationId": "planetary",
+      "runId": "pE95_Th05_b35v85_3e6",
+      "parameters": {
+        "impactor_mass": 0.05,
+        "impactor_velocity": 7.9,
+        "impactor_angle": 35.0
+      },
+      "liveDataPath": "/engine/planetary/pE95_Th05_b35v85_3e6/live_data_table.csv",
+      "summaryPath": "/engine/planetary/pE95_Th05_b35v85_3e6/run_summary.yaml",
+      "defaultView": "houdini",
+      "views": {
+        "houdini": "/engine/planetary/pE95_Th05_b35v85_3e6/animations/houdini.mp4",
+        "material": "/engine/planetary/pE95_Th05_b35v85_3e6/animations/material.mp4",
+        "temperature": "/engine/planetary/pE95_Th05_b35v85_3e6/animations/temperature.mp4"
+      },
+      "paramsPath": "/engine/planetary/pE95_Th05_b35v85_3e6/parameters.yaml"
     },
     {
       "simulationId": "planetary",
@@ -1898,7 +2538,6 @@
       "views": {
         "houdini": "/engine/planetary/pE95_Th05_b40v10_3e6/animations/houdini.mp4",
         "material": "/engine/planetary/pE95_Th05_b40v10_3e6/animations/material.mp4",
-        "pressure": "/engine/planetary/pE95_Th05_b40v10_3e6/animations/pressure.mp4",
         "temperature": "/engine/planetary/pE95_Th05_b40v10_3e6/animations/temperature.mp4"
       },
       "paramsPath": "/engine/planetary/pE95_Th05_b40v10_3e6/parameters.yaml"
@@ -1917,8 +2556,8 @@
       "views": {
         "houdini": "/engine/planetary/pE95_Th05_b40v15_3e6/animations/houdini.mp4",
         "material": "/engine/planetary/pE95_Th05_b40v15_3e6/animations/material.mp4",
-        "pressure": "/engine/planetary/pE95_Th05_b40v15_3e6/animations/pressure.mp4",
-        "temperature": "/engine/planetary/pE95_Th05_b40v15_3e6/animations/temperature.mp4"
+        "temperature": "/engine/planetary/pE95_Th05_b40v15_3e6/animations/temperature.mp4",
+        "temperature_tkytxa37_tmp": "/engine/planetary/pE95_Th05_b40v15_3e6/animations/temperature.tkytxa37.tmp.mp4"
       },
       "paramsPath": "/engine/planetary/pE95_Th05_b40v15_3e6/parameters.yaml"
     },
@@ -1936,7 +2575,6 @@
       "views": {
         "houdini": "/engine/planetary/pE95_Th05_b40v20_3e6/animations/houdini.mp4",
         "material": "/engine/planetary/pE95_Th05_b40v20_3e6/animations/material.mp4",
-        "pressure": "/engine/planetary/pE95_Th05_b40v20_3e6/animations/pressure.mp4",
         "temperature": "/engine/planetary/pE95_Th05_b40v20_3e6/animations/temperature.mp4"
       },
       "paramsPath": "/engine/planetary/pE95_Th05_b40v20_3e6/parameters.yaml"
@@ -1955,10 +2593,27 @@
       "views": {
         "houdini": "/engine/planetary/pE95_Th05_b40v30_3e6/animations/houdini.mp4",
         "material": "/engine/planetary/pE95_Th05_b40v30_3e6/animations/material.mp4",
-        "pressure": "/engine/planetary/pE95_Th05_b40v30_3e6/animations/pressure.mp4",
         "temperature": "/engine/planetary/pE95_Th05_b40v30_3e6/animations/temperature.mp4"
       },
       "paramsPath": "/engine/planetary/pE95_Th05_b40v30_3e6/parameters.yaml"
+    },
+    {
+      "simulationId": "planetary",
+      "runId": "pE95_Th05_b40v85_3e6",
+      "parameters": {
+        "impactor_mass": 0.05,
+        "impactor_velocity": 7.9,
+        "impactor_angle": 40.0
+      },
+      "liveDataPath": "/engine/planetary/pE95_Th05_b40v85_3e6/live_data_table.csv",
+      "summaryPath": "/engine/planetary/pE95_Th05_b40v85_3e6/run_summary.yaml",
+      "defaultView": "houdini",
+      "views": {
+        "houdini": "/engine/planetary/pE95_Th05_b40v85_3e6/animations/houdini.mp4",
+        "material": "/engine/planetary/pE95_Th05_b40v85_3e6/animations/material.mp4",
+        "temperature": "/engine/planetary/pE95_Th05_b40v85_3e6/animations/temperature.mp4"
+      },
+      "paramsPath": "/engine/planetary/pE95_Th05_b40v85_3e6/parameters.yaml"
     },
     {
       "simulationId": "planetary",
@@ -1974,7 +2629,6 @@
       "views": {
         "houdini": "/engine/planetary/pE95_Th05_b45v10_3e6/animations/houdini.mp4",
         "material": "/engine/planetary/pE95_Th05_b45v10_3e6/animations/material.mp4",
-        "pressure": "/engine/planetary/pE95_Th05_b45v10_3e6/animations/pressure.mp4",
         "temperature": "/engine/planetary/pE95_Th05_b45v10_3e6/animations/temperature.mp4"
       },
       "paramsPath": "/engine/planetary/pE95_Th05_b45v10_3e6/parameters.yaml"
@@ -1993,7 +2647,6 @@
       "views": {
         "houdini": "/engine/planetary/pE95_Th05_b45v15_3e6/animations/houdini.mp4",
         "material": "/engine/planetary/pE95_Th05_b45v15_3e6/animations/material.mp4",
-        "pressure": "/engine/planetary/pE95_Th05_b45v15_3e6/animations/pressure.mp4",
         "temperature": "/engine/planetary/pE95_Th05_b45v15_3e6/animations/temperature.mp4"
       },
       "paramsPath": "/engine/planetary/pE95_Th05_b45v15_3e6/parameters.yaml"
@@ -2012,7 +2665,6 @@
       "views": {
         "houdini": "/engine/planetary/pE95_Th05_b45v20_3e6/animations/houdini.mp4",
         "material": "/engine/planetary/pE95_Th05_b45v20_3e6/animations/material.mp4",
-        "pressure": "/engine/planetary/pE95_Th05_b45v20_3e6/animations/pressure.mp4",
         "temperature": "/engine/planetary/pE95_Th05_b45v20_3e6/animations/temperature.mp4"
       },
       "paramsPath": "/engine/planetary/pE95_Th05_b45v20_3e6/parameters.yaml"
@@ -2031,10 +2683,27 @@
       "views": {
         "houdini": "/engine/planetary/pE95_Th05_b45v30_3e6/animations/houdini.mp4",
         "material": "/engine/planetary/pE95_Th05_b45v30_3e6/animations/material.mp4",
-        "pressure": "/engine/planetary/pE95_Th05_b45v30_3e6/animations/pressure.mp4",
         "temperature": "/engine/planetary/pE95_Th05_b45v30_3e6/animations/temperature.mp4"
       },
       "paramsPath": "/engine/planetary/pE95_Th05_b45v30_3e6/parameters.yaml"
+    },
+    {
+      "simulationId": "planetary",
+      "runId": "pE95_Th05_b45v85_3e6",
+      "parameters": {
+        "impactor_mass": 0.05,
+        "impactor_velocity": 7.9,
+        "impactor_angle": 45.0
+      },
+      "liveDataPath": "/engine/planetary/pE95_Th05_b45v85_3e6/live_data_table.csv",
+      "summaryPath": "/engine/planetary/pE95_Th05_b45v85_3e6/run_summary.yaml",
+      "defaultView": "houdini",
+      "views": {
+        "houdini": "/engine/planetary/pE95_Th05_b45v85_3e6/animations/houdini.mp4",
+        "material": "/engine/planetary/pE95_Th05_b45v85_3e6/animations/material.mp4",
+        "temperature": "/engine/planetary/pE95_Th05_b45v85_3e6/animations/temperature.mp4"
+      },
+      "paramsPath": "/engine/planetary/pE95_Th05_b45v85_3e6/parameters.yaml"
     },
     {
       "simulationId": "planetary",
@@ -2050,7 +2719,6 @@
       "views": {
         "houdini": "/engine/planetary/pE95_Th05_b50v10_3e6/animations/houdini.mp4",
         "material": "/engine/planetary/pE95_Th05_b50v10_3e6/animations/material.mp4",
-        "pressure": "/engine/planetary/pE95_Th05_b50v10_3e6/animations/pressure.mp4",
         "temperature": "/engine/planetary/pE95_Th05_b50v10_3e6/animations/temperature.mp4"
       },
       "paramsPath": "/engine/planetary/pE95_Th05_b50v10_3e6/parameters.yaml"
@@ -2069,7 +2737,6 @@
       "views": {
         "houdini": "/engine/planetary/pE95_Th05_b50v15_3e6/animations/houdini.mp4",
         "material": "/engine/planetary/pE95_Th05_b50v15_3e6/animations/material.mp4",
-        "pressure": "/engine/planetary/pE95_Th05_b50v15_3e6/animations/pressure.mp4",
         "temperature": "/engine/planetary/pE95_Th05_b50v15_3e6/animations/temperature.mp4"
       },
       "paramsPath": "/engine/planetary/pE95_Th05_b50v15_3e6/parameters.yaml"
@@ -2088,7 +2755,6 @@
       "views": {
         "houdini": "/engine/planetary/pE95_Th05_b50v20_3e6/animations/houdini.mp4",
         "material": "/engine/planetary/pE95_Th05_b50v20_3e6/animations/material.mp4",
-        "pressure": "/engine/planetary/pE95_Th05_b50v20_3e6/animations/pressure.mp4",
         "temperature": "/engine/planetary/pE95_Th05_b50v20_3e6/animations/temperature.mp4"
       },
       "paramsPath": "/engine/planetary/pE95_Th05_b50v20_3e6/parameters.yaml"
@@ -2107,10 +2773,27 @@
       "views": {
         "houdini": "/engine/planetary/pE95_Th05_b50v30_3e6/animations/houdini.mp4",
         "material": "/engine/planetary/pE95_Th05_b50v30_3e6/animations/material.mp4",
-        "pressure": "/engine/planetary/pE95_Th05_b50v30_3e6/animations/pressure.mp4",
         "temperature": "/engine/planetary/pE95_Th05_b50v30_3e6/animations/temperature.mp4"
       },
       "paramsPath": "/engine/planetary/pE95_Th05_b50v30_3e6/parameters.yaml"
+    },
+    {
+      "simulationId": "planetary",
+      "runId": "pE95_Th05_b50v85_3e6",
+      "parameters": {
+        "impactor_mass": 0.05,
+        "impactor_velocity": 7.9,
+        "impactor_angle": 50.0
+      },
+      "liveDataPath": "/engine/planetary/pE95_Th05_b50v85_3e6/live_data_table.csv",
+      "summaryPath": "/engine/planetary/pE95_Th05_b50v85_3e6/run_summary.yaml",
+      "defaultView": "houdini",
+      "views": {
+        "houdini": "/engine/planetary/pE95_Th05_b50v85_3e6/animations/houdini.mp4",
+        "material": "/engine/planetary/pE95_Th05_b50v85_3e6/animations/material.mp4",
+        "temperature": "/engine/planetary/pE95_Th05_b50v85_3e6/animations/temperature.mp4"
+      },
+      "paramsPath": "/engine/planetary/pE95_Th05_b50v85_3e6/parameters.yaml"
     },
     {
       "simulationId": "planetary",
@@ -2126,7 +2809,6 @@
       "views": {
         "houdini": "/engine/planetary/pE95_Th05_b60v10_3e6/animations/houdini.mp4",
         "material": "/engine/planetary/pE95_Th05_b60v10_3e6/animations/material.mp4",
-        "pressure": "/engine/planetary/pE95_Th05_b60v10_3e6/animations/pressure.mp4",
         "temperature": "/engine/planetary/pE95_Th05_b60v10_3e6/animations/temperature.mp4"
       },
       "paramsPath": "/engine/planetary/pE95_Th05_b60v10_3e6/parameters.yaml"
@@ -2145,7 +2827,6 @@
       "views": {
         "houdini": "/engine/planetary/pE95_Th05_b60v15_3e6/animations/houdini.mp4",
         "material": "/engine/planetary/pE95_Th05_b60v15_3e6/animations/material.mp4",
-        "pressure": "/engine/planetary/pE95_Th05_b60v15_3e6/animations/pressure.mp4",
         "temperature": "/engine/planetary/pE95_Th05_b60v15_3e6/animations/temperature.mp4"
       },
       "paramsPath": "/engine/planetary/pE95_Th05_b60v15_3e6/parameters.yaml"
@@ -2164,7 +2845,6 @@
       "views": {
         "houdini": "/engine/planetary/pE95_Th05_b60v20_3e6/animations/houdini.mp4",
         "material": "/engine/planetary/pE95_Th05_b60v20_3e6/animations/material.mp4",
-        "pressure": "/engine/planetary/pE95_Th05_b60v20_3e6/animations/pressure.mp4",
         "temperature": "/engine/planetary/pE95_Th05_b60v20_3e6/animations/temperature.mp4"
       },
       "paramsPath": "/engine/planetary/pE95_Th05_b60v20_3e6/parameters.yaml"
@@ -2183,10 +2863,27 @@
       "views": {
         "houdini": "/engine/planetary/pE95_Th05_b60v30_3e6/animations/houdini.mp4",
         "material": "/engine/planetary/pE95_Th05_b60v30_3e6/animations/material.mp4",
-        "pressure": "/engine/planetary/pE95_Th05_b60v30_3e6/animations/pressure.mp4",
         "temperature": "/engine/planetary/pE95_Th05_b60v30_3e6/animations/temperature.mp4"
       },
       "paramsPath": "/engine/planetary/pE95_Th05_b60v30_3e6/parameters.yaml"
+    },
+    {
+      "simulationId": "planetary",
+      "runId": "pE95_Th05_b60v85_3e6",
+      "parameters": {
+        "impactor_mass": 0.05,
+        "impactor_velocity": 7.9,
+        "impactor_angle": 60.0
+      },
+      "liveDataPath": "/engine/planetary/pE95_Th05_b60v85_3e6/live_data_table.csv",
+      "summaryPath": "/engine/planetary/pE95_Th05_b60v85_3e6/run_summary.yaml",
+      "defaultView": "houdini",
+      "views": {
+        "houdini": "/engine/planetary/pE95_Th05_b60v85_3e6/animations/houdini.mp4",
+        "material": "/engine/planetary/pE95_Th05_b60v85_3e6/animations/material.mp4",
+        "temperature": "/engine/planetary/pE95_Th05_b60v85_3e6/animations/temperature.mp4"
+      },
+      "paramsPath": "/engine/planetary/pE95_Th05_b60v85_3e6/parameters.yaml"
     },
     {
       "simulationId": "galaxy",
