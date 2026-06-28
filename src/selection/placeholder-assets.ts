@@ -29,6 +29,7 @@ export interface VideoMatch {
   url: string;
   liveDataUrl: string;
   summaryUrl: string;
+  audioUrl?: string;
   views?: Record<string, string>;
   viewId?: string;
   runId?: string;
@@ -47,6 +48,7 @@ interface RunManifestEntry {
   parameters?: Record<string, number>;
   liveDataPath: string;
   summaryPath: string;
+  audioPath?: string;
   defaultView?: string;
   views: Record<string, string>;
 }
@@ -304,6 +306,9 @@ async function findManifestBackedRun(
     url: resolveManifestAssetUrl(source, videoPath, manifestCacheKeys),
     liveDataUrl: resolveManifestAssetUrl(source, best.liveDataPath, manifestCacheKeys),
     summaryUrl: resolveManifestAssetUrl(source, best.summaryPath, manifestCacheKeys),
+    audioUrl: best.audioPath
+      ? resolveManifestAssetUrl(source, best.audioPath, manifestCacheKeys)
+      : undefined,
     viewId,
     runId: best.runId,
     views: Object.fromEntries(

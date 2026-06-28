@@ -16,6 +16,7 @@ import { createViewport } from '../video_player/viewport.ts';
 import { createTimeline } from '../video_player/timeline.ts';
 import { createTelemetryPanel } from '../live-data/hud.ts';
 import { createEntryOverlay } from '../entry/entry-overlay.ts';
+import { createEntryInfoOverlay } from '../entry/entry-info-overlay.ts';
 import { createSummaryOverlay } from '../summaries/summary-overlay.ts';
 import { createViewSwitcher } from '../video_player/view-switcher.ts';
 import {
@@ -79,7 +80,7 @@ const ACTIVE_VIDEO_FULL_FETCH_MAX_BYTES = 50 * 1024 * 1024;
 const ACTIVE_VIDEO_BUFFER_SECONDS = 8;
 const ACTIVE_VIDEO_BUFFER_WAIT_MS = 6000;
 const ACTIVE_VIDEO_LOADED_DATA_WAIT_MS = 8000;
-const LOCAL_MANIFEST_MIN_TERMINAL_TIME_MAX_MS = 5000;
+const LOCAL_MANIFEST_MIN_TERMINAL_TIME_MAX_MS = 7000;
 const ALTERNATE_PREWARM_RESUME_DELAY_MS = 1200;
 const SCRUB_HUD_UPDATE_INTERVAL_MS = 100;
 
@@ -270,6 +271,9 @@ export function createAppShell(app: HTMLElement): void {
   const displayMenu = createDisplayMenu(topLeft, {
     onHome() {
       handleHome();
+    },
+    onParameters() {
+      openConfigPanel('parameters');
     },
     onViewSelected(view) {
       if (view === 'credits') {
@@ -579,6 +583,13 @@ export function createAppShell(app: HTMLElement): void {
   overlayLayer.className = 'overlay-layer';
   app.appendChild(overlayLayer);
 
+  const lockedInfoOverlay = createEntryInfoOverlay();
+
+  lockedInfoOverlay.infoButton.classList.add('is-hidden');
+  lockedInfoOverlay.infoButton.hidden = true;
+  app.appendChild(lockedInfoOverlay.infoButton);
+  app.appendChild(lockedInfoOverlay.infoModal);
+
   // Mount the end-of-run summary overlay that appears when a video finishes.
   const summaryOverlay = createSummaryOverlay(overlayLayer, {
     onReplay: handleReplay,
@@ -637,6 +648,7 @@ export function createAppShell(app: HTMLElement): void {
     onClose: handleCloseConfig,
     initialView: 'parameters',
   });
+  overlayPanel.setBackVisible(!advancedSettings.lockedScaleId);
 
   // Mount the initializing terminal overlay — the faux-boot sequence.
   const loadingOverlay = createLoadingOverlay(overlayLayer);
@@ -755,7 +767,7 @@ export function createAppShell(app: HTMLElement): void {
 
   bindCollapsibleChrome(topLeft, {
     toggleOnClick: true,
-    isCollapsible: () => app.dataset.mode !== 'entry',
+    isCollapsible: () => app.dataset.mode === 'display',
   });
   bindCollapsibleChrome(leftCenter, { toggleOnClick: true });
   bindCollapsibleChrome(timelineHost, { toggleOnClick: false });
@@ -1125,7 +1137,7 @@ export function createAppShell(app: HTMLElement): void {
     // Fire-and-forget the async data loads — they'll update the HUD when done.
     void loadActiveLiveStats(match.liveDataUrl, runRequestId);
     void loadActiveRunMetadata(match.summaryUrl, runRequestId);
-    void loadActiveRunAudio(match.summaryUrl, runRequestId);
+    void loadActiveRunAudio(match.summaryUrl, runRequestId, match.audioUrl);
     viewport.setMuted(true);
     refreshViewSwitcher(selectedViewId);
     refreshAudioControlVisibility();
@@ -1347,18 +1359,25 @@ export function createAppShell(app: HTMLElement): void {
     setElementVisibility(displayChrome, showDisplay);
     setElementVisibility(swiftLogo, nextMode === 'display' || nextMode === 'entry');
 
-    // Burger menu: visible on landing page, parameter selection, and display
-    // unless the experience is locked to a single theme. Hidden during loading.
+    // Burger menu: visible on landing page, parameter selection, and display.
+    // A locked scale only removes the Home action from the menu itself.
     setElementVisibility(
       topLeft,
-      !advancedSettings.lockedScaleId &&
-        (nextMode === 'entry' || nextMode === 'config' || nextMode === 'display'),
+      nextMode === 'entry' || nextMode === 'config' || nextMode === 'display',
+    );
+    setElementVisibility(
+      lockedInfoOverlay.infoButton,
+      nextMode === 'config' && Boolean(advancedSettings.lockedScaleId),
     );
 
-    if (nextMode === 'entry') {
-      // Reassert the expanded state every time we return home. This prevents the
-      // burger from carrying a previously collapsed display/config state back
-      // into the landing page.
+    if (nextMode !== 'config' || !advancedSettings.lockedScaleId) {
+      lockedInfoOverlay.close();
+    }
+
+    if (nextMode !== 'display') {
+      // Reassert the expanded state everywhere the burger should remain fully
+      // visible. This prevents display-mode collapse state from leaking into
+      // entry or parameter-selection screens.
       expandOne(topLeft);
     } else {
       collapseOneNow(topLeft);
@@ -1384,6 +1403,9 @@ export function createAppShell(app: HTMLElement): void {
     // had already completed when the user left and came back.
     if (nextMode !== 'display') {
       summaryOverlay.hide();
+      viewSwitcher.hide();
+      viewportTitle.classList.add('is-hidden');
+      viewportTitle.innerHTML = '';
     } else if (hasCompletedPlayback) {
       const thumbnail = viewport.captureFrame();
 
@@ -1395,6 +1417,8 @@ export function createAppShell(app: HTMLElement): void {
         thumbnail,
       );
       summaryOverlay.show();
+    } else {
+      refreshViewSwitcher();
     }
 
     // Viewport visibility: hidden before init and during the boot sequence.
@@ -1512,6 +1536,8 @@ export function createAppShell(app: HTMLElement): void {
 
     summaryOverlay.hide();
     viewSwitcher.hide();
+    viewportTitle.classList.add('is-hidden');
+    viewportTitle.innerHTML = '';
     viewport.pause();
     runAudio.pause();
     viewport.clearPrewarmedSources();
@@ -1800,16 +1826,21 @@ export function createAppShell(app: HTMLElement): void {
     return activeClass.views.some((view) => view.id === selectedViewId && view.audio);
   }
 
-  function getRunAudioUrl(summaryUrl: string): string {
+  function getRunAudioUrl(summaryUrl: string, audioUrl?: string): string {
+    if (audioUrl) {
+      return audioUrl;
+    }
+
     return summaryUrl.replace(/run_summary\.yaml($|\?)/, 'audio_track.wav$1');
   }
 
   async function loadActiveRunAudio(
     summaryUrl: string,
     runRequestId: number,
+    audioUrl?: string,
   ): Promise<void> {
-    const audioUrl = getRunAudioUrl(summaryUrl);
-    const resolvedAudioUrl = resolveOnlineAssetUrl(audioUrl);
+    const resolvedAudioPath = getRunAudioUrl(summaryUrl, audioUrl);
+    const resolvedAudioUrl = resolveOnlineAssetUrl(resolvedAudioPath);
 
     if (knownAvailableAudioUrls.has(resolvedAudioUrl)) {
       activateRunAudio(resolvedAudioUrl);
@@ -1818,7 +1849,7 @@ export function createAppShell(app: HTMLElement): void {
     }
 
     const probeNonce = ++audioProbeNonce;
-    const available = await doesAudioTrackExist(audioUrl);
+      const available = await doesAudioTrackExist(resolvedAudioPath);
 
     if (!runRequests.isCurrent(runRequestId) || probeNonce !== audioProbeNonce) {
       return;
@@ -1996,6 +2027,7 @@ export function createAppShell(app: HTMLElement): void {
     summaryOverlay.setHomeVisible(!advancedSettings.lockedScaleId);
     entryOverlay.setSimulationClasses(availableSimulationClasses);
     overlayPanel.setAdvancedSettings(advancedSettings);
+    overlayPanel.setBackVisible(!advancedSettings.lockedScaleId);
     logInfo('Advanced settings updated', advancedSettings);
     resetAudioPreferencesToDefaults();
     syncRunAudioPlayback();

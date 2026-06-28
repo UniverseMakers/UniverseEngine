@@ -9,13 +9,15 @@
 export interface DisplayMenuController {
   /** Close the menu popover if it is open. */
   close: () => void;
-  /** Update whether the Home action should be shown. */
+  /** Update whether the Home or Select Parameters action should be shown. */
   setHomeVisible: (isVisible: boolean) => void;
 }
 
 interface DisplayMenuOptions {
   /** Called after the user chooses to return to the scale selector. */
   onHome: () => void;
+  /** Called after the user chooses to jump back to parameter selection. */
+  onParameters: () => void;
   /** Called after the user picks a non-simulation view entry. */
   onViewSelected: (view: 'settings' | 'credits') => void;
   /** Whether the Home action should be visible. */
@@ -63,7 +65,13 @@ export function createDisplayMenu(
     options.onHome();
   });
 
+  const parametersButton = createMenuButton('Select Parameters', () => {
+    close();
+    options.onParameters();
+  });
+
   menu.appendChild(homeButton);
+  menu.appendChild(parametersButton);
 
   menu.appendChild(
     createMenuButton('Settings', () => {
@@ -161,5 +169,7 @@ export function createDisplayMenu(
   function setHomeVisible(isVisible: boolean) {
     homeButton.hidden = !isVisible;
     homeButton.classList.toggle('is-hidden', !isVisible);
+    parametersButton.hidden = isVisible;
+    parametersButton.classList.toggle('is-hidden', isVisible);
   }
 }
