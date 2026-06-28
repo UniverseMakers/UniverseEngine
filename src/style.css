@@ -1450,24 +1450,7 @@ button {
   border-right: 1px solid var(--line-strong);
 }
 
-@media (width <= 768px) {
-  .entry-info-modal__media {
-    align-items: center;
-    padding-left: 1.9rem;
-    margin-top: 5rem;
-  }
-}
-
-@media (height <= 1024px) and (orientation: portrait) {
-  .entry-info-modal__media {
-    display: none;
-  }
-}
-@media (width <= 1024px) {
-  .entry-info-modal__media {
-    display: none;
-  }
-}
+/* Show media on all screen sizes — becomes a banner on mobile. */
 
 .entry-info-modal__image {
   position: absolute;
@@ -3263,10 +3246,42 @@ button {
   }
 
   .entry-info-modal__media {
-    min-height: 13rem;
-    max-height: 13rem;
+    display: flex;
+    align-items: flex-end;
+    position: relative;
+    height: 12.75rem;
+    min-height: 12.75rem;
+    padding: 1rem;
     border-right: 0;
     border-bottom: 1px solid var(--line-strong);
+    background: #0a1118;
+  }
+
+  .entry-info-modal__image {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    opacity: 0.6;
+    filter: brightness(0.7) saturate(0.8);
+  }
+
+  .entry-info-modal__media::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.3);
+  }
+
+  .entry-info-modal__media-copy {
+    position: relative;
+    z-index: 1;
+    max-width: unset;
+  }
+
+  .entry-info-modal__headline {
+    font-size: 1.8rem;
   }
 
   .entry-info-modal__content {
