@@ -213,6 +213,10 @@ function formatMetricValue(
   const scale = stat.valueScale ?? 1;
   const scaled = numeric * scale;
 
+  if (typeof stat.precision === 'number' && !stat.integer) {
+    return scaled.toFixed(Math.max(0, stat.precision));
+  }
+
   // Live-updating values always use compact formatting first — even
   // integer-configured stats like particle counts benefit from it when
   // streaming (e.g. "1.2M" instead of "1,234,567").

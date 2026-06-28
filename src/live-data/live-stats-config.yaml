@@ -17,10 +17,12 @@ planetary:
       value: '0.10'
       unit: Earth masses
       live: false
+      precision: 2
     - id: impactor_velocity
       value: '12.0'
       unit: km/s
       live: false
+      precision: 2
     - id: impactor_angle
       value: '45'
       unit: °
@@ -32,6 +34,7 @@ planetary:
       live: true
       live_key: time_seconds
       value_scale: 2.777777777777778e-4
+      precision: 2
     - id: particlesUpdated
       value: '0'
       label: Particle updates
