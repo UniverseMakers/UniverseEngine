@@ -600,21 +600,41 @@ button {
   }
 }
 
-/* ── Mode Visibility ──────────────────────────────────────────────────────── */    
+/* On touch devices the view buttons are non-interactive when collapsed,
+   and both the view selector and timeline are more transparent while idle. */
+@media (hover: none), (pointer: coarse) {
+  .display-chrome__left-center.side-collapsed .view-switcher__button {
+    pointer-events: none;
+  }
+
+  .display-chrome__left-center.side-collapsed .view-switcher {
+    opacity: 0.6;
+  }
+
+  .display-chrome__bottom.side-collapsed {
+    opacity: 0.6;
+  }
+
+  .display-chrome__top-left.side-collapsed .display-button {
+    opacity: 0.6;
+  }
+}
+
+/* ── Mode Visibility ──────────────────────────────────────────────────────── */
 #app[data-mode='entry'] {
+  .app-partner-logo {
+    display: block;
+    top: auto;
+    right: auto;
+    bottom: calc(1.5rem + 1.75vh);
+    left: 50%;
+    transform: translateX(-50%);
+  }
+  @media (width <= 768px) {
     .app-partner-logo {
-	display: block;
-	top: auto;
-	right: auto;
-	bottom: calc(1.5rem + 1.75vh);
-	left: 50%;
-	transform: translateX(-50%);
+      bottom: calc(1rem + 1vh);
     }
-    @media(width <= 768px) {
-	.app-partner-logo {
-	    bottom: calc(1rem + 1vh);
-	}
-    }
+  }
 }
 
 #app:has(.overlay--summary.is-visible) .app-partner-logo {
@@ -828,28 +848,28 @@ button {
   -webkit-backdrop-filter: blur(12px);
 }
 @media (width <= 1560px) {
-    .timeline {
-	max-width: 60%;
-    }
+  .timeline {
+    max-width: 60%;
+  }
 }
 @media (width <= 1600px) and (orientation: portrait) {
-    .timeline {
-	margin: 15% auto;
-	max-width: unset;
-    }
+  .timeline {
+    margin: 15% auto;
+    max-width: unset;
+  }
 }
 
 @media (width <= 768px) {
-    .timeline {
-	max-width: 80%;
-	margin: 0 auto;
-    }
+  .timeline {
+    max-width: 80%;
+    margin: 0 auto;
+  }
 }
 @media (width <= 525px) {
-    .timeline {
-	max-width: 100%;
-	margin: 5rem auto;
-    }
+  .timeline {
+    max-width: 100%;
+    margin: 5rem auto;
+  }
 }
 
 .timeline__bar-row {
@@ -1091,9 +1111,9 @@ button {
   .timeline__speed-btn,
   .timeline__play-btn,
   .timeline__summary-btn {
-    width: 2.9rem;
-    min-width: 2.9rem;
-    height: 2.9rem;
+    width: 1.9rem;
+    min-width: 1.9rem;
+    height: 1.9rem;
   }
 
   .timeline__speed-btn {
@@ -1373,22 +1393,22 @@ button {
 }
 
 @media (width <= 768px) {
-    .entry-info-modal__media {
-	align-items: center;
-	padding-left: 1.9rem;
-	margin-top: 5rem;
-    }
+  .entry-info-modal__media {
+    align-items: center;
+    padding-left: 1.9rem;
+    margin-top: 5rem;
+  }
 }
 
-@media(height <= 1024px) and (orientation: portrait) {
-    .entry-info-modal__media {
-	display: none;
-    }
+@media (height <= 1024px) and (orientation: portrait) {
+  .entry-info-modal__media {
+    display: none;
+  }
 }
-@media(width <= 1024px) {
-    .entry-info-modal__media {
-	display: none;
-    }
+@media (width <= 1024px) {
+  .entry-info-modal__media {
+    display: none;
+  }
 }
 
 .entry-info-modal__image {
@@ -1439,14 +1459,14 @@ button {
   min-height: 0;
 }
 @media (width <= 768px) {
-    .entry-info-modal__content {
-	margin-bottom: 4rem;
-    }
+  .entry-info-modal__content {
+    margin-bottom: 4rem;
+  }
 }
 @media (height <= 1024px) and (orientation: portrait) {
-    .entry-info-modal__content {
-	margin-top: 4rem;
-    }
+  .entry-info-modal__content {
+    margin-top: 4rem;
+  }
 }
 
 .entry-info-modal__close {
@@ -1714,9 +1734,9 @@ button {
 }
 
 .galaxy-summary__check.is-found {
-  border-color: #4CD98A;
+  border-color: #4cd98a;
   background: rgba(76, 217, 138, 0.08);
-  color: #4CD98A;
+  color: #4cd98a;
 }
 
 .galaxy-summary__check-box {
@@ -1733,10 +1753,10 @@ button {
 .galaxy-summary__done {
   margin-top: 0.9rem;
   padding: 0.55rem 1rem;
-  border: 1px solid #4CD98A;
+  border: 1px solid #4cd98a;
   border-radius: 4px;
   background: rgba(76, 217, 138, 0.05);
-  color: #4CD98A;
+  color: #4cd98a;
   font-family: var(--font-mono);
   font-size: 0.76rem;
   letter-spacing: 0.1em;
@@ -2029,12 +2049,12 @@ button {
 }
 
 @media (width <= 768px) {
-    .sci-bottom-row {
-	flex-direction: column;
-    }
-    .sci-section {
-	max-width: unset;;
-    }
+  .sci-bottom-row {
+    flex-direction: column;
+  }
+  .sci-section {
+    max-width: unset;
+  }
 }
 
 .sci-bottom-row .sci-bars {
@@ -2268,10 +2288,10 @@ button {
 }
 
 @media (width <= 1024px) {
-    .config-overlay__chartermark {
-	left: unset;
-	right: 1.25rem;
-    }
+  .config-overlay__chartermark {
+    left: unset;
+    right: 1.25rem;
+  }
 }
 
 .config-overlay__media-copy {
@@ -2979,7 +2999,7 @@ button {
 /* Responsive Layout                                                           */
 /* -------------------------------------------------------------------------- */
 
-@media (width <= 1024px){
+@media (width <= 1024px) {
   .entry-overlay {
     transform: translateY(-2vh);
   }
@@ -2990,8 +3010,8 @@ button {
   }
 
   .entry-overlay__actions {
-      margin-bottom: 10%;
-      min-height: 90%;
+    margin-bottom: 10%;
+    min-height: 90%;
   }
 
   .display-chrome__left-center {
@@ -3108,9 +3128,9 @@ button {
 }
 
 @media (width <= 768px), (height <= 450px) {
-    .data-panel {
-	display: none;
-    }
+  .data-panel {
+    display: none;
+  }
 }
 
 @media (width <= 768px), (height <= 576px) {
@@ -3388,8 +3408,8 @@ button {
   }
 
   .config-overlay__subtitle {
-      font-size: 0.72rem;
-      max-width: unset;
+    font-size: 0.72rem;
+    max-width: unset;
   }
 
   .config-overlay__controls {
@@ -3459,27 +3479,27 @@ button {
   }
 
   .param-card__range {
-      display: block;
+    display: block;
   }
 
   .param-card__header {
-      display: grid;
-      grid-template-columns: auto auto;
-      justify-content: space-between;
-      row-gap: 0px;
-      column-gap: 10rem;
+    display: grid;
+    grid-template-columns: auto auto;
+    justify-content: space-between;
+    row-gap: 0px;
+    column-gap: 10rem;
   }
   .param-card__header span:nth-child(1) {
-      grid-row: 1;
-      grid-column: 1;
+    grid-row: 1;
+    grid-column: 1;
   }
   .param-card__header span:nth-child(3) {
-      grid-row: 1;
-      grid-column: 2;
+    grid-row: 1;
+    grid-column: 2;
   }
   .param-card__header span:nth-child(2) {
-      grid-row: 2;
-      grid-column: span 2;
+    grid-row: 2;
+    grid-column: span 2;
   }
 
   .param-card .res-card__value {
@@ -3507,7 +3527,7 @@ button {
   .theme-picker {
     margin-top: 0.5rem;
   }
-  
+
   .run-button {
     width: 100%;
     max-width: none;
@@ -3546,13 +3566,16 @@ button {
 
   .display-chrome__left-center {
     top: calc(5rem + env(safe-area-inset-top));
-    left: 0.75rem;
+    right: 0.75rem;
+    left: auto;
     transform: none;
   }
 
   .view-switcher {
     gap: 0.38rem;
     padding: 0.38rem;
+    transform: scale(0.7) translateY(50%);
+    transform-origin: top right;
   }
 
   .view-switcher__button {
@@ -3683,9 +3706,9 @@ button {
 }
 
 @media (height <= 576px) and (orientation: landscape) {
-    .summary-overlay__actions {
-	flex-direction: row;
-    }
+  .summary-overlay__actions {
+    flex-direction: row;
+  }
 }
 
 @media (width <= 720px) {
@@ -3706,15 +3729,15 @@ button {
 }
 
 @media (height <=768px) and (orientation: landscape) {
-    .view-switcher__button {
-	flex: 1;
-	min-width: 7.98rem;
-	max-height: 1.8rem;
-	gap: 0.6rem;
-	padding: 0.55rem 0.77rem;
-	font-size: 0.64rem;
-	letter-spacing: 0.14em;
-    }
+  .view-switcher__button {
+    flex: 1;
+    min-width: 7.98rem;
+    max-height: 1.8rem;
+    gap: 0.6rem;
+    padding: 0.55rem 0.77rem;
+    font-size: 0.64rem;
+    letter-spacing: 0.14em;
+  }
 }
 
 /* ── SWIFT logo (bottom-right corner) ─────────────────────────────────── */
@@ -3748,18 +3771,18 @@ button {
 }
 
 @media (max-width: 768px) {
-    .swift-logo__image {
-	display: none;
-    }
-    .swift-logo__image-compact {
-	display: block;
-	width: auto;
-	height: 40px;
-    }
-    .swift-logo {
-	right: 1rem;
-	bottom: 1rem;
-    }
+  .swift-logo__image {
+    display: none;
+  }
+  .swift-logo__image-compact {
+    display: block;
+    width: auto;
+    height: 40px;
+  }
+  .swift-logo {
+    right: 1rem;
+    bottom: 1rem;
+  }
 }
 
 /* ── Synthesizer logo (bottom-right, galaxy HST tab only) ─────────────── */
@@ -3793,17 +3816,17 @@ button {
 }
 
 @media (max-width: 768px) {
-    .synth-logo__image {
-	display: none;
-    }
-    .synth-logo__image-compact {
-	display: block;
-	height: 40px;
-    }
-    .synth-logo {
-	bottom: 1rem;
-	left: 1rem;
-    }
+  .synth-logo__image {
+    display: none;
+  }
+  .synth-logo__image-compact {
+    display: block;
+    height: 40px;
+  }
+  .synth-logo {
+    bottom: 1rem;
+    left: 1rem;
+  }
 }
 
 /* ── Fullscreen ───────────────────────────────────────────────────────────── */
