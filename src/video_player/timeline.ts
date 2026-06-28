@@ -193,7 +193,7 @@ export function createTimeline(
       slider.style.setProperty('--fill', `${clamped * 100}%`);
     },
     setPlaying(playing: boolean) {
-      playBtn.textContent = playing ? '\u23F8\uFE0E' : '\u25B6\uFE0E';
+      playBtn.textContent = playing ? '\u23F8\uFE0E' : '\u275A\u275A\uFE0E';
       playBtn.classList.toggle('is-paused', !playing);
       playBtn.setAttribute('aria-label', playing ? 'Pause' : 'Play');
     },
