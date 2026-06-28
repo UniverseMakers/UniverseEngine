@@ -77,6 +77,7 @@ export function createTimeline(
   } = options;
 
   const timeline = document.createElement('div');
+  let isScrubbing = false;
 
   timeline.className = 'timeline';
 
@@ -170,9 +171,30 @@ export function createTimeline(
     onChange?.(position);
   });
 
-  slider.addEventListener('pointerdown', () => onScrubStart?.());
-  slider.addEventListener('pointerup', () => onScrubEnd?.());
-  slider.addEventListener('change', () => onScrubEnd?.());
+  slider.addEventListener('pointerdown', () => {
+    if (isScrubbing) {
+      return;
+    }
+
+    isScrubbing = true;
+    onScrubStart?.();
+  });
+  slider.addEventListener('pointerup', () => {
+    if (!isScrubbing) {
+      return;
+    }
+
+    isScrubbing = false;
+    onScrubEnd?.();
+  });
+  slider.addEventListener('change', () => {
+    if (!isScrubbing) {
+      return;
+    }
+
+    isScrubbing = false;
+    onScrubEnd?.();
+  });
 
   document.addEventListener('click', (event) => {
     if (!speedWrap.contains(event.target as Node)) {

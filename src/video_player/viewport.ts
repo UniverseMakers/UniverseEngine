@@ -56,6 +56,9 @@ export interface ViewportController {
   /** Wait until the current source has buffered ahead by the requested amount. */
   waitForBufferedAhead: (minSeconds: number, timeoutMs?: number) => Promise<void>;
 
+  /** Wait until the current seek operation has settled enough to render. */
+  waitForSeekSettled: (timeoutMs?: number) => Promise<void>;
+
   /** Subscribe to normalized time updates. */
   onTimeUpdate: (callback: (fraction: number) => void) => void;
 
@@ -361,6 +364,39 @@ export function createViewport(
     });
   }
 
+  function waitForSeekSettled(timeoutMs = 800): Promise<void> {
+    if (!video.seeking && video.readyState >= HTMLMediaElement.HAVE_CURRENT_DATA) {
+      return Promise.resolve();
+    }
+
+    return new Promise((resolve) => {
+      const handleSettled = () => {
+        if (video.seeking || video.readyState < HTMLMediaElement.HAVE_CURRENT_DATA) {
+          return;
+        }
+
+        cleanup();
+        resolve();
+      };
+      const handleTimeout = window.setTimeout(() => {
+        cleanup();
+        resolve();
+      }, Math.max(0, timeoutMs));
+
+      function cleanup() {
+        window.clearTimeout(handleTimeout);
+        video.removeEventListener('seeked', handleSettled);
+        video.removeEventListener('canplay', handleSettled);
+        video.removeEventListener('loadeddata', handleSettled);
+      }
+
+      video.addEventListener('seeked', handleSettled);
+      video.addEventListener('canplay', handleSettled);
+      video.addEventListener('loadeddata', handleSettled);
+      handleSettled();
+    });
+  }
+
   function hasBufferedAhead(minSeconds: number): boolean {
     const currentTime = video.currentTime;
 
@@ -566,6 +602,7 @@ export function createViewport(
     resetPlayback,
     waitForLoadedData,
     waitForBufferedAhead,
+    waitForSeekSettled,
     onTimeUpdate,
     onEnded,
     getDurationSeconds: () => (Number.isFinite(video.duration) ? video.duration : 0),

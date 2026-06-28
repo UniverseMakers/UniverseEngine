@@ -408,7 +408,7 @@ export function createAppShell(app: HTMLElement): void {
       stopScrubberLoop();
     },
     onScrubEnd() {
-      handleScrubEnd();
+      void handleScrubEnd();
       if (!viewport.isPaused()) {
         startScrubberLoop();
       }
@@ -435,6 +435,8 @@ export function createAppShell(app: HTMLElement): void {
   let pendingSeekFraction: number | null = null;
   let scheduledSeekRafId: number | null = null;
   let isPointerScrubbing = false;
+  let wasPlayingBeforeScrub = false;
+  let scrubCompletionNonce = 0;
   let alternatePrewarmResumeTimer: number | null = null;
   let lastScrubHudUpdateAt = 0;
   let lastAudioSyncAt = Number.NEGATIVE_INFINITY;
@@ -551,21 +553,49 @@ export function createAppShell(app: HTMLElement): void {
   }
 
   function handleScrubStart(): void {
+    if (isPointerScrubbing) {
+      return;
+    }
+
+    scrubCompletionNonce += 1;
+    wasPlayingBeforeScrub = !viewport.isPaused();
     isPointerScrubbing = true;
     lastScrubHudUpdateAt = 0;
     suspendAlternatePrewarming();
+    viewport.pause();
     syncRunAudioPlayback();
   }
 
-  function handleScrubEnd(): void {
+  async function handleScrubEnd(): Promise<void> {
+    if (!isPointerScrubbing) {
+      return;
+    }
+
+    const completionNonce = ++scrubCompletionNonce;
+
     isPointerScrubbing = false;
     lastScrubHudUpdateAt = 0;
     flushScheduledViewportSeek();
+    await viewport.waitForSeekSettled();
+
+    if (completionNonce !== scrubCompletionNonce) {
+      return;
+    }
+
     syncAudioToViewport({ force: true });
     lastPlaybackSeconds = viewport.getCurrentTimeSeconds();
     refreshLiveDataOverlay(lastPlaybackSeconds);
+
+    if (wasPlayingBeforeScrub) {
+      await playViewportWithMutedFallback(viewport);
+
+      if (completionNonce !== scrubCompletionNonce) {
+        return;
+      }
+    }
+
     scheduleAlternatePrewarmingResume();
-    syncRunAudioPlayback();
+    syncRunAudioPlayback({ forceAudioSync: false });
   }
 
   // Keep the timeline button in sync and start/stop the smooth scrubber loop.
@@ -1574,6 +1604,8 @@ export function createAppShell(app: HTMLElement): void {
     activeRunMatch = null;
     lastPlaybackSeconds = 0;
     isPointerScrubbing = false;
+    wasPlayingBeforeScrub = false;
+    scrubCompletionNonce += 1;
     pendingSeekFraction = null;
     clearAlternatePrewarmResumeTimer();
 
@@ -2011,7 +2043,9 @@ export function createAppShell(app: HTMLElement): void {
     lastAudioSyncAt = now;
   }
 
-  function syncRunAudioPlayback(): void {
+  function syncRunAudioPlayback(
+    options: { forceAudioSync?: boolean } = {},
+  ): void {
     const audioVisible =
       doesActiveViewSupportAudio() && activeAudioAvailable && Boolean(activeAudioUrl);
 
@@ -2026,7 +2060,7 @@ export function createAppShell(app: HTMLElement): void {
       return;
     }
 
-    syncAudioToViewport({ force: runAudio.paused });
+    syncAudioToViewport({ force: options.forceAudioSync ?? runAudio.paused });
 
     if (
       app.dataset.mode !== 'display' ||
