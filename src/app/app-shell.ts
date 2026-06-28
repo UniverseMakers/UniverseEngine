@@ -84,6 +84,7 @@ const LOCAL_MANIFEST_MIN_TERMINAL_TIME_MAX_MS = 7000;
 const ALTERNATE_PREWARM_RESUME_DELAY_MS = 1200;
 const SCRUB_HUD_UPDATE_INTERVAL_MS = 100;
 const MOBILE_TELEMETRY_MEDIA_QUERY = '(max-width: 768px), (max-height: 450px)';
+const TOUCH_INTERACTION_MEDIA_QUERY = '(hover: none), (pointer: coarse)';
 const SCRUB_SEEK_SETTLE_WAIT_MS = 250;
 const AUDIO_RESYNC_DRIFT_SECONDS = 1;
 const AUDIO_RESYNC_COOLDOWN_MS = 1500;
@@ -111,6 +112,7 @@ export function createAppShell(app: HTMLElement): void {
   const manifestController = createManifestController(advancedSettings.manifestSource);
   const runRequests = createRunRequestController();
   const mobileTelemetryMediaQuery = window.matchMedia(MOBILE_TELEMETRY_MEDIA_QUERY);
+  const touchInteractionMediaQuery = window.matchMedia(TOUCH_INTERACTION_MEDIA_QUERY);
 
   setVerboseLoggingEnabled(advancedSettings.verboseLogging);
 
@@ -836,12 +838,36 @@ export function createAppShell(app: HTMLElement): void {
     }
   };
 
+  function usesTouchInteractionChrome(): boolean {
+    return touchInteractionMediaQuery.matches;
+  }
+
   bindCollapsibleChrome(topLeft, {
     toggleOnClick: true,
     isCollapsible: () => app.dataset.mode === 'display',
   });
   bindCollapsibleChrome(leftCenter, { toggleOnClick: true });
   bindCollapsibleChrome(timelineHost, { toggleOnClick: false });
+  leftCenter.addEventListener(
+    'click',
+    (event) => {
+      if (!usesTouchInteractionChrome() || !leftCenter.classList.contains('side-collapsed')) {
+        return;
+      }
+
+      const target = event.target as Element | null;
+
+      if (!target?.closest('.view-switcher__button')) {
+        return;
+      }
+
+      event.preventDefault();
+      event.stopPropagation();
+      expandOne(leftCenter);
+      scheduleCollapseOne(leftCenter);
+    },
+    { capture: true },
+  );
 
   // ── Keyboard controls ──────────────────────────────────────────────────
   let scrubDirection = 0;
@@ -1647,6 +1673,10 @@ export function createAppShell(app: HTMLElement): void {
    * @returns void
    */
   function handleViewSelection(viewId: string): void {
+    if (usesTouchInteractionChrome()) {
+      collapseOneNow(leftCenter);
+    }
+
     // Guard: no views configured, or already on this view.
     if (!activeRunMatch?.views) {
       return;
