@@ -110,9 +110,9 @@ CONTENT_TYPE_MAP: dict[str, str] = {
 # ---------------------------------------------------------------------------
 # Cache-Control headers grouped by asset category
 # ---------------------------------------------------------------------------
-CACHE_IMMUTABLE = "public, max-age=31536000, immutable"
-CACHE_MODERATE  = "public, max-age=3600"
-CACHE_MANIFEST  = "no-store, max-age=0"
+CACHE_MEDIA = "public, max-age=3600"
+CACHE_REVALIDATE = "public, max-age=0, must-revalidate"
+CACHE_MANIFEST = "no-store, max-age=0"
 
 
 # ===========================================================================
@@ -157,10 +157,14 @@ def _get_cache_control(file_path: Path, remote_key: str) -> str:
     """Return the appropriate Cache-Control value for a remote object."""
     if remote_key.endswith("/manifest.json") or remote_key.endswith("/run-manifest.json"):
         return CACHE_MANIFEST
+
+    # Heavy media benefits from short-lived caching, while sidecar metadata must
+    # revalidate so app-visible updates do not get stuck behind stale caches.
     ext = file_path.suffix.lower()
     if ext in VIDEO_EXTENSIONS or ext in STATIC_EXTENSIONS or ext == ".wav":
-        return CACHE_IMMUTABLE
-    return CACHE_MODERATE
+        return CACHE_MEDIA
+
+    return CACHE_REVALIDATE
 
 
 def _normalise_remote_key(prefix: str, rel_path: str) -> str:

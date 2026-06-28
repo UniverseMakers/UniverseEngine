@@ -35,7 +35,7 @@ import time
 from collections import Counter
 from pathlib import Path
 from typing import Any
-from urllib.parse import urljoin, urlparse
+from urllib.parse import parse_qsl, urlencode, urljoin, urlparse, urlunparse
 from urllib.request import Request, urlopen
 
 try:
@@ -52,6 +52,8 @@ CHUNK_SIZE = 8 * 1024 * 1024  # 8 MiB
 DEFAULT_HTTP_HEADERS = {
     "User-Agent": "UniverseEngineAssetDownloader/1.0 (+https://github.com/UniverseMakers)",
     "Accept": "*/*",
+    "Cache-Control": "no-cache",
+    "Pragma": "no-cache",
 }
 
 
@@ -100,6 +102,15 @@ def log_line(message: str, progress: ProgressBar | None = None, *, error: bool =
         return
 
     print(message, file=stream)
+
+
+def with_cache_bust(url: str) -> str:
+    """Append a throwaway query param so caches must treat the request as fresh."""
+    parsed = urlparse(url)
+    query = parse_qsl(parsed.query, keep_blank_values=True)
+
+    query.append(("_download_bust", str(time.time_ns())))
+    return urlunparse(parsed._replace(query=urlencode(query)))
 
 
 def parse_args() -> argparse.Namespace:
@@ -295,20 +306,8 @@ def download_file(task: dict[str, str], dry_run: bool, progress: ProgressBar | N
 
     for index, candidate in enumerate(candidates):
         try:
-            existing_size = dest_path.stat().st_size if dest_path.exists() else 0
-            remote_size = fetch_remote_size(candidate)
-
-            if existing_size > 0 and remote_size is not None and existing_size == remote_size:
-                log_line(
-                    f"  SKIP    {label}  already present ({format_size(existing_size)})",
-                    progress,
-                )
-                return True
-            if existing_size > 0 and remote_size is None:
-                log_line(f"  SKIP    {label}  already present (size unknown)", progress)
-                return True
-
-            request = Request(candidate, headers=DEFAULT_HTTP_HEADERS)
+            candidate_url = with_cache_bust(candidate)
+            request = Request(candidate_url, headers=DEFAULT_HTTP_HEADERS)
             with urlopen(request) as response:
                 length = response.headers.get("Content-Length")
                 total = int(length) if length else None
@@ -357,25 +356,6 @@ def download_file(task: dict[str, str], dry_run: bool, progress: ProgressBar | N
             continue
 
     return False
-
-
-def fetch_remote_size(url: str) -> int | None:
-    """Return the remote Content-Length when available."""
-    request = Request(url, headers=DEFAULT_HTTP_HEADERS, method="HEAD")
-    with urlopen(request) as response:
-        length = response.headers.get("Content-Length")
-
-    if not length:
-        return None
-
-    try:
-        size = int(length)
-    except ValueError:
-        return None
-
-    return size if size >= 0 else None
-
-
 def main() -> None:
     args = parse_args()
     manifest = load_manifest(args.manifest.expanduser().resolve())
