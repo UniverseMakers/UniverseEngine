@@ -946,37 +946,40 @@ button {
 }
 
 @media (width <= 525px) {
-    .timeline__bar-row {
-	display: grid;
-	grid-template-columns: auto auto;
-	justify-content: stretch;
-	row-gap: 1rem;
-	column-gap: 1rem;
-    }
-    .timeline__play-btn {
-	grid-row: 2;
-	grid-column: 1;
-	justify-self: center;
-    }
-    .timeline__audio {
-	grid-row: 2;
-	grid-column: 2;
-	justify-self: left;
-    }
-    .timeline__speed {
-	grid-row: 2;
-	grid-column: 3;
-	justify-self: center;
-    }
-    .timeline__summary-btn {
-	grid-row: 2;
-	grid-column: 4;
-	justify-self: right;
-    }
-    .timeline__slider {
-	grid-row: 1;
-	grid-column: span 4;
-    }
+  .timeline__bar-row {
+    flex-wrap: wrap;
+    align-items: stretch;
+    row-gap: 0.8rem;
+    column-gap: 0.8rem;
+  }
+
+  .timeline__slider {
+    order: 1;
+    flex: 0 0 100%;
+    width: 100%;
+  }
+
+  .timeline__audio,
+  .timeline__speed,
+  .timeline__play-btn,
+  .timeline__summary-btn {
+    order: 2;
+    flex: 1 1 0;
+    min-width: 0;
+  }
+
+  .timeline__audio-btn,
+  .timeline__speed-btn,
+  .timeline__play-btn,
+  .timeline__summary-btn {
+    width: 100%;
+    min-width: 0;
+    height: 2.9rem;
+  }
+
+  .timeline__speed-btn {
+    padding-inline: 0.5rem;
+  }
 }
 
 .timeline__slider::-webkit-slider-thumb {
