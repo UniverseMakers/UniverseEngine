@@ -85,7 +85,10 @@ export function createViewSwitcher(
         label.className = 'view-switcher__label';
         label.textContent = view.label ?? view.id;
         button.appendChild(label);
-        button.addEventListener('click', () => options.onSelect(view.id));
+        button.addEventListener('click', (event) => {
+          event.stopPropagation();
+          options.onSelect(view.id);
+        });
         row.appendChild(button);
 
         if (view.description) {

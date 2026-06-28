@@ -850,6 +850,26 @@ export function createAppShell(app: HTMLElement): void {
   bindCollapsibleChrome(leftCenter, { toggleOnClick: true });
   bindCollapsibleChrome(timelineHost, { toggleOnClick: false });
   leftCenter.addEventListener(
+    'pointerdown',
+    (event) => {
+      if (!usesTouchInteractionChrome() || !leftCenter.classList.contains('side-collapsed')) {
+        return;
+      }
+
+      const target = event.target as Element | null;
+
+      if (!target?.closest('.view-switcher__button')) {
+        return;
+      }
+
+      event.preventDefault();
+      event.stopPropagation();
+      expandOne(leftCenter);
+      scheduleCollapseOne(leftCenter);
+    },
+    { capture: true },
+  );
+  leftCenter.addEventListener(
     'click',
     (event) => {
       if (!usesTouchInteractionChrome() || !leftCenter.classList.contains('side-collapsed')) {
