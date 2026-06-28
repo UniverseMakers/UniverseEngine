@@ -870,6 +870,54 @@ button {
     max-width: 100%;
     margin: 5rem auto;
   }
+
+  /* Shrink burger button 20% on mobile. */
+  .display-chrome__top-left.side-collapsed .display-button {
+    transform: scale(0.6);
+  }
+
+  .display-chrome__top-left:not(.side-collapsed) .display-button,
+  .display-chrome__top-left.open .display-button {
+    transform: scale(0.8);
+  }
+
+  /* Match the about (ⓘ) button to the burger size. */
+  .entry-overlay__info-button {
+    transform: scale(0.8);
+  }
+
+  /* Place the about overlay close button where the ⓘ icon was — match burger style. */
+  .entry-info-modal__close {
+    position: fixed !important;
+    top: 0.75rem !important;
+    right: 0.75rem !important;
+    left: auto !important;
+    bottom: auto !important;
+    z-index: 999 !important;
+    min-width: auto !important;
+    width: auto !important;
+    height: auto !important;
+    display: grid !important;
+    place-items: center !important;
+    padding: 0.99rem !important;
+    border: 1px solid var(--line-strong) !important;
+    border-radius: 0 !important;
+    background: rgba(0, 0, 0, 0.46) !important;
+    color: var(--accent) !important;
+    box-shadow: none !important;
+    backdrop-filter: blur(8px) !important;
+    -webkit-backdrop-filter: blur(8px) !important;
+    font-family: var(--font-mono) !important;
+    font-size: 1.1rem !important;
+    line-height: 1 !important;
+    transform: scale(0.8) !important;
+  }
+
+  /* Make the about overlay full-screen like settings/credits. */
+  .sci-modal:has(.entry-info-modal) {
+    padding: 0;
+    align-items: stretch;
+  }
 }
 
 .timeline__bar-row {
@@ -1306,6 +1354,11 @@ button {
   background: rgba(34, 211, 238, 0.1);
 }
 
+/* Hide the about button when its overlay is open — redundant to keep it visible. */
+#app:has(.sci-modal:not(.is-hidden)) .entry-overlay__info-button {
+  display: none;
+}
+
 .entry-overlay__title {
   margin: -0.25rem 0 0.25rem;
   color: var(--accent);
@@ -1473,6 +1526,8 @@ button {
   position: absolute;
   top: 1.35rem;
   right: 1.35rem;
+  display: grid;
+  place-items: center;
   min-width: 2.5rem;
   padding: 0.55rem;
   border: 1px solid var(--line-strong);
@@ -2445,10 +2500,14 @@ button {
 }
 
 .config-overlay__close {
+  display: grid;
+  place-items: center;
+  text-align: center;
   min-width: 2.25rem;
   padding: 0.5rem;
   font-size: 1rem;
   line-height: 1;
+  letter-spacing: normal;
 }
 
 .config-overlay__section {
@@ -3413,16 +3472,69 @@ button {
   }
 
   .config-overlay__controls {
-    height: 100%;
+    flex: 1;
     min-height: 0;
     overflow: hidden;
     gap: 1rem;
-    padding-top: 3.5rem;
+    padding-top: 0.75rem;
     padding-bottom: 0px;
   }
 
   .config-overlay__media {
-    display: none;
+    display: flex;
+    align-items: flex-end;
+    position: relative;
+    height: 7rem;
+    min-height: 7rem;
+    padding: 1rem;
+    border-bottom: 1px solid var(--line-strong);
+    border-right: none;
+    background: #0a1118;
+  }
+
+  .config-overlay__media-image {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    opacity: 0.6;
+    filter: brightness(0.7) saturate(0.8);
+  }
+
+  .config-overlay__media::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.3);
+  }
+
+  .config-overlay__media-copy {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+    max-width: unset;
+  }
+
+  .config-overlay__headline {
+    font-size: 1.4rem;
+    letter-spacing: 0.06em;
+  }
+
+  .config-overlay__media-subtitle {
+    font-size: 1rem;
+    letter-spacing: 0.1em;
+  }
+
+  .config-overlay__chartermark {
+    position: absolute;
+    top: 0.75rem;
+    right: 0.75rem;
+    left: unset;
+    width: 4rem;
+    opacity: 0.85;
   }
 
   .config-overlay__shell {
