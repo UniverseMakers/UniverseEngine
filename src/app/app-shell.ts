@@ -85,6 +85,7 @@ const ALTERNATE_PREWARM_RESUME_DELAY_MS = 1200;
 const SCRUB_HUD_UPDATE_INTERVAL_MS = 100;
 const MOBILE_TELEMETRY_MEDIA_QUERY = '(max-width: 768px), (max-height: 450px)';
 const TOUCH_INTERACTION_MEDIA_QUERY = '(hover: none), (pointer: coarse)';
+const COLLAPSIBLE_CHROME_IDLE_MS = 2000;
 const SCRUB_SEEK_SETTLE_WAIT_MS = 250;
 const AUDIO_RESYNC_DRIFT_SECONDS = 1;
 const AUDIO_RESYNC_COOLDOWN_MS = 1500;
@@ -760,7 +761,7 @@ export function createAppShell(app: HTMLElement): void {
       setTimeout(() => {
         el.classList.add('side-collapsed');
         sideTimers.delete(el);
-      }, 2500),
+      }, COLLAPSIBLE_CHROME_IDLE_MS),
     );
   };
 
