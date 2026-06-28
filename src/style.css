@@ -1371,6 +1371,20 @@ button {
   border-right: 1px solid var(--line-strong);
 }
 
+@media (width < 750px) {
+    .entry-info-modal__media {
+	align-items: center;
+	padding-left: 1.9rem;
+	margin-top: 5rem;
+    }
+}
+
+@media(height < 1024px) and (width < 750px) {
+    .entry-info-modal__media {
+	display: none;
+    }
+}
+
 .entry-info-modal__image {
   position: absolute;
   inset: 0;
@@ -1417,6 +1431,16 @@ button {
   gap: 1.9rem;
   padding: 2.7rem 2.9rem 2.3rem;
   min-height: 0;
+}
+@media (width < 750px) {
+    .entry-info-modal__content {
+	margin-bottom: 4rem;
+    }
+}
+@media (height < 1024px) and (width < 750px) {
+    .entry-info-modal__content {
+	margin-top: 4rem;
+    }
 }
 
 .entry-info-modal__close {
