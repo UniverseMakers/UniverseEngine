@@ -35,6 +35,7 @@ import targetMessagesRaw from './summary-target-messages.yaml?raw';
 export interface SummaryOverlayController {
   show: () => void;
   hide: () => void;
+  resetGalaxyChecklist: () => void;
   setHomeVisible: (visible: boolean) => void;
   update: (
     simClass: SimulationClass,
@@ -42,6 +43,7 @@ export interface SummaryOverlayController {
     videoDurationSeconds: number,
     runMetadata?: VideoRunMetadata | null,
     thumbnail?: string | null,
+    runToken?: number | null,
   ) => void;
 }
 
@@ -438,6 +440,8 @@ export function createSummaryOverlay(
   // and only purges when the summary closes AFTER the hunt is complete.
   const foundMorphologies = new Set<string>();
   let huntCompleteAtClose = false;
+  let currentChecklistRunToken: number | null = null;
+  let suppressedChecklistRunToken: number | null = null;
 
   // The same modal is reused for both result bars and info cards so we only
   // maintain one focus/close behavior and one piece of DOM.
@@ -574,6 +578,23 @@ export function createSummaryOverlay(
       }, SUMMARY_OVERLAY.HIDE_AFTER_MS);
     },
 
+    resetGalaxyChecklist() {
+      foundMorphologies.clear();
+      huntCompleteAtClose = false;
+      suppressedChecklistRunToken = currentChecklistRunToken;
+
+      for (const box of content.querySelectorAll('.galaxy-summary__check')) {
+        box.classList.remove('is-found');
+        const mark = box.querySelector('.galaxy-summary__check-box');
+
+        if (mark) {
+          mark.textContent = '';
+        }
+      }
+
+      content.querySelector('.galaxy-summary__done')?.remove();
+    },
+
     setHomeVisible(visible) {
       homeButton.hidden = !visible;
     },
@@ -584,6 +605,7 @@ export function createSummaryOverlay(
       videoDurationSeconds: number,
       runMetadata?: VideoRunMetadata | null,
       thumbnail?: string | null,
+      runToken?: number | null,
     ) {
       // The summary content is intentionally treated as ephemeral view state.
       // Clearing and rebuilding it from current inputs avoids stale DOM when the
@@ -714,8 +736,18 @@ export function createSummaryOverlay(
         const normalizedMorphology = currentMorphology?.toLowerCase() ?? null;
         const checklistIds = new Set(checklist.map((item) => item.id));
 
-        if (normalizedMorphology && checklistIds.has(normalizedMorphology)) {
+        currentChecklistRunToken = runToken ?? null;
+
+        if (
+          normalizedMorphology &&
+          checklistIds.has(normalizedMorphology) &&
+          currentChecklistRunToken !== suppressedChecklistRunToken
+        ) {
           foundMorphologies.add(normalizedMorphology);
+        }
+
+        if (currentChecklistRunToken !== suppressedChecklistRunToken) {
+          suppressedChecklistRunToken = null;
         }
 
         const bottomRow = document.createElement('div');

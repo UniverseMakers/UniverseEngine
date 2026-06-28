@@ -83,6 +83,7 @@ const ACTIVE_VIDEO_LOADED_DATA_WAIT_MS = 8000;
 const LOCAL_MANIFEST_MIN_TERMINAL_TIME_MAX_MS = 7000;
 const ALTERNATE_PREWARM_RESUME_DELAY_MS = 1200;
 const SCRUB_HUD_UPDATE_INTERVAL_MS = 100;
+const MOBILE_TELEMETRY_MEDIA_QUERY = '(max-width: 768px), (max-height: 450px)';
 
 /** Maps each cosmic scale to its default visual theme. */
 const SCALE_TO_THEME: Record<string, ThemeId> = {
@@ -106,6 +107,7 @@ export function createAppShell(app: HTMLElement): void {
   let availableSimulationClasses = getSelectableSimulationClasses(advancedSettings);
   const manifestController = createManifestController(advancedSettings.manifestSource);
   const runRequests = createRunRequestController();
+  const mobileTelemetryMediaQuery = window.matchMedia(MOBILE_TELEMETRY_MEDIA_QUERY);
 
   setVerboseLoggingEnabled(advancedSettings.verboseLogging);
 
@@ -132,6 +134,7 @@ export function createAppShell(app: HTMLElement): void {
   // Track whether the currently loaded video has reached the end — we need this
   // to know if we should re-show the summary overlay.
   let hasCompletedPlayback = false;
+  let activeCompletedRunToken = 0;
 
   // Sidecar run metadata for the currently loaded video (wallclock, compute, etc).
   let activeRunMetadata: VideoRunMetadata | null = null;
@@ -153,6 +156,9 @@ export function createAppShell(app: HTMLElement): void {
 
   // Hold the currently loaded live-stat frames for the active simulation/video.
   let activeLiveStatsFrames: LiveStatsDataset = EMPTY_LIVE_STATS_DATASET;
+  let activeLiveStatsUrl: string | null = null;
+  let activeRunRequestId = 0;
+  let telemetryEnabled = !mobileTelemetryMediaQuery.matches;
 
   // Keep the viewport hidden until a simulation has successfully initialized.
   // This way the video element doesn't flash before the boot sequence finishes.
@@ -343,6 +349,24 @@ export function createAppShell(app: HTMLElement): void {
   dataPanelHost.className = 'display-chrome__top-right';
   displayChrome.appendChild(dataPanelHost);
   const dataPanel = createTelemetryPanel(dataPanelHost);
+
+  function syncTelemetryVisibility(): void {
+    telemetryEnabled = !mobileTelemetryMediaQuery.matches;
+    setElementVisibility(dataPanelHost, telemetryEnabled);
+
+    if (!telemetryEnabled) {
+      return;
+    }
+
+    refreshLiveDataOverlay(lastPlaybackSeconds);
+
+    if (activeLiveStatsUrl && activeLiveStatsFrames.frames.length === 0 && activeRunRequestId > 0) {
+      void loadActiveLiveStats(activeLiveStatsUrl, activeRunRequestId);
+    }
+  }
+
+  syncTelemetryVisibility();
+  mobileTelemetryMediaQuery.addEventListener('change', syncTelemetryVisibility);
 
   // Mount the decorative center status frame used by tablet/mobile layouts.
   // This is purely cosmetic — it gives the display mode a bit of visual weight
@@ -537,7 +561,7 @@ export function createAppShell(app: HTMLElement): void {
     flushScheduledViewportSeek();
     lastPlaybackSeconds =
       viewport.getPlaybackFraction() * viewport.getDurationSeconds();
-    refreshDisplayData(lastPlaybackSeconds);
+    refreshLiveDataOverlay(lastPlaybackSeconds);
     scheduleAlternatePrewarmingResume();
     syncRunAudioPlayback();
   }
@@ -572,7 +596,7 @@ export function createAppShell(app: HTMLElement): void {
       lastScrubHudUpdateAt = now;
     }
 
-    refreshDisplayData(lastPlaybackSeconds);
+    refreshLiveDataOverlay(lastPlaybackSeconds);
     syncAudioToViewport();
   });
 
@@ -601,6 +625,7 @@ export function createAppShell(app: HTMLElement): void {
   // When playback ends, remember that state and show the summary overlay.
   viewport.onEnded(() => {
     hasCompletedPlayback = true;
+    activeCompletedRunToken += 1;
     const thumbnail = viewport.captureFrame();
 
     summaryOverlay.update(
@@ -609,6 +634,7 @@ export function createAppShell(app: HTMLElement): void {
       viewport.getDurationSeconds(),
       activeRunMetadata,
       thumbnail,
+      activeCompletedRunToken,
     );
     summaryOverlay.show();
     syncRunAudioPlayback();
@@ -644,6 +670,9 @@ export function createAppShell(app: HTMLElement): void {
         });
       });
     },
+    onResetGalaxyChecklist: () => {
+      summaryOverlay.resetGalaxyChecklist();
+    },
     onApplySettings: handleApplySettings,
     onClose: handleCloseConfig,
     initialView: 'parameters',
@@ -657,7 +686,7 @@ export function createAppShell(app: HTMLElement): void {
   // Prime everything to a clean, empty baseline before the first mode switch.
 
   timeline.setPosition(0);
-  refreshDisplayData();
+  refreshLiveDataOverlay();
   summaryOverlay.hide();
 
   // ── Collapsible Left-Side UI ────────────────────────────────────────────
@@ -906,7 +935,7 @@ export function createAppShell(app: HTMLElement): void {
     // Rebuild the config overlay so the parameters match the new family.
     overlayPanel.setSimulation(activeClass, getActiveValues());
     timeline.setPosition(0);
-    refreshDisplayData();
+    refreshLiveDataOverlay();
     refreshViewSwitcher();
     updateSynthesizerLogo();
   }
@@ -925,7 +954,7 @@ export function createAppShell(app: HTMLElement): void {
       values: valuesByClass[activeClass.id],
     });
     // The HUD shows parameter values, so refresh it immediately.
-    refreshDisplayData();
+    refreshLiveDataOverlay();
   }
 
   /**
@@ -1034,6 +1063,7 @@ export function createAppShell(app: HTMLElement): void {
    */
   function handleShowSummary(): void {
     hasCompletedPlayback = true;
+    activeCompletedRunToken += 1;
     viewport.pause();
     const thumbnail = activeRunMetadata ? viewport.captureFrame() : null;
 
@@ -1043,6 +1073,7 @@ export function createAppShell(app: HTMLElement): void {
       viewport.getDurationSeconds(),
       activeRunMetadata,
       thumbnail,
+      activeCompletedRunToken,
     );
     summaryOverlay.show();
     syncRunAudioPlayback();
@@ -1093,6 +1124,8 @@ export function createAppShell(app: HTMLElement): void {
     const values = getActiveValues();
     const runRequestId = runRequests.start();
 
+    activeRunRequestId = runRequestId;
+
     logInfo('Run requested', {
       simClassId: activeClass.id,
       values,
@@ -1133,6 +1166,7 @@ export function createAppShell(app: HTMLElement): void {
     const alternateViewUrls = Object.entries(match.views ?? {})
       .filter(([viewId]) => viewId !== selectedViewId)
       .map(([, url]) => url);
+    activeLiveStatsUrl = match.liveDataUrl;
 
     // Fire-and-forget the async data loads — they'll update the HUD when done.
     void loadActiveLiveStats(match.liveDataUrl, runRequestId);
@@ -1415,6 +1449,7 @@ export function createAppShell(app: HTMLElement): void {
         viewport.getDurationSeconds(),
         activeRunMetadata,
         thumbnail,
+        activeCompletedRunToken,
       );
       summaryOverlay.show();
     } else {
@@ -1459,7 +1494,11 @@ export function createAppShell(app: HTMLElement): void {
    * @param timeSeconds - Current playback time in seconds.
    * @returns void
    */
-  function refreshDisplayData(timeSeconds = 0): void {
+  function refreshLiveDataOverlay(timeSeconds = 0): void {
+    if (!telemetryEnabled) {
+      return;
+    }
+
     const sampledValues = sampleLiveStats(
       activeLiveStatsFrames,
       timeSeconds,
@@ -1518,9 +1557,11 @@ export function createAppShell(app: HTMLElement): void {
   function resetSimulationState(options: { preserveRunRequest?: boolean } = {}): void {
     if (!options.preserveRunRequest) {
       runRequests.invalidate();
+      activeRunRequestId = 0;
     }
 
     activeLiveStatsFrames = EMPTY_LIVE_STATS_DATASET;
+    activeLiveStatsUrl = null;
     hasCompletedPlayback = false;
     activeRunMetadata = null;
     activeRunMatch = null;
@@ -1670,6 +1711,12 @@ export function createAppShell(app: HTMLElement): void {
    * @returns Promise that resolves once loading completes.
    */
   async function loadActiveLiveStats(url: string, runRequestId: number): Promise<void> {
+    if (!telemetryEnabled) {
+      activeLiveStatsFrames = EMPTY_LIVE_STATS_DATASET;
+
+      return;
+    }
+
     let nextFrames = EMPTY_LIVE_STATS_DATASET;
 
     try {
@@ -1686,7 +1733,7 @@ export function createAppShell(app: HTMLElement): void {
     }
 
     activeLiveStatsFrames = nextFrames;
-    refreshDisplayData();
+    refreshLiveDataOverlay();
   }
 
   /**
@@ -1706,7 +1753,7 @@ export function createAppShell(app: HTMLElement): void {
     }
 
     activeRunMetadata = nextMetadata;
-    refreshDisplayData(lastPlaybackSeconds);
+    refreshLiveDataOverlay(lastPlaybackSeconds);
   }
 
   /**

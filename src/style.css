@@ -2318,12 +2318,27 @@ button {
   text-transform: uppercase;
 }
 
+.config-overlay__section[data-section='settings'] {
+  display: grid;
+  gap: 1rem;
+}
+
+.config-overlay__settings-block {
+  display: grid;
+  gap: 0.9rem;
+  padding: 1.15rem 1.2rem;
+  border-top: 1px solid rgba(123, 208, 255, 0.12);
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.config-overlay__settings-group {
+  display: grid;
+  gap: 0.9rem;
+}
+
 .audio-settings {
   display: grid;
   gap: 0.9rem;
-  margin-top: 1rem;
-  padding-top: 1rem;
-  border-top: 1px solid var(--line);
 }
 
 .audio-settings__slider {
@@ -2575,9 +2590,6 @@ button {
 .advanced-settings {
   display: grid;
   gap: 0.9rem;
-  margin-top: 1.6rem;
-  padding-top: 1.6rem;
-  border-top: 1px solid rgba(123, 208, 255, 0.12);
 }
 
 .advanced-settings__access,

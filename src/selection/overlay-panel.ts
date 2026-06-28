@@ -40,6 +40,7 @@ interface OverlayPanelOptions {
   onValuesChange: (values: Record<string, number>) => void;
   onThemeChange: (theme: ThemeId) => void;
   onRun: () => void;
+  onResetGalaxyChecklist: () => void;
   onApplySettings: (settings: AdvancedSettings) => void;
   onClose: () => void;
   initialView?: OverlayPanelView;
@@ -141,17 +142,35 @@ export function createOverlayPanel(
 
   settingsSection.className = 'config-overlay__section config-overlay__section--grow';
   settingsSection.dataset.section = 'settings';
-  settingsSection.innerHTML = `
+  const themePickerHost = document.createElement('div');
+  themePickerHost.className = 'config-overlay__settings-block';
+  themePickerHost.innerHTML = `
     <p class="config-overlay__eyebrow">Theme settings</p>
     <p class="config-overlay__settings-copy">Theme only for this pass. Choose the interface era here, and set the default audio behavior for views that support sonification.</p>
   `;
-  const themePickerHost = document.createElement('div');
+  const checklistSettings = document.createElement('section');
 
+  checklistSettings.className = 'config-overlay__settings-group config-overlay__settings-block';
+  checklistSettings.innerHTML = `
+    <p class="config-overlay__eyebrow">Galaxy checklist</p>
+    <p class="config-overlay__settings-copy">Clear the galaxy scavenger-hunt progress and uncheck every morphology box for this session.</p>
+  `;
+
+  const resetGalaxyChecklistButton = document.createElement('button');
+
+  resetGalaxyChecklistButton.className = 'advanced-settings__access';
+  resetGalaxyChecklistButton.type = 'button';
+  resetGalaxyChecklistButton.textContent = 'Reset Galaxy Checkboxes';
+  resetGalaxyChecklistButton.addEventListener('click', () => {
+    options.onResetGalaxyChecklist();
+  });
+  checklistSettings.appendChild(resetGalaxyChecklistButton);
   settingsSection.appendChild(themePickerHost);
+  settingsSection.prepend(checklistSettings);
 
   const audioSettings = document.createElement('section');
 
-  audioSettings.className = 'audio-settings';
+  audioSettings.className = 'audio-settings config-overlay__settings-block';
   audioSettings.innerHTML = `
     <p class="config-overlay__eyebrow">Audio defaults</p>
     <p class="config-overlay__settings-copy">These defaults apply when a run opens an audio-enabled view. You can still change them from the playback controls.</p>
@@ -196,7 +215,7 @@ export function createOverlayPanel(
 
   const advancedPanel = document.createElement('section');
 
-  advancedPanel.className = 'advanced-settings';
+  advancedPanel.className = 'advanced-settings config-overlay__settings-block';
   advancedPanel.dataset.state = 'closed';
   advancedPanel.innerHTML = `
     <div class="advanced-settings__header">
