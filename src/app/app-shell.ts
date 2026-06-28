@@ -84,6 +84,7 @@ const LOCAL_MANIFEST_MIN_TERMINAL_TIME_MAX_MS = 7000;
 const ALTERNATE_PREWARM_RESUME_DELAY_MS = 1200;
 const SCRUB_HUD_UPDATE_INTERVAL_MS = 100;
 const MOBILE_TELEMETRY_MEDIA_QUERY = '(max-width: 768px), (max-height: 450px)';
+const SCRUB_SEEK_SETTLE_WAIT_MS = 250;
 const AUDIO_RESYNC_DRIFT_SECONDS = 1;
 const AUDIO_RESYNC_COOLDOWN_MS = 1500;
 
@@ -437,6 +438,7 @@ export function createAppShell(app: HTMLElement): void {
   let isPointerScrubbing = false;
   let wasPlayingBeforeScrub = false;
   let scrubCompletionNonce = 0;
+  let skipNextPlayStateAudioSync = false;
   let alternatePrewarmResumeTimer: number | null = null;
   let lastScrubHudUpdateAt = 0;
   let lastAudioSyncAt = Number.NEGATIVE_INFINITY;
@@ -558,6 +560,7 @@ export function createAppShell(app: HTMLElement): void {
     }
 
     scrubCompletionNonce += 1;
+    skipNextPlayStateAudioSync = false;
     wasPlayingBeforeScrub = !viewport.isPaused();
     isPointerScrubbing = true;
     lastScrubHudUpdateAt = 0;
@@ -576,7 +579,7 @@ export function createAppShell(app: HTMLElement): void {
     isPointerScrubbing = false;
     lastScrubHudUpdateAt = 0;
     flushScheduledViewportSeek();
-    await viewport.waitForSeekSettled();
+    await viewport.waitForSeekSettled(SCRUB_SEEK_SETTLE_WAIT_MS);
 
     if (completionNonce !== scrubCompletionNonce) {
       return;
@@ -587,11 +590,8 @@ export function createAppShell(app: HTMLElement): void {
     refreshLiveDataOverlay(lastPlaybackSeconds);
 
     if (wasPlayingBeforeScrub) {
-      await playViewportWithMutedFallback(viewport);
-
-      if (completionNonce !== scrubCompletionNonce) {
-        return;
-      }
+      skipNextPlayStateAudioSync = true;
+      void playViewportWithMutedFallback(viewport);
     }
 
     scheduleAlternatePrewarmingResume();
@@ -608,6 +608,12 @@ export function createAppShell(app: HTMLElement): void {
     } else {
       startScrubberLoop();
       scheduleAlternatePrewarmingResume(0);
+    }
+
+    if (!isPaused && skipNextPlayStateAudioSync) {
+      skipNextPlayStateAudioSync = false;
+
+      return;
     }
 
     syncRunAudioPlayback();
@@ -1606,6 +1612,7 @@ export function createAppShell(app: HTMLElement): void {
     isPointerScrubbing = false;
     wasPlayingBeforeScrub = false;
     scrubCompletionNonce += 1;
+    skipNextPlayStateAudioSync = false;
     pendingSeekFraction = null;
     clearAlternatePrewarmResumeTimer();
 

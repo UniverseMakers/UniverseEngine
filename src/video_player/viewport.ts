@@ -364,7 +364,7 @@ export function createViewport(
     });
   }
 
-  function waitForSeekSettled(timeoutMs = 800): Promise<void> {
+  function waitForSeekSettled(timeoutMs = 250): Promise<void> {
     if (!video.seeking && video.readyState >= HTMLMediaElement.HAVE_CURRENT_DATA) {
       return Promise.resolve();
     }
