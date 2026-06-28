@@ -223,7 +223,7 @@ function formatMetricValue(
   if (shouldFormat) {
     return stat.integer
       ? formatCompactNumber(Math.round(scaled))
-      : formatCompactNumber(scaled);
+      : formatLiveMetricNumber(scaled);
   }
 
   // Non-live integer-configured stats use locale-grouped digits.
@@ -233,4 +233,27 @@ function formatMetricValue(
 
   // Static parameter values keep their step-aligned precision.
   return formatMaybeNumber(value, { integer: stat.integer });
+}
+
+function formatLiveMetricNumber(value: number): string {
+  const abs = Math.abs(value);
+  const sign = value < 0 ? '−' : '';
+
+  if (abs < 1_000) {
+    return value.toFixed(2);
+  }
+
+  if (abs < 1_000_000) {
+    return `${sign}${(abs / 1_000).toFixed(2)}k`;
+  }
+
+  if (abs < 1_000_000_000) {
+    return `${sign}${(abs / 1_000_000).toFixed(2)}M`;
+  }
+
+  if (abs < 1_000_000_000_000) {
+    return `${sign}${(abs / 1_000_000_000).toFixed(2)}B`;
+  }
+
+  return `${sign}${(abs / 1_000_000_000_000).toFixed(2)}T`;
 }
