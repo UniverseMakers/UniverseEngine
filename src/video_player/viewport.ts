@@ -65,6 +65,9 @@ export interface ViewportController {
   /** Read the current media duration in seconds. */
   getDurationSeconds: () => number;
 
+  /** Read the current playback position in seconds. */
+  getCurrentTimeSeconds: () => number;
+
   /** Read the current playback position as a normalized fraction. */
   getPlaybackFraction: () => number;
 
@@ -566,6 +569,7 @@ export function createViewport(
     onTimeUpdate,
     onEnded,
     getDurationSeconds: () => (Number.isFinite(video.duration) ? video.duration : 0),
+    getCurrentTimeSeconds: () => (Number.isFinite(video.currentTime) ? video.currentTime : 0),
     getPlaybackFraction: () => {
       if (!Number.isFinite(video.duration) || video.duration <= 0) {
         return 0;

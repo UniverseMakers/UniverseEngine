@@ -84,6 +84,8 @@ const LOCAL_MANIFEST_MIN_TERMINAL_TIME_MAX_MS = 7000;
 const ALTERNATE_PREWARM_RESUME_DELAY_MS = 1200;
 const SCRUB_HUD_UPDATE_INTERVAL_MS = 100;
 const MOBILE_TELEMETRY_MEDIA_QUERY = '(max-width: 768px), (max-height: 450px)';
+const AUDIO_RESYNC_DRIFT_SECONDS = 1;
+const AUDIO_RESYNC_COOLDOWN_MS = 1500;
 
 /** Maps each cosmic scale to its default visual theme. */
 const SCALE_TO_THEME: Record<string, ThemeId> = {
@@ -420,7 +422,8 @@ export function createAppShell(app: HTMLElement): void {
   timeline.setMuted(audioMuted);
 
   runAudio.addEventListener('loadedmetadata', () => {
-    syncAudioToViewport(true);
+    runAudio.playbackRate = viewport.getPlaybackRate();
+    syncAudioToViewport({ force: true });
     syncRunAudioPlayback();
   });
 
@@ -434,6 +437,7 @@ export function createAppShell(app: HTMLElement): void {
   let isPointerScrubbing = false;
   let alternatePrewarmResumeTimer: number | null = null;
   let lastScrubHudUpdateAt = 0;
+  let lastAudioSyncAt = Number.NEGATIVE_INFINITY;
 
   function startScrubberLoop() {
     if (scrubberRafId !== null) return;
@@ -478,7 +482,6 @@ export function createAppShell(app: HTMLElement): void {
 
       pendingSeekFraction = null;
       viewport.seekToFraction(fractionToSeek);
-      syncAudioToViewport(true);
     });
   }
 
@@ -496,7 +499,6 @@ export function createAppShell(app: HTMLElement): void {
 
     pendingSeekFraction = null;
     viewport.seekToFraction(fractionToSeek);
-    syncAudioToViewport(true);
   }
 
   function clearAlternatePrewarmResumeTimer(): void {
@@ -559,8 +561,8 @@ export function createAppShell(app: HTMLElement): void {
     isPointerScrubbing = false;
     lastScrubHudUpdateAt = 0;
     flushScheduledViewportSeek();
-    lastPlaybackSeconds =
-      viewport.getPlaybackFraction() * viewport.getDurationSeconds();
+    syncAudioToViewport({ force: true });
+    lastPlaybackSeconds = viewport.getCurrentTimeSeconds();
     refreshLiveDataOverlay(lastPlaybackSeconds);
     scheduleAlternatePrewarmingResume();
     syncRunAudioPlayback();
@@ -597,6 +599,10 @@ export function createAppShell(app: HTMLElement): void {
     }
 
     refreshLiveDataOverlay(lastPlaybackSeconds);
+    if (isPointerScrubbing) {
+      return;
+    }
+
     syncAudioToViewport();
   });
 
@@ -1049,7 +1055,7 @@ export function createAppShell(app: HTMLElement): void {
 
     if (atEnd) {
       viewport.resetPlayback();
-      syncAudioToViewport(true);
+      syncAudioToViewport({ force: true });
     }
 
     void playViewportWithMutedFallback(viewport);
@@ -1105,6 +1111,7 @@ export function createAppShell(app: HTMLElement): void {
    */
   function handleSpeedChange(rate: number): void {
     viewport.setPlaybackRate(rate);
+    runAudio.playbackRate = rate;
     persistPlaybackSpeed(rate);
     timeline.setSpeed(rate);
   }
@@ -1915,6 +1922,7 @@ export function createAppShell(app: HTMLElement): void {
   function activateRunAudio(resolvedAudioUrl: string): void {
     activeAudioUrl = resolvedAudioUrl;
     activeAudioAvailable = true;
+    runAudio.playbackRate = viewport.getPlaybackRate();
 
     if (runAudio.src !== activeAudioUrl) {
       runAudio.pause();
@@ -1975,19 +1983,32 @@ export function createAppShell(app: HTMLElement): void {
     timeline.setMuted(audioMuted);
   }
 
-  function syncAudioToViewport(force = false): void {
+  function syncAudioToViewport(
+    options: { force?: boolean; driftThresholdSeconds?: number } = {},
+  ): void {
     if (!activeAudioAvailable || !Number.isFinite(runAudio.duration) || runAudio.duration <= 0) {
       return;
     }
 
+    const force = options.force ?? false;
     const targetTime = Math.max(
       0,
-      Math.min(runAudio.duration, viewport.getPlaybackFraction() * runAudio.duration),
+      Math.min(runAudio.duration, viewport.getCurrentTimeSeconds()),
     );
+    const drift = Math.abs(runAudio.currentTime - targetTime);
 
-    if (force || Math.abs(runAudio.currentTime - targetTime) > 0.35) {
-      runAudio.currentTime = targetTime;
+    if (!force && drift <= (options.driftThresholdSeconds ?? AUDIO_RESYNC_DRIFT_SECONDS)) {
+      return;
     }
+
+    const now = performance.now();
+
+    if (!force && now - lastAudioSyncAt < AUDIO_RESYNC_COOLDOWN_MS) {
+      return;
+    }
+
+    runAudio.currentTime = targetTime;
+    lastAudioSyncAt = now;
   }
 
   function syncRunAudioPlayback(): void {
@@ -1997,6 +2018,7 @@ export function createAppShell(app: HTMLElement): void {
     refreshAudioControlVisibility();
     runAudio.muted = audioMuted;
     runAudio.volume = audioVolume;
+    runAudio.playbackRate = viewport.getPlaybackRate();
 
     if (!audioVisible) {
       runAudio.pause();
@@ -2004,7 +2026,7 @@ export function createAppShell(app: HTMLElement): void {
       return;
     }
 
-    syncAudioToViewport();
+    syncAudioToViewport({ force: runAudio.paused });
 
     if (
       app.dataset.mode !== 'display' ||
