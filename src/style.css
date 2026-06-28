@@ -3139,15 +3139,22 @@ button {
 
   .entry-overlay__button {
     grid-template-columns: 1fr;
+    justify-items: center;
+    align-content: center;
     gap: 0.9rem;
     min-height: 0;
     padding: 1.15rem 1rem;
+    text-align: center;
+  }
+
+  .entry-overlay__button-label {
+    justify-self: center;
   }
 
   .entry-overlay__button-description {
     max-width: none;
-    text-align: left;
-    justify-self: start;
+    text-align: center;
+    justify-self: center;
     line-height: 1.6;
   }
 
