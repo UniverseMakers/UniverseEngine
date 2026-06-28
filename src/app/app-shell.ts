@@ -299,6 +299,8 @@ export function createAppShell(app: HTMLElement): void {
     showHome: !advancedSettings.lockedScaleId,
   });
 
+  displayMenu.setFullscreenVisible(!advancedSettings.lockFullscreen);
+
   // Left-center slot: the view-switcher that appears when a run has multiple
   // video views available (e.g. dark matter + gas density for cosmos).
   const leftCenter = document.createElement('div');
@@ -2146,6 +2148,7 @@ export function createAppShell(app: HTMLElement): void {
     }
 
     displayMenu.setHomeVisible(!advancedSettings.lockedScaleId);
+    displayMenu.setFullscreenVisible(!advancedSettings.lockFullscreen);
     summaryOverlay.setHomeVisible(!advancedSettings.lockedScaleId);
     entryOverlay.setSimulationClasses(availableSimulationClasses);
     overlayPanel.setAdvancedSettings(advancedSettings);

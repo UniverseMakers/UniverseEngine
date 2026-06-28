@@ -913,6 +913,11 @@ button {
     transform: scale(0.8) !important;
   }
 
+  /* Hide fullscreen option on mobile — not useful on phones. */
+  .display-menu__fullscreen {
+    display: none;
+  }
+
   /* Make the about overlay full-screen like settings/credits. */
   .sci-modal:has(.entry-info-modal) {
     padding: 0;

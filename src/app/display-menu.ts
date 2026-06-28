@@ -11,6 +11,8 @@ export interface DisplayMenuController {
   close: () => void;
   /** Update whether the Home or Select Parameters action should be shown. */
   setHomeVisible: (isVisible: boolean) => void;
+  /** Hide or show the Fullscreen toggle. */
+  setFullscreenVisible: (isVisible: boolean) => void;
 }
 
 interface DisplayMenuOptions {
@@ -96,6 +98,8 @@ export function createDisplayMenu(
     }
   });
 
+  fullscreenButton.classList.add('display-menu__fullscreen');
+
   menu.appendChild(fullscreenButton);
 
   host.appendChild(menu);
@@ -134,6 +138,10 @@ export function createDisplayMenu(
   return {
     close,
     setHomeVisible,
+    setFullscreenVisible(isVisible) {
+      fullscreenButton.hidden = !isVisible;
+      fullscreenButton.classList.toggle('is-hidden', !isVisible);
+    },
   };
 
   /**

@@ -7,6 +7,7 @@ export interface AdvancedSettings {
   hiddenScaleIds: string[];
   audioMutedByDefault: boolean;
   defaultAudioVolume: number;
+  lockFullscreen: boolean;
 }
 
 const STORAGE_KEY = 'universe-engine-advanced-settings';
@@ -22,6 +23,7 @@ export function getDefaultAdvancedSettings(): AdvancedSettings {
     hiddenScaleIds: [],
     audioMutedByDefault: true,
     defaultAudioVolume: 0.75,
+    lockFullscreen: false,
   };
 }
 
@@ -56,6 +58,7 @@ export function saveAdvancedSettings(
         hiddenScaleIds: normalized.hiddenScaleIds,
         audioMutedByDefault: normalized.audioMutedByDefault,
         defaultAudioVolume: normalized.defaultAudioVolume,
+        lockFullscreen: normalized.lockFullscreen,
       }),
   );
 
@@ -102,6 +105,7 @@ export function normalizeAdvancedSettings(
     hiddenScaleIds,
     audioMutedByDefault: Boolean(settings.audioMutedByDefault),
     defaultAudioVolume,
+    lockFullscreen: Boolean(settings.lockFullscreen),
   };
 }
 

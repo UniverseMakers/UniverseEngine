@@ -330,6 +330,22 @@ export function createOverlayPanel(
   verboseField.appendChild(verboseCopy);
   advancedForm.appendChild(verboseField);
 
+  const fullscreenLockField = document.createElement('label');
+
+  fullscreenLockField.className = 'advanced-settings__field advanced-settings__field--inline';
+  const fullscreenLockInput = document.createElement('input');
+  const fullscreenLockCopy = document.createElement('span');
+
+  fullscreenLockInput.type = 'checkbox';
+  fullscreenLockInput.className = 'advanced-settings__checkbox';
+  fullscreenLockCopy.innerHTML = `
+    <span class="advanced-settings__label">Lock fullscreen</span>
+    <span class="advanced-settings__help">Remove the Fullscreen option from the burger menu to keep the app locked to fullscreen.</span>
+  `;
+  fullscreenLockField.appendChild(fullscreenLockInput);
+  fullscreenLockField.appendChild(fullscreenLockCopy);
+  advancedForm.appendChild(fullscreenLockField);
+
   const visibilityField = document.createElement('div');
 
   visibilityField.className = 'advanced-settings__field';
@@ -496,6 +512,9 @@ export function createOverlayPanel(
     pendingAdvancedSettings.defaultAudioVolume = Number(audioVolumeInput.value) / 100;
     syncAudioVolumeValue();
   });
+  fullscreenLockInput.addEventListener('change', () => {
+    pendingAdvancedSettings.lockFullscreen = fullscreenLockInput.checked;
+  });
 
   for (const [scaleId, checkbox] of visibilityInputs.entries()) {
     checkbox.addEventListener('change', () => {
@@ -577,6 +596,7 @@ export function createOverlayPanel(
     onlineSourceInput.checked = pendingAdvancedSettings.manifestSource === 'online';
     verboseInput.checked = pendingAdvancedSettings.verboseLogging;
     audioMuteInput.checked = pendingAdvancedSettings.audioMutedByDefault;
+    fullscreenLockInput.checked = pendingAdvancedSettings.lockFullscreen;
     audioVolumeInput.value = String(
       Math.round(pendingAdvancedSettings.defaultAudioVolume * 100),
     );
@@ -706,5 +726,6 @@ function cloneAdvancedSettings(settings: AdvancedSettings): AdvancedSettings {
     hiddenScaleIds: [...settings.hiddenScaleIds],
     audioMutedByDefault: settings.audioMutedByDefault,
     defaultAudioVolume: settings.defaultAudioVolume,
+    lockFullscreen: settings.lockFullscreen,
   };
 }
