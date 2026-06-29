@@ -233,6 +233,18 @@ function resolveResultValue(
   // For non-parameter result keys, prefer summaryMetrics over parameterValues.
   // run_summary.yaml is the authoritative source for output values; the
   // parameters.yaml sidecar may contain stale placeholders for those keys.
+  // Prefer the "_bar" variant first — these are "forgiven"/scaled
+  // values that are more forgiving of mismatches (e.g. Moon mass, spin).
+  const barValue = runMetadata?.summaryMetrics[`${id}_bar`]?.value;
+
+  if (barValue !== undefined) {
+    const numeric = Number(barValue);
+
+    if (Number.isFinite(numeric)) {
+      return numeric;
+    }
+  }
+
   const summaryValue = runMetadata?.summaryMetrics[id]?.value;
 
   if (summaryValue !== undefined) {

@@ -268,6 +268,14 @@ function resolveScientificValue(
 
   // Prefer summaryMetrics over parameterValues for non-parameter keys.
   // run_summary.yaml is the authoritative source for output values.
+  // Prefer the "_bar" variant first — these are "forgiven"/scaled
+  // values that are more forgiving of mismatches (e.g. Moon mass, spin).
+  const barValue = parseNumeric(runMetadata?.summaryMetrics[`${id}_bar`]?.value);
+
+  if (barValue !== null) {
+    return barValue;
+  }
+
   const summaryValue = parseNumeric(runMetadata?.summaryMetrics[id]?.value);
 
   if (summaryValue !== null) {
@@ -864,6 +872,7 @@ export function createSummaryOverlay(
               openCardModal(item.label, item.hint!),
             );
           }
+
           huntGrid.appendChild(box);
         }
 
