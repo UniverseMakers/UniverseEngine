@@ -850,7 +850,7 @@ export function createAppShell(app: HTMLElement): void {
     isCollapsible: () => app.dataset.mode === 'display',
   });
   bindCollapsibleChrome(leftCenter, { toggleOnClick: true });
-  bindCollapsibleChrome(timelineHost, { toggleOnClick: false });
+  bindCollapsibleChrome(timelineHost, { toggleOnClick: false, isCollapsible: () => false });
 
 
   // ── Keyboard controls ──────────────────────────────────────────────────
@@ -915,7 +915,6 @@ export function createAppShell(app: HTMLElement): void {
       case 'ArrowLeft':
         event.preventDefault();
         expandOne(timelineHost);
-        scheduleCollapseOne(timelineHost);
         scrubDirection = -1;
         startScrubbing();
         break;
@@ -923,7 +922,6 @@ export function createAppShell(app: HTMLElement): void {
       case 'ArrowRight':
         event.preventDefault();
         expandOne(timelineHost);
-        scheduleCollapseOne(timelineHost);
         scrubDirection = 1;
         startScrubbing();
         break;
