@@ -164,11 +164,24 @@ export function createTimeline(
   barRow.appendChild(speedWrap);
   barRow.appendChild(summaryBtn);
 
+  let pendingPosition: number | null = null;
+  let scheduledRafId: number | null = null;
+
   slider.addEventListener('input', () => {
     const position = parseInt(slider.value, 10) / 1000;
 
     slider.style.setProperty('--fill', `${position * 100}%`);
-    onChange?.(position);
+    pendingPosition = position;
+
+    if (scheduledRafId !== null) return;
+
+    scheduledRafId = requestAnimationFrame(() => {
+      scheduledRafId = null;
+      if (pendingPosition === null) return;
+      const positionToSend = pendingPosition;
+      pendingPosition = null;
+      onChange?.(positionToSend);
+    });
   });
 
   slider.addEventListener('pointerdown', () => {
