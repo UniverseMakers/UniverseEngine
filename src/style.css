@@ -1014,7 +1014,7 @@ button {
 .timeline__slider {
   flex: 1;
   appearance: none;
-  height: 7px;
+  height: 10px;
   background: rgba(34, 211, 238, 0.18);
 }
 
@@ -3837,7 +3837,7 @@ button {
   }
 
   .timeline__slider {
-    height: 8px;
+    height: 12px;
   }
 
   .terminal {
