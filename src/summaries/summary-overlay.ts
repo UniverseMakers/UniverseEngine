@@ -219,10 +219,16 @@ function buildScientificBars(
       // same visual scale: 1.0 means exactly on target, 0.5 means half the
       // target value, 2.0 means double, and anything higher is clamped later.
       const normalizedValue = resolved / Math.max(result.target, 1e-9);
+
+      // Use the non-"_bar" raw value for display text when available,
+      // falling back to the "_bar" value otherwise.
+      const displayRaw =
+        parseNumeric(runMetadata?.summaryMetrics[result.id]?.value) ?? resolved;
+
       const label = resolveScientificLabel(result, simClass, runMetadata);
       const detail = detailForTarget(result.id, label, normalizedValue);
       const formattedValue = withUnit(
-        formatSummaryValue(String(resolved), result),
+        formatSummaryValue(String(displayRaw), result),
         result.unit,
       );
 
