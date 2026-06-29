@@ -34,7 +34,7 @@ planetary:
       unit: kg CO₂
       display_format: float
       precision: 2
-      description: The estimated carbon footprint of this run.  Carbon dioxide is a major driver of climate change, and supercomputer-driven research at this scale has real environmental costs that must be considered when we plan our research.
+      description: The estimated carbon footprint of this run.  Carbon dioxide is a major driver of climate change, and supercomputer-driven research at this scale has real environmental costs that must be considered when we plan our research. For context, driving the average car for 100 miles produces roughly 40 kg of CO₂, and the average transatlantic flight produces roughly 1,000 kg of CO₂ per passenger.
     - &resource_compute_used
       id: computeUsed
       value: '--'
