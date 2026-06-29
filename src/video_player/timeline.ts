@@ -164,6 +164,19 @@ export function createTimeline(
   barRow.appendChild(speedWrap);
   barRow.appendChild(summaryBtn);
 
+  barRow.addEventListener('click', (event) => {
+    const target = event.target as HTMLElement;
+    if (target.closest('button')) return;
+
+    const rect = slider.getBoundingClientRect();
+    const x = event.clientX - rect.left;
+    const position = Math.max(0, Math.min(1, x / rect.width));
+
+    slider.value = String(Math.round(position * 1000));
+    slider.style.setProperty('--fill', `${position * 100}%`);
+    onChange?.(position);
+  });
+
   slider.addEventListener('input', () => {
     const position = parseInt(slider.value, 10) / 1000;
 
