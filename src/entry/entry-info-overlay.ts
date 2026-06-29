@@ -38,6 +38,7 @@ export function createEntryInfoOverlay(): EntryInfoOverlayController {
   infoModal.className = 'sci-modal is-hidden';
   infoModal.innerHTML = `
     <div class="entry-info-modal">
+      <button class="entry-info-modal__close" type="button" aria-label="Close">×</button>
       <div class="entry-info-modal__shell">
         <div class="entry-info-modal__media">
           <img
@@ -54,7 +55,6 @@ export function createEntryInfoOverlay(): EntryInfoOverlayController {
           </div>
         </div>
         <div class="entry-info-modal__content">
-          <button class="entry-info-modal__close" type="button" aria-label="Close">×</button>
           <div class="entry-info-modal__header">
             <p class="entry-info-modal__eyebrow">About</p>
             <h2 class="entry-info-modal__title">What Is The Universe Engine?</h2>
