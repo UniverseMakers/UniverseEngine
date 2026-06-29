@@ -2,6 +2,7 @@
 
 interface ImportMetaEnv {
   readonly VITE_MANIFEST_SOURCE?: 'local' | 'online';
+  readonly VITE_LOCKED_SCALE_ID?: string;
 }
 
 /**

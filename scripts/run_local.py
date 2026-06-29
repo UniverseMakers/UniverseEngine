@@ -4,7 +4,7 @@
 This script:
 1. Ensures a local manifest exists, downloading assets first when needed.
 2. Starts the local tracking server unless one is already running.
-3. Launches the Vite dev server in forced local-manifest mode.
+3. Launches the Vite dev server in the configured Vite mode.
 """
 
 from __future__ import annotations
@@ -36,6 +36,11 @@ def parse_args() -> argparse.Namespace:
         action="store_true",
         help="Skip asset download/manifest generation checks.",
     )
+    parser.add_argument(
+        "--mode",
+        default="localmanifest",
+        help="Vite mode to use (default: localmanifest).",
+    )
     return parser.parse_args()
 
 
@@ -54,8 +59,13 @@ def main() -> None:
     signal.signal(signal.SIGINT, shutdown)
     signal.signal(signal.SIGTERM, shutdown)
 
+    vite = REPO_ROOT / "node_modules" / ".bin" / "vite"
+
+    if not vite.is_file():
+        raise SystemExit(f"Vite binary not found at {vite}. Run 'npm install' first.")
+
     try:
-        subprocess.run(["npm", "run", "dev:local"], cwd=REPO_ROOT, check=True)
+        subprocess.run([str(vite), "--mode", args.mode], cwd=REPO_ROOT, check=True)
     finally:
         terminate_process(tracking_process)
 
