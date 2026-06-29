@@ -387,14 +387,14 @@ export function createSummaryOverlay(
 
   replayButton.className = 'summary-overlay__button';
   replayButton.type = 'button';
-  replayButton.textContent = 'Continue Visualising';
+  replayButton.innerHTML = '<span class="long-label">Continue Visualising</span><span class="short-label">Continue</span>';
 
   const newButton = document.createElement('button');
   const homeButton = document.createElement('button');
 
   newButton.className = 'summary-overlay__button summary-overlay__button--primary';
   newButton.type = 'button';
-  newButton.textContent = 'New Parameters';
+  newButton.innerHTML = '<span class="long-label">New Parameters</span><span class="short-label">New</span>';
 
   homeButton.className = 'summary-overlay__button';
   homeButton.type = 'button';

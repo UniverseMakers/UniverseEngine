@@ -1725,6 +1725,10 @@ button {
   margin-top: 0.75rem;
 }
 
+.short-label {
+  display: none;
+}
+
 .summary-overlay__button {
   flex: 1 1 0;
   padding: 0.95rem 1rem;
@@ -3332,25 +3336,21 @@ button {
 
   .summary-overlay {
     width: 100vw;
-    min-height: 100vh;
-    min-height: 100dvh;
-    height: 100vh;
-    height: 100dvh;
+    height: auto;
+    max-height: none;
+    overflow: visible;
     border-radius: 0;
     border-left: 0;
     border-right: 0;
     padding: calc(2.5rem + env(safe-area-inset-top)) 1rem
       calc(2rem + env(safe-area-inset-bottom));
     background: #080b10;
-    overflow: hidden;
   }
 
   .summary-overlay__content {
-    flex: 1;
-    min-height: 0;
-    overflow: auto;
-    -webkit-overflow-scrolling: touch;
-    overscroll-behavior: contain;
+    flex: none;
+    min-height: unset;
+    overflow-y: visible;
     padding-right: 0.25rem;
   }
 
@@ -3430,7 +3430,17 @@ button {
   }
 
   .summary-overlay__actions {
-    flex-direction: column;
+    flex-direction: row;
+    margin-bottom: 2rem;
+    margin-top: 1.5rem;
+  }
+
+  .short-label {
+    display: inline;
+  }
+
+  .long-label {
+    display: none;
   }
 
   .config-overlay,
