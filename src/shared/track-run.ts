@@ -19,23 +19,12 @@ export function trackRunSelection(payload: TrackRunPayload): void {
 }
 
 function sendTrackingRequest(url: string, payload: TrackRunPayload): void {
-  if (navigator.sendBeacon) {
-    const blob = new Blob([JSON.stringify(payload)], { type: 'application/json' });
-    const sent = navigator.sendBeacon(url, blob);
-
-    if (sent) {
-      logInfo('Run selection tracking dispatched', {
-        simulationId: payload.simulationId,
-      });
-
-      return;
-    }
-  }
+  const body = JSON.stringify(payload);
 
   void fetch(url, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(payload),
+    body,
     keepalive: true,
   })
     .then((response) => {
@@ -49,9 +38,14 @@ function sendTrackingRequest(url: string, payload: TrackRunPayload): void {
       }
     })
     .catch((error) => {
-      logWarn('Run selection tracking failed', {
+      logWarn('Run selection tracking failed, falling back to sendBeacon', {
         simulationId: payload.simulationId,
         error: error instanceof Error ? error.message : String(error),
       });
+
+      if (navigator.sendBeacon) {
+        const blob = new Blob([body], { type: 'text/plain' });
+        navigator.sendBeacon(url, blob);
+      }
     });
 }

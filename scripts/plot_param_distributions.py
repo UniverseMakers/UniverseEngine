@@ -28,11 +28,30 @@ from typing import Any
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 import numpy as np
+from collections import Counter
+from yaml import safe_load
 
 # ── Configuration ───────────────────────────────────────────────────────────
 
 DB_NAME = "universe-engine-db"
 QUERY = "SELECT created_at, simulation_id, parameters_json FROM run_selections ORDER BY created_at ASC"
+
+PARAM_INFO_PATH = Path(__file__).resolve().parent.parent / "src" / "selection" / "parameter-info.yaml"
+_PARAM_INFO_CACHE: dict[str, Any] | None = None
+
+
+def _load_param_info() -> dict[str, Any]:
+    global _PARAM_INFO_CACHE
+    if _PARAM_INFO_CACHE is None:
+        with open(PARAM_INFO_PATH) as f:
+            _PARAM_INFO_CACHE = safe_load(f)
+    return _PARAM_INFO_CACHE
+
+
+def get_quali_labels(family: str, param_name: str) -> list[str] | None:
+    info = _load_param_info().get(family, {}).get(param_name, {})
+    labels = info.get("quali_labels")
+    return list(labels) if labels else None
 
 FAMILY_LABELS: dict[str, str] = {
     "planetary": "Planetary",
@@ -41,9 +60,23 @@ FAMILY_LABELS: dict[str, str] = {
 }
 
 FAMILY_COLORS: dict[str, str] = {
-    "planetary": "#00ff41",
-    "galaxy": "#00bfff",
+    "planetary": "#2ecc71",
+    "galaxy": "#3498db",
     "cosmos": "#e74c3c",
+}
+
+FAMILY_CMAP: dict[str, str] = {
+    "planetary": "Greens",
+    "galaxy": "Blues",
+    "cosmos": "Reds",
+}
+
+# Current expected parameter keys per family — entries with outdated
+# parameter sets are filtered out so distributions stay meaningful.
+EXPECTED_PARAMS: dict[str, frozenset[str]] = {
+    "planetary": frozenset({"impactor_mass", "impactor_velocity", "impactor_angle"}),
+    "galaxy": frozenset({"crowding", "mass_rank"}),
+    "cosmos": frozenset({"baryon_fraction", "black_hole_strength", "gravity_strength"}),
 }
 
 # ── Data fetching ───────────────────────────────────────────────────────────
@@ -81,6 +114,7 @@ def fetch_rows(remote: bool) -> list[dict[str, Any]]:
 def parse_rows(rows: list[dict[str, Any]]) -> dict[str, list[dict[str, Any]]]:
     """Group rows by simulation family, parse JSON parameters and timestamps."""
     by_family: dict[str, list[dict[str, Any]]] = defaultdict(list)
+    discarded = 0
 
     for row in rows:
         family = row["simulation_id"]
@@ -89,8 +123,16 @@ def parse_rows(rows: list[dict[str, Any]]) -> dict[str, list[dict[str, Any]]]:
         except (json.JSONDecodeError, TypeError):
             continue
 
+        expected = EXPECTED_PARAMS.get(family)
+        if expected is not None and not expected.issuperset(params.keys()):
+            discarded += 1
+            continue
+
         ts = datetime.fromisoformat(row["created_at"]).replace(tzinfo=None)
         by_family[family].append({"ts": ts, "params": params})
+
+    if discarded:
+        print(f"  Discarded {discarded} record(s) with outdated parameter sets.")
 
     return dict(by_family)
 
@@ -116,43 +158,205 @@ def save_figure(fig: plt.Figure, out_dir: Path, name: str) -> None:
     print(f"  saved {path}")
 
 
-# ── a) Histogram plots ──────────────────────────────────────────────────────
+# ── a) Corner plots (histograms on diagonal, 2-D histograms off-diagonal) ─
 
 
-def plot_histograms(
+def plot_corner(
     by_family: dict[str, list[dict[str, Any]]],
     out_dir: Path,
 ) -> None:
-    """One figure per simulation family with a histogram subplot per parameter."""
-    print("\nGenerating histogram grids...")
+    """One corner plot per simulation family with 1-D histograms on
+    the diagonal and 2-D histograms in the lower triangle.  Bins use a
+    shared per-parameter edge array so 1-D bars literally sit above the
+    2-D cells they summarise.  All 2-D cells share a single colour scale
+    per figure."""
+    print("\nGenerating corner plots...")
 
     for family, entries in sorted(by_family.items()):
         if not entries:
             continue
 
         param_names = list(entries[0]["params"].keys())
-        fig, axes = setup_figure(len(param_names), f"{FAMILY_LABELS.get(family, family)} — Parameter Distributions")
+        n = len(param_names)
+        if n < 2:
+            fallback_histogram(family, entries, param_names, out_dir)
+            continue
+
         color = FAMILY_COLORS.get(family, "#333333")
+        cmap_name = FAMILY_CMAP.get(family, "viridis")
 
-        for ax, pname in zip(axes, param_names):
-            values = [e["params"].get(pname) for e in entries if pname in e["params"]]
+        # ── Extract values, qualitative labels, and shared bin edges ──
+        values: dict[str, list[float]] = {}
+        quali: dict[str, list[str] | None] = {}
+        edges: dict[str, np.ndarray | None] = {}
 
-            if not values:
-                ax.text(0.5, 0.5, "no data", ha="center", va="center", transform=ax.transAxes)
-                continue
+        for pname in param_names:
+            pv = [e["params"].get(pname) for e in entries if pname in e["params"]]
+            values[pname] = pv
+            lbls = get_quali_labels(family, pname)
+            quali[pname] = lbls
+            if lbls:
+                edges[pname] = np.arange(-0.5, len(lbls) + 0.5, 1)
+            else:
+                nbins = min(30, max(5, len(pv) // 3))
+                edges[pname] = np.histogram_bin_edges(pv, bins=nbins)
 
-            bins = min(30, max(5, len(values) // 3))
-            ax.hist(values, bins=bins, color=color, edgecolor="white", linewidth=0.5, alpha=0.85)
-            ax.set_title(pname, fontsize=10)
-            ax.set_xlabel("value")
-            ax.set_ylabel("count")
+        # ── Figure with tight subplots — share x within each column ──
+        fig, axes = plt.subplots(n, n, figsize=(3 * n + 1, 3 * n),
+                                 sharex="col",
+                                 constrained_layout=False,
+                                 gridspec_kw={"wspace": 0, "hspace": 0})
 
-            mean = np.mean(values)
-            ax.axvline(mean, color="#e74c3c", linestyle="--", linewidth=1, label=f"mean={mean:.3g}")
-            ax.legend(fontsize=8)
+        # ── Compute global 2-D max for a shared colour scale ─────────
+        global_max = 0
+        for i in range(n):
+            for j in range(i):
+                pname_i = param_names[i]
+                pname_j = param_names[j]
+                pairs = [
+                    (e["params"][param_names[j]], e["params"][param_names[i]])
+                    for e in entries
+                    if param_names[j] in e["params"] and param_names[i] in e["params"]
+                ]
+                if not pairs:
+                    continue
+                xv, yv = zip(*pairs)
+                if quali[param_names[j]] and quali[param_names[i]]:
+                    # Qualitative-qualitative: just record the max cell count.
+                    max_in_cell = max(Counter(zip(xv, yv)).values(), default=0)
+                    global_max = max(global_max, max_in_cell)
+                else:
+                    hist, _, _ = np.histogram2d(
+                        list(xv), list(yv),
+                        bins=[edges[param_names[j]], edges[param_names[i]]],
+                    )
+                    global_max = max(global_max, hist.max())
 
-        fig.tight_layout()
-        save_figure(fig, out_dir, f"histogram_{family}.png")
+        norm = plt.Normalize(vmin=0, vmax=max(global_max, 1))
+
+        # ── Build each cell ──────────────────────────────────────────
+        for i in range(n):
+            for j in range(n):
+                ax = axes[i, j]
+                pname_i = param_names[i]
+                pname_j = param_names[j]
+
+                if i == j:
+                    # Diagonal: 1-D histogram, y-axis on the right.
+                    lbls = quali[pname_i]
+                    e = edges[pname_i]
+                    if lbls:
+                        counts = Counter(values[pname_i])
+                        x = list(range(len(lbls)))
+                        y = [counts.get(k, 0) for k in x]
+                        ax.bar(x, y, width=1, color=color,
+                               edgecolor="white", linewidth=0.5, alpha=0.85)
+                        ax.set_xticks(x)
+                        ax.set_xticklabels(lbls, fontsize=7,
+                                           rotation=30, ha="right")
+                    else:
+                        ax.hist(values[pname_i], bins=e, color=color,
+                                edgecolor="white", linewidth=0.5, alpha=0.85)
+                        ax.margins(x=0)
+                    ax.yaxis.set_visible(False)
+                elif i > j:
+                    # Lower triangle: 2-D histogram.
+                    pairs = [
+                        (e["params"][param_names[j]], e["params"][param_names[i]])
+                        for e in entries
+                        if param_names[j] in e["params"] and param_names[i] in e["params"]
+                    ]
+                    if not pairs:
+                        continue
+                    xv, yv = zip(*pairs)
+                    x_lbls = quali[param_names[j]]
+                    y_lbls = quali[param_names[i]]
+                    x_e = edges[param_names[j]]
+                    y_e = edges[param_names[i]]
+
+                    if x_lbls and y_lbls:
+                        counts = Counter(zip(xv, yv))
+                        nx, ny = len(x_lbls), len(y_lbls)
+                        grid = np.zeros((ny, nx))
+                        for (xi, yi), c in counts.items():
+                            grid[yi, xi] = c
+                        ax.imshow(grid, origin="lower", aspect="auto",
+                                   cmap=cmap_name, norm=norm)
+                        ax.set_xticks(range(nx))
+                        ax.set_xticklabels(x_lbls, fontsize=6,
+                                           rotation=30, ha="right")
+                        ax.set_yticks(range(ny))
+                        ax.set_yticklabels(y_lbls, fontsize=6)
+                        for yi in range(ny):
+                            for xi in range(nx):
+                                if grid[yi, xi] > 0:
+                                    ax.text(xi, yi, int(grid[yi, xi]),
+                                            ha="center", va="center",
+                                            fontsize=7)
+                    else:
+                        hist, _, _ = np.histogram2d(
+                            list(xv), list(yv), bins=[x_e, y_e],
+                        )
+                        ax.pcolormesh(x_e, y_e, hist.T, cmap=cmap_name,
+                                   norm=norm, edgecolors="white",
+                                   linewidth=0.3)
+                        ax.tick_params(labelsize=7)
+                else:
+                    ax.set_visible(False)
+
+                # Tick visibility: only outer edges get labels.
+                if j > 0:
+                    ax.tick_params(axis="y", labelleft=False)
+                if i < n - 1:
+                    ax.tick_params(axis="x", labelbottom=False)
+
+                if j == 0:
+                    ax.set_ylabel(pname_i, fontsize=8)
+                if i == n - 1:
+                    ax.set_xlabel(param_names[j], fontsize=8)
+
+        # ── Single colourbar for all 2-D cells ───────────────────────
+        fig.subplots_adjust(right=0.85)
+        br_ax = axes[n - 1, n - 1]
+        br_pos = br_ax.get_position()
+        cbar_ax = fig.add_axes([0.88, br_pos.y0, 0.02, br_pos.height])
+        fig.colorbar(
+            plt.cm.ScalarMappable(norm=norm, cmap=cmap_name),
+            cax=cbar_ax,
+        )
+
+        save_figure(fig, out_dir, f"corner_{family}.png")
+
+
+def fallback_histogram(
+    family: str,
+    entries: list[dict[str, Any]],
+    param_names: list[str],
+    out_dir: Path,
+) -> None:
+    """Single 1-D histogram for families with only one parameter."""
+    fig, ax = plt.subplots(figsize=(5, 4))
+    color = FAMILY_COLORS.get(family, "#333333")
+    pname = param_names[0]
+    values = [e["params"].get(pname) for e in entries if pname in e["params"]]
+    quali_labels = get_quali_labels(family, pname)
+
+    if quali_labels:
+        counts = Counter(values)
+        x = list(range(len(quali_labels)))
+        y = [counts.get(i, 0) for i in x]
+        ax.bar(x, y, color=color, edgecolor="white", linewidth=0.5, alpha=0.85)
+        ax.set_xticks(x)
+        ax.set_xticklabels(quali_labels, fontsize=8)
+    else:
+        bins = min(30, max(5, len(values) // 3))
+        ax.hist(values, bins=bins, color=color, edgecolor="white", linewidth=0.5, alpha=0.85)
+
+    ax.set_title(f"{FAMILY_LABELS.get(family, family)} — {pname}", fontsize=12)
+    ax.set_xlabel(pname, fontsize=10)
+    ax.set_ylabel("count", fontsize=10)
+    fig.tight_layout()
+    save_figure(fig, out_dir, f"corner_{family}.png")
 
 
 # ── b) Time-series diagnostics ──────────────────────────────────────────────
@@ -198,15 +402,11 @@ def plot_time_series(
 
             ax.scatter(t_vals, values, s=12, color=color, alpha=0.5, edgecolors="none")
 
-            # Rolling mean
-            window = max(5, len(values) // 10)
-            if len(values) >= window:
-                rolling = np.convolve(values, np.ones(window) / window, mode="valid")
-                ax.plot(t_vals[window - 1:], rolling, color="#e74c3c", linewidth=1.5, label=f"rolling mean (n={window})")
-
             ax.set_title(pname, fontsize=10)
-            ax.xaxis.set_major_formatter(mdates.DateFormatter("%m-%d\n%H:%M"))
-            ax.legend(fontsize=7)
+            ax.xaxis.set_major_locator(mdates.AutoDateLocator(maxticks=8))
+            ax.xaxis.set_major_formatter(mdates.DateFormatter("%b %d"))
+            plt.setp(ax.get_xticklabels(), rotation=20, ha="right")
+            ax.grid(True, which="major", linestyle="--", alpha=0.3)
 
         fig.tight_layout()
         save_figure(fig, out_dir, f"timeseries_{family}.png")
@@ -241,7 +441,9 @@ def plot_runs_per_day(
     ax.set_ylabel("runs")
     ax.grid(True, linestyle='--', alpha=0.7)
     ax.legend(fontsize=9)
+    ax.xaxis.set_major_locator(mdates.AutoDateLocator(maxticks=8))
     ax.xaxis.set_major_formatter(mdates.DateFormatter("%b %d"))
+    plt.setp(ax.get_xticklabels(), rotation=20, ha="right")
     fig.tight_layout()
     save_figure(fig, out_dir, "runs_per_day.png")
 
@@ -271,7 +473,9 @@ def plot_cumulative_runs(
     ax.set_ylabel("total runs")
     ax.grid(True, linestyle='--', alpha=0.7)
     ax.legend(fontsize=9)
+    ax.xaxis.set_major_locator(mdates.AutoDateLocator(maxticks=8))
     ax.xaxis.set_major_formatter(mdates.DateFormatter("%b %d"))
+    plt.setp(ax.get_xticklabels(), rotation=20, ha="right")
     fig.tight_layout()
     save_figure(fig, out_dir, "cumulative_runs.png")
 
@@ -319,7 +523,7 @@ def main() -> None:
 
     out_dir = args.out
     plot_overview(by_family, out_dir)
-    plot_histograms(by_family, out_dir)
+    plot_corner(by_family, out_dir)
     plot_time_series(by_family, out_dir)
     plot_runs_per_day(by_family, out_dir)
     plot_cumulative_runs(by_family, out_dir)
