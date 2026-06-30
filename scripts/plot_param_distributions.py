@@ -239,6 +239,7 @@ def plot_runs_per_day(
 
     ax.set_title("Runs Per Day", fontsize=12, fontweight="bold")
     ax.set_ylabel("runs")
+    ax.grid(True, linestyle='--', alpha=0.7)
     ax.legend(fontsize=9)
     ax.xaxis.set_major_formatter(mdates.DateFormatter("%b %d"))
     fig.tight_layout()
