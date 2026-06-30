@@ -43,4 +43,4 @@ export const ONLINE_MANIFEST_BACKUP_URL =
  */
 export const TRACKING_API_URL = import.meta.env.DEV
   ? '/api/track-run'
-  : 'https://universe-engine.universe-engine.workers.dev/api/track-run';
+  : 'https://api.universemakers.org/api/track-run';
