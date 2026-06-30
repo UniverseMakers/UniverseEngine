@@ -25,6 +25,7 @@ from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 DEFAULT_DB = REPO_ROOT / "local_tracking.db"
+ARCHIVE_DB = REPO_ROOT / "synced_tracking.db"
 DB_NAME = "universe-engine-db"
 BATCH_SIZE = 50
 
@@ -41,11 +42,6 @@ def parse_args() -> argparse.Namespace:
         "--dry-run",
         action="store_true",
         help="Print what would be synced without touching D1",
-    )
-    parser.add_argument(
-        "--no-clear",
-        action="store_true",
-        help="Do not delete local records after syncing",
     )
     return parser.parse_args()
 
@@ -98,6 +94,21 @@ def main() -> None:
         conn.close()
         return
 
+    # Initialize Archive
+    archive_conn = sqlite3.connect(str(ARCHIVE_DB))
+    archive_conn.execute("""
+        CREATE TABLE IF NOT EXISTS run_selections (
+          id INTEGER PRIMARY KEY,
+          created_at TEXT NOT NULL,
+          simulation_id TEXT NOT NULL,
+          parameters_json TEXT NOT NULL,
+          manifest_source TEXT NOT NULL,
+          matched_run_id TEXT,
+          asset_host_mode TEXT,
+          asset_host_base TEXT
+        );
+    """)
+
     print(f"Found {len(rows)} local record(s) to sync.\n")
 
     if args.dry_run:
@@ -124,26 +135,36 @@ def main() -> None:
             label = f"Batch {i - len(batch) + 1}–{i} ({len(batch)} records)"
             print(f"  {label}")
             if run_wrangler(sql, args.dry_run):
-                if not args.no_clear and not args.dry_run:
+                if not args.dry_run:
+                    # Archive
+                    for j in range(i - len(batch), i):
+                        r = rows[j]
+                        archive_conn.execute(
+                            "INSERT OR IGNORE INTO run_selections VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+                            (r['id'], r['created_at'], r['simulation_id'], r['parameters_json'], r['manifest_source'], r['matched_run_id'], r['asset_host_mode'], r['asset_host_base'])
+                        )
+                    # Delete
                     for rid in synced_ids[-len(batch):]:
                         conn.execute("DELETE FROM run_selections WHERE id = ?", (rid,))
+                    archive_conn.commit()
                     conn.commit()
             else:
                 print(f"  Sync failed at batch starting record {synced_ids[-len(batch)]}. "
                       "Local records preserved.", file=sys.stderr)
                 conn.close()
+                archive_conn.close()
                 sys.exit(1)
             batch = []
 
-    if not args.dry_run and not args.no_clear:
+    if not args.dry_run:
         remaining = conn.execute("SELECT COUNT(*) FROM run_selections").fetchone()[0]
-        print(f"\n  Cleared synced records. {remaining} record(s) remain locally.")
-    elif args.no_clear:
-        print(f"\n  Sync complete. {len(synced_ids)} record(s) kept locally (--no-clear).")
+        print(f"\n  Sync complete. Archived to {ARCHIVE_DB}. {remaining} record(s) remain locally.")
     else:
-        print(f"\n  [DRY-RUN] {len(synced_ids)} record(s) would be synced and cleared.")
+        print(f"\n  [DRY-RUN] {len(synced_ids)} record(s) would be synced, archived, and cleared.")
 
     conn.close()
+    archive_conn.close()
+
 
 
 if __name__ == "__main__":

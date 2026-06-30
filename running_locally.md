@@ -209,14 +209,13 @@ npm run tracking:sync
 ```
 
 This reads every row from `local_tracking.db`, inserts them into the remote
-D1 `run_selections` table in batches, and deletes the synced records from the
-local database.
+D1 `run_selections` table in batches, archives the successfully synced records to
+`synced_tracking.db`, and deletes them from the local database.
 
 Options:
 
 ```bash
 npm run tracking:sync -- --dry-run   # preview without touching D1
-npm run tracking:sync -- --no-clear  # upload but keep local records
 ```
 
 ## Troubleshooting
