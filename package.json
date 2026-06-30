@@ -21,6 +21,7 @@
     "setup:local": "python3 scripts/download_engine_assets.py && python3 scripts/generate_run_manifest.py --local",
     "tracking:server": "python3 scripts/local_tracking_server.py",
     "tracking:sync": "python3 scripts/sync_tracking_to_d1.py",
+    "tracking:sync-dev": "python3 scripts/sync_dev_databases.py",
     "format": "prettier --write \"src/**/*.{ts,css,yaml,yml}\" \"*.{md,json}\"",
     "format:check": "prettier --check \"src/**/*.{ts,css,yaml,yml}\" \"*.{md,json}\""
   },

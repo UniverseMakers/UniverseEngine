@@ -12,6 +12,12 @@ const VALID_MANIFEST_SOURCES = new Set(['local', 'online']);
 const VALID_ASSET_HOST_MODES = new Set(['local', 'primary', 'backup']);
 const MAX_PARAMETER_COUNT = 16;
 
+const CORS_HEADERS = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Methods': 'POST, OPTIONS',
+  'Access-Control-Allow-Headers': 'Content-Type',
+};
+
 function isValidPayload(body: unknown): body is RunSelectionPayload {
   if (typeof body !== 'object' || body === null) {
     return false;
@@ -61,13 +67,17 @@ export default {
     const url = new URL(request.url);
 
     if (url.pathname !== '/api/track-run') {
-      return new Response('Not found', { status: 404 });
+      return new Response('Not found', { status: 404, headers: CORS_HEADERS });
+    }
+
+    if (request.method === 'OPTIONS') {
+      return new Response(null, { status: 204, headers: CORS_HEADERS });
     }
 
     if (request.method !== 'POST') {
       return new Response('Method not allowed', {
         status: 405,
-        headers: { Allow: 'POST' },
+        headers: { ...CORS_HEADERS, Allow: 'POST' },
       });
     }
 
@@ -76,11 +86,11 @@ export default {
     try {
       body = await request.json();
     } catch {
-      return new Response('Invalid JSON', { status: 400 });
+      return new Response('Invalid JSON', { status: 400, headers: CORS_HEADERS });
     }
 
     if (!isValidPayload(body)) {
-      return new Response('Invalid payload', { status: 400 });
+      return new Response('Invalid payload', { status: 400, headers: CORS_HEADERS });
     }
 
     const {
@@ -109,10 +119,10 @@ export default {
     } catch (error) {
       console.error('Failed to insert run selection', error);
 
-      return new Response('Internal server error', { status: 500 });
+      return new Response('Internal server error', { status: 500, headers: CORS_HEADERS });
     }
 
-    return new Response(null, { status: 204 });
+    return new Response(null, { status: 204, headers: CORS_HEADERS });
   },
 };
 

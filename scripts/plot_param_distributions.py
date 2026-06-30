@@ -89,7 +89,7 @@ def parse_rows(rows: list[dict[str, Any]]) -> dict[str, list[dict[str, Any]]]:
         except (json.JSONDecodeError, TypeError):
             continue
 
-        ts = datetime.fromisoformat(row["created_at"])
+        ts = datetime.fromisoformat(row["created_at"]).replace(tzinfo=None)
         by_family[family].append({"ts": ts, "params": params})
 
     return dict(by_family)
@@ -246,6 +246,36 @@ def plot_runs_per_day(
     save_figure(fig, out_dir, "runs_per_day.png")
 
 
+def plot_cumulative_runs(
+    by_family: dict[str, list[dict[str, Any]]],
+    out_dir: Path,
+) -> None:
+    """Single figure with one line per simulation family showing cumulative counts over time."""
+    print("\nGenerating cumulative runs...")
+
+    fig, ax = plt.subplots(figsize=(12, 5))
+
+    for family, entries in sorted(by_family.items()):
+        color = FAMILY_COLORS.get(family, "#333333")
+        label = FAMILY_LABELS.get(family, family)
+        timestamps = sorted(e["ts"] for e in entries)
+
+        if not timestamps:
+            continue
+
+        counts = list(range(1, len(timestamps) + 1))
+        ax.step(timestamps, counts, where="post", color=color,
+                linewidth=1.5, label=label)
+
+    ax.set_title("Cumulative Runs Over Time", fontsize=12, fontweight="bold")
+    ax.set_ylabel("total runs")
+    ax.grid(True, linestyle='--', alpha=0.7)
+    ax.legend(fontsize=9)
+    ax.xaxis.set_major_formatter(mdates.DateFormatter("%b %d"))
+    fig.tight_layout()
+    save_figure(fig, out_dir, "cumulative_runs.png")
+
+
 def plot_overview(by_family: dict[str, list[dict[str, Any]]], out_dir: Path) -> None:
     """Single overview figure: total runs per family bar chart."""
     print("\nGenerating overview...")
@@ -292,6 +322,7 @@ def main() -> None:
     plot_histograms(by_family, out_dir)
     plot_time_series(by_family, out_dir)
     plot_runs_per_day(by_family, out_dir)
+    plot_cumulative_runs(by_family, out_dir)
 
     print(f"\nDone. Figures saved to {out_dir.resolve()}/")
 

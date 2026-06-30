@@ -48,6 +48,7 @@ def main() -> None:
     args = parse_args()
 
     if not args.skip_setup:
+        run_checked(["python3", "scripts/sync_dev_databases.py"])
         run_checked(["python3", "scripts/sync_tracking_to_d1.py"])
         ensure_local_setup(force_refresh=args.refresh_assets)
 
