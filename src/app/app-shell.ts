@@ -1027,6 +1027,9 @@ export function createAppShell(app: HTMLElement): void {
    */
   function openConfigPanel(view: OverlayPanelView): void {
     if (view === 'parameters') {
+      viewport.hideMedia();
+      viewport.pause();
+      viewport.clearSource();
       overlayPanel.setSimulation(activeClass, getActiveValues());
     }
 

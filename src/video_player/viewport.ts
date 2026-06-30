@@ -41,6 +41,9 @@ export interface ViewportController {
   /** Visually hide the media element while keeping it mounted. */
   hideMedia: () => void;
 
+  /** Clear the media element source. */
+  clearSource: () => void;
+
   /** Reveal the media element again. */
   showMedia: () => void;
 
@@ -275,6 +278,12 @@ export function createViewport(
 
   function hideMedia(): void {
     video.classList.add('is-empty');
+  }
+
+  function clearSource(): void {
+    video.removeAttribute('src');
+    video.load();
+    lastFrameDataUrl = null;
   }
 
   function showMedia(): void {
@@ -597,6 +606,7 @@ export function createViewport(
     play,
     pause,
     hideMedia,
+    clearSource,
     showMedia,
     seekToFraction,
     resetPlayback,
