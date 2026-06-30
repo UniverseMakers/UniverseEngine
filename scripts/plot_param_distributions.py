@@ -43,7 +43,7 @@ FAMILY_LABELS: dict[str, str] = {
 FAMILY_COLORS: dict[str, str] = {
     "planetary": "#00ff41",
     "galaxy": "#00bfff",
-    "cosmos": "#ff6b35",
+    "cosmos": "#e74c3c",
 }
 
 # ── Data fetching ───────────────────────────────────────────────────────────
