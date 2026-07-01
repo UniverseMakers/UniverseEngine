@@ -37,6 +37,11 @@ def parse_args() -> argparse.Namespace:
         help="Skip asset download/manifest generation checks.",
     )
     parser.add_argument(
+        "--sync",
+        action="store_true",
+        help="Enable tracking database syncs (disabled by default).",
+    )
+    parser.add_argument(
         "--mode",
         default="localmanifest",
         help="Vite mode to use (default: localmanifest).",
@@ -47,9 +52,11 @@ def parse_args() -> argparse.Namespace:
 def main() -> None:
     args = parse_args()
 
-    if not args.skip_setup:
+    if args.sync:
         run_checked(["python3", "scripts/sync_dev_databases.py"])
         run_checked(["python3", "scripts/sync_tracking_to_d1.py"])
+
+    if not args.skip_setup:
         ensure_local_setup(force_refresh=args.refresh_assets)
 
     tracking_process = start_tracking_server_if_needed()
