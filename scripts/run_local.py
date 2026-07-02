@@ -17,7 +17,6 @@ import sys
 import time
 from pathlib import Path
 
-
 REPO_ROOT = Path(__file__).resolve().parent.parent
 LOCAL_MANIFEST = REPO_ROOT / "public" / "assets" / "local-manifest.json"
 TRACKING_HOST = "127.0.0.1"
@@ -91,7 +90,9 @@ def ensure_local_setup(*, force_refresh: bool) -> None:
 
 def start_tracking_server_if_needed() -> subprocess.Popen[str] | None:
     if is_port_open(TRACKING_HOST, TRACKING_PORT):
-        print(f"Using existing tracking server on http://{TRACKING_HOST}:{TRACKING_PORT}")
+        print(
+            f"Using existing tracking server on http://{TRACKING_HOST}:{TRACKING_PORT}"
+        )
         return None
 
     print("Starting local tracking server...")
@@ -104,7 +105,9 @@ def start_tracking_server_if_needed() -> subprocess.Popen[str] | None:
     deadline = time.monotonic() + 5.0
     while time.monotonic() < deadline:
         if process.poll() is not None:
-            raise SystemExit(f"Tracking server exited early with code {process.returncode}")
+            raise SystemExit(
+                f"Tracking server exited early with code {process.returncode}"
+            )
         if is_port_open(TRACKING_HOST, TRACKING_PORT):
             print(f"Tracking server ready on http://{TRACKING_HOST}:{TRACKING_PORT}")
             return process
