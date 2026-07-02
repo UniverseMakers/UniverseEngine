@@ -3608,9 +3608,13 @@ button {
     opacity: 0.85;
   }
 
-  .config-overlay__section--grow,
-  .terminal__log {
+  .config-overlay__section--grow {
     overflow: visible;
+    min-height: unset;
+  }
+
+  .terminal__log {
+    overflow: auto;
     min-height: unset;
   }
 
