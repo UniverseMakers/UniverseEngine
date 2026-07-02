@@ -14,8 +14,8 @@ planetary:
     label: Impactor Mass
     description: How big was the object that smashed into the young Earth?  A more massive impactor could spray out more debris — and perhaps result in a bigger Moon.
     unit: Earth masses
-    min: 0.01
-    max: 0.35
+    min: 0.03
+    max: 0.37
     step: 0.01
     primary: false
   impactor_velocity:
@@ -31,7 +31,7 @@ planetary:
     description: Was the impact head-on, or grazing at a high angle?  A direct hit blasts material straight out, while a sideswipe can spray the debris out into a disk, or even escape as a hit and run.
     unit: °
     min: 0
-    max: 65
+    max: 63
     step: 1
     primary: true
 
