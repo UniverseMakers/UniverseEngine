@@ -198,22 +198,26 @@ cosmos:
       display_format: integer
       description: How many galaxy-sized dark matter halos (above 10 billion solar masses) your universe managed to build.
   simulationStats:
+    - id: simulationVolume
+      label: Simulation Volume
+      value: '--'
+      description: The volume of this chunk of the universe.  When we run simulations we have to limit to a fixed volume of the universe that includes enough of what we want to study, while making sure the simulation doesn't become too costly.  We tend to describe this in terms of the length along a side, e.g. 25 Mpc/81.5M light years.
     - id: stellar_mass_msun
       label: Stellar mass formed
       value: '--'
       unit: Msun
       display_format: compact
       precision: 3
-      description: How much star-stuff your universe managed to cook up across all of cosmic history.
+      description: How much "star-stuff" your chunk of the universe managed to cook up across all of cosmic history.  In our Universe we would expect roughly 4.8 trillion Msun of stellar mass in this volume of the universe.
     - id: number_of_black_holes
       label: Black holes formed
       value: '--'
       display_format: integer
-      description: How many black holes popped into existence over the course of your universe.
+      description: How many black holes popped into existence over the course of your chunk of the universe's evolution.  In our Universe we would expect roughly 4,800 black holes in this volume of the universe.
     - id: particlesUpdated
       label: Particles updated
       value: '--'
-      display_format: integer
-      description: The sheer number of moving pieces the simulation had to keep track of every single frame.
+      display_format: compact
+      description: The sheer number of moving pieces the simulation had to keep track of every single frame.  In our Universe we would expect roughly 19.1 billion particle updates in this volume of the universe.
   similarityScore:
     value: '--'

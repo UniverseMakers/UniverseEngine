@@ -134,6 +134,10 @@ export function buildSummaryMetricMap(
     carbonBurnt: { label: 'Carbon Burnt', value: carbonKg },
     computeUsed: { label: 'Compute Used', value: computeProfile },
     memoryUsed: { label: 'Memory Used', value: formatCompactNumber(memoryGb, 1) },
+    simulationVolume: {
+      label: 'Simulation Volume',
+      value: '25³ Mpc³\n81.5M³ ly³',
+    },
     particlesUpdated: {
       label: 'Particle updates',
       value: runMetadata ? formatCount(runMetadata.particlesUpdated) : '--',

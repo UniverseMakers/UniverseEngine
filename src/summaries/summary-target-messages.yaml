@@ -29,26 +29,26 @@ planetary:
 
 cosmos:
   stellar_fraction:
-    greenLow: Very close.  Your universe locked just a slightly smaller fraction of its mass into stars than ours.
-    greenHigh: Very close.  Your universe locked just a slightly larger fraction of its mass into stars than ours.
-    amberLow: A bit low.  Your universe turned less of its raw material into stars, leaving it a bit darker and emptier.
-    amberHigh: A bit high.  Your universe was a bit more efficient at forging gas into stars than our own.
-    redLow: Far too low.  Your universe struggled to form stars — most of the mass is still drifting around as gas.
-    redHigh: Far too high.  Your universe is bursting with stars — it converted far more mass into starlight than ours.
+    greenLow: Very close.  Your universe locked just a slightly smaller fraction of its mass into stars than ours.  In our Universe roughly 0.79% of the mass ended up locked inside stars.
+    greenHigh: Very close.  Your universe locked just a slightly larger fraction of its mass into stars than ours.  In our Universe roughly 0.79% of the mass ended up locked inside stars.
+    amberLow: A bit low.  Your universe turned less of its raw material into stars, leaving it a bit darker and emptier.  In our Universe roughly 0.79% of the mass ended up locked inside stars.
+    amberHigh: A bit high.  Your universe was a bit more efficient at forging gas into stars than our own.  In our Universe roughly 0.79% of the mass ended up locked inside stars.
+    redLow: Far too low.  Your universe struggled to form stars — most of the mass is still drifting around as gas.  In our Universe roughly 0.79% of the mass ended up locked inside stars.
+    redHigh: Far too high.  Your universe is bursting with stars — it converted far more mass into starlight than ours.  In our Universe roughly 0.79% of the mass ended up locked inside stars.
   average_temperature_kelvin:
-    greenLow: Very close.  The gas in your universe is just a shade cooler than in ours.
-    greenHigh: Very close.  The gas in your universe is just a shade warmer than in ours.
-    amberLow: A bit cool.  Your gas is cooler than expected — less energetic feedback from black holes and supernovae heating things up.
-    amberHigh: A bit hot.  Your gas is warmer than average — more energetic black holes and stars are heating up the cosmos.
-    redLow: Far too cool.  The gas in your universe is very cold — there is barely any energetic feedback happening at all.
-    redHigh: Far too hot.  The gas is scorching — black holes and stars are pumping so much energy that normal galaxy growth is disrupted.
+    greenLow: Very close.  The gas in your universe is just a shade cooler than in ours.  In our Universe the average gas temperature is roughly 902,000 K.
+    greenHigh: Very close.  The gas in your universe is just a shade warmer than in ours.  In our Universe the average gas temperature is roughly 902,000 K.
+    amberLow: A bit cool.  Your gas is cooler than expected — less energetic feedback from black holes and supernovae heating things up.  In our Universe the average gas temperature is roughly 902,000 K.
+    amberHigh: A bit hot.  Your gas is warmer than average — more energetic black holes and stars are heating up the cosmos.  In our Universe the average gas temperature is roughly 902,000 K.
+    redLow: Far too cool.  The gas in your universe is very cold — there is barely any energetic feedback happening at all.  In our Universe the average gas temperature is roughly 902,000 K.
+    redHigh: Far too hot.  The gas is scorching — black holes and stars are pumping so much energy that normal galaxy growth is disrupted.  In our Universe the average gas temperature is roughly 902,000 K.
   nhalos:
-    greenLow: Very close.  Your universe built just a fraction fewer galaxy-sized dark matter halos than ours.
-    greenHigh: Very close.  Your universe built just a fraction more galaxy-sized dark matter halos than ours.
-    amberLow: A bit low.  Fewer galaxy-sized dark matter clumps formed — your universe needed a bit more time or stronger gravity to pull them together.
-    amberHigh: A bit high.  More galaxy-sized dark matter clumps popped up than in ours — structure formation was a little more eager.
-    redLow: Far too low.  Very few galaxy halos managed to form — structures barely clumped together.
-    redHigh: Far too high.  Galaxy halos are everywhere — your universe is absolutely teeming with dark matter structures.
+    greenLow: Very close.  Your universe built just a fraction fewer galaxy-sized dark matter halos than ours.  In our Universe roughly 1,600 galaxy halos form in this volume.
+    greenHigh: Very close.  Your universe built just a fraction more galaxy-sized dark matter halos than ours.  In our Universe roughly 1,600 galaxy halos form in this volume.
+    amberLow: A bit low.  Fewer galaxy-sized dark matter clumps formed — your universe needed a bit more time or stronger gravity to pull them together.  In our Universe roughly 1,600 galaxy halos form in this volume.
+    amberHigh: A bit high.  More galaxy-sized dark matter clumps popped up than in ours — structure formation was a little more eager.  In our Universe roughly 1,600 galaxy halos form in this volume.
+    redLow: Far too low.  Very few galaxy halos managed to form — structures barely clumped together.  In our Universe roughly 1,600 galaxy halos form in this volume.
+    redHigh: Far too high.  Galaxy halos are everywhere — your universe is absolutely teeming with dark matter structures.  In our Universe roughly 1,600 galaxy halos form in this volume.
 
 # Unused! Galaxy uses a scavenger hunt checklist instead of similarity bars
 galaxy:
