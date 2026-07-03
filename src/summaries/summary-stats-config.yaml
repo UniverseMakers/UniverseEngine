@@ -213,7 +213,7 @@ cosmos:
       label: Black holes formed
       value: '--'
       display_format: integer
-      description: How many black holes popped into existence over the course of your chunk of the universe's evolution.  In our Universe we would expect roughly 4,800 black holes in this volume of the universe.
+      description: How many supermassive black holes with masses greater than 50k Msun popped into existence over the course of your chunk of the universe's evolution.  In our Universe we would expect roughly 4,800 black holes in this volume of the universe.
     - id: particlesUpdated
       label: Particles updated
       value: '--'
