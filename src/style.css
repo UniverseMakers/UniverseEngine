@@ -436,14 +436,17 @@ button {
   display: flex;
   align-items: center;
   gap: 0.83rem;
+  width: 100%;
   padding: 0.99rem 0.94rem;
   border: 0;
   background: transparent;
   color: var(--text-primary);
+  cursor: pointer;
   font-family: var(--font-mono);
   font-size: 0.79rem;
   letter-spacing: 0.2em;
   text-align: left;
+  text-decoration: none;
   text-transform: uppercase;
   transition:
     background 0.16s ease,

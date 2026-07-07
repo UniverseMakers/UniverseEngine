@@ -89,6 +89,10 @@ export function createDisplayMenu(
     }),
   );
 
+  menu.appendChild(
+    createMenuLink('More Info', 'https://universemakers.org/'),
+  );
+
   const fullscreenButton = createMenuButton('Fullscreen', () => {
     close();
     if (document.fullscreenElement) {
@@ -163,6 +167,19 @@ export function createDisplayMenu(
     button.addEventListener('click', onClick);
 
     return button;
+  }
+
+  function createMenuLink(label: string, href: string): HTMLAnchorElement {
+    const link = document.createElement('a');
+
+    link.className = 'display-menu__item';
+    link.href = href;
+    link.innerHTML = `
+      <span class="display-menu__item-mark"></span>
+      <span class="display-menu__item-label">${label}</span>
+    `;
+
+    return link;
   }
 
   /**
