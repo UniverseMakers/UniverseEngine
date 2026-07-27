@@ -26,6 +26,9 @@
 - text: Forward modelling done with Synthesizer
   url: https://synthesizer-project.github.io/synthesizer/#
 
+- text: Sonifications developed with STRAUSS (Trayford et al. 2025)
+  url: https://strauss.readthedocs.io/en/latest/
+
 - text: 'Moon formation simulations by Jacob Kegerreis, Ella Buxton, Harrison Davies, Vince Eke, Callum Mosley'
 
 - text: 'Galaxy formation simulations by Kyle Oman, Diego Dado, Isabel Santos, James Trayford, Owen Jessop, Will Roper, + The COLIBRE Team'
