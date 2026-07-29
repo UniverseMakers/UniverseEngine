@@ -27,6 +27,8 @@ from typing import Any
 
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
+import matplotlib.ticker as mticker
+from matplotlib.colors import LogNorm
 import numpy as np
 from collections import Counter
 from yaml import safe_load
@@ -52,6 +54,165 @@ def get_quali_labels(family: str, param_name: str) -> list[str] | None:
     info = _load_param_info().get(family, {}).get(param_name, {})
     labels = info.get("quali_labels")
     return list(labels) if labels else None
+
+
+def get_param_info(family: str, param_name: str) -> dict[str, Any]:
+    return _load_param_info().get(family, {}).get(param_name, {})
+
+
+def get_param_label(family: str, param_name: str) -> str:
+    info = get_param_info(family, param_name)
+    label = info.get("label", param_name.replace("_", " "))
+    unit = info.get("unit")
+    if unit:
+        return f"{label} [{unit}]"
+    return str(label)
+
+
+def is_log_param(family: str, param_name: str) -> bool:
+    return bool(get_param_info(family, param_name).get("log_scale"))
+
+
+def get_value_scale(family: str, param_name: str) -> float:
+    return float(get_param_info(family, param_name).get("value_scale", 1.0) or 1.0)
+
+
+def scale_parameter_value(family: str, param_name: str, value: float) -> float:
+    if get_quali_labels(family, param_name):
+        return float(round(value))
+    return float(value) * get_value_scale(family, param_name)
+
+
+def scaled_parameter_range(family: str, param_name: str) -> tuple[float, float]:
+    info = get_param_info(family, param_name)
+    scale = get_value_scale(family, param_name)
+    return float(info["min"]) * scale, float(info["max"]) * scale
+
+
+def get_parameter_edges(family: str, param_name: str) -> np.ndarray:
+    labels = get_quali_labels(family, param_name)
+    if labels:
+        return np.arange(-0.5, len(labels) + 0.5, 1)
+
+    info = get_param_info(family, param_name)
+    min_value, max_value = scaled_parameter_range(family, param_name)
+
+    if is_log_param(family, param_name):
+        return np.geomspace(min_value, max_value, 21)
+
+    return np.linspace(min_value, max_value, 21)
+
+
+def to_plot_space(family: str, param_name: str, value: float) -> float:
+    return scale_parameter_value(family, param_name, value)
+
+
+def configure_axis(
+    ax: plt.Axes,
+    family: str,
+    param_name: str,
+    axis: str,
+    show_label: bool = True,
+) -> None:
+    labels = get_quali_labels(family, param_name)
+    if labels:
+        setter = ax.set_xticks if axis == "x" else ax.set_yticks
+        label_setter = ax.set_xticklabels if axis == "x" else ax.set_yticklabels
+        setter(range(len(labels)))
+        label_setter(labels, fontsize=7, rotation=45 if axis == "x" else 0,
+                     ha="right" if axis == "x" else "right")
+        if axis == "x":
+            ax.set_xlim(-0.5, len(labels) - 0.5)
+        else:
+            ax.set_ylim(-0.5, len(labels) - 0.5)
+    elif is_log_param(family, param_name):
+        min_value, max_value = scaled_parameter_range(family, param_name)
+        tick_min = int(np.ceil(np.log10(min_value)))
+        tick_max = int(np.floor(np.log10(max_value)))
+        ticks = [10 ** exponent for exponent in range(tick_min, tick_max + 1)]
+        if min_value not in ticks:
+            ticks.insert(0, min_value)
+
+        if axis == "x":
+            ax.set_xscale("log")
+            ax.set_xlim(min_value, max_value)
+            ax.xaxis.set_major_locator(mticker.FixedLocator(ticks))
+            ax.xaxis.set_major_formatter(mticker.LogFormatterMathtext())
+            ax.xaxis.set_minor_formatter(mticker.NullFormatter())
+        else:
+            ax.set_yscale("log")
+            ax.set_ylim(min_value, max_value)
+            ax.yaxis.set_major_locator(mticker.FixedLocator(ticks))
+            ax.yaxis.set_major_formatter(mticker.LogFormatterMathtext())
+            ax.yaxis.set_minor_formatter(mticker.NullFormatter())
+    else:
+        locator = mticker.MaxNLocator(nbins=5)
+        if axis == "x":
+            ax.xaxis.set_major_locator(locator)
+        else:
+            ax.yaxis.set_major_locator(locator)
+
+    ax.tick_params(axis=axis, labelsize=7)
+
+    if show_label:
+        label = get_param_label(family, param_name)
+        if axis == "x":
+            ax.set_xlabel(label, fontsize=8)
+        else:
+            ax.set_ylabel(label, fontsize=8)
+
+
+def set_parameter_ylim(ax: plt.Axes, family: str, param_name: str) -> None:
+    if get_quali_labels(family, param_name):
+        return
+    min_value, max_value = scaled_parameter_range(family, param_name)
+    if is_log_param(family, param_name):
+        log_min = np.log10(min_value)
+        log_max = np.log10(max_value)
+        pad = 0.04 * (log_max - log_min)
+        ax.set_ylim(10 ** (log_min - pad), 10 ** (log_max + pad))
+        return
+    pad = 0.04 * (max_value - min_value)
+    ax.set_ylim(min_value - pad, max_value + pad)
+
+
+def format_count(count: int) -> str:
+    return f"{count:,}"
+
+
+def add_histogram_grid(ax: plt.Axes) -> None:
+    ax.grid(True, which="major", axis="both", linestyle="--", linewidth=0.6, alpha=0.35)
+    ax.set_axisbelow(True)
+
+
+def remove_axis_frame(ax: plt.Axes) -> None:
+    for spine in ax.spines.values():
+        spine.set_visible(False)
+
+
+def hide_overlapping_corner_x_tick_labels(fig: plt.Figure, axes: np.ndarray, padding_px: float = 6) -> None:
+    """Hide only lower-bound x labels that overlap or crowd an adjacent upper bound."""
+    fig.canvas.draw()
+    renderer = fig.canvas.get_renderer()
+    bottom_axes = axes[-1]
+
+    for left_ax, right_ax in zip(bottom_axes[:-1], bottom_axes[1:]):
+        left_labels = [label for label in left_ax.get_xticklabels() if label.get_visible() and label.get_text()]
+        right_labels = [label for label in right_ax.get_xticklabels() if label.get_visible() and label.get_text()]
+        if not left_labels or not right_labels:
+            continue
+
+        left_label = left_labels[-1]
+        right_label = right_labels[0]
+        left_bbox = left_label.get_window_extent(renderer)
+        right_bbox = right_label.get_window_extent(renderer)
+        y_overlaps = left_bbox.y0 <= right_bbox.y1 and right_bbox.y0 <= left_bbox.y1
+        x_crowded = left_bbox.x1 + padding_px >= right_bbox.x0
+        if y_overlaps and x_crowded:
+            # The right label is the minimum of the next panel; keep the upper
+            # limit from the previous panel visible.
+            right_label.set_visible(False)
+
 
 FAMILY_LABELS: dict[str, str] = {
     "planetary": "Planetary",
@@ -124,7 +285,7 @@ def parse_rows(rows: list[dict[str, Any]]) -> dict[str, list[dict[str, Any]]]:
             continue
 
         expected = EXPECTED_PARAMS.get(family)
-        if expected is not None and not expected.issuperset(params.keys()):
+        if expected is not None and set(params.keys()) != expected:
             discarded += 1
             continue
 
@@ -140,12 +301,11 @@ def parse_rows(rows: list[dict[str, Any]]) -> dict[str, list[dict[str, Any]]]:
 # ── Plotting helpers ────────────────────────────────────────────────────────
 
 
-def setup_figure(n_params: int, title: str) -> tuple[plt.Figure, list[plt.Axes]]:
+def setup_figure(n_params: int) -> tuple[plt.Figure, list[plt.Axes]]:
     """Create a figure with one subplot per parameter in a horizontal row."""
     fig, axes = plt.subplots(1, n_params, figsize=(5 * n_params, 4.5))
     if n_params == 1:
         axes = [axes]
-    fig.suptitle(title, fontsize=13, fontweight="bold")
     return fig, axes
 
 
@@ -185,21 +345,21 @@ def plot_corner(
         color = FAMILY_COLORS.get(family, "#333333")
         cmap_name = FAMILY_CMAP.get(family, "viridis")
 
-        # ── Extract values, qualitative labels, and shared bin edges ──
+        # ── Extract selected slider values and YAML-defined parameter bins ──
         values: dict[str, list[float]] = {}
         quali: dict[str, list[str] | None] = {}
-        edges: dict[str, np.ndarray | None] = {}
+        edges: dict[str, np.ndarray] = {}
 
         for pname in param_names:
-            pv = [e["params"].get(pname) for e in entries if pname in e["params"]]
+            pv = [
+                to_plot_space(family, pname, e["params"][pname])
+                for e in entries
+                if pname in e["params"]
+            ]
             values[pname] = pv
             lbls = get_quali_labels(family, pname)
             quali[pname] = lbls
-            if lbls:
-                edges[pname] = np.arange(-0.5, len(lbls) + 0.5, 1)
-            else:
-                nbins = min(30, max(5, len(pv) // 3))
-                edges[pname] = np.histogram_bin_edges(pv, bins=nbins)
+            edges[pname] = get_parameter_edges(family, pname)
 
         # ── Figure with tight subplots — share x within each column ──
         fig, axes = plt.subplots(n, n, figsize=(3 * n + 1, 3 * n),
@@ -214,7 +374,10 @@ def plot_corner(
                 pname_i = param_names[i]
                 pname_j = param_names[j]
                 pairs = [
-                    (e["params"][param_names[j]], e["params"][param_names[i]])
+                    (
+                        to_plot_space(family, param_names[j], e["params"][param_names[j]]),
+                        to_plot_space(family, param_names[i], e["params"][param_names[i]]),
+                    )
                     for e in entries
                     if param_names[j] in e["params"] and param_names[i] in e["params"]
                 ]
@@ -232,7 +395,7 @@ def plot_corner(
                     )
                     global_max = max(global_max, hist.max())
 
-        norm = plt.Normalize(vmin=0, vmax=max(global_max, 1))
+        norm = LogNorm(vmin=1, vmax=max(global_max, 1))
 
         # ── Build each cell ──────────────────────────────────────────
         for i in range(n):
@@ -251,18 +414,20 @@ def plot_corner(
                         y = [counts.get(k, 0) for k in x]
                         ax.bar(x, y, width=1, color=color,
                                edgecolor="white", linewidth=0.5, alpha=0.85)
-                        ax.set_xticks(x)
-                        ax.set_xticklabels(lbls, fontsize=7,
-                                           rotation=30, ha="right")
                     else:
                         ax.hist(values[pname_i], bins=e, color=color,
                                 edgecolor="white", linewidth=0.5, alpha=0.85)
                         ax.margins(x=0)
-                    ax.yaxis.set_visible(False)
+                    add_histogram_grid(ax)
+                    configure_axis(ax, family, pname_i, "x", show_label=False)
+                    ax.tick_params(axis="y", left=False, labelleft=False)
                 elif i > j:
                     # Lower triangle: 2-D histogram.
                     pairs = [
-                        (e["params"][param_names[j]], e["params"][param_names[i]])
+                        (
+                            to_plot_space(family, param_names[j], e["params"][param_names[j]]),
+                            to_plot_space(family, param_names[i], e["params"][param_names[i]]),
+                        )
                         for e in entries
                         if param_names[j] in e["params"] and param_names[i] in e["params"]
                     ]
@@ -279,14 +444,10 @@ def plot_corner(
                         nx, ny = len(x_lbls), len(y_lbls)
                         grid = np.zeros((ny, nx))
                         for (xi, yi), c in counts.items():
-                            grid[yi, xi] = c
-                        ax.imshow(grid, origin="lower", aspect="auto",
-                                   cmap=cmap_name, norm=norm)
-                        ax.set_xticks(range(nx))
-                        ax.set_xticklabels(x_lbls, fontsize=6,
-                                           rotation=30, ha="right")
-                        ax.set_yticks(range(ny))
-                        ax.set_yticklabels(y_lbls, fontsize=6)
+                            grid[int(yi), int(xi)] = c
+                        masked_grid = np.ma.masked_where(grid <= 0, grid)
+                        ax.imshow(masked_grid, origin="lower", aspect="auto",
+                                  cmap=cmap_name, norm=norm)
                         for yi in range(ny):
                             for xi in range(nx):
                                 if grid[yi, xi] > 0:
@@ -297,10 +458,13 @@ def plot_corner(
                         hist, _, _ = np.histogram2d(
                             list(xv), list(yv), bins=[x_e, y_e],
                         )
-                        ax.pcolormesh(x_e, y_e, hist.T, cmap=cmap_name,
-                                   norm=norm, edgecolors="white",
-                                   linewidth=0.3)
+                        masked_hist = np.ma.masked_where(hist.T <= 0, hist.T)
+                        ax.pcolormesh(x_e, y_e, masked_hist, cmap=cmap_name,
+                                      norm=norm, edgecolors="white",
+                                      linewidth=0.3)
                         ax.tick_params(labelsize=7)
+                    configure_axis(ax, family, pname_j, "x", show_label=False)
+                    configure_axis(ax, family, pname_i, "y", show_label=False)
                 else:
                     ax.set_visible(False)
 
@@ -310,20 +474,35 @@ def plot_corner(
                 if i < n - 1:
                     ax.tick_params(axis="x", labelbottom=False)
 
-                if j == 0:
-                    ax.set_ylabel(pname_i, fontsize=8)
+                if j == 0 and i > j:
+                    configure_axis(
+                        ax,
+                        family,
+                        pname_i,
+                        "y",
+                        show_label=True,
+                    )
                 if i == n - 1:
-                    ax.set_xlabel(param_names[j], fontsize=8)
+                    configure_axis(
+                        ax,
+                        family,
+                        param_names[j],
+                        "x",
+                        show_label=True,
+                    )
 
         # ── Single colourbar for all 2-D cells ───────────────────────
         fig.subplots_adjust(right=0.85)
         br_ax = axes[n - 1, n - 1]
         br_pos = br_ax.get_position()
         cbar_ax = fig.add_axes([0.88, br_pos.y0, 0.02, br_pos.height])
-        fig.colorbar(
+        colorbar = fig.colorbar(
             plt.cm.ScalarMappable(norm=norm, cmap=cmap_name),
             cax=cbar_ax,
         )
+        colorbar.set_label("Count", fontsize=8)
+
+        hide_overlapping_corner_x_tick_labels(fig, axes)
 
         save_figure(fig, out_dir, f"corner_{family}.png")
 
@@ -338,25 +517,69 @@ def fallback_histogram(
     fig, ax = plt.subplots(figsize=(5, 4))
     color = FAMILY_COLORS.get(family, "#333333")
     pname = param_names[0]
-    values = [e["params"].get(pname) for e in entries if pname in e["params"]]
+    values = [
+        to_plot_space(family, pname, e["params"][pname])
+        for e in entries
+        if pname in e["params"]
+    ]
     quali_labels = get_quali_labels(family, pname)
+    edges = get_parameter_edges(family, pname)
 
     if quali_labels:
         counts = Counter(values)
         x = list(range(len(quali_labels)))
         y = [counts.get(i, 0) for i in x]
         ax.bar(x, y, color=color, edgecolor="white", linewidth=0.5, alpha=0.85)
-        ax.set_xticks(x)
-        ax.set_xticklabels(quali_labels, fontsize=8)
     else:
-        bins = min(30, max(5, len(values) // 3))
-        ax.hist(values, bins=bins, color=color, edgecolor="white", linewidth=0.5, alpha=0.85)
+        ax.hist(
+            values,
+            bins=edges,
+            color=color,
+            edgecolor="white",
+            linewidth=0.5,
+            alpha=0.85,
+        )
 
-    ax.set_title(f"{FAMILY_LABELS.get(family, family)} — {pname}", fontsize=12)
-    ax.set_xlabel(pname, fontsize=10)
-    ax.set_ylabel("count", fontsize=10)
+    configure_axis(ax, family, pname, "x")
+    add_histogram_grid(ax)
+    ax.set_ylabel("Count", fontsize=10)
     fig.tight_layout()
     save_figure(fig, out_dir, f"corner_{family}.png")
+
+
+def plot_parameter_histograms(
+    by_family: dict[str, list[dict[str, Any]]],
+    out_dir: Path,
+) -> None:
+    """Histograms of submitted parameter values."""
+    print("\nGenerating parameter histograms...")
+
+    for family, entries in sorted(by_family.items()):
+        if not entries:
+            continue
+
+        param_names = list(entries[0]["params"].keys())
+        fig, axes = setup_figure(len(param_names))
+        color = FAMILY_COLORS.get(family, "#333333")
+
+        for ax, pname in zip(axes, param_names):
+            values = [
+                to_plot_space(family, pname, e["params"][pname])
+                for e in entries
+                if pname in e["params"]
+            ]
+            bins = get_parameter_edges(family, pname)
+
+            ax.hist(values, bins=bins, color=color,
+                    edgecolor="white", linewidth=0.5, alpha=0.85)
+
+            configure_axis(ax, family, pname, "x")
+            add_histogram_grid(ax)
+
+            ax.set_ylabel("Count", fontsize=8)
+
+        fig.tight_layout()
+        save_figure(fig, out_dir, f"parameter_histograms_{family}.png")
 
 
 # ── b) Time-series diagnostics ──────────────────────────────────────────────
@@ -375,7 +598,6 @@ def plot_time_series(
 
         param_names = list(entries[0]["params"].keys())
         color = FAMILY_COLORS.get(family, "#333333")
-        label = FAMILY_LABELS.get(family, family)
 
         # Sort by timestamp
         entries_sorted = sorted(entries, key=lambda e: e["ts"])
@@ -385,41 +607,80 @@ def plot_time_series(
             print(f"  skipping {family} — needs at least 2 data points")
             continue
 
-        # ── Parameter values over time (scatter + rolling mean) ──
-        fig, axes = setup_figure(
+        fig, axes = plt.subplots(
             len(param_names),
-            f"{label} — Parameter Values Over Time",
+            2,
+            figsize=(11.5, 2.6 * len(param_names)),
+            sharex="col",
+            gridspec_kw={"width_ratios": [6, 1], "wspace": 0},
         )
+        if len(param_names) == 1:
+            axes = np.array([axes])
 
-        for ax, pname in zip(axes, param_names):
-            values = np.array([e["params"].get(pname) for e in entries_sorted if pname in e["params"]])
+        for row, pname in enumerate(param_names):
+            ax = axes[row, 0]
+            hist_ax = axes[row, 1]
+            pairs = [
+                (e["ts"], to_plot_space(family, pname, e["params"][pname]))
+                for e in entries_sorted
+                if pname in e["params"]
+            ]
 
-            if len(values) < 2:
+            if len(pairs) < 2:
                 ax.text(0.5, 0.5, "not enough data", ha="center", va="center", transform=ax.transAxes)
                 continue
 
-            t_vals = timestamps[:len(values)]
+            t_vals = [pair[0] for pair in pairs]
+            values = np.array([pair[1] for pair in pairs])
 
-            ax.scatter(t_vals, values, s=12, color=color, alpha=0.5, edgecolors="none")
+            ax.scatter(t_vals, values, s=9, color=color, alpha=0.28, edgecolors="none")
+            configure_axis(ax, family, pname, "y")
+            ax.set_ylabel(get_param_label(family, pname), fontsize=9)
 
-            ax.set_title(pname, fontsize=10)
-            ax.xaxis.set_major_locator(mdates.AutoDateLocator(maxticks=8))
-            ax.xaxis.set_major_formatter(mdates.DateFormatter("%b %d"))
-            plt.setp(ax.get_xticklabels(), rotation=20, ha="right")
-            ax.grid(True, which="major", linestyle="--", alpha=0.3)
+            set_parameter_ylim(ax, family, pname)
+
+            ax.grid(True, which="major", linestyle="--", linewidth=0.6, alpha=0.35)
+            ax.set_axisbelow(True)
+            y_limits = ax.get_ylim()
+            hist_ax.hist(values, bins=get_parameter_edges(family, pname), orientation="horizontal",
+                         color=color, edgecolor="white", linewidth=0.5, alpha=0.85)
+            configure_axis(hist_ax, family, pname, "y", show_label=False)
+            hist_ax.set_ylim(y_limits)
+            hist_ax.tick_params(axis="y", left=False, labelleft=False)
+            hist_ax.tick_params(axis="x", bottom=False, labelbottom=False)
+            hist_ax.grid(True, which="major", axis="y", linestyle="--", linewidth=0.6, alpha=0.35)
+            hist_ax.set_axisbelow(True)
+            remove_axis_frame(hist_ax)
+
+        axes[-1, 0].set_xlabel("Date")
+        axes[-1, 0].xaxis.set_major_locator(mdates.AutoDateLocator(maxticks=7))
+        axes[-1, 0].xaxis.set_major_formatter(
+            mdates.ConciseDateFormatter(
+                axes[-1, 0].xaxis.get_major_locator(),
+                show_offset=False,
+            ),
+        )
+        plt.setp(axes[-1, 0].get_xticklabels(), rotation=30, ha="right")
+        for ax in axes[:-1, 0]:
+            ax.tick_params(axis="x", labelbottom=False)
 
         fig.tight_layout()
         save_figure(fig, out_dir, f"timeseries_{family}.png")
 
 
-def plot_runs_per_day(
+def plot_run_activity(
     by_family: dict[str, list[dict[str, Any]]],
     out_dir: Path,
 ) -> None:
-    """Single figure with one line per simulation family showing daily run counts."""
-    print("\nGenerating runs per day...")
+    """Two-row figure showing daily and cumulative run counts."""
+    print("\nGenerating run activity...")
 
-    fig, ax = plt.subplots(figsize=(12, 4))
+    fig, (daily_ax, cumulative_ax) = plt.subplots(
+        2,
+        1,
+        figsize=(12, 7),
+        sharex=True,
+    )
 
     for family, entries in sorted(by_family.items()):
         color = FAMILY_COLORS.get(family, "#333333")
@@ -434,50 +695,34 @@ def plot_runs_per_day(
         counts = [daily_counts[d] for d in days]
         day_dates = [datetime.strptime(d, "%Y-%m-%d") for d in days]
 
-        ax.plot(day_dates, counts, color=color, linewidth=2, marker="o",
-                markersize=5, label=label)
+        daily_ax.plot(day_dates, counts, color=color, linewidth=1.8, marker="o",
+                      markersize=3.5, label=label)
 
-    ax.set_title("Runs Per Day", fontsize=12, fontweight="bold")
-    ax.set_ylabel("runs")
-    ax.grid(True, linestyle='--', alpha=0.7)
-    ax.legend(fontsize=9)
-    ax.xaxis.set_major_locator(mdates.AutoDateLocator(maxticks=8))
-    ax.xaxis.set_major_formatter(mdates.DateFormatter("%b %d"))
-    plt.setp(ax.get_xticklabels(), rotation=20, ha="right")
-    fig.tight_layout()
-    save_figure(fig, out_dir, "runs_per_day.png")
-
-
-def plot_cumulative_runs(
-    by_family: dict[str, list[dict[str, Any]]],
-    out_dir: Path,
-) -> None:
-    """Single figure with one line per simulation family showing cumulative counts over time."""
-    print("\nGenerating cumulative runs...")
-
-    fig, ax = plt.subplots(figsize=(12, 5))
-
-    for family, entries in sorted(by_family.items()):
-        color = FAMILY_COLORS.get(family, "#333333")
-        label = FAMILY_LABELS.get(family, family)
-        timestamps = sorted(e["ts"] for e in entries)
-
-        if not timestamps:
+        cumulative_timestamps = sorted(timestamps)
+        if not cumulative_timestamps:
             continue
 
-        counts = list(range(1, len(timestamps) + 1))
-        ax.step(timestamps, counts, where="post", color=color,
-                linewidth=1.5, label=label)
+        cumulative_counts = list(range(1, len(cumulative_timestamps) + 1))
+        cumulative_ax.step(cumulative_timestamps, cumulative_counts, where="post",
+                           color=color, linewidth=1.8, label=label)
 
-    ax.set_title("Cumulative Runs Over Time", fontsize=12, fontweight="bold")
-    ax.set_ylabel("total runs")
-    ax.grid(True, linestyle='--', alpha=0.7)
-    ax.legend(fontsize=9)
-    ax.xaxis.set_major_locator(mdates.AutoDateLocator(maxticks=8))
-    ax.xaxis.set_major_formatter(mdates.DateFormatter("%b %d"))
-    plt.setp(ax.get_xticklabels(), rotation=20, ha="right")
+    daily_ax.set_ylabel("Runs per day")
+    cumulative_ax.set_ylabel("Runs")
+    cumulative_ax.set_xlabel("Date")
+
+    for ax in (daily_ax, cumulative_ax):
+        ax.grid(True, which="major", linestyle="--", linewidth=0.6, alpha=0.35)
+        ax.set_axisbelow(True)
+
+    daily_ax.legend(fontsize=9, frameon=False)
+    locator = mdates.AutoDateLocator(maxticks=24)
+    cumulative_ax.xaxis.set_major_locator(locator)
+    cumulative_ax.xaxis.set_major_formatter(
+        mdates.ConciseDateFormatter(locator, show_offset=False),
+    )
+    plt.setp(cumulative_ax.get_xticklabels(), rotation=30, ha="right")
     fig.tight_layout()
-    save_figure(fig, out_dir, "cumulative_runs.png")
+    save_figure(fig, out_dir, "run_activity.png")
 
 
 def plot_overview(by_family: dict[str, list[dict[str, Any]]], out_dir: Path) -> None:
@@ -493,12 +738,11 @@ def plot_overview(by_family: dict[str, list[dict[str, Any]]], out_dir: Path) -> 
     bars = ax.bar(range(len(families)), counts, color=colors, edgecolor="white", linewidth=0.5)
     for bar, count in zip(bars, counts):
         ax.text(bar.get_x() + bar.get_width() / 2, bar.get_height() + 0.5,
-                str(count), ha="center", fontsize=9, fontweight="bold")
+                format_count(count), ha="center", fontsize=9, fontweight="bold")
 
     ax.set_xticks(range(len(families)))
     ax.set_xticklabels(labels)
-    ax.set_title("Total Runs Per Simulation Family", fontsize=12, fontweight="bold")
-    ax.set_ylabel("runs")
+    ax.set_ylabel("Runs")
     fig.tight_layout()
     save_figure(fig, out_dir, "overview_runs_per_family.png")
 
@@ -523,10 +767,10 @@ def main() -> None:
 
     out_dir = args.out
     plot_overview(by_family, out_dir)
+    plot_parameter_histograms(by_family, out_dir)
     plot_corner(by_family, out_dir)
     plot_time_series(by_family, out_dir)
-    plot_runs_per_day(by_family, out_dir)
-    plot_cumulative_runs(by_family, out_dir)
+    plot_run_activity(by_family, out_dir)
 
     print(f"\nDone. Figures saved to {out_dir.resolve()}/")
 
