@@ -35,6 +35,14 @@ export interface VideoMatch {
   runId?: string;
 }
 
+export interface GalleryManifestRun extends VideoMatch {
+  runId: string;
+  simulationId: string;
+  parameters: Record<string, number>;
+  thumbnailUrl: string | null;
+  thumbnailFallbackUrl: string | null;
+}
+
 interface RunManifest {
   version: number;
   primaryBase?: string;
@@ -49,6 +57,7 @@ interface RunManifestEntry {
   liveDataPath: string;
   summaryPath: string;
   audioPath?: string;
+  thumbnailPath?: string;
   defaultView?: string;
   views: Record<string, string>;
 }
@@ -57,6 +66,11 @@ export interface ManifestController {
   getSource: () => ManifestSource;
   setSource: (source: ManifestSource) => void;
   preloadActiveManifest: () => Promise<void>;
+  listRuns: (simClassId: string) => Promise<GalleryManifestRun[]>;
+  getRunById: (
+    simClassId: string,
+    runId: string,
+  ) => Promise<GalleryManifestRun | null>;
   findNearestVideo: (
     simClassId: string,
     params: SimParameter[],
@@ -75,6 +89,25 @@ export function createManifestController(
   let source = initialSource;
   const manifestPromises = new Map<ManifestSource, Promise<RunManifest>>();
   const manifestCacheKeys = new Map<ManifestSource, string>();
+  const listRuns = async (simClassId: string): Promise<GalleryManifestRun[]> => {
+    const manifest = await loadRunManifest(
+      source,
+      manifestPromises,
+      manifestCacheKeys,
+    );
+
+    return manifest.runs
+      .filter((entry) => entry.simulationId === simClassId)
+      .map((entry) =>
+        toGalleryManifestRun(
+          source,
+          manifest,
+          entry,
+          manifestCacheKeys,
+        ),
+      )
+      .filter((run): run is GalleryManifestRun => run !== null);
+  };
 
   return {
     getSource() {
@@ -90,6 +123,12 @@ export function createManifestController(
     },
     async preloadActiveManifest() {
       await loadRunManifest(source, manifestPromises, manifestCacheKeys);
+    },
+    listRuns,
+    async getRunById(simClassId, runId) {
+      const runs = await listRuns(simClassId);
+
+      return runs.find((run) => run.runId === runId) ?? null;
     },
     async findNearestVideo(simClassId, params, values) {
       const manifestMatch = await findManifestBackedRun(
@@ -120,6 +159,73 @@ export function createManifestController(
       };
     },
   };
+}
+
+function toGalleryManifestRun(
+  source: ManifestSource,
+  manifest: RunManifest,
+  entry: RunManifestEntry,
+  manifestCacheKeys: Map<ManifestSource, string>,
+): GalleryManifestRun | null {
+  const viewId = entry.defaultView ?? Object.keys(entry.views)[0];
+  const videoPath = viewId ? entry.views[viewId] : undefined;
+
+  if (!viewId || !videoPath) {
+    return null;
+  }
+
+  const thumbnailUrl = entry.thumbnailPath
+    ? resolveGalleryThumbnailUrl(source, manifest.primaryBase, entry.thumbnailPath)
+    : null;
+  const thumbnailFallbackUrl =
+    source === 'online' && entry.thumbnailPath && manifest.backupBase
+      ? joinAssetBase(manifest.backupBase, entry.thumbnailPath)
+      : null;
+
+  return {
+    url: resolveManifestAssetUrl(source, videoPath, manifestCacheKeys),
+    liveDataUrl: resolveManifestAssetUrl(
+      source,
+      entry.liveDataPath,
+      manifestCacheKeys,
+    ),
+    summaryUrl: resolveManifestAssetUrl(
+      source,
+      entry.summaryPath,
+      manifestCacheKeys,
+    ),
+    audioUrl: entry.audioPath
+      ? resolveManifestAssetUrl(source, entry.audioPath, manifestCacheKeys)
+      : undefined,
+    views: Object.fromEntries(
+      Object.entries(entry.views).map(([key, path]) => [
+        key,
+        resolveManifestAssetUrl(source, path, manifestCacheKeys),
+      ]),
+    ),
+    viewId,
+    runId: entry.runId,
+    simulationId: entry.simulationId,
+    parameters: { ...(entry.parameters ?? {}) },
+    thumbnailUrl,
+    thumbnailFallbackUrl,
+  };
+}
+
+function resolveGalleryThumbnailUrl(
+  source: ManifestSource,
+  primaryBase: string | undefined,
+  path: string,
+): string {
+  if (source === 'local') {
+    return withBaseUrl(path);
+  }
+
+  return primaryBase ? joinAssetBase(primaryBase, path) : resolveOnlineAssetUrl(path);
+}
+
+function joinAssetBase(base: string, path: string): string {
+  return `${base.replace(/\/+$/, '')}/${path.replace(/^\/+/, '')}`;
 }
 
 /**

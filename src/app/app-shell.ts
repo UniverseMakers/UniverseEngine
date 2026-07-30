@@ -67,6 +67,13 @@ import {
   resolveOnlineAssetUrl,
 } from '../shared/online-assets.ts';
 import { trackRunSelection } from '../shared/track-run.ts';
+import { buildGalleryScene } from '../gallery/gallery-data.ts';
+import { createGalleryOverlay } from '../gallery/gallery-overlay.ts';
+import { createGallerySelectorOverlay } from '../gallery/gallery-selector-overlay.ts';
+import {
+  getCompletedGalleryRunIds,
+  markGalleryRunCompleted,
+} from '../gallery/gallery-progress.ts';
 
 type AppMode = 'entry' | 'config' | 'initializing' | 'display';
 
@@ -141,6 +148,10 @@ export function createAppShell(app: HTMLElement): void {
   // to know if we should re-show the summary overlay.
   let hasCompletedPlayback = false;
   let activeCompletedRunToken = 0;
+  let restoreSummaryAfterGallery = false;
+  let restoreGallerySelectorAfterGallery = false;
+  let galleryRequestId = 0;
+  let galleryClass = activeClass;
 
   // Sidecar run metadata for the currently loaded video (wallclock, compute, etc).
   let activeRunMetadata: VideoRunMetadata | null = null;
@@ -286,6 +297,13 @@ export function createAppShell(app: HTMLElement): void {
     },
     onParameters() {
       openConfigPanel('parameters');
+    },
+    onGallery() {
+      if (app.dataset.mode === 'entry') {
+        gallerySelectorOverlay.show();
+      } else {
+        void openGallery();
+      }
     },
     onViewSelected(view) {
       if (view === 'credits') {
@@ -661,10 +679,18 @@ export function createAppShell(app: HTMLElement): void {
   app.appendChild(lockedInfoOverlay.infoButton);
   app.appendChild(lockedInfoOverlay.infoModal);
 
+  const galleryOverlay = createGalleryOverlay(overlayLayer, {
+    onClose: closeGallery,
+    onSelectRun(runId) {
+      void selectGalleryRun(runId);
+    },
+  });
+
   // Mount the end-of-run summary overlay that appears when a video finishes.
   const summaryOverlay = createSummaryOverlay(overlayLayer, {
     onReplay: handleReplay,
     onParameters: () => openConfigPanel('parameters'),
+    onGallery: () => void openGallery(true),
     onHome: handleHome,
     showHome: !advancedSettings.lockedScaleId,
   });
@@ -673,6 +699,11 @@ export function createAppShell(app: HTMLElement): void {
   viewport.onEnded(() => {
     hasCompletedPlayback = true;
     activeCompletedRunToken += 1;
+
+    if (activeRunMatch?.runId) {
+      markGalleryRunCompleted(activeClass.id, activeRunMatch.runId);
+    }
+
     const thumbnail = viewport.captureFrame();
 
     summaryOverlay.update(
@@ -687,6 +718,87 @@ export function createAppShell(app: HTMLElement): void {
     syncRunAudioPlayback();
   });
 
+  async function openGallery(
+    fromSummary = false,
+    requestedClass = activeClass,
+    fromSelector = false,
+  ): Promise<void> {
+    const requestId = ++galleryRequestId;
+    const requestedGalleryClass = requestedClass;
+
+    restoreSummaryAfterGallery = fromSummary;
+    restoreGallerySelectorAfterGallery = fromSelector;
+    galleryClass = requestedGalleryClass;
+    viewport.pause();
+    if (fromSummary) {
+      summaryOverlay.hide();
+    }
+
+    const runs = await manifestController.listRuns(requestedGalleryClass.id);
+
+    if (requestId !== galleryRequestId) {
+      return;
+    }
+
+    const scene = buildGalleryScene(requestedGalleryClass, runs);
+    const completedRunIds = new Set(
+      getCompletedGalleryRunIds(requestedGalleryClass.id),
+    );
+
+    galleryOverlay.update(requestedGalleryClass, scene, completedRunIds);
+    galleryOverlay.show();
+  }
+
+  function closeGallery(): void {
+    galleryRequestId += 1;
+    galleryOverlay.hide();
+
+    if (restoreSummaryAfterGallery && hasCompletedPlayback) {
+      summaryOverlay.show();
+    }
+
+    if (restoreGallerySelectorAfterGallery) {
+      gallerySelectorOverlay.show();
+    }
+
+    restoreSummaryAfterGallery = false;
+    restoreGallerySelectorAfterGallery = false;
+  }
+
+  async function selectGalleryRun(runId: string): Promise<void> {
+    const selectedClass = galleryClass;
+    const run = await manifestController.getRunById(selectedClass.id, runId);
+
+    if (!run) {
+      logWarn('Gallery run is no longer available', {
+        simulationId: selectedClass.id,
+        runId,
+      });
+
+      return;
+    }
+
+    handleClassChange(selectedClass);
+    const nextValues = { ...getActiveValues() };
+
+    for (const parameter of selectedClass.parameters) {
+      const value = run.parameters[parameter.id];
+
+      if (Number.isFinite(value)) {
+        nextValues[parameter.id] = value;
+      }
+    }
+
+    valuesByClass[selectedClass.id] = nextValues;
+    overlayPanel.setSimulation(selectedClass, nextValues);
+    restoreSummaryAfterGallery = false;
+    restoreGallerySelectorAfterGallery = false;
+    gallerySelectorOverlay.hide();
+    closeGallery();
+    summaryOverlay.hide();
+    await handleRun(run);
+  }
+
   // Mount the first-load entry overlay — the very first thing the user sees.
   const entryOverlay = createEntryOverlay(
     overlayLayer,
@@ -695,6 +807,16 @@ export function createAppShell(app: HTMLElement): void {
       handleClassChange(simClass);
       openConfigPanel('parameters');
     },
+  );
+
+  const gallerySelectorOverlay = createGallerySelectorOverlay(
+    overlayLayer,
+    availableSimulationClasses,
+    (simClass) => {
+      gallerySelectorOverlay.hide();
+      void openGallery(false, simClass, true);
+    },
+    () => gallerySelectorOverlay.hide(),
   );
 
   // Mount the main selection overlay — parameters, settings, credits, etc.
@@ -724,6 +846,7 @@ export function createAppShell(app: HTMLElement): void {
     onClose: handleCloseConfig,
     initialView: 'parameters',
   });
+
   overlayPanel.setBackVisible(!advancedSettings.lockedScaleId);
 
   // Mount the initializing terminal overlay — the faux-boot sequence.
@@ -1174,7 +1297,7 @@ export function createAppShell(app: HTMLElement): void {
    *
    * @returns void
    */
-  async function handleRun(): Promise<void> {
+  async function handleRun(requestedMatch?: VideoMatch): Promise<void> {
     const values = getActiveValues();
     const runRequestId = runRequests.start();
 
@@ -1189,11 +1312,13 @@ export function createAppShell(app: HTMLElement): void {
     // Query the manifest for the best-matching precomputed video asset.
     // This only selects which video bundle to show; the user's chosen slider
     // values remain the source of truth for scoring and answer-checking.
-    const match = await manifestController.findNearestVideo(
-      activeClass.id,
-      activeClass.parameters,
-      values,
-    );
+    const match =
+      requestedMatch ??
+      (await manifestController.findNearestVideo(
+        activeClass.id,
+        activeClass.parameters,
+        values,
+      ));
 
     if (!runRequests.isCurrent(runRequestId)) {
       return;
@@ -1220,6 +1345,7 @@ export function createAppShell(app: HTMLElement): void {
     const alternateViewUrls = Object.entries(match.views ?? {})
       .filter(([viewId]) => viewId !== selectedViewId)
       .map(([, url]) => url);
+
     activeLiveStatsUrl = match.liveDataUrl;
 
     // Fire-and-forget the async data loads — they'll update the HUD when done.
@@ -1432,6 +1558,8 @@ export function createAppShell(app: HTMLElement): void {
   function setMode(nextMode: AppMode): void {
     // Set a data attribute on the app root so CSS can react to mode changes.
     app.dataset.mode = nextMode;
+    displayMenu.setGalleryPlural(nextMode === 'entry');
+    gallerySelectorOverlay.hide();
 
     // The landing page uses the neutral glass theme. All other modes use the
     // active scale-specific theme (set when the user picks a simulation class).
@@ -2152,6 +2280,7 @@ export function createAppShell(app: HTMLElement): void {
     displayMenu.setFullscreenVisible(!advancedSettings.lockFullscreen);
     summaryOverlay.setHomeVisible(!advancedSettings.lockedScaleId);
     entryOverlay.setSimulationClasses(availableSimulationClasses);
+    gallerySelectorOverlay.setSimulationClasses(availableSimulationClasses);
     overlayPanel.setAdvancedSettings(advancedSettings);
     overlayPanel.setBackVisible(!advancedSettings.lockedScaleId);
     logInfo('Advanced settings updated', advancedSettings);

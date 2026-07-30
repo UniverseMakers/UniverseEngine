@@ -143,6 +143,20 @@ This writes:
 
 - `public/assets/local-manifest.json`
 
+### Gallery thumbnails
+
+Generate the 416x360 WebP gallery images before refreshing a manifest:
+
+```bash
+npm run generate:gallery-thumbnails
+```
+
+This requires `ffmpeg` and `cwebp`. Planetary images are imported from the
+FOSMoonEngine gallery by default; use `--planetary-source` to override that
+location. Galaxy thumbnails use the final HST frame and cosmos thumbnails use
+the final gas-density frame. Use `--simulation`, `--dry-run`, or `--force` to
+control a batch.
+
 ### Local Setup Shortcut
 
 To prepare local assets if needed, start local tracking, and launch the app in
@@ -208,22 +222,27 @@ If you are preparing a Cloudflare-backed manifest, run:
 
 ```bash
 python3 scripts/generate_run_summaries.py
+python3 scripts/generate_gallery_thumbnails.py
+python3 scripts/upload_engine_assets_to_r2.py --assets-dir public/assets
 python3 scripts/generate_run_manifest.py
+python3 scripts/upload_run_manifest_to_r2.py
 ```
 
 ### Upload workflow
 
 Manifest generation is intentionally separate from the upload step.
 
-1. Generate `public/assets/run-manifest.json` locally.
+1. Generate local summaries and gallery thumbnails.
 2. Upload the assets tree to R2.
-3. Upload the already-generated manifest as a final publishing step.
+3. Generate `public/assets/run-manifest.json` from the updated bucket contents.
+4. Upload the generated manifest as the final publishing step.
 
 Example:
 
 ```bash
+python3 scripts/upload_engine_assets_to_r2.py --assets-dir public/assets
 python3 scripts/generate_run_manifest.py
-python3 scripts/upload_engine_assets_to_r2.py --assets-dir public/assets --manifest-path public/assets/run-manifest.json
+python3 scripts/upload_run_manifest_to_r2.py
 ```
 
 Or, if you only need to publish the manifest after regenerating it:

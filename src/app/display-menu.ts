@@ -13,6 +13,8 @@ export interface DisplayMenuController {
   setHomeVisible: (isVisible: boolean) => void;
   /** Hide or show the Fullscreen toggle. */
   setFullscreenVisible: (isVisible: boolean) => void;
+  /** Use a plural label while no simulation scale has been selected. */
+  setGalleryPlural: (isPlural: boolean) => void;
 }
 
 interface DisplayMenuOptions {
@@ -20,6 +22,8 @@ interface DisplayMenuOptions {
   onHome: () => void;
   /** Called after the user chooses to jump back to parameter selection. */
   onParameters: () => void;
+  /** Called when the user opens the run gallery. */
+  onGallery: () => void;
   /** Called after the user picks a non-simulation view entry. */
   onViewSelected: (view: 'settings' | 'credits') => void;
   /** Whether the Home action should be visible. */
@@ -74,6 +78,13 @@ export function createDisplayMenu(
 
   menu.appendChild(homeButton);
   menu.appendChild(parametersButton);
+
+  const galleryButton = createMenuButton('Gallery', () => {
+    close();
+    options.onGallery();
+  });
+
+  menu.appendChild(galleryButton);
 
   menu.appendChild(
     createMenuButton('Settings', () => {
@@ -142,6 +153,13 @@ export function createDisplayMenu(
   return {
     close,
     setHomeVisible,
+    setGalleryPlural(isPlural) {
+      const label = galleryButton.querySelector('.display-menu__item-label');
+
+      if (label) {
+        label.textContent = isPlural ? 'Galleries' : 'Gallery';
+      }
+    },
     setFullscreenVisible(isVisible) {
       fullscreenButton.hidden = !isVisible;
       fullscreenButton.classList.toggle('is-hidden', !isVisible);

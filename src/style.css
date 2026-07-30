@@ -3968,6 +3968,218 @@ button {
   }
 }
 
+/* ── Run gallery ───────────────────────────────────────────────────────── */
+
+.overlay--gallery-selector {
+  z-index: 20;
+  background: rgba(3, 8, 14, 0.72);
+}
+
+#app:has(.overlay--gallery-selector:not(.is-hidden)) .app-partner-logo,
+#app:has(.overlay--gallery-selector:not(.is-hidden)) .swift-logo,
+#app:has(.overlay--gallery-selector:not(.is-hidden)) .synth-logo,
+#app:has(.overlay--gallery:not(.is-hidden)) .app-partner-logo,
+#app:has(.overlay--gallery:not(.is-hidden)) .swift-logo,
+#app:has(.overlay--gallery:not(.is-hidden)) .synth-logo {
+  display: none !important;
+}
+
+.gallery-selector-overlay {
+  position: relative;
+  width: min(42rem, calc(100vw - 3rem));
+}
+
+.gallery-selector-overlay__close {
+  position: absolute;
+  top: 1.25rem;
+  right: 1.25rem;
+}
+
+.overlay--gallery {
+  z-index: 30;
+  background:
+    radial-gradient(circle at top, color-mix(in srgb, var(--accent) 12%, transparent), transparent 42%),
+    rgba(3, 8, 14, 0.88);
+}
+
+.gallery-overlay {
+  position: relative;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  gap: 1rem;
+  width: min(92rem, calc(100vw - 3rem));
+  height: min(52rem, calc(100dvh - 3rem));
+  padding: 1.25rem;
+  border: 1px solid var(--line-strong);
+  background: rgba(8, 13, 20, 0.96);
+  box-shadow: var(--shadow-ambient);
+  backdrop-filter: blur(18px);
+}
+
+.gallery-overlay__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.gallery-overlay__title,
+.gallery-overlay__empty-title {
+  margin: 0;
+  color: var(--text-primary);
+  font-family: var(--font-mono);
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+}
+
+.gallery-overlay__title {
+  font-size: 1.3rem;
+}
+
+.gallery-overlay__close {
+  display: grid;
+  place-items: center;
+  min-width: 2.5rem;
+  padding: 0.55rem;
+  border: 1px solid var(--line-strong);
+  background: rgba(42, 42, 45, 0.84);
+  color: var(--accent);
+  font: 1.1rem/1 var(--font-mono);
+  cursor: pointer;
+}
+
+.gallery-overlay__viewport {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid color-mix(in srgb, var(--accent) 30%, transparent);
+  background:
+    radial-gradient(circle at center, color-mix(in srgb, var(--accent) 15%, transparent), transparent 48%),
+    linear-gradient(180deg, rgba(10, 17, 27, 0.92), rgba(3, 6, 10, 0.98));
+  cursor: grab;
+  touch-action: none;
+}
+
+.gallery-overlay__viewport.is-dragging {
+  cursor: grabbing;
+}
+
+.gallery-overlay__stage {
+  position: absolute;
+  top: 0;
+  left: 0;
+  transform-origin: 0 0;
+  will-change: transform;
+}
+
+.gallery-overlay__node {
+  position: absolute;
+  z-index: 0;
+  display: block;
+  overflow: hidden;
+  border: 0;
+  background: var(--line-strong);
+  clip-path: polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%);
+  box-shadow: 0 16px 28px rgba(0, 0, 0, 0.34);
+  transition:
+    opacity 0.24s ease,
+    transform 0.18s ease,
+    box-shadow 0.18s ease,
+    background-color 0.18s ease;
+}
+
+.gallery-overlay__node.is-pending {
+  opacity: 0;
+  transform: scale(0.92);
+  pointer-events: none;
+}
+
+.gallery-overlay__node.is-pending.is-visible {
+  opacity: 1;
+  transform: scale(1);
+  pointer-events: auto;
+}
+
+.gallery-overlay__node--no-reveal-animation {
+  transition: none;
+}
+
+.gallery-overlay__node-media {
+  position: absolute;
+  inset: 0;
+  display: block;
+  overflow: hidden;
+  clip-path: inherit;
+  transform: scale(0.9777777778);
+}
+
+.gallery-overlay__node-image {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  pointer-events: none;
+  user-select: none;
+  filter: grayscale(1) brightness(0.55) saturate(0.3);
+  transition: filter 0.18s ease;
+}
+
+.gallery-overlay__node:hover,
+.gallery-overlay__node:focus-visible {
+  z-index: 20;
+  transform: scale(1.1);
+  background: var(--accent);
+  box-shadow: 0 0 22px var(--accent-soft), 0 20px 32px rgba(0, 0, 0, 0.38);
+}
+
+.gallery-overlay__node.is-lit {
+  z-index: 10;
+  background: var(--accent);
+}
+
+.gallery-overlay__node.is-lit .gallery-overlay__node-image,
+.gallery-overlay__node:hover .gallery-overlay__node-image,
+.gallery-overlay__node:focus-visible .gallery-overlay__node-image {
+  filter: grayscale(0) brightness(0.94) saturate(1);
+}
+
+.gallery-overlay__empty {
+  align-self: center;
+  justify-self: center;
+  max-width: 32rem;
+  padding: 2rem;
+  border: 1px solid color-mix(in srgb, var(--accent) 30%, transparent);
+  text-align: center;
+}
+
+.gallery-overlay__empty-title {
+  font-size: 0.88rem;
+}
+
+.gallery-overlay__empty-copy {
+  color: var(--text-secondary);
+  line-height: 1.6;
+}
+
+@media (width <= 768px), (height <= 576px) {
+  html:has(.overlay--gallery:not(.is-hidden)),
+  body:has(.overlay--gallery:not(.is-hidden)) {
+    overflow: hidden;
+  }
+
+  .gallery-overlay {
+    width: 100vw;
+    height: 100dvh;
+    padding: 1rem;
+    border: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .gallery-overlay__node {
+    transition: none;
+  }
+}
+
 /* ── Synthesizer logo (bottom-right, galaxy HST tab only) ─────────────── */
 
 .synth-logo {
