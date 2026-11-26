@@ -18,6 +18,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import sqlite3
 import subprocess
 import sys
 from collections import defaultdict
@@ -243,8 +244,18 @@ EXPECTED_PARAMS: dict[str, frozenset[str]] = {
 # ── Data fetching ───────────────────────────────────────────────────────────
 
 
-def fetch_rows(remote: bool) -> list[dict[str, Any]]:
-    """Execute the D1 query via wrangler and return parsed rows."""
+def fetch_rows(remote: bool, db: Path | None = None) -> list[dict[str, Any]]:
+    """Return tracking rows from a local SQLite file (``db``) or from D1 via wrangler."""
+    if db is not None:
+        if not db.is_file():
+            sys.exit(f"Database not found: {db}")
+        with sqlite3.connect(db) as conn:
+            conn.row_factory = sqlite3.Row
+            results = [dict(row) for row in conn.execute(QUERY)]
+        if not results:
+            sys.exit(f"No rows in {db}. Has anyone clicked Run yet?")
+        return results
+
     cmd = [
         "npx", "wrangler", "d1", "execute", DB_NAME,
         "--json", "--command", QUERY,
@@ -756,10 +767,12 @@ def main() -> None:
                         help="Query the remote (production) D1 database rather than local")
     parser.add_argument("--out", type=Path, default=Path("plots"),
                         help="Output directory for generated figures (default: plots/)")
+    parser.add_argument("--db", type=Path,
+                        help="Read a local SQLite tracking file (e.g. local_tracking.db) instead of D1")
     args = parser.parse_args()
 
-    print(f"Querying {'remote' if args.remote else 'local'} D1 database...")
-    rows = fetch_rows(remote=args.remote)
+    print(f"Reading {args.db or ('remote' if args.remote else 'local') + ' D1 database'}...")
+    rows = fetch_rows(remote=args.remote, db=args.db)
     by_family = parse_rows(rows)
 
     print(f"Loaded {sum(len(v) for v in by_family.values())} rows across {len(by_family)} families: "

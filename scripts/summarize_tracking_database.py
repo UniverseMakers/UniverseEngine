@@ -30,6 +30,7 @@ from plot_param_distributions import (  # noqa: E402
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--remote", action="store_true", help="Query remote D1 rather than local D1")
+    parser.add_argument("--db", type=Path, help="Read a local SQLite tracking file (e.g. local_tracking.db) instead of D1")
     return parser.parse_args()
 
 
@@ -134,7 +135,7 @@ def summarize_parameters(entries: list[dict[str, Any]]) -> list[list[str]]:
 
 def main() -> None:
     args = parse_args()
-    rows = fetch_rows(remote=args.remote)
+    rows = fetch_rows(remote=args.remote, db=args.db)
     entries, invalid_schema_count, out_of_range_count = parse_rows(rows)
 
     schema_entries = [entry for entry in entries if entry["valid_schema"]]
