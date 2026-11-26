@@ -23,6 +23,7 @@ def load_script(name: str):
 
 manifest = load_script("generate_run_manifest")
 thumbnails = load_script("generate_gallery_thumbnails")
+downloader = load_script("download_engine_assets")
 
 
 class GalleryAssetTests(unittest.TestCase):
@@ -91,6 +92,22 @@ class GalleryAssetTests(unittest.TestCase):
             self.assertEqual(len(jobs), 1)
             self.assertEqual(jobs[0].source, source)
             self.assertEqual(jobs[0].destination.name, "gallery-thumbnail.webp")
+
+    def test_downloader_fetches_gallery_thumbnail(self) -> None:
+        manifest_data = {
+            "primaryBase": "https://example.org",
+            "runs": [{
+                "simulationId": "galaxy",
+                "runId": "track0",
+                "thumbnailPath": "/engine/galaxy/track0/gallery-thumbnail.webp",
+            }],
+        }
+        tasks = downloader.collect_downloads(manifest_data, None, Path("assets"), None)
+        thumbnail = [task for task in tasks if task["asset_kind"] == "thumbnail"]
+
+        self.assertEqual(len(thumbnail), 1)
+        self.assertEqual(thumbnail[0]["url"], "https://example.org/engine/galaxy/track0/gallery-thumbnail.webp")
+        self.assertEqual(thumbnail[0]["dest"], str(Path("assets/galaxy/track0/gallery-thumbnail.webp")))
 
 
 if __name__ == "__main__":
