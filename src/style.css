@@ -3998,7 +3998,11 @@ button {
 .overlay--gallery {
   z-index: 30;
   background:
-    radial-gradient(circle at top, color-mix(in srgb, var(--accent) 12%, transparent), transparent 42%),
+    radial-gradient(
+      circle at top,
+      color-mix(in srgb, var(--accent) 12%, transparent),
+      transparent 42%
+    ),
     rgba(3, 8, 14, 0.88);
 }
 
@@ -4053,7 +4057,11 @@ button {
   overflow: hidden;
   border: 1px solid color-mix(in srgb, var(--accent) 30%, transparent);
   background:
-    radial-gradient(circle at center, color-mix(in srgb, var(--accent) 15%, transparent), transparent 48%),
+    radial-gradient(
+      circle at center,
+      color-mix(in srgb, var(--accent) 15%, transparent),
+      transparent 48%
+    ),
     linear-gradient(180deg, rgba(10, 17, 27, 0.92), rgba(3, 6, 10, 0.98));
   cursor: grab;
   touch-action: none;
@@ -4128,7 +4136,9 @@ button {
   z-index: 20;
   transform: scale(1.1);
   background: var(--accent);
-  box-shadow: 0 0 22px var(--accent-soft), 0 20px 32px rgba(0, 0, 0, 0.38);
+  box-shadow:
+    0 0 22px var(--accent-soft),
+    0 20px 32px rgba(0, 0, 0, 0.38);
 }
 
 .gallery-overlay__node.is-lit {
