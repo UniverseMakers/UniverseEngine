@@ -150,6 +150,7 @@ export function createAppShell(app: HTMLElement): void {
   let activeCompletedRunToken = 0;
   let restoreSummaryAfterGallery = false;
   let restoreGallerySelectorAfterGallery = false;
+  let resumePlaybackAfterGallery = false;
   let galleryRequestId = 0;
   let galleryClass = activeClass;
 
@@ -729,6 +730,10 @@ export function createAppShell(app: HTMLElement): void {
     restoreSummaryAfterGallery = fromSummary;
     restoreGallerySelectorAfterGallery = fromSelector;
     galleryClass = requestedGalleryClass;
+    if (!galleryOverlay.isVisible()) {
+      resumePlaybackAfterGallery = !viewport.isPaused();
+    }
+
     viewport.pause();
     if (fromSummary) {
       summaryOverlay.hide();
@@ -761,8 +766,13 @@ export function createAppShell(app: HTMLElement): void {
       gallerySelectorOverlay.show();
     }
 
+    if (resumePlaybackAfterGallery) {
+      void playViewportWithMutedFallback(viewport);
+    }
+
     restoreSummaryAfterGallery = false;
     restoreGallerySelectorAfterGallery = false;
+    resumePlaybackAfterGallery = false;
   }
 
   async function selectGalleryRun(runId: string): Promise<void> {
@@ -793,6 +803,7 @@ export function createAppShell(app: HTMLElement): void {
     overlayPanel.setSimulation(selectedClass, nextValues);
     restoreSummaryAfterGallery = false;
     restoreGallerySelectorAfterGallery = false;
+    resumePlaybackAfterGallery = false;
     gallerySelectorOverlay.hide();
     closeGallery();
     summaryOverlay.hide();
