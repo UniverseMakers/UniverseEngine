@@ -1,6 +1,6 @@
 # Offline Setup
 
-Run UniverseEngine locally, with no internet needed once it's set up.
+These instructions walk you through setting up UniverseEngine to run entirely locally, with no internet needed once it's set up.
 
 ## 1. Install the tools
 
@@ -8,7 +8,7 @@ You need `git`, Python 3 and Node.js 18+.
 
 ### macOS
 
-Install [Homebrew](https://brew.sh) by following the instructions on its homepage,
+Install [Homebrew](https://brew.sh) by following the instructions on its homepage if needed,
 then:
 
 ```bash
@@ -17,7 +17,9 @@ brew install git python node
 
 ### Windows (WSL)
 
-UniverseEngine runs inside WSL (Ubuntu on Windows).
+On Windows, UniverseEngine needs WSL (Windows Subsystem for Linux).
+
+If you already have WSL set up, skip to step 3.
 
 1. Install WSL by following
    [Microsoft's instructions](https://learn.microsoft.com/en-us/windows/wsl/install)
@@ -74,8 +76,9 @@ To download only one scale, run one of these instead, then
 npm run local
 ```
 
-Open http://localhost:5173 in your browser (on Windows, any Windows browser works).
-Press `Ctrl + C` to stop the app.
+Open http://localhost:5173 in your browser. We recommend Chrome; Edge is known to have performance issues on Windows.
+
+Press `Ctrl + C` in the terminal to stop the app.
 
 To start it again later, run `npm run local` in `~/UniverseEngine`. To update,
 run `git pull && npm install && npm run setup:local` there.
