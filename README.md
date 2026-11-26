@@ -23,7 +23,9 @@ npm run dev
 Open `http://localhost:5173` — the app streams assets from the cloud by default.
 
 For a full offline setup, asset downloads, local tracking, and production
-workflows, see **[Running Locally](./running_locally.md)**.
+workflows, see **[Running Locally](./running_locally.md)**. For a short,
+beginner-friendly offline guide (macOS, Windows/WSL, Linux), see
+**[Offline Setup](./offline_setup.md)**.
 
 ## Requirements
 

@@ -21,7 +21,11 @@ import json
 import sqlite3
 import subprocess
 import sys
+from datetime import datetime
 from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from local_tracking_server import validate_payload  # noqa: E402
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 DEFAULT_DB = REPO_ROOT / "local_tracking.db"
@@ -67,6 +71,31 @@ def run_wrangler(sql: str, dry_run: bool) -> bool:
     return True
 
 
+def sql_literal(value: object) -> str:
+    """Render a value as a SQLite literal. Quotes are doubled, the only escape SQLite has."""
+    if value is None:
+        return "NULL"
+    return "'" + str(value).replace("'", "''") + "'"
+
+
+def row_error(row: sqlite3.Row) -> str | None:
+    """Return why a row is unsafe to sync, or None. Rows may come from contributed files."""
+    try:
+        datetime.fromisoformat(row["created_at"])
+        params = json.loads(row["parameters_json"])
+    except (TypeError, ValueError):
+        return "bad created_at or parameters_json"
+    return validate_payload({
+        "simulationId": row["simulation_id"],
+        "parameters": params,
+        "manifestSource": row["manifest_source"],
+        "matchedRunId": row["matched_run_id"],
+        # Rows recorded before this column existed have NULL here.
+        "assetHostMode": row["asset_host_mode"] or "local",
+        "assetHostBase": row["asset_host_base"],
+    })
+
+
 def _hash_record(row: tuple) -> str:
     """Hash a record for progress display."""
     raw = json.dumps(row, sort_keys=True, default=str)
@@ -109,6 +138,20 @@ def main() -> None:
         );
     """)
 
+    valid_rows = []
+    for row in rows:
+        error = row_error(row)
+        if error:
+            print(f"  Skipping record {row['id']}: {error}. Left in local DB.", file=sys.stderr)
+        else:
+            valid_rows.append(row)
+    rows = valid_rows
+    if not rows:
+        print("No valid records to sync.")
+        conn.close()
+        archive_conn.close()
+        return
+
     print(f"Found {len(rows)} local record(s) to sync.\n")
 
     if args.dry_run:
@@ -118,14 +161,14 @@ def main() -> None:
     batch: list[str] = []
 
     for i, row in enumerate(rows, 1):
-        matched = f"'{row['matched_run_id']}'" if row["matched_run_id"] else "NULL"
-        asset_host_mode = f"'{row['asset_host_mode']}'" if row["asset_host_mode"] else "NULL"
-        asset_host_base = f"'{row['asset_host_base']}'" if row["asset_host_base"] else "NULL"
+        values = ", ".join(sql_literal(row[column] or None) for column in (
+            "created_at", "simulation_id", "parameters_json", "manifest_source",
+            "matched_run_id", "asset_host_mode", "asset_host_base",
+        ))
         insert_sql = (
-            f"INSERT INTO run_selections "
-            f"(created_at, simulation_id, parameters_json, manifest_source, matched_run_id, asset_host_mode, asset_host_base) "
-            f"VALUES ('{row['created_at']}', '{row['simulation_id']}', "
-            f"'{row['parameters_json']}', '{row['manifest_source']}', {matched}, {asset_host_mode}, {asset_host_base})"
+            "INSERT INTO run_selections "
+            "(created_at, simulation_id, parameters_json, manifest_source, matched_run_id, asset_host_mode, asset_host_base) "
+            f"VALUES ({values})"
         )
         batch.append(insert_sql)
         synced_ids.append(row["id"])
