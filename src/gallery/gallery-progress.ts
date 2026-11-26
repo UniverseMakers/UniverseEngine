@@ -14,10 +14,14 @@ export function markGalleryRunCompleted(simulationId: string, runId: string): st
   completed.add(runId);
   const completedRunIds = [...completed].sort();
 
-  localStorage.setItem(
-    getStorageKey(simulationId),
-    JSON.stringify({ completedRunIds } satisfies GalleryProgressRecord),
-  );
+  try {
+    localStorage.setItem(
+      getStorageKey(simulationId),
+      JSON.stringify({ completedRunIds } satisfies GalleryProgressRecord),
+    );
+  } catch {
+    // Storage blocked or full (private window, kiosk lockdown): progress just isn't saved.
+  }
 
   return completedRunIds;
 }
