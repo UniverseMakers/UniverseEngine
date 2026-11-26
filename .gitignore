@@ -31,6 +31,20 @@ __pycache__/
 # Local tracking
 PROGRESS.md
 local_tracking.db
+synced_tracking.db
+
+# Downloaded simulation assets (npm run setup:local)
+public/assets/cosmos/*
+public/assets/galaxy/*
+public/assets/planetary/*
+!public/assets/*/.gitkeep
+public/assets/local-manifest.json
+
+# Python virtualenv (offline_setup.md stats section)
+.venv/
+
+# CodeGraph index
+.codegraph/
 
 # Wrangler / Cloudflare Workers
 .wrangler/
