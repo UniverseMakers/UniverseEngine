@@ -10,6 +10,10 @@ const COSMOS_NODE_REVEAL_STAGGER_MS = 8;
 // Reveal a hex anyway if its image is this slow, so one stalled request
 // can't hold up the rest of the reveal sequence.
 const IMAGE_REVEAL_TIMEOUT_MS = 3000;
+// On touch / small screens, start zoomed in far enough that a hex is a
+// comfortable tap target (~52px wide) rather than fitting the whole grid.
+const TOUCH_LAYOUT_QUERY = '(pointer: coarse), (width <= 768px), (height <= 450px)';
+const MIN_TAP_HEX_WIDTH_PX = 52;
 
 export interface GalleryOverlayController {
   show: () => void;
@@ -38,6 +42,7 @@ export function createGalleryOverlay(
   const meta = document.createElement('div');
   const progress = document.createElement('p');
   const readout = document.createElement('p');
+  const playButton = document.createElement('button');
   const closeButton = document.createElement('button');
   const viewport = document.createElement('div');
   const stage = document.createElement('div');
@@ -56,6 +61,9 @@ export function createGalleryOverlay(
   progress.className = 'gallery-overlay__progress';
   readout.className = 'gallery-overlay__readout';
   readout.setAttribute('aria-live', 'polite');
+  playButton.className = 'gallery-overlay__play is-hidden';
+  playButton.type = 'button';
+  playButton.textContent = 'Play';
   closeButton.className = 'gallery-overlay__close';
   closeButton.type = 'button';
   closeButton.setAttribute('aria-label', 'Close gallery');
@@ -67,7 +75,7 @@ export function createGalleryOverlay(
     <p class="gallery-overlay__empty-title">No runs in the gallery yet</p>
     <p class="gallery-overlay__empty-copy">Runs will appear when thumbnails are available.</p>
   `;
-  meta.append(progress, readout);
+  meta.append(progress, readout, playButton);
   header.append(title, meta, closeButton);
   viewport.appendChild(stage);
   panel.append(header, viewport, empty);
@@ -93,6 +101,9 @@ export function createGalleryOverlay(
   let pinchWorldY = 0;
   const revealedSimulationIds = new Set<string>();
   let returnFocusTo: HTMLElement | null = null;
+  // Touch has no hover, so the first tap selects a hex (showing its
+  // parameters and a Play button) and a second tap on it plays.
+  let selectedNode: HTMLElement | null = null;
 
   closeButton.addEventListener('click', options.onClose);
   overlay.addEventListener('click', (event) => {
@@ -121,7 +132,12 @@ export function createGalleryOverlay(
   stage.addEventListener('pointerover', showReadout);
   stage.addEventListener('focusin', showReadout);
   stage.addEventListener('pointerleave', () => {
-    readout.textContent = '';
+    readout.textContent = selectedNode?.getAttribute('aria-label') ?? '';
+  });
+  playButton.addEventListener('click', () => {
+    if (selectedNode?.dataset.runId) {
+      options.onSelectRun(selectedNode.dataset.runId);
+    }
   });
 
   viewport.addEventListener('pointerdown', (event) => {
@@ -240,6 +256,7 @@ export function createGalleryOverlay(
       progress.textContent =
         scene.nodes.length > 0 ? `${explored} / ${scene.nodes.length} explored` : '';
       readout.textContent = '';
+      selectNode(null);
       stage.style.width = `${scene.stageWidth}px`;
       stage.style.height = `${scene.stageHeight}px`;
       empty.classList.toggle('is-hidden', scene.nodes.length > 0);
@@ -344,6 +361,7 @@ export function createGalleryOverlay(
   function trapFocus(event: KeyboardEvent): void {
     const focusable = [
       closeButton,
+      ...(playButton.classList.contains('is-hidden') ? [] : [playButton]),
       ...stage.querySelectorAll<HTMLElement>('.gallery-overlay__node:not(.is-pending)'),
     ];
     const first = focusable[0];
@@ -389,9 +407,30 @@ export function createGalleryOverlay(
       viewport.classList.remove('is-dragging');
     }
 
-    if (selectedRunId) {
-      options.onSelectRun(selectedRunId);
+    if (!selectedRunId) {
+      return;
     }
+
+    if (
+      event.pointerType === 'mouse' ||
+      selectedNode?.dataset.runId === selectedRunId
+    ) {
+      options.onSelectRun(selectedRunId);
+    } else {
+      selectNode(
+        stage.querySelector<HTMLElement>(
+          `.gallery-overlay__node[data-run-id="${CSS.escape(selectedRunId)}"]`,
+        ),
+      );
+    }
+  }
+
+  function selectNode(node: HTMLElement | null): void {
+    selectedNode?.classList.remove('is-selected');
+    selectedNode = node;
+    node?.classList.add('is-selected');
+    readout.textContent = node?.getAttribute('aria-label') ?? '';
+    playButton.classList.toggle('is-hidden', !node);
   }
 
   function releaseActivePointer(): void {
@@ -454,6 +493,10 @@ export function createGalleryOverlay(
     }
 
     scale = getMinimumScale();
+    const hexWidth = currentScene.nodes[0]?.width;
+    if (hexWidth && window.matchMedia(TOUCH_LAYOUT_QUERY).matches) {
+      scale = Math.min(MAX_SCALE, Math.max(scale, MIN_TAP_HEX_WIDTH_PX / hexWidth));
+    }
     translateX = (viewport.clientWidth - currentScene.stageWidth * scale) / 2;
     translateY = (viewport.clientHeight - currentScene.stageHeight * scale) / 2;
     applyTransform();
