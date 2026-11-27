@@ -3984,6 +3984,15 @@ button {
   display: none !important;
 }
 
+/* The gallery is modal with its own close button; hide the app chrome so the
+   burger menu can't sit on top of the full-screen gallery header on phones. */
+#app:has(.overlay--gallery:not(.is-hidden)) .display-chrome__top-left,
+#app:has(.overlay--gallery:not(.is-hidden)) .display-chrome__top-right,
+#app:has(.overlay--gallery:not(.is-hidden)) .display-chrome__left-center,
+#app:has(.overlay--gallery:not(.is-hidden)) .display-chrome__bottom {
+  display: none;
+}
+
 .gallery-selector-overlay {
   position: relative;
   width: min(42rem, calc(100vw - 3rem));
@@ -4009,6 +4018,7 @@ button {
 .gallery-overlay {
   position: relative;
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   grid-template-rows: auto minmax(0, 1fr);
   gap: 1rem;
   width: min(92rem, calc(100vw - 3rem));
@@ -4061,6 +4071,8 @@ button {
 }
 
 .gallery-overlay__readout {
+  flex: 1;
+  min-width: 0;
   overflow: hidden;
   color: var(--text-secondary);
   text-overflow: ellipsis;
@@ -4153,13 +4165,30 @@ button {
 }
 
 .gallery-overlay__node:hover,
-.gallery-overlay__node:focus-visible {
+.gallery-overlay__node:focus-visible,
+.gallery-overlay__node.is-selected {
   z-index: 20;
   transform: scale(1.1);
   background: var(--accent);
   box-shadow:
     0 0 22px var(--accent-soft),
     0 20px 32px rgba(0, 0, 0, 0.38);
+}
+
+.gallery-overlay__play {
+  flex-shrink: 0;
+  padding: 0.4rem 0.9rem;
+  border: 1px solid var(--accent);
+  background: color-mix(in srgb, var(--accent) 18%, transparent);
+  color: var(--text-primary);
+  font: 0.78rem/1 var(--font-mono);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.gallery-overlay__play.is-hidden {
+  display: none;
 }
 
 .gallery-overlay__node.is-lit {
@@ -4169,7 +4198,8 @@ button {
 
 .gallery-overlay__node.is-lit .gallery-overlay__node-image,
 .gallery-overlay__node:hover .gallery-overlay__node-image,
-.gallery-overlay__node:focus-visible .gallery-overlay__node-image {
+.gallery-overlay__node:focus-visible .gallery-overlay__node-image,
+.gallery-overlay__node.is-selected .gallery-overlay__node-image {
   filter: grayscale(0) brightness(0.94) saturate(1);
 }
 
