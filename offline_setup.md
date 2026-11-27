@@ -78,6 +78,13 @@ npm run local
 
 Open http://localhost:5173 in your browser. We recommend Chrome; Edge is known to have performance issues on Windows.
 
+To lock the app to one scale (useful if you only downloaded that scale), run
+one of these instead:
+
+- `npm run local_cosmos`
+- `npm run local_planet`
+- `npm run local_galaxy`
+
 Press `Ctrl + C` in the terminal to stop the app.
 
 To start it again later, run `npm run local` in `~/UniverseEngine`. To update,
