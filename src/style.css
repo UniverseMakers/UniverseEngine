@@ -3346,6 +3346,7 @@ button {
 
   .summary-overlay {
     width: 100vw;
+    max-width: none;
     height: auto;
     max-height: none;
     overflow: visible;
@@ -3439,8 +3440,11 @@ button {
     text-align: left;
   }
 
+  /* 2x2 so each button is a decent tap target on a narrow phone. */
   .summary-overlay__actions {
-    flex-direction: row;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.6rem;
     margin-bottom: 2rem;
     margin-top: 1.5rem;
   }
@@ -3890,7 +3894,26 @@ button {
 
 @media (height <= 576px) and (orientation: landscape) {
   .summary-overlay__actions {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  /* Landscape phones: keep the final frame beside the stats instead of a
+     full-width image that pushes everything below the fold. */
+  .sci-top {
     flex-direction: row;
+  }
+
+  .sci-hero__thumbnail {
+    max-height: 70dvh;
+  }
+}
+
+@media (width <= 768px), (height <= 576px) {
+  /* The full-width summary scrolls under the fixed corner logos; hide them. */
+  #app:has(.overlay--summary.is-visible) .swift-logo,
+  #app:has(.overlay--summary.is-visible) .synth-logo,
+  #app:has(.overlay--summary.is-visible) .app-partner-logo {
+    display: none;
   }
 }
 
