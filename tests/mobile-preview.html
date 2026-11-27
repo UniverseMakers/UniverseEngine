@@ -20,8 +20,16 @@
     </style>
   </head>
   <body>
-    <!-- Phone-sized frames of the app: portrait and landscape. -->
+    <!-- Phone-sized frames of the app: portrait and landscape.
+         Add ?audit to the URL to run the automated layout audit instead. -->
     <iframe id="p" src="/" style="width: 390px; height: 780px"></iframe>
     <iframe id="l" src="/" style="width: 780px; height: 390px"></iframe>
+    <script type="module">
+      if (new URLSearchParams(location.search).has('audit')) {
+        document.body.replaceChildren();
+        const { runMobileAudit } = await import('./mobile-audit.js');
+        await runMobileAudit(document.body);
+      }
+    </script>
   </body>
 </html>
