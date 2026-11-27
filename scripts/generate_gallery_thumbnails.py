@@ -3,7 +3,9 @@
 
 Planetary thumbnails are imported from the FOSMoonEngine gallery. Galaxy and
 cosmos thumbnails use the final decoded frame of their HST and gas-density
-videos respectively.
+videos respectively. Videos missing locally are read from the manifest's
+primaryBase URL, so the online run-manifest.json works without downloading
+any assets.
 """
 
 from __future__ import annotations
@@ -23,7 +25,7 @@ REPO_ROOT = Path(__file__).resolve().parent.parent
 PUBLIC_ROOT = REPO_ROOT / "public"
 DEFAULT_MANIFEST = PUBLIC_ROOT / "assets" / "local-manifest.json"
 DEFAULT_PLANETARY_SOURCE = (
-    REPO_ROOT.parent.parent / "FOSMoonEngine" / "public" / "assets" / "planetary"
+    REPO_ROOT.parent.parent / "FOSMoonEngine" / "dist" / "assets" / "planetary"
 )
 THUMBNAIL_WIDTH = 416
 THUMBNAIL_HEIGHT = 360
@@ -36,7 +38,7 @@ SIMULATIONS = ("planetary", "galaxy", "cosmos")
 class ThumbnailJob:
     simulation_id: str
     run_id: str
-    source: Path
+    source: Path | str  # local file, or URL for remote videos
     destination: Path
     source_is_video: bool
 
@@ -151,8 +153,11 @@ def build_jobs(
                 missing.append(f"{simulation_id}/{run_id}: missing {view_id} view")
                 continue
             source = manifest_path_to_local_file(view_path)
+            primary_base = manifest.get("primaryBase")
+            if not source.is_file() and isinstance(primary_base, str) and primary_base:
+                source = primary_base.rstrip("/") + "/" + view_path.lstrip("/")
 
-        if not source.is_file():
+        if isinstance(source, Path) and not source.is_file():
             missing.append(f"{simulation_id}/{run_id}: {source}")
             continue
 

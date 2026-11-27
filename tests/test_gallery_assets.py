@@ -93,6 +93,28 @@ class GalleryAssetTests(unittest.TestCase):
             self.assertEqual(jobs[0].source, source)
             self.assertEqual(jobs[0].destination.name, "gallery-thumbnail.webp")
 
+    def test_missing_local_video_falls_back_to_primary_base(self) -> None:
+        jobs, missing = thumbnails.build_jobs(
+            {
+                "primaryBase": "https://example.org/",
+                "runs": [
+                    {
+                        "simulationId": "cosmos",
+                        "runId": "not-on-disk",
+                        "views": {"gas_density": "/engine/cosmos/not-on-disk/animations/Gas_Density.mp4"},
+                    }
+                ],
+            },
+            ("cosmos",),
+            Path("unused"),
+        )
+
+        self.assertEqual(missing, [])
+        self.assertEqual(
+            jobs[0].source,
+            "https://example.org/engine/cosmos/not-on-disk/animations/Gas_Density.mp4",
+        )
+
     def test_downloader_fetches_gallery_thumbnail(self) -> None:
         manifest_data = {
             "primaryBase": "https://example.org",
