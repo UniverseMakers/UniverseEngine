@@ -4264,6 +4264,49 @@ button {
   .gallery-overlay__meta {
     order: 1;
     flex-basis: 100%;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    row-gap: 0.4rem;
+  }
+
+  /* The readout is the only way to see a run's parameters on touch, so give
+     it its own full-width line and let it wrap instead of truncating. */
+  .gallery-overlay__readout {
+    order: 1;
+    flex-basis: 100%;
+    white-space: normal;
+  }
+}
+
+/* Landscape phones: vertical space is scarce, so keep the progress/readout on
+   the title row and leave room under the landing cards for the fixed logos. */
+@media (height <= 450px) and (orientation: landscape) {
+  .gallery-overlay {
+    padding: 0.5rem 1rem;
+  }
+
+  .gallery-overlay__header {
+    flex-wrap: nowrap;
+  }
+
+  .gallery-overlay__meta {
+    order: 0;
+    flex-basis: auto;
+    flex-wrap: nowrap;
+  }
+
+  .gallery-overlay__readout {
+    order: 0;
+    flex-basis: auto;
+  }
+
+  .gallery-overlay__title {
+    flex-shrink: 0;
+    font-size: 1rem;
+  }
+
+  .entry-overlay {
+    padding-bottom: calc(4.5rem + env(safe-area-inset-bottom));
   }
 }
 
