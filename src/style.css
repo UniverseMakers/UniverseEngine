@@ -901,7 +901,8 @@ button {
     left: auto !important;
     bottom: auto !important;
     z-index: 999 !important;
-    min-width: auto !important;
+    min-width: 44px !important;
+    min-height: 44px !important;
     width: auto !important;
     height: auto !important;
     display: grid !important;
@@ -917,7 +918,6 @@ button {
     font-family: var(--font-mono) !important;
     font-size: 1.1rem !important;
     line-height: 1 !important;
-    transform: scale(0.8) !important;
   }
 
   /* Hide fullscreen option on mobile — not useful on phones. */
@@ -2015,7 +2015,7 @@ button {
   font-size: 1.15rem;
   display: -webkit-box;
   -webkit-box-orient: vertical;
-  -webkit-line-clamp: 2;
+  -webkit-line-clamp: 3;
   overflow: hidden;
   white-space: pre-line;
   line-height: 1.3;
@@ -3366,6 +3366,7 @@ button {
   }
 
   .summary-overlay__hint {
+    font-size: 0.7rem;
     text-align: left;
   }
 
@@ -3382,6 +3383,7 @@ button {
   }
 
   .sci-section__hint {
+    font-size: 0.7rem;
     text-align: left;
   }
 
@@ -3409,8 +3411,10 @@ button {
     padding: 0.55rem 0.7rem;
   }
 
-  .res-card__label {
-    font-size: 0.56rem;
+  .param-card__range,
+  .res-card__label,
+  .param-cards .res-card__label {
+    font-size: 0.7rem;
     letter-spacing: 0.1em;
   }
 
@@ -3580,25 +3584,6 @@ button {
   .config-overlay__headline {
     font-size: 1.4rem;
     letter-spacing: 0.06em;
-  }
-
-  /* Shrink buttons 20% on mobile. */
-  .config-overlay__footer .display-button,
-  .summary-overlay__actions .display-button,
-  .entry-overlay__actions .display-button,
-  .config-overlay__apply,
-  .config-overlay__close,
-  .config-overlay__back,
-  .entry-info-modal__close,
-  .summary-overlay__button,
-  .run-button,
-  .view-switcher__button,
-  .timeline__play-btn,
-  .timeline__audio-btn,
-  .timeline__speed-btn,
-  .timeline__summary-btn,
-  .summary-overlay__button--primary {
-    transform: scale(0.8) !important;
   }
 
   .config-overlay__media-subtitle {
@@ -3909,6 +3894,21 @@ button {
 }
 
 @media (width <= 768px), (height <= 576px) {
+  /* End the landing panel's scroll area above a strip for the fixed partner
+     logos, so cards never sit underneath them. */
+  .entry-overlay {
+    min-height: 0;
+    height: calc(100dvh - 4.5rem - env(safe-area-inset-bottom));
+  }
+
+  /* The about dialog is full screen on phones; the fixed logos would sit on
+     top of its text. */
+  #app:has(.sci-modal:not(.is-hidden)) .swift-logo,
+  #app:has(.sci-modal:not(.is-hidden)) .synth-logo,
+  #app:has(.sci-modal:not(.is-hidden)) .app-partner-logo {
+    display: none;
+  }
+
   /* The full-width summary scrolls under the fixed corner logos; hide them. */
   #app:has(.overlay--summary.is-visible) .swift-logo,
   #app:has(.overlay--summary.is-visible) .synth-logo,
@@ -4278,8 +4278,9 @@ button {
   }
 }
 
-/* Landscape phones: vertical space is scarce, so keep the progress/readout on
-   the title row and leave room under the landing cards for the fixed logos. */
+/* Landscape phones: vertical space is scarce, so keep the gallery's progress
+   and readout on the title row, shrink the landing banner and title, and keep
+   the menu short enough to fit. */
 @media (height <= 450px) and (orientation: landscape) {
   .gallery-overlay {
     padding: 0.5rem 1rem;
@@ -4292,12 +4293,6 @@ button {
   .gallery-overlay__meta {
     order: 0;
     flex-basis: auto;
-    flex-wrap: nowrap;
-  }
-
-  .gallery-overlay__readout {
-    order: 0;
-    flex-basis: auto;
   }
 
   .gallery-overlay__title {
@@ -4305,8 +4300,34 @@ button {
     font-size: 1rem;
   }
 
-  .entry-overlay {
-    padding-bottom: calc(4.5rem + env(safe-area-inset-bottom));
+  .entry-overlay__banner-frame {
+    height: 4.5rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .entry-overlay__title {
+    font-size: 1.6rem;
+  }
+
+  /* Fullscreen is already hidden on portrait phones; hide it here too so the
+     whole menu fits above the timeline without scrolling. */
+  .display-menu__fullscreen {
+    display: none;
+  }
+
+  .display-menu {
+    max-height: calc(100dvh - 4rem);
+  }
+
+  /* Anchor the view switcher to the top-right corner (instead of pushing it
+     down by half its height) so all of its buttons stay on screen above the
+     corner logo. */
+  .display-chrome__left-center {
+    top: calc(0.75rem + env(safe-area-inset-top));
+  }
+
+  .view-switcher {
+    transform: scale(0.7);
   }
 }
 
@@ -4367,4 +4388,55 @@ button {
 #app.is-fullscreen {
   overflow: hidden;
   background: #000;
+}
+
+/* Phones: keep every control a comfortable touch target (at least 44px on
+   screen). The view switcher is drawn at 70%, so its buttons are sized up to
+   compensate. Kept last so it beats the base and landscape size rules. */
+@media (width <= 768px), (height <= 576px) {
+  .config-overlay__footer .display-button,
+  .summary-overlay__actions .display-button,
+  .entry-overlay__actions .display-button,
+  .config-overlay__apply,
+  .config-overlay__close,
+  .config-overlay__back,
+  .summary-overlay__button,
+  .run-button,
+  .view-switcher__button,
+  .timeline__play-btn,
+  .timeline__audio-btn,
+  .timeline__speed-btn,
+  .timeline__summary-btn,
+  .summary-overlay__button--primary,
+  .display-chrome__top-left .display-button,
+  .gallery-overlay__close,
+  .gallery-overlay__play,
+  .entry-info-modal__close,
+  .sci-modal__close {
+    min-width: 44px;
+    min-height: 44px;
+  }
+
+  .credits-list__link {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+  }
+
+  .view-switcher__button {
+    min-height: calc(44px / 0.7);
+    max-height: none;
+  }
+
+  .display-chrome__left-center.side-collapsed .view-switcher__button {
+    min-width: calc(44px / 0.7);
+  }
+
+  /* Don't shrink the burger below its 44px size (earlier rules scale it
+     to 60-80% on small phones). */
+  .display-chrome__top-left.side-collapsed .display-button,
+  .display-chrome__top-left:not(.side-collapsed) .display-button,
+  .display-chrome__top-left.open .display-button {
+    transform: none;
+  }
 }
