@@ -52,6 +52,8 @@ interface SummaryOverlayOptions {
   onReplay: () => void;
   /** Return to parameter editing for the active scale. */
   onParameters: () => void;
+  /** Open the completed-run gallery for the active scale. */
+  onGallery: () => void;
   /** Navigate back to the landing page when available. */
   onHome: () => void;
   /** Whether the Home action should be rendered at all. */
@@ -404,11 +406,16 @@ export function createSummaryOverlay(
   replayButton.innerHTML = '<span class="long-label">Continue Visualising</span><span class="short-label">Continue</span>';
 
   const newButton = document.createElement('button');
+  const galleryButton = document.createElement('button');
   const homeButton = document.createElement('button');
 
   newButton.className = 'summary-overlay__button summary-overlay__button--primary';
   newButton.type = 'button';
   newButton.innerHTML = '<span class="long-label">New Parameters</span><span class="short-label">New</span>';
+
+  galleryButton.className = 'summary-overlay__button';
+  galleryButton.type = 'button';
+  galleryButton.textContent = 'Gallery';
 
   homeButton.className = 'summary-overlay__button';
   homeButton.type = 'button';
@@ -417,10 +424,12 @@ export function createSummaryOverlay(
 
   replayButton.addEventListener('click', options.onReplay);
   newButton.addEventListener('click', options.onParameters);
+  galleryButton.addEventListener('click', options.onGallery);
   homeButton.addEventListener('click', options.onHome);
 
   actions.appendChild(newButton);
   actions.appendChild(replayButton);
+  actions.appendChild(galleryButton);
   actions.appendChild(homeButton);
 
   panel.appendChild(header);

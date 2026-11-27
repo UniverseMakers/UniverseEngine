@@ -238,6 +238,19 @@ def collect_downloads(
                 )
             )
 
+        # ── optional gallery thumbnail ──────────────────────────────────
+        thumbnail_url = entry.get("thumbnailPath")
+        if thumbnail_url:
+            tasks.append(
+                build_download_task(
+                    entry=entry,
+                    url=resolve_asset_url(thumbnail_url, primary_base),
+                    backup_url=resolve_asset_url(thumbnail_url, backup_base),
+                    dest=base / "gallery-thumbnail.webp",
+                    asset_kind="thumbnail",
+                )
+            )
+
         # ── view videos ────────────────────────────────────────────────
         for view_id, video_url in entry.get("views", {}).items():
             filename = urlparse(video_url).path.rsplit("/", 1)[-1]

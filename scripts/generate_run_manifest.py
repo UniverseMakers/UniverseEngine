@@ -306,7 +306,11 @@ def build_manifest_entry(
     """
     animations_dir = run_dir / "animations"
     videos = (
-        sorted(animations_dir.glob("*.mp4"))
+        sorted(
+            video
+            for video in animations_dir.glob("*.mp4")
+            if not video.name.endswith(".tmp.mp4")
+        )
         if animations_dir.exists()
         else []
     )
@@ -317,6 +321,7 @@ def build_manifest_entry(
     run_summary_yaml = run_dir / "run_summary.yaml"
     parameters_yaml = run_dir / "parameters.yaml"
     audio_track = run_dir / "audio_track.wav"
+    thumbnail = run_dir / "gallery-thumbnail.webp"
 
     view_paths = {
         infer_view_id(video): path_builder(video)
@@ -339,6 +344,9 @@ def build_manifest_entry(
 
     if audio_track.exists():
         entry["audioPath"] = path_builder(audio_track)
+
+    if thumbnail.exists():
+        entry["thumbnailPath"] = path_builder(thumbnail)
 
     return entry
 
@@ -395,7 +403,9 @@ def build_manifest_entry_from_r2(
     video_keys = sorted(
         key
         for key in object_keys
-        if key.endswith(".mp4") and "/animations/" in key
+        if key.endswith(".mp4")
+        and not key.endswith(".tmp.mp4")
+        and "/animations/" in key
     )
     if not video_keys:
         return None
@@ -405,6 +415,7 @@ def build_manifest_entry_from_r2(
     summary_key = f"{run_root}run_summary.yaml"
     parameter_key = f"{run_root}parameters.yaml"
     audio_key = f"{run_root}audio_track.wav"
+    thumbnail_key = f"{run_root}gallery-thumbnail.webp"
 
     view_paths = {
         infer_view_id(Path(video_key)): to_manifest_asset_path(object_prefix, video_key)
@@ -436,6 +447,11 @@ def build_manifest_entry_from_r2(
 
     if audio_key in object_keys:
         entry["audioPath"] = to_manifest_asset_path(object_prefix, audio_key)
+
+    if thumbnail_key in object_keys:
+        entry["thumbnailPath"] = to_manifest_asset_path(
+            object_prefix, thumbnail_key
+        )
 
     return entry
 

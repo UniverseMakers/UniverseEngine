@@ -111,6 +111,7 @@ CONTENT_TYPE_MAP: dict[str, str] = {
 # Cache-Control headers grouped by asset category
 # ---------------------------------------------------------------------------
 CACHE_MEDIA = "public, max-age=3600"
+CACHE_GALLERY_THUMBNAIL = "public, max-age=86400, stale-while-revalidate=604800"
 CACHE_REVALIDATE = "public, max-age=0, must-revalidate"
 CACHE_MANIFEST = "no-store, max-age=0"
 
@@ -157,6 +158,9 @@ def _get_cache_control(file_path: Path, remote_key: str) -> str:
     """Return the appropriate Cache-Control value for a remote object."""
     if remote_key.endswith("/manifest.json") or remote_key.endswith("/run-manifest.json"):
         return CACHE_MANIFEST
+
+    if file_path.name == "gallery-thumbnail.webp":
+        return CACHE_GALLERY_THUMBNAIL
 
     # Heavy media benefits from short-lived caching, while sidecar metadata must
     # revalidate so app-visible updates do not get stuck behind stale caches.
